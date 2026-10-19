@@ -317,7 +317,7 @@ export async function requireOrgForScheduledBroadcast(id) {
   const { data: broadcast, error } = await auth.admin
     .from("scheduled_broadcast")
     .select(
-      "id, organization_id, status, scheduled_for, payload, created_by_user_id",
+      "id, organization_id, channel, status, scheduled_for, payload, created_by_user_id",
     )
     .eq("id", broadcastId)
     .maybeSingle();

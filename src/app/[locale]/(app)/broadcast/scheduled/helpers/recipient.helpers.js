@@ -74,10 +74,11 @@ export function getRecipientForChannel(user, channel) {
   const normalized = normalizeUser(user);
 
   if (channel === "teams") {
+    /* O servidor só aceita o id do utilizador, não os ids do Teams. */
     const userId =
+      normalized.id ||
       normalized.teamsFromId ||
       normalized.teamsAadObjectId ||
-      normalized.id ||
       "";
 
     if (!userId) return null;
@@ -261,11 +262,15 @@ export function getRecipientKey(recipient, channel) {
     return cleanText(normalized.userId);
   }
 
+  /*
+   * O id do utilizador é a identidade: é o que o servidor guarda e valida.
+   * Telefone, BSUID e Bird só servem quando não há id (agendas antigas).
+   */
   return (
+    cleanText(normalized.userId) ||
     cleanText(normalized.phoneNumber) ||
     cleanText(normalized.whatsappBsuid) ||
-    cleanText(normalized.birdContactId) ||
-    cleanText(normalized.userId)
+    cleanText(normalized.birdContactId)
   );
 }
 
@@ -298,63 +303,120 @@ export function uniqueRecipients(recipients = [], channel = "whatsapp") {
   return out;
 }
 
-export function mapRecipientsToEntries(
+/**
+ * Encontra o utilizador da organização a que corresponde um destinatário
+ * guardado. Primeiro pela chave (o id do utilizador); só para agendas antigas,
+ * sem id, recorre ao telefone, BSUID ou Bird.
+ */
+export function findCandidateForRecipient(
+  recipient,
+  candidates = [],
+  channel = "whatsapp",
+) {
+  const normalized = normalizeRecipientForChannel(recipient, channel);
+  const key = getRecipientKey(normalized, channel);
+
+  if (!normalized || !key) return null;
+
+  const safeCandidates = Array.isArray(candidates) ? candidates : [];
+  const byKey = safeCandidates.find((candidate) => candidate?.key === key);
+
+  if (byKey) return byKey;
+
+  if (channel === "teams") return null;
+
+  return (
+    safeCandidates.find((candidate) => {
+      const known = candidate?.payloadRecipient || {};
+
+      const phone = cleanText(candidate?.phoneNumber || known.phoneNumber);
+      const bsuid = cleanText(candidate?.whatsappBsuid || known.whatsappBsuid);
+      const bird = cleanText(candidate?.birdContactId || known.birdContactId);
+
+      return (
+        (normalized.phoneNumber && phonesMatch(phone, normalized.phoneNumber)) ||
+        (normalized.whatsappBsuid && bsuid === normalized.whatsappBsuid) ||
+        (normalized.birdContactId && bird === normalized.birdContactId)
+      );
+    }) || null
+  );
+}
+
+/**
+ * Destinatários prontos a gravar: os que correspondem a um utilizador da
+ * organização passam à sua forma com `userId`; os outros ficam como estão.
+ */
+export function canonicalizeRecipients(
   recipients = [],
   candidates = [],
   channel = "whatsapp",
 ) {
+  return uniqueRecipients(
+    (Array.isArray(recipients) ? recipients : []).map((recipient) => {
+      const found = findCandidateForRecipient(recipient, candidates, channel);
+
+      return found?.payloadRecipient || recipient;
+    }),
+    channel,
+  );
+}
+
+/**
+ * Entrada de lista para um destinatário que já não existe na organização.
+ * Nunca mostra o id em bruto como se fosse um nome.
+ */
+export function buildUnresolvedEntry(
+  recipient,
+  channel = "whatsapp",
+  unknownLabel = "Utilizador removido",
+) {
+  const normalized = normalizeRecipientForChannel(recipient, channel);
+  const key = getRecipientKey(normalized, channel);
+
+  if (!normalized || !key) return null;
+
+  const name =
+    cleanText(normalized.name) ||
+    cleanText(normalized.phoneNumber) ||
+    cleanText(normalized.whatsappUsername) ||
+    cleanText(normalized.whatsappBsuid) ||
+    cleanText(normalized.birdContactId) ||
+    cleanText(normalized.email) ||
+    unknownLabel;
+
+  const secondary =
+    cleanText(normalized.phoneNumber) ||
+    cleanText(normalized.email) ||
+    cleanText(normalized.whatsappUsername) ||
+    cleanText(normalized.whatsappBsuid) ||
+    cleanText(normalized.birdContactId) ||
+    "-";
+
+  return {
+    id: key,
+    key,
+    name,
+    recipient: normalized,
+    payloadRecipient: normalized,
+    secondary,
+    kind: getRecipientKind(normalized, channel),
+    unresolved: true,
+  };
+}
+
+export function mapRecipientsToEntries(
+  recipients = [],
+  candidates = [],
+  channel = "whatsapp",
+  { unknownLabel } = {},
+) {
   const safeRecipients = Array.isArray(recipients) ? recipients : [];
-  const safeCandidates = Array.isArray(candidates) ? candidates : [];
-
-  const byKey = new Map();
-
-  for (const candidate of safeCandidates) {
-    const key =
-      candidate?.key ||
-      getRecipientKey(candidate?.payloadRecipient, channel) ||
-      getRecipientKey(candidate?.recipient, channel) ||
-      cleanText(candidate?.recipient);
-
-    if (key) byKey.set(key, candidate);
-  }
 
   return safeRecipients
-    .map((recipient) => {
-      const normalized = normalizeRecipientForChannel(recipient, channel);
-      const key = getRecipientKey(normalized, channel);
-      const found = key ? byKey.get(key) : null;
-
-      if (found) return found;
-
-      const name =
-        cleanText(normalized?.name) ||
-        cleanText(normalized?.phoneNumber) ||
-        cleanText(normalized?.whatsappUsername) ||
-        cleanText(normalized?.whatsappBsuid) ||
-        cleanText(normalized?.birdContactId) ||
-        cleanText(normalized?.email) ||
-        cleanText(normalized?.userId) ||
-        cleanText(recipient) ||
-        "Unknown recipient";
-
-      const secondary = normalized?.phoneNumber
-        ? "Phone number"
-        : normalized?.whatsappBsuid
-          ? "WhatsApp BSUID fallback"
-          : normalized?.birdContactId
-            ? "Bird contact fallback"
-            : normalized?.email || "Sem utilizador associado";
-
-      return {
-        id: key || name,
-        key: key || name,
-        name,
-        recipient: normalized || recipient,
-        payloadRecipient: normalized || recipient,
-        secondary,
-        kind: getRecipientKind(normalized, channel),
-        unresolved: true,
-      };
-    })
+    .map(
+      (recipient) =>
+        findCandidateForRecipient(recipient, candidates, channel) ||
+        buildUnresolvedEntry(recipient, channel, unknownLabel),
+    )
     .filter(Boolean);
 }

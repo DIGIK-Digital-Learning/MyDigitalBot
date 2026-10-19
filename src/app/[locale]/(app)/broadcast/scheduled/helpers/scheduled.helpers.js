@@ -83,9 +83,24 @@ function normalizeStatus(status = "") {
   return value || "scheduled";
 }
 
+/* Quiz, sondagem e pergunta aberta (payload.question), ou null. */
+export function getPayloadQuestion(payload) {
+  const question = payload?.question;
+
+  if (!question || typeof question !== "object") return null;
+  if (!["quiz", "survey", "open"].includes(question.kind)) return null;
+
+  return question;
+}
+
 function getPayloadMessage(payload) {
   if (!payload) return "";
   if (typeof payload === "string") return payload;
+
+  /* Nas perguntas a mensagem fica vazia e o texto está em question.body. */
+  const questionBody = getPayloadQuestion(payload)?.body;
+
+  if (questionBody) return questionBody;
 
   return (
     payload.message ??
@@ -103,6 +118,7 @@ export function normalizeBroadcast(row) {
   return {
     id: row?.[FIELD_MAP.id],
     message: getPayloadMessage(payload),
+    questionKind: getPayloadQuestion(payload)?.kind ?? null,
     channel: String(row?.[FIELD_MAP.channel] ?? "teams").toLowerCase(),
     scheduledFor: row?.[FIELD_MAP.scheduledFor] ?? null,
     timezone: row?.[FIELD_MAP.timezone] ?? "Europe/Lisbon",
@@ -116,8 +132,9 @@ export function normalizeBroadcast(row) {
   };
 }
 
+/* O servidor só deixa alterar mensagens que ainda estão na fila. */
 export function canEditItem(item) {
-  return !["sending", "sent"].includes(item.status);
+  return item.status === "scheduled";
 }
 
 export function canDeleteItem(item) {
