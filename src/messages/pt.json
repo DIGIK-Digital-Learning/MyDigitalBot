@@ -1435,6 +1435,8 @@
     "attachments": "Anexos",
     "sendnow": "Enviar agora",
     "scheduleBtn": "Agendar",
+    "deliveryMode": "Modo de envio",
+    "scheduleFor": "Agendar para {date}, {time}",
     "timezone": "Fuso Horário",
     "hour": "Hora",
     "scheduleError": "Por favor escolha uma data e hora no futuro.",

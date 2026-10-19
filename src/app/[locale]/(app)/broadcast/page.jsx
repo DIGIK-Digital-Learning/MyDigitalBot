@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import styles from "./broadcast.module.css";
 import { useAuth } from "@/app/AuthContext";
@@ -113,6 +113,7 @@ export default function BroadcastPage() {
   const { user } = useAuth();
   const { org } = useOrganization(user);
 
+  const locale = useLocale();
   const translation = useTranslations();
   const showAlert = useAlert();
   const confirm = useConfirm();
@@ -2446,12 +2447,28 @@ export default function BroadcastPage() {
     [],
   );
 
-  const scheduleButtonLabel =
-    deliveryMode === "schedule"
-      ? `${scheduledFor.toLocaleDateString()} ${formatHour(
-          scheduledFor,
-        )}:${formatMinute(scheduledFor)}`
-      : translation("Broadcast.sendnow");
+  const scheduleDateLabel = scheduledFor.toLocaleDateString(locale, {
+    day: "2-digit",
+    month: "2-digit",
+  });
+  const draftHourNumber = Number(hourDraft);
+  const draftMinuteNumber = Number(minuteDraft);
+  const hasValidTimeDraft =
+    /^\d{1,2}$/.test(hourDraft) &&
+    /^\d{1,2}$/.test(minuteDraft) &&
+    draftHourNumber >= 0 &&
+    draftHourNumber <= 23 &&
+    draftMinuteNumber >= 0 &&
+    draftMinuteNumber <= 59;
+  const scheduleTimeLabel = hasValidTimeDraft
+    ? `${String(draftHourNumber).padStart(2, "0")}:${String(
+        draftMinuteNumber,
+      ).padStart(2, "0")}`
+    : `${formatHour(scheduledFor)}:${formatMinute(scheduledFor)}`;
+  const scheduleActionLabel = translation("Broadcast.scheduleFor", {
+    date: scheduleDateLabel,
+    time: scheduleTimeLabel,
+  });
 
   const activeDelay = Number(
     activeChainStep?.delayAfterPreviousReadMinutes || 0,
@@ -2517,10 +2534,8 @@ export default function BroadcastPage() {
       </div>
     ) : null;
 
-  const schedulePanel = activeToolPanel === "schedule" && (
+  const schedulePanel = (
     <SchedulePanel
-      deliveryMode={deliveryMode}
-      setDeliveryMode={setDeliveryMode}
       scheduledFor={scheduledFor}
       setScheduledFor={setScheduledFor}
       hourDraft={hourDraft}
@@ -2555,13 +2570,18 @@ export default function BroadcastPage() {
 
   if (showStartMenu) {
     composer = (
-      <StartMenu
-        channel={channel}
-        onChoose={setComposeMode}
-        sampleName={sampleName}
-        previewTime={previewTime}
-        translation={translation}
-      />
+      <>
+        <StartMenu
+          channel={channel}
+          onChoose={setComposeMode}
+          sampleName={sampleName}
+          previewTime={previewTime}
+          translation={translation}
+        />
+        {deliveryMode === "schedule" ? (
+          <div className={styles.inlineToolPanel}>{schedulePanel}</div>
+        ) : null}
+      </>
     );
   } else if (isSurveyMode) {
     composer = (
@@ -2570,7 +2590,10 @@ export default function BroadcastPage() {
         onBack={() => setComposeMode(null)}
         activeToolPanel={activeToolPanel}
         toggleToolPanel={toggleToolPanel}
-        scheduleButtonLabel={scheduleButtonLabel}
+        deliveryMode={deliveryMode}
+        setDeliveryMode={setDeliveryMode}
+        sending={sending}
+        schedulePanel={schedulePanel}
         trackedLinksCount={trackedLinksCount}
         translation={translation}
         phone={
@@ -2585,7 +2608,6 @@ export default function BroadcastPage() {
           />
         }
       >
-        {schedulePanel}
         {linksPanel}
       </MessageComposer>
     );
@@ -2596,7 +2618,10 @@ export default function BroadcastPage() {
         onBack={() => setComposeMode(null)}
         activeToolPanel={activeToolPanel}
         toggleToolPanel={toggleToolPanel}
-        scheduleButtonLabel={scheduleButtonLabel}
+        deliveryMode={deliveryMode}
+        setDeliveryMode={setDeliveryMode}
+        sending={sending}
+        schedulePanel={schedulePanel}
         trackedLinksCount={trackedLinksCount}
         translation={translation}
         phone={
@@ -2611,7 +2636,6 @@ export default function BroadcastPage() {
           />
         }
       >
-        {schedulePanel}
         {linksPanel}
       </MessageComposer>
     );
@@ -2622,7 +2646,10 @@ export default function BroadcastPage() {
         onBack={() => setComposeMode(null)}
         activeToolPanel={activeToolPanel}
         toggleToolPanel={toggleToolPanel}
-        scheduleButtonLabel={scheduleButtonLabel}
+        deliveryMode={deliveryMode}
+        setDeliveryMode={setDeliveryMode}
+        sending={sending}
+        schedulePanel={schedulePanel}
         trackedLinksCount={trackedLinksCount}
         translation={translation}
         phone={
@@ -2637,7 +2664,6 @@ export default function BroadcastPage() {
           />
         }
       >
-        {schedulePanel}
         {linksPanel}
       </MessageComposer>
     );
@@ -2650,7 +2676,10 @@ export default function BroadcastPage() {
         warning={composerWarning}
         activeToolPanel={activeToolPanel}
         toggleToolPanel={toggleToolPanel}
-        scheduleButtonLabel={scheduleButtonLabel}
+        deliveryMode={deliveryMode}
+        setDeliveryMode={setDeliveryMode}
+        sending={sending}
+        schedulePanel={schedulePanel}
         trackedLinksCount={trackedLinksCount}
         translation={translation}
         leftToolsContent={chainDelayTools}
@@ -2719,7 +2748,6 @@ export default function BroadcastPage() {
           )
         }
       >
-        {schedulePanel}
         {linksPanel}
       </MessageComposer>
     );
@@ -2734,6 +2762,7 @@ export default function BroadcastPage() {
         sending={sending}
         canSend={canSend}
         deliveryMode={deliveryMode}
+        scheduleActionLabel={scheduleActionLabel}
         onPrimaryClick={
           deliveryMode === "schedule" ? handleSchedule : handleSend
         }

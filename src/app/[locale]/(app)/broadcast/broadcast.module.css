@@ -18,6 +18,8 @@
 .actionsRight {
   margin-left: auto;
   display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 8px;
   align-items: center;
 }
@@ -39,6 +41,37 @@
 .primaryBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.deliveryModeSwitch {
+  display: inline-flex;
+  height: 45px;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--ui-border);
+  border-radius: 999px;
+  background: var(--ui-pill);
+}
+
+.deliveryModeBtn {
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 18px;
+  background: transparent;
+  color: #4b5563;
+  font-size: 16px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.deliveryModeBtnActive {
+  background: var(--brand-1);
+  color: #fff;
+}
+
+.deliveryModeBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .columns {
@@ -169,13 +202,6 @@
   display: grid;
   gap: 4px;
 }
-.scheduleModeRow {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 4px;
-}
-
 .modeBtnActive {
   background: var(--brand-1);
   color: #fff;
