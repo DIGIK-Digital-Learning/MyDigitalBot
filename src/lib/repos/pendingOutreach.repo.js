@@ -93,6 +93,26 @@ export async function releasePendingOutreach(id) {
   if (error) throw error;
 }
 
+export async function updatePendingOutreachTemplateMessageId(id, templateMessageId) {
+  const { error } = await supabase
+    .from("pending_outreach")
+    .update({ template_message_id: templateMessageId || null })
+    .eq("id", id)
+    .eq("status", "pending");
+
+  if (error) throw error;
+}
+
+export async function deletePendingOutreach(id) {
+  const { error } = await supabase
+    .from("pending_outreach")
+    .delete()
+    .eq("id", id)
+    .eq("status", "pending");
+
+  if (error) throw error;
+}
+
 export async function markPendingOutreachReplied(id, replyMessageId) {
   const { data, error } = await supabase
     .from("pending_outreach") // <- was missing

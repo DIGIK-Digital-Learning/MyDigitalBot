@@ -3,7 +3,19 @@ import crypto from "crypto";
 import { toE164 } from "@/lib/whatsapp/E164";
 import { getUserById } from "@/lib/repos/user.repo";
 import { createMessage, isWindowOpenForUser } from "@/lib/repos/messages.repo";
-import { createPendingOutreach } from "@/lib/repos/pendingOutreach.repo";
+import {
+  createPendingOutreach,
+  deletePendingOutreach,
+  getAllPendingOutreachByUser,
+  updatePendingOutreachTemplateMessageId,
+} from "@/lib/repos/pendingOutreach.repo";
+import {
+  attachWhatsappOpeningGateOutreach,
+  claimWhatsappOpeningGate,
+  failWhatsappOpeningGate,
+  getWhatsappOpeningGate,
+  markWhatsappOpeningGateSent,
+} from "@/lib/repos/whatsappOpeningGate.repo";
 import { createQuestion, getQuestionById } from "@/lib/repos/questions.repo";
 import { getLatestUserThreadForChannel } from "@/lib/repos/threads.repo";
 import {
@@ -17,6 +29,10 @@ import {
   getOpeningTemplateConfig,
   sanitizeOpeningBody,
 } from "@/lib/whatsapp/openingTemplate";
+import {
+  findPendingOpeningGate,
+  openingGateExpiresAt,
+} from "@/lib/whatsapp/openingGate";
 import {
   LINK_BUTTON_BODY_MAX_LENGTH,
   buildLinkButtonActions,
@@ -290,9 +306,11 @@ async function sendOpeningTemplate({
  * Envio WhatsApp em massa.
  *
  * - Contacto com a janela de 24h aberta: recebe a mensagem livre.
- * - Contacto fora da janela: recebe o template de abertura e a mensagem
- *   fica em espera até responder.
- * - `openingOnly`: envia só o template de abertura, sem mensagem em espera.
+ * - Contacto fora da janela: recebe um template de abertura; a mensagem
+ *   fica em espera até tocar no Quick Reply associado a esse template.
+ * - O template pendente não se repete durante 14 dias; novos envios juntam-se
+ *   à fila existente.
+ * - `openingOnly`: envia só o template de abertura e regista a sua resposta.
  * - `openingBody`: corpo do template só para este envio; sem ele usa-se o
  *   corpo guardado na organização.
  * - `question`: quiz com botões ou pergunta aberta em texto simples. Cria uma linha em
@@ -584,6 +602,94 @@ export async function sendWhatsappBroadcast(input = {}) {
       String(resolvedMessage || "").trim().length > 0 ||
       onlyImageUrls.length > 0;
 
+    const pendingRows = user
+      ? await getAllPendingOutreachByUser(user.id)
+      : [];
+    const persistedGate = user
+      ? await getWhatsappOpeningGate({ orgId, userId: user.id })
+      : null;
+    const legacyGate = persistedGate
+      ? null
+      : findPendingOpeningGate(pendingRows);
+    const activeOpeningGate =
+      persistedGate &&
+      ["sending", "pending"].includes(persistedGate.status) &&
+      Date.parse(persistedGate.expires_at) > Date.now()
+        ? persistedGate
+        : legacyGate;
+
+    const pendingPayload = {
+      message: resolvedMessage,
+      imageUrls: onlyImageUrls,
+      ...(questionRow
+        ? {
+            type: question.kind,
+            questionId: questionRow.id,
+            actions: quizActions,
+          }
+        : {}),
+      ...(linkActions ? { actions: linkActions } : {}),
+      ...(followUps.length ? { followUps } : {}),
+    };
+
+    const persistPendingOutreach = ({
+      expiresAt,
+      templateMessageId = null,
+      openingGate = false,
+    }) =>
+      createPendingOutreach({
+        orgId,
+        userId: user.id,
+        payload: {
+          ...(hasResolvedFreeformContent ? pendingPayload : {}),
+          ...(openingGate ? { openingGate: true } : {}),
+        },
+        expiresAt,
+        templateMessageId,
+        messageChainId: chainMetadata?.messageChainId || null,
+        messageChainStepId: chainMetadata?.messageChainStepId || null,
+        messageChainRecipientId:
+          chainMetadata?.messageChainRecipientId || null,
+        messageChainStepIndex: chainMetadata?.messageChainStepIndex || null,
+      });
+
+    if (activeOpeningGate) {
+      if (!sendOpeningOnly && hasResolvedFreeformContent) {
+        await persistPendingOutreach({
+          expiresAt: activeOpeningGate.expires_at,
+        });
+
+        return {
+          ...base,
+          kind: "queued",
+          resolvedMessage,
+          questionId: questionRow?.id ?? null,
+          providerMessageId: null,
+          ok: true,
+          status: 202,
+          data: {
+            queued: true,
+            waitingForQuickReply: true,
+            expiresAt: activeOpeningGate.expires_at,
+          },
+        };
+      }
+
+      return {
+        ...base,
+        kind: "suppressed",
+        resolvedMessage,
+        questionId: questionRow?.id ?? null,
+        providerMessageId: null,
+        ok: true,
+        status: 202,
+        data: {
+          reason: "opening_template_already_pending",
+          expiresAt: activeOpeningGate.expires_at,
+        },
+      };
+    }
+
     const windowOpen =
       !sendOpeningOnly && user ? await isWindowOpenForUser(user.id) : false;
 
@@ -679,6 +785,102 @@ export async function sendWhatsappBroadcast(input = {}) {
       body: resolvedOpeningBody,
     });
 
+    const gateExpiresAt = openingGateExpiresAt();
+    let gateClaim = null;
+    let gateQueueRow = null;
+
+    if (user) {
+      gateClaim = await claimWhatsappOpeningGate({
+        orgId,
+        userId: user.id,
+        expiresAt: gateExpiresAt,
+      });
+
+      if (!gateClaim.claimed) {
+        const concurrentGate = gateClaim.gate;
+        if (
+          concurrentGate &&
+          ["sending", "pending"].includes(concurrentGate.status) &&
+          Date.parse(concurrentGate.expires_at) > Date.now()
+        ) {
+          if (!sendOpeningOnly && hasResolvedFreeformContent) {
+            await persistPendingOutreach({
+              expiresAt: concurrentGate.expires_at,
+            });
+
+            return {
+              ...base,
+              kind: "queued",
+              resolvedMessage,
+              questionId: questionRow?.id ?? null,
+              providerMessageId: null,
+              ok: true,
+              status: 202,
+              data: {
+                queued: true,
+                waitingForQuickReply: true,
+                expiresAt: concurrentGate.expires_at,
+              },
+            };
+          }
+
+          return {
+            ...base,
+            kind: "suppressed",
+            resolvedMessage,
+            questionId: questionRow?.id ?? null,
+            providerMessageId: null,
+            ok: true,
+            status: 202,
+            data: {
+              reason: "opening_template_already_pending",
+              expiresAt: concurrentGate.expires_at,
+            },
+          };
+        }
+
+        return {
+          ...base,
+          kind: "suppressed",
+          resolvedMessage,
+          questionId: questionRow?.id ?? null,
+          providerMessageId: null,
+          ok: true,
+          status: 202,
+          data: { reason: "opening_template_claim_not_acquired" },
+        };
+      }
+
+      try {
+        gateQueueRow = await persistPendingOutreach({
+          expiresAt: gateClaim.gate.expires_at,
+          openingGate: true,
+        });
+        await attachWhatsappOpeningGateOutreach({
+          orgId,
+          userId: user.id,
+          pendingOutreachId: gateQueueRow?.id,
+        });
+      } catch (err) {
+        await failWhatsappOpeningGate({ orgId, userId: user.id }).catch(
+          (cleanupError) =>
+            console.error("Could not release an unsent opening gate", {
+              userId: user.id,
+              error: cleanupError?.message || String(cleanupError),
+            }),
+        );
+        if (gateQueueRow?.id) {
+          await deletePendingOutreach(gateQueueRow.id).catch((cleanupError) =>
+            console.error("Could not remove an unsent pending outreach", {
+              pendingOutreachId: gateQueueRow.id,
+              error: cleanupError?.message || String(cleanupError),
+            }),
+          );
+        }
+        throw err;
+      }
+    }
+
     console.log("[WA template final]", {
       sendGroupId,
       recipient: label,
@@ -690,13 +892,22 @@ export async function sendWhatsappBroadcast(input = {}) {
       kvPairs,
     });
 
-    const r = await sendOpeningTemplate({
-      endpoint: messagesEndpoint,
-      accessKey,
-      contact,
-      config,
-      kvPairs,
-    });
+    let r;
+    try {
+      r = await sendOpeningTemplate({
+        endpoint: messagesEndpoint,
+        accessKey,
+        contact,
+        config,
+        kvPairs,
+      });
+    } catch (err) {
+      /*
+       * O resultado da ligação é incerto: conserva-se a reserva durante o
+       * prazo para impedir que outro envio repita o template às cegas.
+       */
+      throw err;
+    }
 
     console.log("[WA template result]", {
       sendGroupId,
@@ -711,35 +922,41 @@ export async function sendWhatsappBroadcast(input = {}) {
       data: r.data,
     });
 
-    if (r.ok && user && !sendOpeningOnly && hasResolvedFreeformContent) {
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-      const templateMessageId = r.providerMessageId;
+    if (gateClaim?.claimed) {
+      if (r.ok) {
+        try {
+          await markWhatsappOpeningGateSent({
+            orgId,
+            userId: user.id,
+            templateMessageId: r.providerMessageId,
+            pendingOutreachId: gateQueueRow?.id ?? null,
+          });
+        } catch (err) {
+          console.error("Could not mark WhatsApp opening template as sent", {
+            userId: user.id,
+            error: err?.message || String(err),
+          });
+        }
 
-      await createPendingOutreach({
-        orgId,
-        userId: user.id,
-        payload: {
-          message: resolvedMessage,
-          imageUrls: onlyImageUrls,
-          ...(questionRow
-            ? {
-                type: question.kind,
-                questionId: questionRow.id,
-                actions: quizActions,
-              }
-            : {}),
-          /* A entrega em espera envia o que estiver em `actions`. */
-          ...(linkActions ? { actions: linkActions } : {}),
-          /* E depois os balões à parte, pela mesma ordem. */
-          ...(followUps.length ? { followUps } : {}),
-        },
-        expiresAt,
-        templateMessageId,
-        messageChainId: chainMetadata?.messageChainId || null,
-        messageChainStepId: chainMetadata?.messageChainStepId || null,
-        messageChainRecipientId: chainMetadata?.messageChainRecipientId || null,
-        messageChainStepIndex: chainMetadata?.messageChainStepIndex || null,
-      });
+        if (gateQueueRow?.id && r.providerMessageId) {
+          try {
+            await updatePendingOutreachTemplateMessageId(
+              gateQueueRow.id,
+              r.providerMessageId,
+            );
+          } catch (err) {
+            console.error("Could not attach template id to pending outreach", {
+              userId: user.id,
+              error: err?.message || String(err),
+            });
+          }
+        }
+      } else if (r.status >= 400 && r.status < 500) {
+        await failWhatsappOpeningGate({ orgId, userId: user.id });
+        if (gateQueueRow?.id) {
+          await deletePendingOutreach(gateQueueRow.id);
+        }
+      }
     }
 
     return {
@@ -789,7 +1006,13 @@ export async function sendWhatsappBroadcast(input = {}) {
   const okCount = results.filter((r) => r.ok).length;
   const failedCount = results.length - okCount;
   const queuedCount = results.filter(
-    (r) => r.ok && r.kind === "template" && !sendOpeningOnly,
+    (r) =>
+      r.ok &&
+      ["template", "queued"].includes(r.kind) &&
+      !sendOpeningOnly,
+  ).length;
+  const suppressedCount = results.filter(
+    (r) => r.ok && r.kind === "suppressed",
   ).length;
 
   return {
@@ -798,6 +1021,7 @@ export async function sendWhatsappBroadcast(input = {}) {
     ok: okCount,
     failed: failedCount,
     queued: queuedCount,
+    suppressed: suppressedCount,
     results,
     error:
       okCount === 0
@@ -807,7 +1031,9 @@ export async function sendWhatsappBroadcast(input = {}) {
         : null,
     note:
       queuedCount > 0
-        ? "Some contacts were outside the 24h window: they received the opening message and your message will be delivered on their first reply."
-        : null,
+        ? "Some messages are waiting for the opening template's Quick Reply. They will be delivered after the contact taps its button."
+        : suppressedCount > 0
+          ? "An opening template is already waiting for the contact's Quick Reply, so no duplicate was sent."
+          : null,
   };
 }

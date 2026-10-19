@@ -112,15 +112,37 @@ describe("sendReadChainStep with a question step", () => {
       threadId: null,
     });
   });
+
+  it("keeps a queued WhatsApp step waiting without recording a failure or delivery", async () => {
+    mocks.sendWhatsappBroadcast.mockResolvedValue({
+      results: [{ ok: true, kind: "queued", providerMessageId: null }],
+    });
+
+    const result = await sendReadChainStep({
+      chain: CHAIN,
+      chainRecipient: RECIPIENT,
+      chainStep: { id: "step-1", payload: { message: "Olá", files: [] } },
+      stepIndex: 1,
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      sent: false,
+      waitingForReply: true,
+      kind: "queued",
+    });
+    expect(mocks.createMessage).not.toHaveBeenCalled();
+    expect(mocks.createMessageChainDelivery).not.toHaveBeenCalled();
+    expect(mocks.markMessageChainDeliveryFailed).not.toHaveBeenCalled();
+    expect(mocks.updateMessageChainRecipientProgress).not.toHaveBeenCalled();
+  });
 });
 
 describe("sendReadChainStep on Teams", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.sendTeamsBroadcast.mockResolvedValue({
-      results: [
-        { ok: true, providerMessageId: "teams-1", messageRowId: 901 },
-      ],
+      results: [{ ok: true, providerMessageId: "teams-1", messageRowId: 901 }],
     });
   });
 
