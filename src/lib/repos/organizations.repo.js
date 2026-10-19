@@ -1,22 +1,13 @@
+import { getRepositoryReadClient } from "@/lib/db/readAccess";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 // /lib/repos/organizations.repo.js
-
-import { createClient as createServiceClient } from "@supabase/supabase-js";
-
-const sb = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  {
-    auth: {
-      persistSession: false,
-    },
-  },
-);
 
 export async function createOrganization({
   name,
   ownerUserId,
   channelId,
 }) {
+  const sb = getSupabaseAdminClient();
   if (!name) {
     throw new Error("Organization name is required");
   }
@@ -66,6 +57,7 @@ export async function createOrganization({
 }
 
 export async function getAllOrganization() {
+  const sb = getRepositoryReadClient();
   const { data, error } = await sb
     .from("organization")
     .select("*")
@@ -77,6 +69,7 @@ export async function getAllOrganization() {
 }
 
 export async function getOrganization(orgId) {
+  const sb = getRepositoryReadClient();
   const { data, error } = await sb
     .from("organization")
     .select("*")
@@ -89,6 +82,7 @@ export async function getOrganization(orgId) {
 }
 
 export async function getOrganizationByChannelId(channelId) {
+  const sb = getRepositoryReadClient();
   if (!channelId) return null;
 
   const { data, error } = await sb
@@ -103,6 +97,7 @@ export async function getOrganizationByChannelId(channelId) {
 }
 
 export async function getOrganizationByTeamsTenantId(tenantId) {
+  const sb = getRepositoryReadClient();
   const { data, error } = await sb
     .from("organization")
     .select("*")
@@ -115,6 +110,7 @@ export async function getOrganizationByTeamsTenantId(tenantId) {
 }
 
 export async function getOrganizationBirdConfig(orgId) {
+  const sb = getRepositoryReadClient();
   if (!orgId) {
     throw new Error("orgId is required");
   }
@@ -150,6 +146,7 @@ export async function getOrganizationBirdConfig(orgId) {
    ========================================================= */
 
 export async function getOrganizationOpeningBody(orgId) {
+  const sb = getRepositoryReadClient();
   if (!orgId) {
     throw new Error("orgId is required");
   }
@@ -166,6 +163,7 @@ export async function getOrganizationOpeningBody(orgId) {
 }
 
 export async function updateOrganizationOpeningBody(orgId, body) {
+  const sb = getSupabaseAdminClient();
   if (!orgId) {
     throw new Error("orgId is required");
   }

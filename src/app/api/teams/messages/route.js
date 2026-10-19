@@ -65,7 +65,7 @@ import {
   deactivateGroupInstallation,
 } from "@/lib/repos/teamsInstallations.repo";
 
-import { getBotToken } from "@/lib/teams/auth";
+import { sendReply } from "@/lib/teams/sendReply";
 import { stripBotMention } from "@/lib/teams/mentions";
 import { getChannelPostContext } from "@/lib/services/teams/channelPostContext";
 import { getTeamName } from "@/lib/teams/members";
@@ -141,81 +141,7 @@ async function assertAssistantMatchesOrganization(assistant, organizationId) {
    SEND TEAMS REPLY
    ========================================================= */
 
-async function sendReply(activity, text, opts = {}) {
-  const {
-    replyToId = activity?.id,
 
-    serviceUrl = activity?.serviceUrl,
-
-    conversationId = activity?.conversation?.id,
-
-    attachments = null,
-  } = opts;
-
-  if (!serviceUrl || !conversationId) {
-    console.error("[TEAMS] sendReply missing serviceUrl/conversationId", {
-      serviceUrl,
-      conversationId,
-    });
-
-    return {
-      ok: false,
-      error: "Missing serviceUrl/conversationId",
-    };
-  }
-
-  const token = await getBotToken();
-
-  const base = serviceUrl.endsWith("/") ? serviceUrl : `${serviceUrl}/`;
-
-  const url = `${base}v3/conversations/${conversationId}/activities`;
-
-  const payload = {
-    type: "message",
-
-    text: String(text ?? ""),
-
-    ...(attachments ? { attachments } : {}),
-
-    ...(replyToId
-      ? {
-          replyToId,
-        }
-      : {}),
-  };
-
-  const res = await fetch(url, {
-    method: "POST",
-
-    headers: {
-      Authorization: `Bearer ${token}`,
-
-      "Content-Type": "application/json",
-    },
-
-    body: JSON.stringify(payload),
-  });
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-
-    console.error("[TEAMS] Failed to send reply", res.status, body);
-
-    return {
-      ok: false,
-      status: res.status,
-      body,
-    };
-  }
-
-  const data = await res.json().catch(() => null);
-
-  return {
-    ok: true,
-
-    id: data?.id ?? null,
-  };
-}
 
 const NOT_REGISTERED_TEXT =
   "Ainda não estás registado na MyDigitalBot.<br>Pede ao administrador da tua empresa para te adicionar com o email da tua conta Microsoft. Assim que o fizer, ficas ligado automaticamente.";

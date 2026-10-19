@@ -1,10 +1,7 @@
-import { createClient as createServiceClient } from "@supabase/supabase-js";
+// Acesso interno privilegiado: processamento de eventos/tarefas, sem sessão de administrador.
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 
-const sb = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } },
-);
+const sb = getSupabaseAdminClient();
 
 export async function createAutomationRun(row) {
   const { data, error } = await sb

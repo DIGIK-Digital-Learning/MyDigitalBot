@@ -1,12 +1,8 @@
+import { getRepositoryReadClient } from "@/lib/db/readAccess";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 // src/lib/repos/user.repo.js
-import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
-import { resolveAssistantAssignment } from "@/lib/services/users/assistantAssignment";
 
-const supabase = createSupabaseAdmin(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } },
-);
+import { resolveAssistantAssignment } from "@/lib/services/users/assistantAssignment";
 
 function cleanMsisdn(n) {
   return String(n).replace(/\D/g, "");
@@ -35,6 +31,7 @@ async function cancelPendingInactivityRunsForAssistantChange(
   userId,
   nextAssistantId,
 ) {
+  const supabase = getSupabaseAdminClient();
   let query = supabase
     .from("automation_run")
     .update({
@@ -59,6 +56,7 @@ async function cancelPendingInactivityRunsForAssistantChange(
 
 // Deixa em user_assistant exatamente os assistentes pedidos (#131).
 async function setUserAssistants(userId, assistantIds) {
+  const supabase = getSupabaseAdminClient();
   const { data: existing, error: exErr } = await supabase
     .from("user_assistant")
     .select("assistant_id")
@@ -108,6 +106,7 @@ export async function createUser({
   whatsappUsername,
   birdContactId,
 }) {
+  const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase.rpc("create_user_with_plan_limit", {
     p_organization_id: organizationId,
     p_phone_number: phoneNumber ?? null,
@@ -151,6 +150,7 @@ export async function createUser({
 }
 
 export async function deleteUser(userId) {
+  const supabase = getSupabaseAdminClient();
   await supabase.from("user_tag").delete().eq("user_id", userId).throwOnError();
 
   const { data: threads } = await supabase
@@ -177,6 +177,7 @@ export async function deleteUser(userId) {
 }
 
 export async function updateUser(userId, updates) {
+  const supabase = getSupabaseAdminClient();
   const currentUser = await getUserById(userId);
   if (!currentUser) {
     throw new Error("User not found");
@@ -314,6 +315,7 @@ export async function updateUser(userId, updates) {
 
 // Último menu de troca de assistente enviado ao contacto (#132).
 export async function setUserAssistantMenu(userId, { messageId, sentAt }) {
+  const supabase = getSupabaseAdminClient();
   const patch = { assistant_menu_sent_at: sentAt ?? null };
   if (messageId !== undefined) patch.assistant_menu_message_id = messageId;
 
@@ -325,6 +327,7 @@ export async function updateUserWhatsappIdentity(
   userId,
   { whatsappBsuid, whatsappUsername, birdContactId } = {},
 ) {
+  const supabase = getSupabaseAdminClient();
   if (!userId) return null;
 
   const current = await getUserById(userId);
@@ -371,6 +374,7 @@ export async function updateUserWhatsappIdentity(
 }
 
 export async function getUserById(userId) {
+  const supabase = getRepositoryReadClient();
   const { data, error } = await supabase
     .from("user")
     .select(
@@ -429,6 +433,7 @@ export async function getUserById(userId) {
 }
 
 async function getSingleUserByIdentity({ column, value, organizationId }) {
+  const supabase = getRepositoryReadClient();
   const cleaned = cleanText(value);
   if (!cleaned) return null;
 
@@ -484,6 +489,7 @@ export async function getUserByNumber(
   phoneNumber,
   organizationId,
 ) {
+  const supabase = getRepositoryReadClient();
   const digits = cleanMsisdn(phoneNumber);
 
   if (!digits || !organizationId) {
@@ -531,6 +537,7 @@ export async function getUserByNumber(
 }
 
 export async function getUserByEmail(email, tenant) {
+  const supabase = getRepositoryReadClient();
   const _email = String(email || "")
     .trim()
     .toLowerCase();
@@ -557,11 +564,11 @@ export async function getUserByEmail(email, tenant) {
     throw err;
   }
 
-
   return matches[0].id;
 }
 
 export async function getUsersInOrg(orgId, { page = 1, pageSize = 100 } = {}) {
+  const supabase = getRepositoryReadClient();
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
@@ -630,6 +637,7 @@ export async function getUsersInOrg(orgId, { page = 1, pageSize = 100 } = {}) {
 }
 
 export async function getUserByAadObjectId(aadObjectId) {
+  const supabase = getRepositoryReadClient();
   if (!aadObjectId) return null;
 
   const { data, error } = await supabase

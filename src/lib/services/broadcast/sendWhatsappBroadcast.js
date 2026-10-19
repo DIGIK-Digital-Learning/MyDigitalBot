@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 import crypto from "crypto";
 import { toE164 } from "@/lib/whatsapp/E164";
 import { getUserById } from "@/lib/repos/user.repo";
@@ -30,11 +30,7 @@ import {
   resolveTrackedLinksForRecipient,
 } from "./trackedLinks";
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } },
-);
+const supabaseAdmin = getSupabaseAdminClient();
 
 function cleanText(value) {
   if (value === undefined || value === null) return null;

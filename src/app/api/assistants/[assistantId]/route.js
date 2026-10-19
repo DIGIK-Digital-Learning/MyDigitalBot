@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 
 import { updateAssistant, deleteAssistant } from "@/lib/repos/assistants.repo";
@@ -30,15 +31,17 @@ export async function GET(_req, { params }) {
       return orgAuth.error;
     }
 
-    return NextResponse.json(
-      {
-        ...orgAuth.assistant,
-        vectorStoreId: orgAuth.assistant.vector_store_id ?? null,
-      },
-      {
-        status: 200,
-      },
-    );
+    return await withSessionReadAccess(orgAuth, async () => {
+      return NextResponse.json(
+        {
+          ...orgAuth.assistant,
+          vectorStoreId: orgAuth.assistant.vector_store_id ?? null,
+        },
+        {
+          status: 200,
+        },
+      );
+    });
   } catch (err) {
     return handleApiError(err, "Failed to load assistant");
   }

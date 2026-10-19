@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 import { getQuestionExportByOrg } from "@/lib/repos/questions.repo";
 import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
@@ -10,8 +11,10 @@ export async function GET(req) {
     const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
-    const data = await getQuestionExportByOrg(orgAuth.orgId);
-    return NextResponse.json(data);
+    return await withSessionReadAccess(orgAuth, async () => {
+      const data = await getQuestionExportByOrg(orgAuth.orgId);
+      return NextResponse.json(data);
+    });
   } catch (err) {
     return handleApiError(err, "Failed to export questions");
   }

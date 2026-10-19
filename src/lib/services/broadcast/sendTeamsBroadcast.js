@@ -17,6 +17,7 @@ import {
   resolveTrackedLinksForRecipient,
 } from "./trackedLinks";
 import { withButtonLinksInText } from "@/lib/whatsapp/linkButton";
+import { isTrustedTeamsServiceUrl } from "@/lib/teams/serviceUrl";
 
 export async function sendTeamsBroadcast(input = {}) {
   const {
@@ -126,10 +127,15 @@ export async function sendTeamsBroadcast(input = {}) {
       continue;
     }
 
+    if (!isTrustedTeamsServiceUrl(install.service_url)) {
+      results.push({ userId, ok: false, error: "Endereço do serviço Teams não autorizado." });
+      continue;
+    }
+
     try {
       const token = await getBotToken(install.tenant_id);
 
-      const endpoint = `${String(install.service_url).replace(/\/$/, "")}/v3/conversations/${install.conversation_id}/activities`;
+      const endpoint = `${String(install.service_url).replace(/\/$/, "")}/v3/conversations/${encodeURIComponent(install.conversation_id)}/activities`;
 
       const fileParts = buildTeamsFileParts(normalizedFiles);
 
@@ -185,6 +191,7 @@ export async function sendTeamsBroadcast(input = {}) {
 
       const res = await fetch(endpoint, {
         method: "POST",
+        redirect: "error",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

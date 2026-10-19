@@ -1,13 +1,9 @@
+import { getRepositoryReadClient } from "@/lib/db/readAccess";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 import { fetchExportRows } from "./analytics/analyticsBase.repo";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } },
-);
 
 export async function createTrackedLink(row) {
+  const supabaseAdmin = getSupabaseAdminClient();
   const { data, error } = await supabaseAdmin
     .from("tracked_link")
     .insert(row)
@@ -19,6 +15,7 @@ export async function createTrackedLink(row) {
 }
 
 export async function getTrackedLinkByToken(token) {
+  const supabaseAdmin = getRepositoryReadClient();
   const { data, error } = await supabaseAdmin
     .from("tracked_link")
     .select("*")
@@ -34,6 +31,7 @@ export async function getTrackedLinkByToken(token) {
 }
 
 export async function createTrackedLinkEvent(row) {
+  const supabaseAdmin = getSupabaseAdminClient();
   const { data, error } = await supabaseAdmin
     .from("tracked_link_event")
     .insert(row)
@@ -49,6 +47,7 @@ export async function createTrackedLinkEvent(row) {
  * para o mais antigo. Lê a vista tracked_link_library.
  */
 export async function getTrackedLinkLibraryByOrg(orgId, { limit = 200 } = {}) {
+  const supabaseAdmin = getRepositoryReadClient();
   const { data, error } = await supabaseAdmin
     .from("tracked_link_library")
     .select("link_key, link_label, destination_url, last_used_at")
@@ -66,6 +65,7 @@ export async function getTrackedLinkReportsByOrg(
   periodStart = null,
   { paginate = false } = {},
 ) {
+  const supabaseAdmin = getRepositoryReadClient();
   let rows;
 
   if (paginate) {
@@ -77,6 +77,8 @@ export async function getTrackedLinkReportsByOrg(
 
         return periodStart ? query.gte("created_at", periodStart) : query;
       },
+      {},
+      supabaseAdmin,
     );
 
     // Read events separately: embedded arrays can also be capped by PostgREST.
@@ -89,6 +91,8 @@ export async function getTrackedLinkReportsByOrg(
         "tracked_link_event",
         "id, tracked_link_id, created_at",
         (query) => query.in("tracked_link_id", ids),
+        {},
+        supabaseAdmin,
       );
 
       for (const event of events) {
@@ -218,6 +222,7 @@ export async function getTrackedLinkReportsByOrg(
 }
 
 export async function getTrackedLinkReportDetail({ orgId, sendGroupId }) {
+  const supabaseAdmin = getRepositoryReadClient();
   if (!sendGroupId) return null;
 
   const { data, error } = await supabaseAdmin

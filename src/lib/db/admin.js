@@ -1,3 +1,4 @@
+import "server-only";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 let adminClient;
@@ -15,7 +16,7 @@ export function getSupabaseAdminClient() {
   }
 
   adminClient = createServiceClient(url, key, {
-    auth: { persistSession: false },
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   });
 
   return adminClient;

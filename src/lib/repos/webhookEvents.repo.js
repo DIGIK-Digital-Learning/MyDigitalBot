@@ -1,11 +1,8 @@
+// Acesso interno privilegiado: processamento de eventos/tarefas, sem sessão de administrador.
 require("dotenv").config();
-import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 
-const supabase = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } },
-);
+const supabase = getSupabaseAdminClient();
 
 export async function recordWebhookEvent({ provider = "bird", eventKey, eventType, payload }) {
   const { data, error } = await supabase

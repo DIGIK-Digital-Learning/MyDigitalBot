@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -15,12 +16,14 @@ export async function GET(req) {
     const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
-    const data = await getAnalyticsOverview({
-      orgId: orgAuth.orgId,
-      period,
-    });
+    return await withSessionReadAccess(orgAuth, async () => {
+      const data = await getAnalyticsOverview({
+        orgId: orgAuth.orgId,
+        period,
+      });
 
-    return NextResponse.json(data);
+      return NextResponse.json(data);
+    });
   } catch (err) {
     return handleApiError(err, "Failed to load analytics overview");
   }

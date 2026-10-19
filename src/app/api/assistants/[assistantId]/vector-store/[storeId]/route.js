@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 
 import {
@@ -78,49 +79,51 @@ export async function GET(_req, { params }) {
       return auth.error;
     }
 
-    const sId = Number(storeId);
+    return await withSessionReadAccess(auth, async () => {
+      const sId = Number(storeId);
 
-    if (!Number.isInteger(sId) || sId <= 0) {
-      return NextResponse.json(
-        {
-          error: "Invalid store id",
-        },
-        {
-          status: 400,
-        },
-      );
-    }
+      if (!Number.isInteger(sId) || sId <= 0) {
+        return NextResponse.json(
+          {
+            error: "Invalid store id",
+          },
+          {
+            status: 400,
+          },
+        );
+      }
 
-    /*
-     * Do not reveal whether some other
-     * Assistant's Vector Store exists.
-     */
-    if (Number(auth.assistant.vector_store_id) !== sId) {
-      return NextResponse.json(
-        {
-          error: "Not found",
-        },
-        {
-          status: 404,
-        },
-      );
-    }
+      /*
+       * Do not reveal whether some other
+       * Assistant's Vector Store exists.
+       */
+      if (Number(auth.assistant.vector_store_id) !== sId) {
+        return NextResponse.json(
+          {
+            error: "Not found",
+          },
+          {
+            status: 404,
+          },
+        );
+      }
 
-    const store = await getStoreById(sId);
+      const store = await getStoreById(sId);
 
-    if (!store) {
-      return NextResponse.json(
-        {
-          error: "Not found",
-        },
-        {
-          status: 404,
-        },
-      );
-    }
+      if (!store) {
+        return NextResponse.json(
+          {
+            error: "Not found",
+          },
+          {
+            status: 404,
+          },
+        );
+      }
 
-    return NextResponse.json(serializeStore(store), {
-      status: 200,
+      return NextResponse.json(serializeStore(store), {
+        status: 200,
+      });
     });
   } catch (err) {
     return handleApiError(err, "Failed to load vector store");

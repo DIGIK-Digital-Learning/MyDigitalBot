@@ -1,16 +1,10 @@
-import { createClient as createServiceClient } from "@supabase/supabase-js";
-
+import { getRepositoryReadClient } from "@/lib/db/readAccess";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 import {
   buildQuestionDetail,
   buildQuestionReports,
 } from "@/lib/services/questions/questionReports";
 import { buildQuestionExport } from "@/lib/services/questions/questionExport";
-
-const supabase = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } },
-);
 
 const QUESTION_SELECT = `
   id,
@@ -66,6 +60,7 @@ export async function createQuestion({
   createdByUserId = null,
   expiresAt,
 }) {
+  const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
     .from("question")
     .insert([
@@ -92,6 +87,7 @@ export async function createQuestion({
 }
 
 export async function getQuestionById(id) {
+  const supabase = getRepositoryReadClient();
   if (!id) return null;
 
   const { data, error } = await supabase
@@ -105,6 +101,7 @@ export async function getQuestionById(id) {
 }
 
 export async function getQuestionsByIds(ids = []) {
+  const supabase = getRepositoryReadClient();
   const clean = [...new Set((ids || []).filter(Boolean))];
 
   if (!clean.length) return [];
@@ -119,6 +116,7 @@ export async function getQuestionsByIds(ids = []) {
 }
 
 export async function getQuestionAnswer(questionId, userId) {
+  const supabase = getRepositoryReadClient();
   if (!questionId || !userId) return null;
 
   const { data, error } = await supabase
@@ -137,6 +135,7 @@ export async function updateQuestionAnswerEvaluation(
   id,
   { verdict = null, aiFeedback = null, reviewNeeded = false },
 ) {
+  const supabase = getSupabaseAdminClient();
   const { error } = await supabase
     .from("question_answer")
     .update({ verdict, ai_feedback: aiFeedback, review_needed: reviewNeeded })
@@ -161,6 +160,7 @@ export async function createQuestionAnswer({
   aiFeedback = null,
   reviewNeeded = false,
 }) {
+  const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
     .from("question_answer")
     .insert([
@@ -194,6 +194,7 @@ export async function createQuestionAnswer({
  * envolvidos. Auxiliares dos relatórios.
  */
 async function getQuestionMessages(questionIds) {
+  const supabase = getRepositoryReadClient();
   if (!questionIds.length) return [];
 
   const { data, error } = await supabase
@@ -207,6 +208,7 @@ async function getQuestionMessages(questionIds) {
 }
 
 async function getQuestionAnswers(questionIds) {
+  const supabase = getRepositoryReadClient();
   if (!questionIds.length) return [];
 
   const { data, error } = await supabase
@@ -219,6 +221,7 @@ async function getQuestionAnswers(questionIds) {
 }
 
 async function getUsersMap(userIds) {
+  const supabase = getRepositoryReadClient();
   const ids = [...new Set(userIds.filter((id) => id != null))];
 
   if (!ids.length) return new Map();
@@ -236,6 +239,7 @@ async function getUsersMap(userIds) {
  * Lista de perguntas da organização com os totais de respostas.
  */
 export async function getQuestionReportsByOrg(orgId) {
+  const supabase = getRepositoryReadClient();
   const { data: questions, error } = await supabase
     .from("question")
     .select(QUESTION_SELECT)
@@ -261,6 +265,7 @@ export async function getQuestionReportsByOrg(orgId) {
  * Detalhe de uma pergunta: resumo, quem respondeu e quem não respondeu.
  */
 export async function getQuestionReportDetail({ orgId, questionId }) {
+  const supabase = getRepositoryReadClient();
   const { data: question, error } = await supabase
     .from("question")
     .select(QUESTION_SELECT)
@@ -289,6 +294,7 @@ export async function getQuestionReportDetail({ orgId, questionId }) {
  * as etiquetas de cada colaborador e os nomes dos assistentes.
  */
 export async function getQuestionExportByOrg(orgId) {
+  const supabase = getRepositoryReadClient();
   const { data: questions, error } = await supabase
     .from("question")
     .select(QUESTION_SELECT)
@@ -358,6 +364,7 @@ export async function updateQuestionAnswerAdminVerdict({
   orgId,
   adminVerdict,
 }) {
+  const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
     .from("question_answer")
     .update({ admin_verdict: adminVerdict, review_needed: false })

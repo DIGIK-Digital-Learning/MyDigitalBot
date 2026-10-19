@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -18,14 +19,16 @@ export async function GET(req) {
     const auth = await requireOwnedOrg(searchParams.get("orgId"));
     if (auth.error) return auth.error;
 
-    const period = searchParams.get("period") || "all";
+    return await withSessionReadAccess(auth, async () => {
+      const period = searchParams.get("period") || "all";
 
-    const data = await getAnalyticsExportDataset({
-      orgId: auth.orgId,
-      period,
+      const data = await getAnalyticsExportDataset({
+        orgId: auth.orgId,
+        period,
+      });
+
+      return NextResponse.json(data);
     });
-
-    return NextResponse.json(data);
   } catch (err) {
     return handleApiError(err, "Failed to build analytics export");
   }

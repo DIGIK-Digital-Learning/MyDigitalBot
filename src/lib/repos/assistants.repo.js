@@ -1,11 +1,6 @@
+import { getRepositoryReadClient } from "@/lib/db/readAccess";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 // /lib/repos/assistants.repo.js
-import { createClient as createServiceClient } from "@supabase/supabase-js";
-
-const sb = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } },
-);
 
 /**
  * Table: assistant
@@ -24,6 +19,7 @@ export async function createAssistant({
   top_p,
   temperature,
 }) {
+  const sb = getSupabaseAdminClient();
   const orgId = Number(organizationId);
 
   if (!Number.isInteger(orgId) || orgId <= 0) {
@@ -61,6 +57,7 @@ export async function createAssistant({
 }
 
 export async function updateAssistant(assistantId, updates) {
+  const sb = getSupabaseAdminClient();
   const patch = {};
 
   const allow = [
@@ -92,6 +89,7 @@ export async function updateAssistant(assistantId, updates) {
 }
 
 export async function getAssistantsInOrg(organizationId) {
+  const sb = getRepositoryReadClient();
   const orgId = Number(organizationId);
 
   if (!Number.isInteger(orgId) || orgId <= 0) {
@@ -114,6 +112,7 @@ export async function getAssistantsInOrg(organizationId) {
 }
 
 export async function getAssistantById(id) {
+  const sb = getRepositoryReadClient();
   const { data, error } = await sb
     .from("assistant")
     .select("*")
@@ -124,6 +123,7 @@ export async function getAssistantById(id) {
 }
 
 export async function getFirstAssistantInOrg(organizationId) {
+  const sb = getRepositoryReadClient();
   const { data, error } = await sb
     .from("assistant")
     .select("*")
@@ -137,6 +137,7 @@ export async function getFirstAssistantInOrg(organizationId) {
 }
 
 export async function deleteAssistant(id) {
+  const sb = getSupabaseAdminClient();
   // Quem o tinha ativo fica sem ativo ao apagar (a BD põe a null e retira a
   // atribuição); passa a ativo outro dos seus assistentes, se houver (#131).
   const { data: activeUsers, error: usersError } = await sb
@@ -178,6 +179,7 @@ export async function deleteAssistant(id) {
 }
 
 export async function associateVectorStoreToDbAssistant(assistantId, storeId) {
+  const sb = getSupabaseAdminClient();
   const { error } = await sb
     .from("assistant")
     .update({ vector_store_id: storeId })
@@ -187,6 +189,7 @@ export async function associateVectorStoreToDbAssistant(assistantId, storeId) {
 }
 
 export async function nullifyVectorStoreToDbAssistant(assistantId) {
+  const sb = getSupabaseAdminClient();
   const { error } = await sb
     .from("assistant")
     .update({ vector_store_id: null })

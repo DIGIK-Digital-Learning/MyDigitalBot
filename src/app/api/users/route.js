@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 import {
   createUser,
@@ -33,8 +34,10 @@ export async function GET(req) {
     const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
-    const result = await getUsersInOrg(orgAuth.orgId, { page, pageSize });
-    return NextResponse.json(result);
+    return await withSessionReadAccess(orgAuth, async () => {
+      const result = await getUsersInOrg(orgAuth.orgId, { page, pageSize });
+      return NextResponse.json(result);
+    });
   } catch (err) {
     return handleApiError(err, "Failed to load users");
   }

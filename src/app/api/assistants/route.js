@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 
 import {
@@ -41,10 +42,12 @@ export async function GET(req) {
       return orgAuth.error;
     }
 
-    const assistants = await getAssistantsInOrg(orgAuth.orgId);
+    return await withSessionReadAccess(orgAuth, async () => {
+      const assistants = await getAssistantsInOrg(orgAuth.orgId);
 
-    return NextResponse.json(assistants, {
-      status: 200,
+      return NextResponse.json(assistants, {
+        status: 200,
+      });
     });
   } catch (err) {
     return handleApiError(err, "Failed to load assistants");

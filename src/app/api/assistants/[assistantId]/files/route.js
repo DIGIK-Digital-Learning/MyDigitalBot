@@ -1,11 +1,7 @@
 // /lib/repos/files.repo.js
-import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 
-const sb = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } }
-);
+const sb = getSupabaseAdminClient();
 
 /**
  * Table: file

@@ -14,6 +14,10 @@ describe("Atualização de segurança do Next.js", () => {
     expect(lock.packages[""].dependencies.next).toBe("16.3.5");
     expect(lock.packages["node_modules/next"].version).toBe("16.3.5");
     expect(lock.packages["node_modules/next"].optionalDependencies.sharp).toBe("^0.35.4");
-    expect(lock.packages["node_modules/sharp"].version).toBe("0.35.4");
+    // O Node resolve primeiro a dependência dentro de Next. A versão da raiz
+    // é usada pelos uploads da aplicação e pode ser diferente sem afetar Next.
+    const sharpForNext = lock.packages["node_modules/next/node_modules/sharp"]
+      ?? lock.packages["node_modules/sharp"];
+    expect(sharpForNext.version).toBe("0.35.4");
   });
 });

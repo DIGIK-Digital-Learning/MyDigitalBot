@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 import {
   assertNoActiveInactivityRuleConflict,
@@ -29,9 +30,11 @@ export async function GET(req) {
     const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
-    const items = await getOrgAutomationRules(orgAuth.orgId);
+    return await withSessionReadAccess(orgAuth, async () => {
+      const items = await getOrgAutomationRules(orgAuth.orgId);
 
-    return NextResponse.json({ items });
+      return NextResponse.json({ items });
+    });
   } catch (error) {
     return NextResponse.json(
       { error: error?.message || String(error) },

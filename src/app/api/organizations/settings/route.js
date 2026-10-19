@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -30,8 +31,10 @@ export async function GET(request) {
     const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
-    const item = await loadOrganizationSettings(orgAuth.orgId);
-    return NextResponse.json({ ok: true, item });
+    return await withSessionReadAccess(orgAuth, async () => {
+      const item = await loadOrganizationSettings(orgAuth.orgId);
+      return NextResponse.json({ ok: true, item });
+    });
   } catch (error) {
     return handleApiError(error, "Failed to load organization settings");
   }

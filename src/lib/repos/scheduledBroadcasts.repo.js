@@ -1,12 +1,7 @@
-import { createClient as createServiceClient } from "@supabase/supabase-js";
-
-const sb = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } },
-);
-
+import { getRepositoryReadClient } from "@/lib/db/readAccess";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 export async function createScheduledBroadcast(row) {
+  const sb = getSupabaseAdminClient();
   const { data, error } = await sb
     .from("scheduled_broadcast")
     .insert(row)
@@ -21,6 +16,7 @@ export async function getOrgScheduledBroadcasts(
   organizationId,
   { source = "all" } = {},
 ) {
+  const sb = getRepositoryReadClient();
   const { data, error } = await sb
     .from("scheduled_broadcast")
     .select("*")
@@ -59,6 +55,7 @@ export async function getOrgScheduledBroadcasts(
 }
 
 export async function updateScheduledBroadcast(id, patch) {
+  const sb = getSupabaseAdminClient();
   const { data, error } = await sb
     .from("scheduled_broadcast")
     .update({ ...patch, updated_at: new Date().toISOString() })
@@ -72,6 +69,7 @@ export async function updateScheduledBroadcast(id, patch) {
 }
 
 export async function deleteScheduledBroadcast(id) {
+  const sb = getSupabaseAdminClient();
   const { error } = await sb.from("scheduled_broadcast").delete().eq("id", id);
 
   if (error) throw error;
@@ -79,6 +77,7 @@ export async function deleteScheduledBroadcast(id) {
 }
 
 export async function getDueScheduledBroadcasts(limit = 20) {
+  const sb = getRepositoryReadClient();
   const nowIso = new Date().toISOString();
 
   const { data, error } = await sb
@@ -94,6 +93,7 @@ export async function getDueScheduledBroadcasts(limit = 20) {
 }
 
 export async function markScheduledBroadcastProcessing(id) {
+  const sb = getSupabaseAdminClient();
   const { data, error } = await sb
     .from("scheduled_broadcast")
     .update({
@@ -111,6 +111,7 @@ export async function markScheduledBroadcastProcessing(id) {
 }
 
 export async function finishScheduledBroadcast(id, patch) {
+  const sb = getSupabaseAdminClient();
   const { data, error } = await sb
     .from("scheduled_broadcast")
     .update({

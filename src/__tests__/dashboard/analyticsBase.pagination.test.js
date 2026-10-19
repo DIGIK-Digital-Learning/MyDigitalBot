@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  getSupabaseAdminClient: vi.fn(),
+  getScopedReadClient: vi.fn(),
 }));
 
-vi.mock("@/lib/db/admin", () => ({
-  getSupabaseAdminClient: mocks.getSupabaseAdminClient,
+vi.mock("@/lib/db/readAccess", () => ({
+  getScopedReadClient: mocks.getScopedReadClient,
 }));
 
 import { fetchAllRows } from "@/lib/repos/analytics/analyticsBase.repo";
@@ -33,7 +33,7 @@ describe("fetchAllRows", () => {
         return query;
       }),
     };
-    mocks.getSupabaseAdminClient.mockReturnValue(admin);
+    mocks.getScopedReadClient.mockReturnValue(admin);
 
     await expect(
       fetchAllRows("message", "id", (query) => query.eq("role", "user"), 2),

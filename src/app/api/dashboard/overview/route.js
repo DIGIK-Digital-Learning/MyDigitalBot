@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -27,8 +28,10 @@ export async function GET(request) {
     const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
-    const overview = await getDashboardOverview(orgAuth.orgId);
-    return NextResponse.json(overview);
+    return await withSessionReadAccess(orgAuth, async () => {
+      const overview = await getDashboardOverview(orgAuth.orgId);
+      return NextResponse.json(overview);
+    });
   } catch (error) {
     return handleApiError(error, "Failed to load dashboard overview");
   }

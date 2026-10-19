@@ -1,27 +1,6 @@
 import { getBotToken } from "@/lib/teams/auth";
-
-/*
- * Teams service URLs are Microsoft hosts. The bot token is never sent
- * anywhere else, even if a stored URL was tampered with.
- */
-const TRUSTED_HOST_SUFFIXES = [
-  ".trafficmanager.net",
-  ".botframework.com",
-  ".teams.microsoft.com",
-];
-
-export function isTrustedTeamsServiceUrl(value) {
-  try {
-    const url = new URL(String(value || ""));
-
-    return (
-      url.protocol === "https:" &&
-      TRUSTED_HOST_SUFFIXES.some((suffix) => url.hostname.endsWith(suffix))
-    );
-  } catch {
-    return false;
-  }
-}
+import { isTrustedTeamsServiceUrl } from "@/lib/teams/serviceUrl";
+export { isTrustedTeamsServiceUrl } from "@/lib/teams/serviceUrl";
 
 /**
  * A member of a Teams conversation as Microsoft sees it (#153): email,
@@ -37,7 +16,7 @@ export async function getTeamsMember({ serviceUrl, conversationId, memberId }) {
 
   const res = await fetch(
     `${base}/v3/conversations/${encodeURIComponent(conversationId)}/members/${encodeURIComponent(memberId)}`,
-    { headers: { Authorization: `Bearer ${token}` } },
+    { redirect: "error", headers: { Authorization: `Bearer ${token}` } },
   );
 
   if (!res.ok) return null;
@@ -77,7 +56,7 @@ export async function listTeamsConversationMembers({
 
     const res = await fetch(
       `${base}/v3/conversations/${encodeURIComponent(conversationId)}/pagedmembers?${params}`,
-      { headers: { Authorization: `Bearer ${token}` } },
+      { redirect: "error", headers: { Authorization: `Bearer ${token}` } },
     );
 
     if (!res.ok) {
@@ -112,7 +91,7 @@ export async function getTeamName({ serviceUrl, teamId }) {
 
     const res = await fetch(
       `${base}/v3/teams/${encodeURIComponent(teamId)}`,
-      { headers: { Authorization: `Bearer ${token}` } },
+      { redirect: "error", headers: { Authorization: `Bearer ${token}` } },
     );
 
     if (!res.ok) return null;

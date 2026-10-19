@@ -23,8 +23,8 @@ const state = vi.hoisted(() => ({
  * ele devolve menos SEM dar erro. É esse silêncio que o fetchRows
  * paginado tem de aguentar.
  */
-vi.mock("@/lib/db/admin", () => ({
-  getSupabaseAdminClient: () => ({
+vi.mock("@/lib/db/readAccess", () => ({
+  getScopedReadClient: () => ({
     from(table) {
       const q = { table, filters: [], order: null, range: null, head: false };
 

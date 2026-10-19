@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -28,8 +29,10 @@ export async function GET(request) {
     const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
-    const items = await listReusableTrackedLinks(orgAuth.orgId);
-    return NextResponse.json({ items });
+    return await withSessionReadAccess(orgAuth, async () => {
+      const items = await listReusableTrackedLinks(orgAuth.orgId);
+      return NextResponse.json({ items });
+    });
   } catch (error) {
     return handleApiError(error, "Failed to load tracked links");
   }

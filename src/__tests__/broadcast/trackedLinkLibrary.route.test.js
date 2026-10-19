@@ -53,7 +53,7 @@ describe("GET /api/tracked-links/library", () => {
     const items = [
       { key: "guia", label: "Guia MFA", destinationUrl: "https://x.pt" },
     ];
-    mocks.requireOwnedOrg.mockResolvedValue({ orgId: 7 });
+    mocks.requireOwnedOrg.mockResolvedValue({ orgId: 7 , user: { id: "owner-test" }, supabase: { from: vi.fn() } });
     mocks.listReusableTrackedLinks.mockResolvedValue(items);
 
     const response = await GET(request(7));
