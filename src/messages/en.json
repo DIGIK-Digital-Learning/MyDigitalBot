@@ -1427,6 +1427,8 @@
     "attachments": "Attachments",
     "sendnow": "Send now",
     "scheduleBtn": "Schedule",
+    "deliveryMode": "Delivery mode",
+    "scheduleFor": "Schedule for {date}, {time}",
     "timezone": "Timezone",
     "hour": "Hour",
     "scheduleError": "Please choose a future date and time.",

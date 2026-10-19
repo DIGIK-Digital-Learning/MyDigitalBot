@@ -9,6 +9,7 @@ export default function BroadcastHeader({
   sending,
   canSend,
   deliveryMode,
+  scheduleActionLabel,
   onPrimaryClick,
   translation,
 }) {
@@ -59,7 +60,7 @@ export default function BroadcastHeader({
               {translation("Broadcast.sending")}
             </>
           ) : deliveryMode === "schedule" ? (
-            translation("Broadcast.schedule")
+            scheduleActionLabel || translation("Broadcast.schedule")
           ) : (
             translation("Broadcast.send")
           )}
