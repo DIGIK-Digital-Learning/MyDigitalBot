@@ -54,6 +54,15 @@ import {
   releasePendingOutreach,
   markPendingOutreachReplied,
 } from "@/lib/repos/pendingOutreach.repo";
+import {
+  acceptWhatsappOpeningGate,
+  getWhatsappOpeningGate,
+} from "@/lib/repos/whatsappOpeningGate.repo";
+import {
+  extractWhatsappQuickReply,
+  findPendingOpeningGate,
+  isReplyToOpeningGate,
+} from "@/lib/whatsapp/openingGate";
 
 import {
   createMessageChainDelivery,
@@ -807,8 +816,13 @@ async function handleEvent(rawJSON) {
     evt.service === "channels" &&
     evt.event === "whatsapp.inbound" &&
     evt.payload?.body?.type === "text";
+  const inboundReply = extractWhatsappQuickReply(evt.payload);
+  const isInboundQuickReply =
+    evt.service === "channels" &&
+    evt.event === "whatsapp.inbound" &&
+    inboundReply.isQuickReply;
 
-  if (!isInboundText) {
+  if (!isInboundText && !isInboundQuickReply) {
     return;
   }
 
@@ -816,7 +830,14 @@ async function handleEvent(rawJSON) {
 
   const contactId = identity.birdContactId;
 
-  const text = evt.payload?.body?.text?.text || "";
+  const text =
+    inboundReply.isQuickReply && inboundReply.text
+      ? inboundReply.text
+      : evt.payload?.body?.text?.text ||
+        evt.payload?.body?.text?.body ||
+        (typeof evt.payload?.body?.text === "string"
+          ? evt.payload.body.text
+          : "");
 
   const sentChannelId =
     normalizeId(evt.payload?.channelId) ||
@@ -826,7 +847,8 @@ async function handleEvent(rawJSON) {
   const inboundMsgId =
     normalizeId(evt.payload?.id) ||
     normalizeId(evt.payload?.messageId) ||
-    normalizeId(evt.payload?.body?.id);
+    normalizeId(evt.payload?.body?.id) ||
+    normalizeId(evt.payload?.message?.id);
 
   /*
    * Security:
@@ -928,7 +950,114 @@ async function handleEvent(rawJSON) {
    * Pending outreach has priority over
    * normal AI conversation handling.
    */
-  const pendingMessages = await getAllPendingOutreachByUser(user.id);
+  let pendingMessages = await getAllPendingOutreachByUser(user.id);
+  const persistedOpeningGate = await getWhatsappOpeningGate({
+    orgId: user.organization_id,
+    userId: user.id,
+  });
+  const legacyOpeningGate = persistedOpeningGate
+    ? null
+    : findPendingOpeningGate(pendingMessages);
+  const legacyReplyGate =
+    !persistedOpeningGate &&
+    inboundReply.isQuickReply &&
+    inboundReply.replyToMessageId
+      ? pendingMessages.find(
+          (row) =>
+            String(row.template_message_id || "") ===
+            inboundReply.replyToMessageId,
+        ) || null
+      : null;
+  const activeOpeningGate =
+    persistedOpeningGate &&
+    ["sending", "pending"].includes(persistedOpeningGate.status) &&
+    Date.parse(persistedOpeningGate.expires_at) > Date.now()
+      ? persistedOpeningGate
+      : legacyReplyGate || legacyOpeningGate;
+
+  if (activeOpeningGate) {
+    const openingGateQueueRow = persistedOpeningGate?.pending_outreach_id
+      ? pendingMessages.find(
+          (row) =>
+            String(row.id) ===
+            String(persistedOpeningGate.pending_outreach_id),
+        )
+      : persistedOpeningGate
+        ? null
+        : legacyReplyGate || findPendingOpeningGate(pendingMessages);
+    const gateForReply = {
+      ...activeOpeningGate,
+      template_message_id:
+        activeOpeningGate.template_message_id ||
+        openingGateQueueRow?.template_message_id ||
+        null,
+    };
+
+    if (!isReplyToOpeningGate(inboundReply, gateForReply)) {
+      await recordInboundDuringOpeningGate({
+        user,
+        inboundMsgId,
+        contactId,
+        inboundText: text,
+      });
+      console.log("WhatsApp opening gate is waiting for its Quick Reply", {
+        userId: user.id,
+        templateMessageId: gateForReply.template_message_id,
+        inboundMsgId,
+      });
+      return;
+    }
+
+    if (persistedOpeningGate) {
+      await recordInboundDuringOpeningGate({
+        user,
+        inboundMsgId,
+        contactId,
+        inboundText: text,
+      });
+
+      const acceptedGate = await acceptWhatsappOpeningGate({
+        orgId: user.organization_id,
+        userId: user.id,
+        templateMessageId: gateForReply.template_message_id,
+        replyMessageId: inboundMsgId,
+      });
+
+      if (!acceptedGate) {
+        console.log("WhatsApp opening Quick Reply was already handled", {
+          userId: user.id,
+          templateMessageId: gateForReply.template_message_id,
+          inboundMsgId,
+        });
+        return;
+      }
+    }
+
+    // Inclui os envios que entraram na fila durante a aceitação do botão.
+    pendingMessages = await getAllPendingOutreachByUser(user.id);
+
+    if (Array.isArray(pendingMessages) && pendingMessages.length > 0) {
+      await handlePendingMessages({
+        user,
+        inboundMsgId,
+        contactId,
+        inboundIdentity: identity,
+        inboundText: text,
+        pendingMessages,
+        sentChannelId,
+        inboundAlreadyRecorded: Boolean(persistedOpeningGate),
+      });
+    } else if (!persistedOpeningGate) {
+      await recordInboundDuringOpeningGate({
+        user,
+        inboundMsgId,
+        contactId,
+        inboundText: text,
+      });
+    }
+
+    return;
+  }
 
   if (Array.isArray(pendingMessages) && pendingMessages.length > 0) {
     await handlePendingMessages({
@@ -1466,6 +1595,7 @@ async function handlePendingMessages({
   inboundText,
   pendingMessages,
   sentChannelId,
+  inboundAlreadyRecorded = false,
 }) {
   /*
    * A conversa do contacto, para a resposta e as mensagens entregues
@@ -1476,25 +1606,27 @@ async function handlePendingMessages({
     "whatsapp",
   ).catch(() => null);
 
-  await createMessage({
-    threadId: thread?.id ?? null,
+  if (!inboundAlreadyRecorded) {
+    await createMessage({
+      threadId: thread?.id ?? null,
 
-    userId: user.id,
+      userId: user.id,
 
-    organizationId: user.organization_id,
+      organizationId: user.organization_id,
 
-    assistantId: user.assistant_id ?? null,
+      assistantId: user.assistant_id ?? null,
 
-    channel: "whatsapp",
+      channel: "whatsapp",
 
-    messageId: inboundMsgId,
+      messageId: inboundMsgId,
 
-    externalContactId: contactId,
+      externalContactId: contactId,
 
-    content: inboundText,
+      content: inboundText,
 
-    role: "user",
-  });
+      role: "user",
+    });
+  }
 
   const organization = await getOrganization(user.organization_id);
 
@@ -1528,6 +1660,8 @@ async function handlePendingMessages({
 
         userId: user.id,
       });
+
+      await markPendingOutreachReplied(row.id, inboundMsgId);
 
       continue;
     }
@@ -1587,7 +1721,7 @@ async function handlePendingMessages({
       });
 
       await releasePendingOutreach(row.id);
-      continue;
+      break;
     }
 
     const outboundId = sendRes.providerMessageId;
@@ -1737,6 +1871,30 @@ async function handlePendingMessages({
 
     await markPendingOutreachReplied(row.id, inboundMsgId);
   }
+}
+
+async function recordInboundDuringOpeningGate({
+  user,
+  inboundMsgId,
+  contactId,
+  inboundText,
+}) {
+  const thread = await getLatestUserThreadForChannel(
+    user.id,
+    "whatsapp",
+  ).catch(() => null);
+
+  await createMessage({
+    threadId: thread?.id ?? null,
+    userId: user.id,
+    organizationId: user.organization_id,
+    assistantId: thread?.assistant_id ?? user.assistant_id ?? null,
+    channel: "whatsapp",
+    messageId: inboundMsgId,
+    externalContactId: contactId,
+    content: inboundText,
+    role: "user",
+  });
 }
 
 /* =========================================================

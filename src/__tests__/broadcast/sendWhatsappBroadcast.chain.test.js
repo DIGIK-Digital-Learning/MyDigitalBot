@@ -9,6 +9,14 @@ const mocks = vi.hoisted(() => ({
   getUserById: vi.fn(),
   isWindowOpenForUser: vi.fn(),
   createPendingOutreach: vi.fn(),
+  getAllPendingOutreachByUser: vi.fn(),
+  updatePendingOutreachTemplateMessageId: vi.fn(),
+  deletePendingOutreach: vi.fn(),
+  claimWhatsappOpeningGate: vi.fn(),
+  getWhatsappOpeningGate: vi.fn(),
+  attachWhatsappOpeningGateOutreach: vi.fn(),
+  markWhatsappOpeningGateSent: vi.fn(),
+  failWhatsappOpeningGate: vi.fn(),
   createMessage: vi.fn(),
   createQuestion: vi.fn(),
   getQuestionById: vi.fn(),
@@ -47,6 +55,23 @@ vi.mock("@/lib/repos/messages.repo", () => ({
 
 vi.mock("@/lib/repos/pendingOutreach.repo", () => ({
   createPendingOutreach: (...args) => mocks.createPendingOutreach(...args),
+  deletePendingOutreach: (...args) => mocks.deletePendingOutreach(...args),
+  getAllPendingOutreachByUser: (...args) =>
+    mocks.getAllPendingOutreachByUser(...args),
+  updatePendingOutreachTemplateMessageId: (...args) =>
+    mocks.updatePendingOutreachTemplateMessageId(...args),
+}));
+
+vi.mock("@/lib/repos/whatsappOpeningGate.repo", () => ({
+  attachWhatsappOpeningGateOutreach: (...args) =>
+    mocks.attachWhatsappOpeningGateOutreach(...args),
+  claimWhatsappOpeningGate: (...args) =>
+    mocks.claimWhatsappOpeningGate(...args),
+  failWhatsappOpeningGate: (...args) =>
+    mocks.failWhatsappOpeningGate(...args),
+  getWhatsappOpeningGate: (...args) => mocks.getWhatsappOpeningGate(...args),
+  markWhatsappOpeningGateSent: (...args) =>
+    mocks.markWhatsappOpeningGateSent(...args),
 }));
 
 vi.mock("@/lib/repos/questions.repo", () => ({
@@ -100,6 +125,21 @@ describe("sendWhatsappBroadcast with an existing question", () => {
       phone_number: "+351910000000",
     });
     mocks.isWindowOpenForUser.mockResolvedValue(true);
+    mocks.getAllPendingOutreachByUser.mockResolvedValue([]);
+    mocks.getWhatsappOpeningGate.mockResolvedValue(null);
+    mocks.claimWhatsappOpeningGate.mockImplementation(({ expiresAt }) => ({
+      claimed: true,
+      gate: {
+        status: "sending",
+        expires_at:
+          expiresAt instanceof Date ? expiresAt.toISOString() : expiresAt,
+      },
+    }));
+    mocks.attachWhatsappOpeningGateOutreach.mockResolvedValue(undefined);
+    mocks.markWhatsappOpeningGateSent.mockResolvedValue(undefined);
+    mocks.updatePendingOutreachTemplateMessageId.mockResolvedValue(undefined);
+    mocks.deletePendingOutreach.mockResolvedValue(undefined);
+    mocks.failWhatsappOpeningGate.mockResolvedValue(undefined);
     mocks.getQuestionById.mockResolvedValue(QUESTION_ROW);
     mocks.fetch.mockResolvedValue({
       ok: true,

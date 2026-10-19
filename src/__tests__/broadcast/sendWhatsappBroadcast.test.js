@@ -5,6 +5,14 @@ const mocks = vi.hoisted(() => ({
   getUserById: vi.fn(),
   isWindowOpenForUser: vi.fn(),
   createPendingOutreach: vi.fn(),
+  getAllPendingOutreachByUser: vi.fn(),
+  updatePendingOutreachTemplateMessageId: vi.fn(),
+  deletePendingOutreach: vi.fn(),
+  claimWhatsappOpeningGate: vi.fn(),
+  getWhatsappOpeningGate: vi.fn(),
+  attachWhatsappOpeningGateOutreach: vi.fn(),
+  markWhatsappOpeningGateSent: vi.fn(),
+  failWhatsappOpeningGate: vi.fn(),
   createMessage: vi.fn(),
   createQuestion: vi.fn(),
   resolveTrackedLinks: vi.fn(),
@@ -34,6 +42,22 @@ vi.mock("@/lib/repos/messages.repo", () => ({
 
 vi.mock("@/lib/repos/pendingOutreach.repo", () => ({
   createPendingOutreach: (...args) => mocks.createPendingOutreach(...args),
+  deletePendingOutreach: (...args) => mocks.deletePendingOutreach(...args),
+  getAllPendingOutreachByUser: (...args) =>
+    mocks.getAllPendingOutreachByUser(...args),
+  updatePendingOutreachTemplateMessageId: (...args) =>
+    mocks.updatePendingOutreachTemplateMessageId(...args),
+}));
+
+vi.mock("@/lib/repos/whatsappOpeningGate.repo", () => ({
+  attachWhatsappOpeningGateOutreach: (...args) =>
+    mocks.attachWhatsappOpeningGateOutreach(...args),
+  claimWhatsappOpeningGate: (...args) =>
+    mocks.claimWhatsappOpeningGate(...args),
+  failWhatsappOpeningGate: (...args) => mocks.failWhatsappOpeningGate(...args),
+  getWhatsappOpeningGate: (...args) => mocks.getWhatsappOpeningGate(...args),
+  markWhatsappOpeningGateSent: (...args) =>
+    mocks.markWhatsappOpeningGateSent(...args),
 }));
 
 vi.mock("@/lib/repos/questions.repo", () => ({
@@ -87,6 +111,21 @@ describe("sendWhatsappBroadcast", () => {
     mocks.getUserById.mockResolvedValue({ ...USER });
     mocks.isWindowOpenForUser.mockResolvedValue(false);
     mocks.createPendingOutreach.mockResolvedValue({ id: "po-1" });
+    mocks.getAllPendingOutreachByUser.mockResolvedValue([]);
+    mocks.getWhatsappOpeningGate.mockResolvedValue(null);
+    mocks.claimWhatsappOpeningGate.mockImplementation(({ expiresAt }) => ({
+      claimed: true,
+      gate: {
+        status: "sending",
+        expires_at:
+          expiresAt instanceof Date ? expiresAt.toISOString() : expiresAt,
+      },
+    }));
+    mocks.attachWhatsappOpeningGateOutreach.mockResolvedValue(undefined);
+    mocks.markWhatsappOpeningGateSent.mockResolvedValue(undefined);
+    mocks.updatePendingOutreachTemplateMessageId.mockResolvedValue(undefined);
+    mocks.deletePendingOutreach.mockResolvedValue(undefined);
+    mocks.failWhatsappOpeningGate.mockResolvedValue(undefined);
     mocks.createMessage.mockResolvedValue({ id: 900 });
     mocks.createQuestion.mockResolvedValue({ id: 10 });
     mocks.resolveTrackedLinks.mockResolvedValue([]);
@@ -150,6 +189,7 @@ describe("sendWhatsappBroadcast", () => {
               message: "Como verificas os pneus?",
               imageUrls: [],
               actions: null,
+              openingGate: true,
             },
           }),
         );
@@ -198,7 +238,7 @@ describe("sendWhatsappBroadcast", () => {
 
     expect(result.ok).toBe(1);
     expect(result.queued).toBe(1);
-    expect(result.note).toMatch(/opening message/);
+    expect(result.note).toMatch(/Quick Reply/);
     expect(result.results[0].kind).toBe("template");
 
     const { body } = birdCall();
@@ -215,14 +255,138 @@ describe("sendWhatsappBroadcast", () => {
       orgId: 1,
       userId: 42,
       payload: { message: "Dica de hoje", imageUrls: [] },
-      templateMessageId: "bird-msg-1",
+      templateMessageId: null,
     });
+    expect(mocks.updatePendingOutreachTemplateMessageId).toHaveBeenCalledWith(
+      "po-1",
+      "bird-msg-1",
+    );
+  });
+
+  it("queues later broadcasts behind the active opening template without sending another one", async () => {
+    const expiresAt = new Date(
+      Date.now() + 13 * 24 * 60 * 60 * 1000,
+    ).toISOString();
+    mocks.getWhatsappOpeningGate.mockResolvedValue({
+      status: "pending",
+      template_message_id: "bird-opening-1",
+      expires_at: expiresAt,
+    });
+
+    const first = await sendWhatsappBroadcast({
+      orgId: 1,
+      message: "Primeira mensagem da campanha",
+      recipients: [{ userId: 42 }],
+    });
+    const second = await sendWhatsappBroadcast({
+      orgId: 1,
+      message: "Segunda mensagem da campanha",
+      recipients: [{ userId: 42 }],
+    });
+
+    expect(first.results[0].kind).toBe("queued");
+    expect(second.results[0].kind).toBe("queued");
+    expect(first.queued + second.queued).toBe(2);
+    expect(mocks.fetch).not.toHaveBeenCalled();
+    expect(mocks.claimWhatsappOpeningGate).not.toHaveBeenCalled();
+    expect(mocks.isWindowOpenForUser).not.toHaveBeenCalled();
+    expect(mocks.createPendingOutreach).toHaveBeenCalledTimes(2);
+    expect(
+      mocks.createPendingOutreach.mock.calls.map(([row]) => row.expiresAt),
+    ).toEqual([expiresAt, expiresAt]);
   });
 
   /*
    * O template utility não tem corpo: nem o guardado na organização nem o
    * escolhido para um envio chegam ao Bird.
    */
+  it("does not duplicate an opening-only request while its template is pending", async () => {
+    mocks.getWhatsappOpeningGate.mockResolvedValue({
+      status: "pending",
+      template_message_id: "opening-1",
+      expires_at: new Date(Date.now() + 86400000).toISOString(),
+    });
+    const result = await sendWhatsappBroadcast({
+      orgId: 1,
+      openingOnly: true,
+      recipients: [{ userId: 42 }],
+    });
+    expect(result).toMatchObject({ suppressed: 1, queued: 0, failed: 0 });
+    expect(mocks.fetch).not.toHaveBeenCalled();
+    expect(mocks.createPendingOutreach).not.toHaveBeenCalled();
+  });
+
+  it("queues a competing send when another worker claims the opening first", async () => {
+    const expiresAt = new Date(Date.now() + 86400000).toISOString();
+    mocks.claimWhatsappOpeningGate.mockResolvedValue({
+      claimed: false,
+      gate: { status: "sending", expires_at: expiresAt },
+    });
+    const result = await sendWhatsappBroadcast({
+      orgId: 1,
+      message: "Dica",
+      recipients: [{ userId: 42 }],
+    });
+    expect(result).toMatchObject({ queued: 1, failed: 0 });
+    expect(result.results[0].kind).toBe("queued");
+    expect(mocks.fetch).not.toHaveBeenCalled();
+    expect(mocks.createPendingOutreach).toHaveBeenCalledWith(
+      expect.objectContaining({ expiresAt }),
+    );
+  });
+
+  it.each([
+    ["accepted", true, "freeform"],
+    ["accepted", false, "template"],
+    ["expired", false, "template"],
+  ])(
+    "respects the 24h window after a gate is %s (window=%s)",
+    async (status, windowOpen, kind) => {
+      mocks.getWhatsappOpeningGate.mockResolvedValue({ status });
+      mocks.isWindowOpenForUser.mockResolvedValue(windowOpen);
+      const result = await sendWhatsappBroadcast({
+        orgId: 1,
+        message: "Dica",
+        recipients: [{ userId: 42 }],
+      });
+      expect(result.results[0]).toMatchObject({ ok: true, kind });
+      expect(mocks.fetch).toHaveBeenCalledTimes(1);
+      expect(Boolean(birdCall().body.template)).toBe(kind === "template");
+    },
+  );
+
+  it("releases the gate and queue row when Bird rejects the opening", async () => {
+    mocks.fetch.mockResolvedValueOnce({
+      ok: false,
+      status: 422,
+      json: async () => ({ error: "invalid-template" }),
+    });
+    const result = await sendWhatsappBroadcast({
+      orgId: 1,
+      message: "Dica",
+      recipients: [{ userId: 42 }],
+    });
+    expect(result.failed).toBe(1);
+    expect(mocks.failWhatsappOpeningGate).toHaveBeenCalledWith({
+      orgId: 1,
+      userId: 42,
+    });
+    expect(mocks.deletePendingOutreach).toHaveBeenCalledWith("po-1");
+    expect(mocks.markWhatsappOpeningGateSent).not.toHaveBeenCalled();
+  });
+
+  it("keeps the gate reserved after an uncertain network result to prevent a duplicate opening", async () => {
+    mocks.fetch.mockRejectedValueOnce(new Error("network timeout"));
+    const result = await sendWhatsappBroadcast({
+      orgId: 1,
+      message: "Dica",
+      recipients: [{ userId: 42 }],
+    });
+    expect(result.failed).toBe(1);
+    expect(mocks.failWhatsappOpeningGate).not.toHaveBeenCalled();
+    expect(mocks.deletePendingOutreach).not.toHaveBeenCalled();
+  });
+
   it("never sends a body in the opening template, even one chosen for the send", async () => {
     await sendWhatsappBroadcast({
       orgId: 1,
@@ -249,7 +413,14 @@ describe("sendWhatsappBroadcast", () => {
     expect(result.results[0].kind).toBe("template");
     expect(birdCall().body.template).toBeTruthy();
     expect(mocks.isWindowOpenForUser).not.toHaveBeenCalled();
-    expect(mocks.createPendingOutreach).not.toHaveBeenCalled();
+    expect(mocks.createPendingOutreach).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orgId: 1,
+        userId: 42,
+        payload: { openingGate: true },
+        templateMessageId: null,
+      }),
+    );
   });
 
   it("rejects a send with nothing to deliver", async () => {
@@ -379,6 +550,7 @@ describe("sendWhatsappBroadcast", () => {
           { type: "reply", reply: { text: "2,2 bar" } },
           { type: "reply", reply: { text: "2,8 bar" } },
         ],
+        openingGate: true,
       });
     });
 
@@ -423,13 +595,13 @@ describe("sendWhatsappBroadcast", () => {
         files: [{ url: "https://x/img.png", contentType: "image/png" }],
       });
 
-      expect(mocks.createPendingOutreach.mock.calls[0][0].payload).toMatchObject(
-        {
-          type: "quiz",
-          questionId: 10,
-          imageUrls: ["https://x/img.png"],
-        },
-      );
+      expect(
+        mocks.createPendingOutreach.mock.calls[0][0].payload,
+      ).toMatchObject({
+        type: "quiz",
+        questionId: 10,
+        imageUrls: ["https://x/img.png"],
+      });
     });
 
     it("rejects unknown question kinds", async () => {
@@ -499,6 +671,7 @@ describe("sendWhatsappBroadcast", () => {
         message: "Olá Pedro, ativa hoje a MFA.\nGuia:",
         imageUrls: [],
         actions: LINK_ACTIONS,
+        openingGate: true,
       });
     });
 
@@ -588,6 +761,7 @@ describe("sendWhatsappBroadcast", () => {
           message: "Ativa hoje a MFA.",
           imageUrls: [],
           actions: LINK_ACTIONS,
+          openingGate: true,
         });
       });
 
@@ -705,6 +879,7 @@ describe("sendWhatsappBroadcast", () => {
               actions: CURSO_ACTIONS,
             },
           ],
+          openingGate: true,
         });
       });
 
