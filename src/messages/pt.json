@@ -1435,6 +1435,8 @@
     "attachments": "Anexos",
     "sendnow": "Enviar agora",
     "scheduleBtn": "Agendar",
+    "deliveryMode": "Modo de envio",
+    "scheduleFor": "Agendar para {date}, {time}",
     "timezone": "Fuso Horário",
     "hour": "Hora",
     "scheduleError": "Por favor escolha uma data e hora no futuro.",
@@ -1801,6 +1803,12 @@
         "delete": "Eliminar"
       },
       "ViewModal": {
+        "question": {
+          "quiz": "Quiz",
+          "survey": "Sondagem",
+          "open": "Pergunta aberta",
+          "expectedAnswer": "Resposta esperada"
+        },
         "groups": "Grupos Teams",
         "title": "Detalhes da mensagem",
         "createdAt": "Criada em"
@@ -1824,7 +1832,19 @@
         "remove": "Remover",
         "noRecipients": "Sem destinatários selecionados.",
         "files": "Ficheiros",
-        "noFiles": "Sem ficheiros adicionados."
+        "noFiles": "Sem ficheiros adicionados.",
+        "unknownRecipient": "Utilizador removido",
+        "question": {
+          "body": "Pergunta",
+          "options": "Opções",
+          "correct": "Opção certa",
+          "addOption": "Adicionar opção",
+          "feedbackCorrect": "Feedback se acertar",
+          "feedbackIncorrect": "Feedback se errar",
+          "thanksText": "Agradecimento depois da escolha",
+          "expectedAnswer": "Resposta esperada",
+          "aiEvaluation": "Avaliar a resposta com IA"
+        }
       },
       "RecipientPicker": {
         "title": "Gerir destinatários",
@@ -1880,6 +1900,10 @@
         "saveError": {
           "title": "Erro ao guardar alterações",
           "message": "Não foi possível guardar as alterações à mensagem agendada."
+        },
+        "saveConflict": {
+          "title": "Mensagem já em envio",
+          "message": "Esta mensagem já não está agendada (já foi enviada ou está a ser enviada), por isso não pode ser alterada."
         },
         "deleteSuccess": {
           "title": "Mensagem eliminada",
@@ -3374,6 +3398,12 @@
       "delete": "Eliminar"
     },
     "ViewModal": {
+      "question": {
+        "quiz": "Quiz",
+        "survey": "Sondagem",
+        "open": "Pergunta aberta",
+        "expectedAnswer": "Resposta esperada"
+      },
       "groups": "Grupos Teams",
       "title": "Detalhes da mensagem",
       "createdAt": "Criada em"
@@ -3397,7 +3427,19 @@
       "remove": "Remover",
       "noRecipients": "Sem destinatários selecionados.",
       "files": "Ficheiros",
-      "noFiles": "Sem ficheiros adicionados."
+      "noFiles": "Sem ficheiros adicionados.",
+      "unknownRecipient": "Utilizador removido",
+      "question": {
+        "body": "Pergunta",
+        "options": "Opções",
+        "correct": "Opção certa",
+        "addOption": "Adicionar opção",
+        "feedbackCorrect": "Feedback se acertar",
+        "feedbackIncorrect": "Feedback se errar",
+        "thanksText": "Agradecimento depois da escolha",
+        "expectedAnswer": "Resposta esperada",
+        "aiEvaluation": "Avaliar a resposta com IA"
+      }
     },
     "RecipientPicker": {
       "title": "Gerir destinatários",
@@ -3453,6 +3495,10 @@
       "saveError": {
         "title": "Erro ao guardar alterações",
         "message": "Não foi possível guardar as alterações à mensagem agendada."
+      },
+      "saveConflict": {
+        "title": "Mensagem já em envio",
+        "message": "Esta mensagem já não está agendada (já foi enviada ou está a ser enviada), por isso não pode ser alterada."
       },
       "deleteSuccess": {
         "title": "Mensagem eliminada",

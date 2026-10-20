@@ -10,6 +10,7 @@ import {
   handleApiError,
   requireOrgForScheduledBroadcast,
 } from "@/lib/auth/guards";
+import { buildScheduledPayload } from "@/lib/services/broadcast/scheduledPayload";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -162,6 +163,39 @@ export async function PATCH(req, { params }) {
         { error: "Invalid timezone" },
         { status: 400 },
       );
+    }
+
+    /*
+     * O canal fixa o formato do payload (userIds vs recipients, abertura),
+     * por isso não se muda numa agenda existente.
+     */
+    if (
+      body.channel !== undefined &&
+      body.channel !== orgAuth.broadcast.channel
+    ) {
+      return NextResponse.json(
+        { error: "The channel of a scheduled broadcast cannot be changed." },
+        { status: 400 },
+      );
+    }
+
+    /*
+     * O payload nunca é gravado como vem do cliente: passa pelas mesmas
+     * validações do agendamento e o número de destinatários é recalculado.
+     */
+    if (body.payload !== undefined) {
+      const built = await buildScheduledPayload({
+        orgAuth,
+        channel: orgAuth.broadcast.channel,
+        payload: body.payload,
+      });
+
+      if (built.error) {
+        return NextResponse.json({ error: built.error }, { status: 400 });
+      }
+
+      patch.payload = built.payload;
+      patch.recipient_count = built.recipientCount;
     }
 
     if (Object.keys(patch).length === 0) {

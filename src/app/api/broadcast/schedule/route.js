@@ -2,19 +2,8 @@ import { NextResponse } from "next/server";
 import { createScheduledBroadcast } from "@/lib/repos/scheduledBroadcasts.repo";
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
-import {
-  assertTeamsGroupsBelongToOrg,
-  assertUsersBelongToOrg,
-  handleApiError,
-  requireAllRecipientsToBeKnownUsers,
-  requireOwnedOrg,
-} from "@/lib/auth/guards";
-import {
-  assertGroupBroadcastContent,
-  parseGroupIds,
-} from "@/lib/services/broadcast/groupBroadcastOptions";
-import { parseOpeningOptions } from "@/lib/services/broadcast/openingOptions";
-import { parseQuestionOptions } from "@/lib/services/broadcast/questionOptions";
+import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
+import { buildScheduledPayload } from "@/lib/services/broadcast/scheduledPayload";
 
 export async function POST(req) {
   try {
@@ -51,101 +40,15 @@ export async function POST(req) {
       );
     }
 
-    /* Grupos do Teams (#166): só mensagem em branco, sem colaboradores. */
-    if (channel === "teams" && Array.isArray(payload?.groupIds)) {
-      assertGroupBroadcastContent(payload);
+    const built = await buildScheduledPayload({
+      orgAuth,
+      channel,
+      payload,
+    });
 
-      const groups = await assertTeamsGroupsBelongToOrg(
-        orgAuth.admin,
-        orgAuth.orgId,
-        parseGroupIds(payload.groupIds),
-      );
-
-      const groupRow = await createScheduledBroadcast({
-        organization_id: orgAuth.orgId,
-        created_by_user_id: orgAuth.user.id,
-        channel,
-        status: "queued",
-        scheduled_for: when.toISOString(),
-        timezone: timezone || null,
-        payload: {
-          orgId: orgAuth.orgId,
-          message: payload?.message || "",
-          files: Array.isArray(payload?.files) ? payload.files : [],
-          imageUrls: Array.isArray(payload?.imageUrls) ? payload.imageUrls : [],
-          trackedLinks: [],
-          groupIds: groups.map((group) => group.id),
-          /* Só para mostrar nas agendadas; o envio relê os grupos. */
-          groups: groups.map((group) => ({ id: group.id, name: group.name })),
-        },
-        recipient_count: groups.length,
-      });
-
-      await recordAuditEvent(orgAuth, {
-        action: AUDIT_ACTIONS.BROADCAST_SCHEDULED,
-        entityType: "scheduled_broadcast",
-        entityId: groupRow?.id,
-        details: {
-          channel,
-          groupCount: groups.length,
-          scheduledFor: when.toISOString(),
-          timezone: timezone || null,
-        },
-      });
-
-      return NextResponse.json({ ok: true, item: groupRow });
+    if (built.error) {
+      return NextResponse.json({ error: built.error }, { status: 400 });
     }
-
-    const rawRecipients =
-      channel === "teams"
-        ? (Array.isArray(payload?.userIds) ? payload.userIds : []).map(
-            (userId) => ({ userId }),
-          )
-        : Array.isArray(payload?.recipients)
-          ? payload.recipients
-          : [];
-
-    const recipientUserIds = requireAllRecipientsToBeKnownUsers(rawRecipients);
-    await assertUsersBelongToOrg(
-      orgAuth.admin,
-      orgAuth.orgId,
-      recipientUserIds,
-    );
-
-    let opening = { openingBody: null, openingOnly: false };
-
-    if (channel === "whatsapp") {
-      opening = parseOpeningOptions(payload);
-
-      if (opening.error) {
-        return NextResponse.json({ error: opening.error }, { status: 400 });
-      }
-    }
-
-    /* Perguntas nos dois canais; no Teams desde o #151. */
-    const question = parseQuestionOptions(payload);
-
-    if (question.error) {
-      return NextResponse.json({ error: question.error }, { status: 400 });
-    }
-
-    const cleanPayload = {
-      orgId: orgAuth.orgId,
-      message: payload?.message || "",
-      files: Array.isArray(payload?.files) ? payload.files : [],
-      imageUrls: Array.isArray(payload?.imageUrls) ? payload.imageUrls : [],
-      trackedLinks: Array.isArray(payload?.trackedLinks)
-        ? payload.trackedLinks
-        : [],
-      ...(channel === "teams"
-        ? { userIds: recipientUserIds, question: question.question }
-        : {
-            recipients: recipientUserIds.map((userId) => ({ userId })),
-            openingBody: opening.openingBody,
-            openingOnly: opening.openingOnly,
-            question: question.question,
-          }),
-    };
 
     const row = await createScheduledBroadcast({
       organization_id: orgAuth.orgId,
@@ -154,9 +57,11 @@ export async function POST(req) {
       status: "queued",
       scheduled_for: when.toISOString(),
       timezone: timezone || null,
-      payload: cleanPayload,
-      recipient_count: recipientUserIds.length,
+      payload: built.payload,
+      recipient_count: built.recipientCount,
     });
+
+    const isGroupBroadcast = Array.isArray(built.payload.groupIds);
 
     await recordAuditEvent(orgAuth, {
       action: AUDIT_ACTIONS.BROADCAST_SCHEDULED,
@@ -164,7 +69,9 @@ export async function POST(req) {
       entityId: row?.id,
       details: {
         channel,
-        recipientCount: recipientUserIds.length,
+        ...(isGroupBroadcast
+          ? { groupCount: built.recipientCount }
+          : { recipientCount: built.recipientCount }),
         scheduledFor: when.toISOString(),
         timezone: timezone || null,
       },

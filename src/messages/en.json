@@ -1427,6 +1427,8 @@
     "attachments": "Attachments",
     "sendnow": "Send now",
     "scheduleBtn": "Schedule",
+    "deliveryMode": "Delivery mode",
+    "scheduleFor": "Schedule for {date}, {time}",
     "timezone": "Timezone",
     "hour": "Hour",
     "scheduleError": "Please choose a future date and time.",
@@ -1793,6 +1795,12 @@
         "delete": "Delete"
       },
       "ViewModal": {
+        "question": {
+          "quiz": "Quiz",
+          "survey": "Survey",
+          "open": "Open question",
+          "expectedAnswer": "Expected answer"
+        },
         "groups": "Teams groups",
         "title": "Message details",
         "createdAt": "Created at"
@@ -1816,7 +1824,19 @@
         "remove": "Remove",
         "noRecipients": "No recipients selected.",
         "files": "Files",
-        "noFiles": "No files added."
+        "noFiles": "No files added.",
+        "unknownRecipient": "Removed user",
+        "question": {
+          "body": "Question",
+          "options": "Options",
+          "correct": "Correct option",
+          "addOption": "Add option",
+          "feedbackCorrect": "Feedback when correct",
+          "feedbackIncorrect": "Feedback when wrong",
+          "thanksText": "Thank-you message after the choice",
+          "expectedAnswer": "Expected answer",
+          "aiEvaluation": "Evaluate the answer with AI"
+        }
       },
       "RecipientPicker": {
         "title": "Manage recipients",
@@ -1872,6 +1892,10 @@
         "saveError": {
           "title": "Failed to save changes",
           "message": "The scheduled message changes could not be saved."
+        },
+        "saveConflict": {
+          "title": "Message already sending",
+          "message": "This message is no longer scheduled (it was already sent or is being sent), so it cannot be changed."
         },
         "deleteSuccess": {
           "title": "Message deleted",
@@ -3366,6 +3390,12 @@
       "delete": "Delete"
     },
     "ViewModal": {
+      "question": {
+        "quiz": "Quiz",
+        "survey": "Survey",
+        "open": "Open question",
+        "expectedAnswer": "Expected answer"
+      },
       "groups": "Teams groups",
       "title": "Message details",
       "createdAt": "Created at"
@@ -3389,7 +3419,19 @@
       "remove": "Remove",
       "noRecipients": "No recipients selected.",
       "files": "Files",
-      "noFiles": "No files added."
+      "noFiles": "No files added.",
+      "unknownRecipient": "Removed user",
+      "question": {
+        "body": "Question",
+        "options": "Options",
+        "correct": "Correct option",
+        "addOption": "Add option",
+        "feedbackCorrect": "Feedback when correct",
+        "feedbackIncorrect": "Feedback when wrong",
+        "thanksText": "Thank-you message after the choice",
+        "expectedAnswer": "Expected answer",
+        "aiEvaluation": "Evaluate the answer with AI"
+      }
     },
     "RecipientPicker": {
       "title": "Manage recipients",
@@ -3445,6 +3487,10 @@
       "saveError": {
         "title": "Failed to save changes",
         "message": "The scheduled message changes could not be saved."
+      },
+      "saveConflict": {
+        "title": "Message already sending",
+        "message": "This message is no longer scheduled (it was already sent or is being sent), so it cannot be changed."
       },
       "deleteSuccess": {
         "title": "Message deleted",

@@ -7,8 +7,9 @@ import { useAuth } from "@/app/AuthContext";
 import useOrganization from "@/app/hooks/useOrganization";
 import styles from "./scheduled.module.css";
 import { useConfirm } from "@/app/components/Confirm/ConfirmProvider";
+import { parseQuestionOptions } from "@/lib/services/broadcast/questionOptions";
 
-import { normalizeUser } from "./helpers/recipient.helpers";
+import { normalizeUser, uniqueRecipients } from "./helpers/recipient.helpers";
 import {
   STATUS_OPTIONS,
   CHANNEL_OPTIONS,
@@ -31,136 +32,8 @@ import { useAlert } from "@/app/components/Alert/AlertProvider";
 
 const MODAL_CLOSE_MS = 280;
 
-function cleanText(value) {
-  if (value === undefined || value === null) return "";
-  return String(value).trim();
-}
-
-function looksLikeWhatsappBsuid(value) {
-  return /^[A-Z]{2}\.\d+$/i.test(cleanText(value));
-}
-
-function normalizeSavedRecipient(recipient, channel) {
-  if (typeof recipient === "string" || typeof recipient === "number") {
-    const value = cleanText(recipient);
-
-    if (!value) return null;
-
-    if (channel === "teams") {
-      return {
-        userId: value,
-      };
-    }
-
-    if (looksLikeWhatsappBsuid(value)) {
-      return {
-        userId: null,
-        name: null,
-        phoneNumber: null,
-        whatsappBsuid: value,
-        whatsappUsername: null,
-        birdContactId: null,
-      };
-    }
-
-    return {
-      userId: null,
-      name: null,
-      phoneNumber: value,
-      whatsappBsuid: null,
-      whatsappUsername: null,
-      birdContactId: null,
-    };
-  }
-
-  if (!recipient || typeof recipient !== "object") return null;
-
-  if (channel === "teams") {
-    const userId =
-      cleanText(recipient.userId) ||
-      cleanText(recipient.user_id) ||
-      cleanText(recipient.id);
-
-    if (!userId) return null;
-
-    return {
-      userId,
-      name: cleanText(recipient.name) || null,
-      email: cleanText(recipient.email) || null,
-    };
-  }
-
-  const phoneNumber =
-    cleanText(recipient.phoneNumber) ||
-    cleanText(recipient.phone_number) ||
-    cleanText(recipient.phone);
-
-  const whatsappBsuid =
-    cleanText(recipient.whatsappBsuid) ||
-    cleanText(recipient.whatsapp_bsuid) ||
-    cleanText(recipient.whatsappBsuid);
-
-  const birdContactId =
-    cleanText(recipient.birdContactId) || cleanText(recipient.bird_contact_id);
-
-  const userId =
-    cleanText(recipient.userId) ||
-    cleanText(recipient.user_id) ||
-    cleanText(recipient.id);
-
-  if (!phoneNumber && !whatsappBsuid && !birdContactId && !userId) {
-    return null;
-  }
-
-  return {
-    userId: userId || null,
-    name: cleanText(recipient.name) || null,
-    phoneNumber: phoneNumber || null,
-
-    // Phone first. Fallback IDs only when no phone exists.
-    whatsappBsuid: phoneNumber ? null : whatsappBsuid || null,
-    whatsappUsername: phoneNumber
-      ? null
-      : cleanText(recipient.whatsappUsername) ||
-        cleanText(recipient.whatsapp_username) ||
-        null,
-    birdContactId: phoneNumber || whatsappBsuid ? null : birdContactId || null,
-  };
-}
-
-function getSavedRecipientKey(recipient, channel) {
-  const normalized = normalizeSavedRecipient(recipient, channel);
-
-  if (!normalized) return "";
-
-  if (channel === "teams") {
-    return cleanText(normalized.userId);
-  }
-
-  return (
-    cleanText(normalized.phoneNumber) ||
-    cleanText(normalized.whatsappBsuid) ||
-    cleanText(normalized.birdContactId) ||
-    cleanText(normalized.userId)
-  );
-}
-
-function uniqueSavedRecipients(recipients, channel) {
-  const seen = new Set();
-  const out = [];
-
-  for (const recipient of recipients || []) {
-    const normalized = normalizeSavedRecipient(recipient, channel);
-    const key = getSavedRecipientKey(normalized, channel);
-
-    if (!normalized || !key || seen.has(key)) continue;
-
-    seen.add(key);
-    out.push(normalized);
-  }
-
-  return out;
-}
+/* O servidor limita cada página de utilizadores a este número. */
+const USERS_PAGE_SIZE = 200;
 
 export default function ScheduledPage() {
   const t = useTranslations("BroadcastScheduled");
@@ -270,22 +143,41 @@ export default function ScheduledPage() {
       setUsersLoading(true);
 
       try {
-        const response = await fetch(
-          `/api/users?orgId=${org.id}&page=1&pageSize=1000`,
-          { cache: "no-store" },
-        );
+        /* A API devolve no máximo 200 por página: lê-se até ao fim. */
+        const all = [];
+        let page = 1;
+        let total = Infinity;
 
-        const result = await response.json();
+        while (all.length < total) {
+          const response = await fetch(
+            `/api/users?orgId=${org.id}&page=${page}&pageSize=${USERS_PAGE_SIZE}`,
+            { cache: "no-store" },
+          );
 
-        if (cancelled) return;
+          if (!response.ok) throw new Error("Failed to load users");
 
-        const list = Array.isArray(result?.items)
-          ? result.items
-          : Array.isArray(result)
-            ? result
-            : [];
+          const result = await response.json();
 
-        setOrgUsers(list.map(normalizeUser));
+          if (cancelled) return;
+
+          const list = Array.isArray(result?.items)
+            ? result.items
+            : Array.isArray(result)
+              ? result
+              : [];
+
+          all.push(...list);
+
+          total = Number.isFinite(Number(result?.total))
+            ? Number(result.total)
+            : all.length;
+
+          if (list.length < USERS_PAGE_SIZE) break;
+
+          page += 1;
+        }
+
+        setOrgUsers(all.map(normalizeUser));
       } catch (err) {
         console.warn("[Scheduled] load users error:", err);
 
@@ -439,12 +331,32 @@ export default function ScheduledPage() {
       formData.minute,
     );
 
-    const recipients = uniqueSavedRecipients(
-      formData.recipients,
-      formData.channel,
-    );
+    const recipients = uniqueRecipients(formData.recipients, formData.channel);
 
-    if (!formData.message.trim() || !scheduledIso) {
+    /*
+     * Nas perguntas valida-se a pergunta (as mesmas regras do envio) e a
+     * mensagem fica vazia; nas outras mensagens, o texto é obrigatório.
+     */
+    const questionResult = formData.question
+      ? parseQuestionOptions({ question: formData.question })
+      : null;
+
+    if (questionResult?.error) {
+      setError(t("Errors.invalidForm"));
+
+      await showAlert({
+        title: t("Alerts.invalidForm.title"),
+        message: questionResult.error,
+        tone: "warning",
+      });
+
+      return;
+    }
+
+    if (
+      (!questionResult && !formData.message.trim()) ||
+      !scheduledIso
+    ) {
       setError(t("Errors.invalidForm"));
 
       await showAlert({
@@ -480,7 +392,8 @@ export default function ScheduledPage() {
 
       const nextPayload = {
         ...previousPayload,
-        message: formData.message.trim(),
+        message: questionResult ? "" : formData.message.trim(),
+        ...(questionResult ? { question: questionResult.question } : {}),
         files: nextFiles,
         imageUrls: nextFiles
           .filter((file) => file?.contentType?.startsWith("image/"))
@@ -509,19 +422,32 @@ export default function ScheduledPage() {
           headers: {
             "Content-Type": "application/json",
           },
+          /* O servidor valida o payload e recalcula o número de destinatários. */
           body: JSON.stringify({
-            channel: formData.channel,
             scheduled_for: scheduledIso,
             timezone: formData.timezone.trim() || "Europe/Lisbon",
             status:
               formData.status === "scheduled" ? "queued" : formData.status,
             payload: nextPayload,
-            recipient_count: groupItems ? groupItems.length : recipients.length,
           }),
         },
       );
 
       const result = await response.json();
+
+      /* Entretanto a mensagem foi enviada (ou está a ser): já não se edita. */
+      if (response.status === 409) {
+        closeEditModal();
+        loadItems();
+
+        await showAlert({
+          title: t("Alerts.saveConflict.title"),
+          message: t("Alerts.saveConflict.message"),
+          tone: "warning",
+        });
+
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(
