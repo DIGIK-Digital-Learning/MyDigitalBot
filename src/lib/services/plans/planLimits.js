@@ -65,6 +65,21 @@ export async function getOrgLimits(orgId, { now = new Date(), deps = {} } = {}) 
 }
 
 /**
+ * Corpo da resposta 409 quando um limite do plano foi atingido. O ecrã usa o
+ * `code` para escolher o aviso e o `plan` e o `limit` para o preencher ("O
+ * plano Demo permite até 3 utilizadores"). Sem `orgLimits` (por exemplo, se
+ * não foi possível lê-los) vai só o código.
+ */
+export function limitReachedBody(code, limitName, orgLimits = null) {
+  return {
+    error: `Plan limit reached: ${limitName}`,
+    code,
+    plan: orgLimits?.plan?.name ?? null,
+    limit: orgLimits?.limits?.[limitName] ?? null,
+  };
+}
+
+/**
  * Ainda cabe? `limit` null quer dizer sem limite. Serve para as verificações
  * das outras issues: "tem 19 assistentes, pode criar mais 1?".
  */

@@ -12,6 +12,10 @@ import { lookupAssistantName } from "@/lib/services/audit/auditLookups";
 import { AUDIT_ACTIONS, providedFields } from "@/lib/audit/auditEvents";
 import { resolveAssistantAssignment } from "@/lib/services/users/assistantAssignment";
 import {
+  getOrgLimits,
+  limitReachedBody,
+} from "@/lib/services/plans/planLimits";
+import {
   assertAssistantBelongsToOrg,
   assertAssistantsBelongToOrg,
   assertTagsBelongToOrg,
@@ -111,18 +115,34 @@ export async function POST(req) {
         ? `${normalizedCode}${normalizedNational.replace(/\D/g, "")}`
         : null);
 
-    const newUser = await createUserWithAutomations({
-      organizationId: orgAuth.orgId,
-      name,
-      email,
-      assistantId: assignment?.activeId ?? null,
-      assistantIds: assignment?.ids,
-      phoneNumber: fullPhone,
-      phoneCountryCode: normalizedCode,
-      phoneNational: normalizedNational,
-      teamsAadObjectId: teamsAadObjectId ?? null,
-      teamsFromId: teamsFromId ?? null,
-    });
+    let newUser;
+    try {
+      newUser = await createUserWithAutomations({
+        organizationId: orgAuth.orgId,
+        name,
+        email,
+        assistantId: assignment?.activeId ?? null,
+        assistantIds: assignment?.ids,
+        phoneNumber: fullPhone,
+        phoneCountryCode: normalizedCode,
+        phoneNational: normalizedNational,
+        teamsAadObjectId: teamsAadObjectId ?? null,
+        teamsFromId: teamsFromId ?? null,
+      });
+    } catch (error) {
+      if (error.code !== "USER_LIMIT_REACHED") throw error;
+
+      /*
+       * Quem recusa é a base de dados (create_user_with_plan_limit). Aqui só
+       * se junta o plano e o máximo para o aviso; se não for possível lê-los,
+       * o código chega na mesma.
+       */
+      const orgLimits = await getOrgLimits(orgAuth.orgId).catch(() => null);
+      return NextResponse.json(
+        limitReachedBody("USER_LIMIT_REACHED", "users", orgLimits),
+        { status: 409 },
+      );
+    }
 
     await recordAuditEvent(orgAuth, {
       action: AUDIT_ACTIONS.USER_CREATED,
@@ -140,12 +160,6 @@ export async function POST(req) {
 
     return NextResponse.json(newUser, { status: 201 });
   } catch (error) {
-    if (error.code === "USER_LIMIT_REACHED") {
-      return NextResponse.json(
-        { error: "This organization has reached its user limit." },
-        { status: 409 },
-      );
-    }
     if (error.code === "23505") {
       return NextResponse.json(
         { error: "User already exists (duplicate key)." },

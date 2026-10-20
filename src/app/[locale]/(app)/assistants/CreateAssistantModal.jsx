@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import styles from "./assistants.module.css";
 import { useTranslations } from "next-intl";
+import { useAlert } from "@/app/components/Alert/AlertProvider";
 import PresetPicker from "./PresetPicker";
 import {
   DEFAULT_ASSISTANT_PRESET,
@@ -16,6 +17,7 @@ export default function CreateAssistantModal({
   onCreated,
 }) {
   const translation = useTranslations();
+  const showAlert = useAlert();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [instructions, setInstructions] = useState("");
@@ -77,8 +79,26 @@ export default function CreateAssistantModal({
     });
 
     if (!res.ok) {
-      const error = await res.json();
-      alert("Error creating assistant: " + error.error);
+      const error = await res.json().catch(() => ({}));
+
+      /* Limite do plano: aviso traduzido com o plano e o máximo. */
+      if (error?.code === "ASSISTANT_LIMIT_REACHED") {
+        await showAlert({
+          title: translation("Plans.limits.title"),
+          message: translation("Plans.limits.assistants", {
+            plan: error.plan,
+            limit: error.limit,
+          }),
+          tone: "warning",
+        });
+        return;
+      }
+
+      await showAlert({
+        title: translation("CreateAssistant.createFailed"),
+        message: error?.error || "",
+        tone: "danger",
+      });
       return;
     }
 
