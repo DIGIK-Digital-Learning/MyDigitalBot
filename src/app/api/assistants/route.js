@@ -2,9 +2,15 @@ import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 
 import {
+  countAssistantsByOrg,
   createAssistant,
   getAssistantsInOrg,
 } from "@/lib/repos/assistants.repo";
+import {
+  getOrgLimits,
+  hasRoomFor,
+  limitReachedBody,
+} from "@/lib/services/plans/planLimits";
 
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
@@ -100,6 +106,17 @@ export async function POST(req) {
         {
           status: 400,
         },
+      );
+    }
+
+    /* Limite de assistentes do plano (Demo = 1). */
+    const orgLimits = await getOrgLimits(orgAuth.orgId);
+    const assistantCount = await countAssistantsByOrg(orgAuth.orgId);
+
+    if (!hasRoomFor(orgLimits.limits.assistants, assistantCount)) {
+      return NextResponse.json(
+        limitReachedBody("ASSISTANT_LIMIT_REACHED", "assistants", orgLimits),
+        { status: 409 },
       );
     }
 

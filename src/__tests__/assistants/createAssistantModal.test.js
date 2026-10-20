@@ -24,6 +24,12 @@ vi.mock("@/app/components/PillSelect/PillSelect", () => ({
     ),
 }));
 
+const alertMock = vi.hoisted(() => vi.fn(() => Promise.resolve()));
+
+vi.mock("@/app/components/Alert/AlertProvider", () => ({
+  useAlert: () => alertMock,
+}));
+
 vi.mock("@/app/components/Slider/Slider", () => ({
   default: ({ value, onChange, min = 0, max = 1, step = 0.01 }) =>
     React.createElement("input", {
@@ -145,6 +151,68 @@ describe("CreateAssistantModal", () => {
     });
 
     expect(mocks.onCreated).toHaveBeenCalled();
+  });
+
+  it("no limite do plano, mostra o aviso traduzido com o plano e o máximo", async () => {
+    mocks.fetch.mockImplementation(() =>
+      Promise.resolve({
+        ok: false,
+        status: 409,
+        json: () =>
+          Promise.resolve({
+            error: "Plan limit reached: assistants",
+            code: "ASSISTANT_LIMIT_REACHED",
+            plan: "Demo",
+            limit: 1,
+          }),
+      }),
+    );
+    const user = userEvent.setup();
+    renderModal();
+
+    const [nameInput] = screen.getAllByRole("textbox");
+    await user.type(nameInput, "Segundo");
+    await user.click(
+      screen.getByRole("button", { name: "CreateAssistant.create" }),
+    );
+
+    await waitFor(() => expect(alertMock).toHaveBeenCalled());
+
+    expect(alertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Plans.limits.title",
+        message: "Plans.limits.assistants",
+        tone: "warning",
+      }),
+    );
+    expect(mocks.onCreated).not.toHaveBeenCalled();
+  });
+
+  it("outro erro mostra a mensagem do servidor, sem falar em limite", async () => {
+    mocks.fetch.mockImplementation(() =>
+      Promise.resolve({
+        ok: false,
+        status: 400,
+        json: () => Promise.resolve({ error: "Assistant name is required" }),
+      }),
+    );
+    const user = userEvent.setup();
+    renderModal();
+
+    const [nameInput] = screen.getAllByRole("textbox");
+    await user.type(nameInput, "x");
+    await user.click(
+      screen.getByRole("button", { name: "CreateAssistant.create" }),
+    );
+
+    await waitFor(() => expect(alertMock).toHaveBeenCalled());
+
+    expect(alertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "CreateAssistant.createFailed",
+        message: "Assistant name is required",
+      }),
+    );
   });
 
   it("cria com a predefinicao Normal quando nenhuma e escolhida", async () => {

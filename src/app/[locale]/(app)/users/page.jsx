@@ -383,22 +383,39 @@ export default function UsersPage() {
         });
 
         if (!res.ok) {
-          let errMsg = "Failed to create user.";
+          let err = null;
 
           try {
-            const err = await res.json();
-            errMsg = err?.error || errMsg;
+            err = await res.json();
           } catch {
             // manter fallback
           }
 
-          await showAlert({
-            title: translation("Users.alerts.createUserFailed.title"),
-            message: translation("Users.alerts.createUserFailed.message"),
-            tone: "danger",
-          });
+          /* Limite do plano: um só aviso, com o plano e o máximo. */
+          if (err?.code === "USER_LIMIT_REACHED") {
+            await showAlert({
+              title: translation("Plans.limits.title"),
+              message: err.limit
+                ? translation("Plans.limits.users", {
+                    plan: err.plan,
+                    limit: err.limit,
+                  })
+                : translation("Plans.limits.usersNoDetail"),
+              tone: "warning",
+            });
+          } else {
+            await showAlert({
+              title: translation("Users.alerts.createUserFailed.title"),
+              message: translation("Users.alerts.createUserFailed.message"),
+              tone: "danger",
+            });
+          }
 
-          return { ok: false, error: errMsg };
+          return {
+            ok: false,
+            code: err?.code ?? null,
+            error: err?.error || "Failed to create user.",
+          };
         }
 
         await refreshUsers();

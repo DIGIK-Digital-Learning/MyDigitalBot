@@ -88,6 +88,20 @@ export async function updateAssistant(assistantId, updates) {
   return data;
 }
 
+/* Quantos assistentes tem a organização (para o limite do plano). */
+export async function countAssistantsByOrg(organizationId) {
+  const sb = getSupabaseAdminClient();
+
+  const { count, error } = await sb
+    .from("assistant")
+    .select("id", { count: "exact", head: true })
+    .eq("organization_id", Number(organizationId));
+
+  if (error) throw error;
+
+  return count ?? 0;
+}
+
 export async function getAssistantsInOrg(organizationId) {
   const sb = getRepositoryReadClient();
   const orgId = Number(organizationId);

@@ -1,0 +1,165 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const mocks = vi.hoisted(() => ({
+  getOrgLimits: vi.fn(),
+  countAssistantsByOrg: vi.fn(),
+  createAssistant: vi.fn(),
+  createUserWithAutomations: vi.fn(),
+}));
+
+vi.mock("@/lib/db/readAccess", () => ({
+  withSessionReadAccess: (_supabase, fn) => fn(),
+}));
+
+vi.mock("@/lib/auth/guards", () => ({
+  parsePositiveInt(value) {
+    const n = Number(value);
+    return Number.isInteger(n) && n > 0 ? n : null;
+  },
+  requireOwnedOrg: vi.fn(async (orgId) => ({ orgId: Number(orgId), admin: {} })),
+  requireOrgForUser: vi.fn(),
+  assertAssistantBelongsToOrg: vi.fn(async () => null),
+  assertAssistantsBelongToOrg: vi.fn(async () => []),
+  assertTagsBelongToOrg: vi.fn(),
+  handleApiError(error, fallback) {
+    return Response.json({ error: error.message || fallback }, { status: 500 });
+  },
+}));
+
+vi.mock("@/lib/services/plans/planLimits", async (importOriginal) => ({
+  ...(await importOriginal()),
+  getOrgLimits: mocks.getOrgLimits,
+}));
+
+vi.mock("@/lib/repos/assistants.repo", () => ({
+  countAssistantsByOrg: mocks.countAssistantsByOrg,
+  createAssistant: mocks.createAssistant,
+  getAssistantsInOrg: vi.fn(),
+}));
+
+vi.mock("@/lib/repos/user.repo", () => ({
+  createUser: vi.fn(),
+  getUsersInOrg: vi.fn(),
+  updateUser: vi.fn(),
+  deleteUser: vi.fn(),
+}));
+
+vi.mock("@/lib/services/automations/createUserWithAutomations", () => ({
+  createUserWithAutomations: mocks.createUserWithAutomations,
+}));
+
+vi.mock("@/lib/services/audit/recordAuditEvent", () => ({
+  recordAuditEvent: vi.fn(),
+}));
+
+vi.mock("@/lib/services/audit/auditLookups", () => ({
+  lookupAssistantName: vi.fn(async () => null),
+}));
+
+import { POST as createAssistantRoute } from "@/app/api/assistants/route";
+import { POST as createUserRoute } from "@/app/api/users/route";
+
+const request = (body) => ({ json: () => Promise.resolve(body) });
+
+function planWith(limits, name = "Demo") {
+  return { plan: { id: 1, name, level: 0 }, limits };
+}
+
+describe("POST /api/assistants — limite de assistentes do plano", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.createAssistant.mockResolvedValue({ id: 99, name: "Novo" });
+  });
+
+  const body = { organizationId: 7, name: "Novo", model: "gpt-5.6-luna" };
+
+  it("cria enquanto há lugar no plano", async () => {
+    mocks.getOrgLimits.mockResolvedValue(planWith({ assistants: 20 }, "Starter"));
+    mocks.countAssistantsByOrg.mockResolvedValue(19);
+
+    const response = await createAssistantRoute(request(body));
+
+    expect(response.status).not.toBe(409);
+    expect(mocks.createAssistant).toHaveBeenCalled();
+  });
+
+  it("no limite, recusa com o código, o plano e o máximo, e não cria", async () => {
+    mocks.getOrgLimits.mockResolvedValue(planWith({ assistants: 1 }));
+    mocks.countAssistantsByOrg.mockResolvedValue(1);
+
+    const response = await createAssistantRoute(request(body));
+
+    expect(response.status).toBe(409);
+    expect(await response.json()).toEqual({
+      error: "Plan limit reached: assistants",
+      code: "ASSISTANT_LIMIT_REACHED",
+      plan: "Demo",
+      limit: 1,
+    });
+    expect(mocks.createAssistant).not.toHaveBeenCalled();
+  });
+
+  it("um plano sem limite cria sempre", async () => {
+    mocks.getOrgLimits.mockResolvedValue(planWith({ assistants: null }, "Enterprise"));
+    mocks.countAssistantsByOrg.mockResolvedValue(500);
+
+    const response = await createAssistantRoute(request(body));
+
+    expect(response.status).not.toBe(409);
+    expect(mocks.createAssistant).toHaveBeenCalled();
+  });
+});
+
+describe("POST /api/users — limite de utilizadores do plano", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const body = { organizationId: 7, name: "Ana", email: "ana@exemplo.pt" };
+
+  function limitReached() {
+    const error = new Error("User limit reached for this organization");
+    error.code = "USER_LIMIT_REACHED";
+    return error;
+  }
+
+  it("quando a base de dados recusa, devolve o código, o plano e o máximo", async () => {
+    mocks.createUserWithAutomations.mockRejectedValue(limitReached());
+    mocks.getOrgLimits.mockResolvedValue(planWith({ users: 3 }));
+
+    const response = await createUserRoute(request(body));
+
+    expect(response.status).toBe(409);
+    expect(await response.json()).toEqual({
+      error: "Plan limit reached: users",
+      code: "USER_LIMIT_REACHED",
+      plan: "Demo",
+      limit: 3,
+    });
+  });
+
+  it("sem conseguir ler o plano, o código chega na mesma", async () => {
+    mocks.createUserWithAutomations.mockRejectedValue(limitReached());
+    mocks.getOrgLimits.mockRejectedValue(new Error("db down"));
+
+    const response = await createUserRoute(request(body));
+
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({
+      code: "USER_LIMIT_REACHED",
+      plan: null,
+      limit: null,
+    });
+  });
+
+  it("outro erro (utilizador repetido) não fala em limite", async () => {
+    const duplicate = new Error("duplicate key");
+    duplicate.code = "23505";
+    mocks.createUserWithAutomations.mockRejectedValue(duplicate);
+
+    const response = await createUserRoute(request(body));
+    const json = await response.json();
+
+    expect(response.status).toBe(409);
+    expect(json.code).toBeUndefined();
+    expect(json.error).toMatch(/duplicate/i);
+  });
+});

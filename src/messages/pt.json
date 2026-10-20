@@ -3788,6 +3788,7 @@
     }
   },
   "CreateAssistant": {
+    "createFailed": "Não foi possível criar o assistente",
     "title": "Criar novo Assistente",
     "presetLabel": "Comportamento",
     "presetHelp": "Define quão previsível ou variado o Assistant é a responder. Podes mudar depois na edição.",
@@ -4763,6 +4764,14 @@
     "channels": {
       "teams": "Teams",
       "whatsapp": "WhatsApp"
+    }
+  },
+  "Plans": {
+    "limits": {
+      "title": "Limite do plano atingido",
+      "users": "O plano {plan} permite até {limit, plural, one {# utilizador} other {# utilizadores}}. Para adicionares mais, muda de plano.",
+      "usersNoDetail": "Chegaste ao limite de utilizadores do teu plano. Para adicionares mais, muda de plano.",
+      "assistants": "O plano {plan} permite até {limit, plural, one {# assistente} other {# assistentes}}. Apaga um para criares outro, ou muda de plano."
     }
   }
 }
