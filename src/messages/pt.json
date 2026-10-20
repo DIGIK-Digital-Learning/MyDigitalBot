@@ -4814,10 +4814,14 @@
   },
   "Plans": {
     "limits": {
-      "title": "Limite do plano atingido",
-      "users": "O plano {plan} permite até {limit, plural, one {# utilizador} other {# utilizadores}}. Para adicionares mais, muda de plano.",
-      "usersNoDetail": "Chegaste ao limite de utilizadores do teu plano. Para adicionares mais, muda de plano.",
-      "assistants": "O plano {plan} permite até {limit, plural, one {# assistente} other {# assistentes}}. Apaga um para criares outro, ou muda de plano."
+      "assistantsTitle": "Limite de assistentes atingido",
+      "assistants": "O plano {plan} permite criar {limit, plural, one {# assistente} other {# assistentes}}. Atualiza o teu plano para criares mais.",
+      "assistantsNoDetail": "Chegaste ao limite de assistentes do teu plano. Atualiza o teu plano para criares mais.",
+      "usersTitle": "Limite de utilizadores atingido",
+      "users": "O plano {plan} permite criar {limit, plural, one {# utilizador} other {# utilizadores}}. Atualiza o teu plano para criares mais.",
+      "usersNoDetail": "Chegaste ao limite de utilizadores do teu plano. Atualiza o teu plano para criares mais.",
+      "upgrade": "Atualizar plano",
+      "later": "Agora não"
     }
   }
 }

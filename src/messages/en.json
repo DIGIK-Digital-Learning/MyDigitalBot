@@ -4806,10 +4806,14 @@
   },
   "Plans": {
     "limits": {
-      "title": "Plan limit reached",
-      "users": "The {plan} plan allows up to {limit, plural, one {# user} other {# users}}. To add more, change your plan.",
-      "usersNoDetail": "You have reached your plan's user limit. To add more, change your plan.",
-      "assistants": "The {plan} plan allows up to {limit, plural, one {# assistant} other {# assistants}}. Delete one to create another, or change your plan."
+      "assistantsTitle": "Assistant limit reached",
+      "assistants": "The {plan} plan lets you create {limit, plural, one {# assistant} other {# assistants}}. Upgrade your plan to create more.",
+      "assistantsNoDetail": "You have reached your plan's assistant limit. Upgrade your plan to create more.",
+      "usersTitle": "User limit reached",
+      "users": "The {plan} plan lets you create {limit, plural, one {# user} other {# users}}. Upgrade your plan to create more.",
+      "usersNoDetail": "You have reached your plan's user limit. Upgrade your plan to create more.",
+      "upgrade": "Upgrade plan",
+      "later": "Not now"
     }
   }
 }

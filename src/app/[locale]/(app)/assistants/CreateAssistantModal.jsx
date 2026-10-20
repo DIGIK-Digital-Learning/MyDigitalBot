@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import styles from "./assistants.module.css";
 import { useTranslations } from "next-intl";
 import { useAlert } from "@/app/components/Alert/AlertProvider";
+import usePlanLimitPrompt from "@/app/hooks/usePlanLimitPrompt";
 import PresetPicker from "./PresetPicker";
 import {
   DEFAULT_ASSISTANT_PRESET,
@@ -18,6 +19,7 @@ export default function CreateAssistantModal({
 }) {
   const translation = useTranslations();
   const showAlert = useAlert();
+  const promptPlanLimit = usePlanLimitPrompt();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [instructions, setInstructions] = useState("");
@@ -81,18 +83,8 @@ export default function CreateAssistantModal({
     if (!res.ok) {
       const error = await res.json().catch(() => ({}));
 
-      /* Limite do plano: aviso traduzido com o plano e o máximo. */
-      if (error?.code === "ASSISTANT_LIMIT_REACHED") {
-        await showAlert({
-          title: translation("Plans.limits.title"),
-          message: translation("Plans.limits.assistants", {
-            plan: error.plan,
-            limit: error.limit,
-          }),
-          tone: "warning",
-        });
-        return;
-      }
+      /* Limite do plano: aviso com o botão "Atualizar plano". */
+      if (await promptPlanLimit(error)) return;
 
       await showAlert({
         title: translation("CreateAssistant.createFailed"),

@@ -25,9 +25,19 @@ vi.mock("@/app/components/PillSelect/PillSelect", () => ({
 }));
 
 const alertMock = vi.hoisted(() => vi.fn(() => Promise.resolve()));
+const confirmMock = vi.hoisted(() => vi.fn(() => Promise.resolve(false)));
+const pushMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/app/components/Alert/AlertProvider", () => ({
   useAlert: () => alertMock,
+}));
+
+vi.mock("@/app/components/Confirm/ConfirmProvider", () => ({
+  useConfirm: () => confirmMock,
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushMock }),
 }));
 
 vi.mock("@/app/components/Slider/Slider", () => ({
@@ -153,7 +163,8 @@ describe("CreateAssistantModal", () => {
     expect(mocks.onCreated).toHaveBeenCalled();
   });
 
-  it("no limite do plano, mostra o aviso traduzido com o plano e o máximo", async () => {
+  it("no limite do plano, \"Atualizar plano\" leva à página de preços", async () => {
+    confirmMock.mockResolvedValueOnce(true);
     mocks.fetch.mockImplementation(() =>
       Promise.resolve({
         ok: false,
@@ -176,16 +187,41 @@ describe("CreateAssistantModal", () => {
       screen.getByRole("button", { name: "CreateAssistant.create" }),
     );
 
-    await waitFor(() => expect(alertMock).toHaveBeenCalled());
+    await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/pt/pricing"));
 
-    expect(alertMock).toHaveBeenCalledWith(
+    expect(confirmMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: "Plans.limits.title",
-        message: "Plans.limits.assistants",
-        tone: "warning",
+        title: "assistantsTitle",
+        message: "assistants",
+        confirmText: "upgrade",
+        cancelText: "later",
       }),
     );
+    expect(alertMock).not.toHaveBeenCalled();
     expect(mocks.onCreated).not.toHaveBeenCalled();
+  });
+
+  it("no limite do plano, \"Agora não\" fecha sem sair da página", async () => {
+    confirmMock.mockResolvedValueOnce(false);
+    mocks.fetch.mockImplementation(() =>
+      Promise.resolve({
+        ok: false,
+        status: 409,
+        json: () =>
+          Promise.resolve({ code: "ASSISTANT_LIMIT_REACHED", plan: "Demo", limit: 1 }),
+      }),
+    );
+    const user = userEvent.setup();
+    renderModal();
+
+    const [nameInput] = screen.getAllByRole("textbox");
+    await user.type(nameInput, "Segundo");
+    await user.click(
+      screen.getByRole("button", { name: "CreateAssistant.create" }),
+    );
+
+    await waitFor(() => expect(confirmMock).toHaveBeenCalled());
+    expect(pushMock).not.toHaveBeenCalled();
   });
 
   it("outro erro mostra a mensagem do servidor, sem falar em limite", async () => {

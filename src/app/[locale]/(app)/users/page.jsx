@@ -24,6 +24,7 @@ import {
 import useOrganization from "@/app/hooks/useOrganization";
 import { useAuth } from "@/app/AuthContext.jsx";
 import { useConfirm } from "@/app/components/Confirm/ConfirmProvider";
+import usePlanLimitPrompt from "@/app/hooks/usePlanLimitPrompt";
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 import FilterMenu from "./FilterMenu";
 import QuickActionsBar from "./QuickActions/QuickActions";
@@ -69,6 +70,7 @@ export default function UsersPage() {
   const [totalUsers, setTotalUsers] = useState(0);
 
   const confirm = useConfirm();
+  const promptPlanLimit = usePlanLimitPrompt();
   const showAlert = useAlert();
 
     const showAlertRef = useRef(null);
@@ -391,19 +393,8 @@ export default function UsersPage() {
             // manter fallback
           }
 
-          /* Limite do plano: um só aviso, com o plano e o máximo. */
-          if (err?.code === "USER_LIMIT_REACHED") {
-            await showAlert({
-              title: translation("Plans.limits.title"),
-              message: err.limit
-                ? translation("Plans.limits.users", {
-                    plan: err.plan,
-                    limit: err.limit,
-                  })
-                : translation("Plans.limits.usersNoDetail"),
-              tone: "warning",
-            });
-          } else {
+          /* Limite do plano: aviso com o botão "Atualizar plano". */
+          if (!(await promptPlanLimit(err))) {
             await showAlert({
               title: translation("Users.alerts.createUserFailed.title"),
               message: translation("Users.alerts.createUserFailed.message"),
