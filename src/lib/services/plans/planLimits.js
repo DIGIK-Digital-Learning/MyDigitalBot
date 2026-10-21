@@ -1,5 +1,8 @@
 import { getOrganizationPlan } from "@/lib/repos/plans.repo";
 
+/* As regras puras vivem em limitRules.js (servem também aos ecrãs). */
+export { hasRoomFor, limitKeepingCurrent } from "@/lib/plans/limitRules";
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /* Nome de cada limite no código e a coluna da tabela plan onde está guardado. */
@@ -77,13 +80,4 @@ export function limitReachedBody(code, limitName, orgLimits = null) {
     plan: orgLimits?.plan?.name ?? null,
     limit: orgLimits?.limits?.[limitName] ?? null,
   };
-}
-
-/**
- * Ainda cabe? `limit` null quer dizer sem limite. Serve para as verificações
- * das outras issues: "tem 19 assistentes, pode criar mais 1?".
- */
-export function hasRoomFor(limit, current, adding = 1) {
-  if (limit === null || limit === undefined) return true;
-  return current + adding <= limit;
 }

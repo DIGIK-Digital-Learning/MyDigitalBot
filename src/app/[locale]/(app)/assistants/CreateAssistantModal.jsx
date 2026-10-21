@@ -5,6 +5,9 @@ import styles from "./assistants.module.css";
 import { useTranslations } from "next-intl";
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 import usePlanLimitPrompt from "@/app/hooks/usePlanLimitPrompt";
+import usePlanLimits from "@/app/hooks/usePlanLimits";
+import CharCounter from "@/app/components/CharCounter/CharCounter";
+import { limitKeepingCurrent } from "@/lib/plans/limitRules";
 import PresetPicker from "./PresetPicker";
 import {
   DEFAULT_ASSISTANT_PRESET,
@@ -20,9 +23,17 @@ export default function CreateAssistantModal({
   const translation = useTranslations();
   const showAlert = useAlert();
   const promptPlanLimit = usePlanLimitPrompt();
+  const { limits } = usePlanLimits(orgId);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [instructions, setInstructions] = useState("");
+
+  /* Instruções (#185): um assistente novo tem o limite do plano. */
+  const instructionsLimit = limitKeepingCurrent(
+    limits?.assistantInstructionChars,
+  );
+  const instructionsTooLong =
+    instructionsLimit !== null && instructions.length > instructionsLimit;
   /**
    * A predefinição escolhida.
    *
@@ -85,6 +96,18 @@ export default function CreateAssistantModal({
 
       /* Limite do plano: aviso com o botão "Atualizar plano". */
       if (await promptPlanLimit(error)) return;
+
+      /* Instruções longas demais (#185): aviso simples, só com OK. */
+      if (error?.code === "INSTRUCTIONS_TOO_LONG") {
+        await showAlert({
+          title: translation("Plans.limits.instructionsTitle"),
+          message: translation("Plans.limits.instructions", {
+            limit: error.limit,
+          }),
+          tone: "warning",
+        });
+        return;
+      }
 
       await showAlert({
         title: translation("CreateAssistant.createFailed"),
@@ -202,6 +225,10 @@ export default function CreateAssistantModal({
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
             />
+            <CharCounter
+              length={instructions.length}
+              limit={instructionsLimit}
+            />
           </div>
           <div className={styles.formGroup}>
             <label>
@@ -236,7 +263,7 @@ export default function CreateAssistantModal({
           </div>
 
           <div className={styles.buttonGroup}>
-            <button type="submit" disabled={submitting}>
+            <button type="submit" disabled={submitting || instructionsTooLong}>
               {translation("CreateAssistant.create")}
             </button>
             <button type="button" onClick={onClose}>

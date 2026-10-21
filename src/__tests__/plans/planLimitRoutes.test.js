@@ -58,6 +58,8 @@ vi.mock("@/lib/services/audit/auditLookups", () => ({
 
 import { POST as createAssistantRoute } from "@/app/api/assistants/route";
 import { POST as createUserRoute } from "@/app/api/users/route";
+import { GET as planLimitsRoute } from "@/app/api/plans/limits/route";
+import { requireOwnedOrg } from "@/lib/auth/guards";
 
 const request = (body) => ({ json: () => Promise.resolve(body) });
 
@@ -161,5 +163,47 @@ describe("POST /api/users — limite de utilizadores do plano", () => {
     expect(response.status).toBe(409);
     expect(json.code).toBeUndefined();
     expect(json.error).toMatch(/duplicate/i);
+  });
+});
+
+describe("GET /api/plans/limits", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const get = (query) =>
+    planLimitsRoute(new Request(`http://localhost/api/plans/limits${query}`));
+
+  it("devolve o plano e os limites ao dono da organização", async () => {
+    mocks.getOrgLimits.mockResolvedValue({
+      ...planWith({ assistantInstructionChars: 5000 }),
+      expiresAt: null,
+      expired: false,
+      startedAt: new Date(),
+    });
+
+    const response = await get("?orgId=7");
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      plan: { id: 1, name: "Demo", level: 0 },
+      limits: { assistantInstructionChars: 5000 },
+      expiresAt: null,
+      expired: false,
+    });
+  });
+
+  it("não mostra os limites de outra organização", async () => {
+    requireOwnedOrg.mockResolvedValueOnce({
+      error: Response.json({ error: "Forbidden" }, { status: 403 }),
+    });
+
+    const response = await get("?orgId=99");
+
+    expect(response.status).toBe(403);
+    expect(mocks.getOrgLimits).not.toHaveBeenCalled();
+  });
+
+  it("sem organização é um pedido inválido", async () => {
+    const response = await get("");
+    expect(response.status).toBe(400);
   });
 });

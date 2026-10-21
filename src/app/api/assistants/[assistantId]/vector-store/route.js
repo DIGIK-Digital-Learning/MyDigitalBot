@@ -13,6 +13,11 @@ import { requireOrgForAssistant, handleApiError } from "@/lib/auth/guards";
 
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
+import {
+  getOrgLimits,
+  hasRoomFor,
+  limitReachedBody,
+} from "@/lib/services/plans/planLimits";
 
 export async function POST(req, ctx) {
   try {
@@ -55,6 +60,23 @@ export async function POST(req, ctx) {
         {
           status: 400,
         },
+      );
+    }
+
+    /*
+     * Ficheiros por assistente (#185), antes de enviar para a OpenAI: se for
+     * recusado, nada é enviado nem pago.
+     */
+    const orgLimits = await getOrgLimits(auth.orgId);
+
+    if (!hasRoomFor(orgLimits.limits.filesPerAssistant, 0, files.length)) {
+      return NextResponse.json(
+        limitReachedBody(
+          "ASSISTANT_FILE_LIMIT_REACHED",
+          "filesPerAssistant",
+          orgLimits,
+        ),
+        { status: 409 },
       );
     }
 
