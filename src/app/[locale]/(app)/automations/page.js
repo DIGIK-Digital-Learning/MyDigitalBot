@@ -706,13 +706,6 @@ export default function AutomationsPage() {
             <span>{translation("materialize")}</span>
           </button>
 
-          <UsageCounter
-            used={planUsage?.automations}
-            limit={planLimits?.automations}
-            label={usageTranslation("automationsLabel")}
-            hint={usageTranslation("automationsHint")}
-          />
-
           <div className={styles.createMenuWrap} ref={createMenuRef}>
             <button
               type="button"
@@ -782,6 +775,16 @@ export default function AutomationsPage() {
         >
           {translation("deliveries")} ({materialized.length})
         </button>
+
+        {/* Contador do limite do plano ("6 / 20", #186), sempre à direita. */}
+        <div className={styles.usageSlot}>
+          <UsageCounter
+            used={planUsage?.automations}
+            limit={planLimits?.automations}
+            label={usageTranslation("automationsLabel")}
+            hint={usageTranslation("automationsHint")}
+          />
+        </div>
       </div>
 
       {tab === "rules" ? (

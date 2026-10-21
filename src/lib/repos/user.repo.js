@@ -149,6 +149,22 @@ export async function createUser({
   return await getUserById(created.id);
 }
 
+/*
+ * Quantos utilizadores tem a organização, contados como a função
+ * create_user_with_plan_limit conta para recusar (todos os da organização).
+ * Serve ao contador do limite do plano ("3 / 100").
+ */
+export async function countUsersByOrg(organizationId) {
+  const supabase = getSupabaseAdminClient();
+  const { count, error } = await supabase
+    .from("user")
+    .select("id", { count: "exact", head: true })
+    .eq("organization_id", Number(organizationId));
+
+  if (error) throw error;
+  return count ?? 0;
+}
+
 export async function deleteUser(userId) {
   const supabase = getSupabaseAdminClient();
   await supabase.from("user_tag").delete().eq("user_id", userId).throwOnError();

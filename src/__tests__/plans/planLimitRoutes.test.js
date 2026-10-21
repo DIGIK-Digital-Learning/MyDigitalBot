@@ -47,6 +47,7 @@ vi.mock("@/lib/repos/assistants.repo", () => ({
 }));
 
 vi.mock("@/lib/repos/user.repo", () => ({
+  countUsersByOrg: vi.fn(async () => 3),
   createUser: vi.fn(),
   getUsersInOrg: vi.fn(),
   updateUser: vi.fn(),
@@ -189,13 +190,15 @@ describe("GET /api/plans/limits", () => {
       startedAt: new Date(),
     });
 
+    mocks.countAssistantsByOrg.mockResolvedValue(1);
+
     const response = await get("?orgId=7");
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
       plan: { id: 1, name: "Demo", level: 0 },
       limits: { assistantInstructionChars: 5000 },
-      usage: { automations: 6, scheduledMessages: 2 },
+      usage: { users: 3, assistants: 1, automations: 6, scheduledMessages: 2 },
       expiresAt: null,
       expired: false,
     });

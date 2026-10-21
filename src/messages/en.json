@@ -4818,6 +4818,12 @@
       "olderThanLimit": "Created before the {limit}-character limit: it can keep its current length but not grow."
     },
     "usage": {
+      "usersLabel": "Users",
+      "usersHint": "Counts all users in the account.",
+      "filesLabel": "Assistant files",
+      "filesHint": "Each assistant can have up to this many files in its collection.",
+      "assistantsLabel": "Assistants",
+      "assistantsHint": "Counts all assistants in the account.",
       "automationsLabel": "Automations",
       "automationsHint": "All automations in the account count, active and inactive.",
       "scheduledLabel": "Scheduled messages",

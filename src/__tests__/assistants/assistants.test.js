@@ -580,6 +580,42 @@ describe("AssistantsHub Page", () => {
       expect(screen.queryByText("a.pdf")).not.toBeInTheDocument();
     });
 
+    it("mostra o contador de assistentes e, no limite, não deixa criar", async () => {
+      LIMITS.limits.assistants = 2;
+      LIMITS.usage = { assistants: 2 };
+      try {
+        mockWith(DETAILS_1);
+        renderPage();
+
+        expect(await screen.findByText("2 / 2")).toBeInTheDocument();
+        expect(
+          screen.getByRole("button", { name: "Assistants.createAssistant" }),
+        ).toBeDisabled();
+      } finally {
+        delete LIMITS.limits.assistants;
+        delete LIMITS.usage;
+      }
+    });
+
+    it("mostra os ficheiros da coleção sobre o limite, e na edição o resultado antes de guardar", async () => {
+      const user = userEvent.setup();
+      mockWith({ ...DETAILS_1, vectorStoreId: 42 });
+      renderPage();
+
+      /* Leitura: a coleção tem 1 ficheiro. */
+      expect(await screen.findByText("1 / 5")).toBeInTheDocument();
+
+      await user.click(
+        screen.getByRole("button", { name: "Assistants.vector.edit" }),
+      );
+
+      /* Edição: marcar o único ficheiro para tirar mostra logo 0 / 5. */
+      await user.click(
+        screen.getByRole("button", { name: "Assistants.vector.remove" }),
+      );
+      expect(await screen.findByText("0 / 5")).toBeInTheDocument();
+    });
+
     it("ao editar a coleção, escolher até ao limite é aceite", async () => {
       const user = userEvent.setup({ applyAccept: false });
       mockWith({ ...DETAILS_1, vectorStoreId: 42 });

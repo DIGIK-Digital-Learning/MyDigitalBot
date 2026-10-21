@@ -559,18 +559,7 @@ export default function ScheduledPage() {
 
   return (
     <div className={styles.scheduledScreen}>
-      <ScheduledHeader
-        translation={t}
-        organizationName={org?.name}
-        usage={
-          <UsageCounter
-            used={planUsage?.scheduledMessages}
-            limit={planLimits?.scheduledMessages}
-            label={usageTranslation("scheduledLabel")}
-            hint={usageTranslation("scheduledHint")}
-          />
-        }
-      />
+      <ScheduledHeader translation={t} organizationName={org?.name} />
 
       <ScheduledStats translation={t} stats={stats} />
 
@@ -588,6 +577,14 @@ export default function ScheduledPage() {
         onDateChange={setDateFilter}
         onClearDate={() => setDateFilter("")}
         onRefresh={() => loadItems(true)}
+        usage={
+          <UsageCounter
+            used={planUsage?.scheduledMessages}
+            limit={planLimits?.scheduledMessages}
+            label={usageTranslation("scheduledLabel")}
+            hint={usageTranslation("scheduledHint")}
+          />
+        }
       />
 
       {error ? <div className={styles.errorBox}>{error}</div> : null}

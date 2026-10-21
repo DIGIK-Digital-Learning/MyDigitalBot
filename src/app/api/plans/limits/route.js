@@ -6,6 +6,8 @@ import {
   requireOwnedOrg,
 } from "@/lib/auth/guards";
 import { getOrgLimits } from "@/lib/services/plans/planLimits";
+import { countAssistantsByOrg } from "@/lib/repos/assistants.repo";
+import { countUsersByOrg } from "@/lib/repos/user.repo";
 import { countAutomationRulesByOrg } from "@/lib/repos/automationRules.repo";
 import { countManualQueuedBroadcasts } from "@/lib/repos/scheduledBroadcasts.repo";
 
@@ -30,17 +32,24 @@ export async function GET(req) {
      * O "gasto" usa as mesmas contagens que as rotas usam para recusar: o
      * número que se vê no ecrã ("6 / 20") é o que o servidor compara.
      */
-    const [{ plan, limits, expiresAt, expired }, automations, scheduledMessages] =
-      await Promise.all([
-        getOrgLimits(orgAuth.orgId),
-        countAutomationRulesByOrg(orgAuth.orgId),
-        countManualQueuedBroadcasts(orgAuth.orgId),
-      ]);
+    const [
+      { plan, limits, expiresAt, expired },
+      users,
+      assistants,
+      automations,
+      scheduledMessages,
+    ] = await Promise.all([
+      getOrgLimits(orgAuth.orgId),
+      countUsersByOrg(orgAuth.orgId),
+      countAssistantsByOrg(orgAuth.orgId),
+      countAutomationRulesByOrg(orgAuth.orgId),
+      countManualQueuedBroadcasts(orgAuth.orgId),
+    ]);
 
     return NextResponse.json({
       plan,
       limits,
-      usage: { automations, scheduledMessages },
+      usage: { users, assistants, automations, scheduledMessages },
       expiresAt,
       expired,
     });

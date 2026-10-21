@@ -4826,6 +4826,12 @@
       "olderThanLimit": "Criado antes do limite de {limit} caracteres: pode ficar com o tamanho que tem, mas não aumentar."
     },
     "usage": {
+      "usersLabel": "Utilizadores",
+      "usersHint": "Conta todos os utilizadores da conta.",
+      "filesLabel": "Ficheiros do assistente",
+      "filesHint": "Cada assistente pode ter até este número de ficheiros na coleção.",
+      "assistantsLabel": "Assistentes",
+      "assistantsHint": "Conta todos os assistentes da conta.",
       "automationsLabel": "Automações",
       "automationsHint": "Contam todas as automações da conta, ativas e inativas.",
       "scheduledLabel": "Mensagens agendadas",
