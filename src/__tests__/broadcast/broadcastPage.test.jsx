@@ -124,6 +124,69 @@ describe("BroadcastPage", () => {
     fireEvent.click(screen.getByRole("menuitem", { name }));
   }
 
+  describe("limites da mensagem do plano (#187)", () => {
+    function withPlanLimits(limits) {
+      const baseFetch = mocks.fetch.getMockImplementation();
+      mocks.fetch.mockImplementation((input, init = {}) => {
+        const url = typeof input === "string" ? input : input.url;
+        if (url.startsWith("/api/plans/limits")) {
+          return makeResponse({ plan: { name: "Demo" }, limits, usage: {} });
+        }
+        return baseFetch(input, init);
+      });
+    }
+
+    it("mostra os caracteres como se veem e desativa Enviar acima do limite", async () => {
+      withPlanLimits({ messageChars: 10, filesPerMessage: 5 });
+      await openWhatsapp();
+      fireEvent.click(screen.getByText("Broadcast.start.blank"));
+      fireEvent.click(screen.getByText("Pedro Silva"));
+
+      const editor = screen.getByRole("textbox", { name: "Broadcast.message" });
+      typeInEditor(editor, "*aaaaaaaaaa*");
+
+      /* As marcas do negrito não contam: 10 / 10 e ainda se pode enviar. */
+      expect(await screen.findByText("10 / 10")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Broadcast.send" })).not.toBeDisabled();
+
+      /*
+       * Com espaço: "*aaaaaaaaaa* b" continua em negrito e vale 10 + 2 = 12.
+       * (Colado, "*aaaaaaaaaa*b", o WhatsApp não fecha o negrito e os
+       * asteriscos passam a contar: 13.)
+       */
+      typeInEditor(editor, " b");
+
+      expect(await screen.findByText("12 / 10")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Broadcast.send" })).toBeDisabled();
+    });
+
+    it("se o servidor recusar o tamanho, mostra um aviso simples", async () => {
+      const baseFetch = mocks.fetch.getMockImplementation();
+      mocks.fetch.mockImplementation((input, init = {}) => {
+        const url = typeof input === "string" ? input : input.url;
+        if (url === "/api/broadcast/whatsapp") {
+          return makeResponse({ code: "MESSAGE_TOO_LONG", limit: 1500 }, false);
+        }
+        return baseFetch(input, init);
+      });
+
+      await openWhatsapp();
+      fireEvent.click(screen.getByText("Broadcast.start.blank"));
+      typeInEditor(
+        screen.getByRole("textbox", { name: "Broadcast.message" }),
+        "Olá",
+      );
+      fireEvent.click(screen.getByText("Pedro Silva"));
+      fireEvent.click(screen.getByRole("button", { name: "Broadcast.send" }));
+
+      await waitFor(() =>
+        expect(appMocks.alert).toHaveBeenCalledWith(
+          expect.objectContaining({ title: "Plans.limits.messageTooLongTitle" }),
+        ),
+      );
+    });
+  });
+
   it("mostra o envio em curso e bloqueia o ecrã até o servidor responder", async () => {
     let respond;
     const baseFetch = mocks.fetch.getMockImplementation();

@@ -8,6 +8,7 @@ import {
   requireOwnedOrg,
 } from "@/lib/auth/guards";
 import { sendTeamsGroupBroadcast } from "@/lib/services/broadcast/sendTeamsGroupBroadcast";
+import { checkMessageContent } from "@/lib/services/plans/planLimits";
 import {
   assertGroupBroadcastContent,
   parseGroupIds,
@@ -24,6 +25,15 @@ export async function POST(req) {
     if (orgAuth.error) return orgAuth.error;
 
     assertGroupBroadcastContent(body);
+
+    /* Conteúdo da mensagem dentro do plano (#187): caracteres e ficheiros. */
+    const content = await checkMessageContent(orgAuth.orgId, {
+      message: typeof body?.message === "string" ? body.message : "",
+      files: Array.isArray(body?.files) ? body.files : [],
+    });
+    if (content.body) {
+      return NextResponse.json(content.body, { status: 400 });
+    }
 
     const groups = await assertTeamsGroupsBelongToOrg(
       orgAuth.admin,
