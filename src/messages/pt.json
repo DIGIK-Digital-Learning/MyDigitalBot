@@ -2525,11 +2525,6 @@
         "title": "Falta de Contacto",
         "message": "Adiciona pelo menos um método de contacto: telemóvel, Teams ou email",
         "ok": "OK"
-      },
-      "fullOrg": {
-        "title": "Limite de Utilizadores",
-        "message": "Chegou ao limite de utilizadores para esta organização.",
-        "ok": "OK"
       }
     },
     "PillSelect": {
@@ -4120,11 +4115,6 @@
     "noContact": {
       "title": "Falta de Contacto",
       "message": "Adiciona pelo menos um método de contacto: telemóvel, Teams ou email",
-      "ok": "OK"
-    },
-    "fullOrg": {
-      "title": "Limite de Utilizadores",
-      "message": "Chegou ao limite de utilizadores para esta organização.",
       "ok": "OK"
     }
   },

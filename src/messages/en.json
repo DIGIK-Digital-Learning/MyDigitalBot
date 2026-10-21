@@ -2517,11 +2517,6 @@
         "title": "Missing Contact",
         "message": "Add at least one contact method: phone, Teams, or email.",
         "ok": "OK"
-      },
-      "fullOrg": {
-        "title": "User Limits",
-        "message": "This organization has reached its user limit.",
-        "ok": "OK"
       }
     },
     "PillSelect": {
@@ -4112,11 +4107,6 @@
     "noContact": {
       "title": "Missing Contact",
       "message": "Add at least one contact method: phone, Teams, or email.",
-      "ok": "OK"
-    },
-    "fullOrg": {
-      "title": "User Limits",
-      "message": "This organization has reached its user limit.",
       "ok": "OK"
     }
   },
