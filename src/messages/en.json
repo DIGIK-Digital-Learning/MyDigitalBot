@@ -4808,10 +4808,20 @@
       "instructions": "Instructions can have up to {limit} characters. Shorten the text to save.",
       "filesTitle": "File limit reached",
       "files": "Each assistant can have up to {limit, plural, one {# file} other {# files}}. Remove one before adding another.",
-      "filesRemaining": "You can only add {remaining, plural, =0 {no more files} one {# more file} other {# more files}} ({limit} per assistant). Pick fewer files or remove some from the collection."
+      "filesRemaining": "You can only add {remaining, plural, =0 {no more files} one {# more file} other {# more files}} ({limit} per assistant). Pick fewer files or remove some from the collection.",
+      "automationsTitle": "Automation limit reached",
+      "automations": "Each account can have up to {limit, plural, one {# automation} other {# automations}}. Delete one to create another.",
+      "scheduledTitle": "Scheduled message limit reached",
+      "scheduled": "You can have up to {limit, plural, one {# scheduled message} other {# scheduled messages}} waiting to be sent. Cancel or delete one in scheduled messages to schedule another."
     },
     "counter": {
       "olderThanLimit": "Created before the {limit}-character limit: it can keep its current length but not grow."
+    },
+    "usage": {
+      "automationsLabel": "Automations",
+      "automationsHint": "All automations in the account count, active and inactive.",
+      "scheduledLabel": "Scheduled messages",
+      "scheduledHint": "Counts the messages you scheduled that are still waiting to be sent. Automation messages and chains do not count."
     }
   }
 }

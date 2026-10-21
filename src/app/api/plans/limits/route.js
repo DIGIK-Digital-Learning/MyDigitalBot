@@ -6,11 +6,14 @@ import {
   requireOwnedOrg,
 } from "@/lib/auth/guards";
 import { getOrgLimits } from "@/lib/services/plans/planLimits";
+import { countAutomationRulesByOrg } from "@/lib/repos/automationRules.repo";
+import { countManualQueuedBroadcasts } from "@/lib/repos/scheduledBroadcasts.repo";
 
 /**
- * O plano e os limites da organização, para os ecrãs mostrarem contadores e
- * avisarem antes de enviar (ex.: "3.017 / 5.000" nas instruções). Só o dono
- * da organização os vê. Quem decide é sempre o servidor: isto só ajuda o ecrã.
+ * O plano, os limites e quanto já está gasto, para os ecrãs mostrarem
+ * contadores ("6 / 20" automações, "2 / 100" agendadas) e avisarem antes de
+ * enviar. Só o dono da organização os vê. Quem decide é sempre o servidor:
+ * isto só ajuda o ecrã.
  */
 export async function GET(req) {
   try {
@@ -23,9 +26,24 @@ export async function GET(req) {
     const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
-    const { plan, limits, expiresAt, expired } = await getOrgLimits(orgAuth.orgId);
+    /*
+     * O "gasto" usa as mesmas contagens que as rotas usam para recusar: o
+     * número que se vê no ecrã ("6 / 20") é o que o servidor compara.
+     */
+    const [{ plan, limits, expiresAt, expired }, automations, scheduledMessages] =
+      await Promise.all([
+        getOrgLimits(orgAuth.orgId),
+        countAutomationRulesByOrg(orgAuth.orgId),
+        countManualQueuedBroadcasts(orgAuth.orgId),
+      ]);
 
-    return NextResponse.json({ plan, limits, expiresAt, expired });
+    return NextResponse.json({
+      plan,
+      limits,
+      usage: { automations, scheduledMessages },
+      expiresAt,
+      expired,
+    });
   } catch (err) {
     return handleApiError(err, "Failed to load plan limits");
   }

@@ -15,12 +15,27 @@ export default function SchedulePanel({
   scheduleInvalid,
   browserTimeZone,
   translation,
+  usage = null,
+  limitWarning = null,
 }) {
   return (
     <div className={styles.toolPanelCard}>
+      {/*
+        Limite de agendadas do plano (#186): o contador ("2 / 100") e, quando
+        está cheio, a explicação de porque o botão Agendar está desativado.
+      */}
       <div className={styles.scheduleHint}>
-        {translation("Broadcast.timezone")}: {browserTimeZone}
+        <span>
+          {translation("Broadcast.timezone")}: {browserTimeZone}
+        </span>
+        {usage}
       </div>
+
+      {limitWarning ? (
+        <div className={styles.composerWarning} role="status">
+          {limitWarning}
+        </div>
+      ) : null}
 
       <div className={styles.scheduleLayout}>
         <div className={styles.scheduleCalendarCol}>

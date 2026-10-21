@@ -31,6 +31,15 @@ vi.mock("@/lib/services/plans/planLimits", async (importOriginal) => ({
   getOrgLimits: mocks.getOrgLimits,
 }));
 
+/* O gasto (#186) vem das mesmas contagens que as rotas usam para recusar. */
+vi.mock("@/lib/repos/automationRules.repo", () => ({
+  countAutomationRulesByOrg: vi.fn(async () => 6),
+}));
+
+vi.mock("@/lib/repos/scheduledBroadcasts.repo", () => ({
+  countManualQueuedBroadcasts: vi.fn(async () => 2),
+}));
+
 vi.mock("@/lib/repos/assistants.repo", () => ({
   countAssistantsByOrg: mocks.countAssistantsByOrg,
   createAssistant: mocks.createAssistant,
@@ -172,7 +181,7 @@ describe("GET /api/plans/limits", () => {
   const get = (query) =>
     planLimitsRoute(new Request(`http://localhost/api/plans/limits${query}`));
 
-  it("devolve o plano e os limites ao dono da organização", async () => {
+  it("devolve o plano, os limites e o gasto ao dono da organização", async () => {
     mocks.getOrgLimits.mockResolvedValue({
       ...planWith({ assistantInstructionChars: 5000 }),
       expiresAt: null,
@@ -186,6 +195,7 @@ describe("GET /api/plans/limits", () => {
     expect(await response.json()).toEqual({
       plan: { id: 1, name: "Demo", level: 0 },
       limits: { assistantInstructionChars: 5000 },
+      usage: { automations: 6, scheduledMessages: 2 },
       expiresAt: null,
       expired: false,
     });

@@ -27,6 +27,14 @@
   color: #0f1c3f;
 }
 
+/* O título e o contador do limite do plano ("2 / 100") na mesma linha. */
+.titleRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .subtitle {
   margin: 6px 0 0;
   color: var(--ui-muted, #6b7280);
