@@ -963,6 +963,60 @@ describe("BroadcastPage", () => {
       expect(screen.queryByTestId("link-button-preview")).toBeNull();
     });
 
+    /* Imagem com o tamanho pedido, sem gastar memória no teste. */
+    function imageOfMb(name, mb) {
+      const file = new File(["x"], name, { type: "image/png" });
+      Object.defineProperty(file, "size", { value: mb * 1024 * 1024 });
+      return file;
+    }
+
+    it("no WhatsApp, recusa imagens acima de 5 MB antes de as enviar", async () => {
+      await openWhatsapp();
+      fireEvent.click(screen.getByText("Broadcast.start.blank"));
+
+      fireEvent.change(screen.getByTestId("file-input"), {
+        target: { files: [imageOfMb("grande.png", 6)] },
+      });
+
+      await waitFor(() =>
+        expect(appMocks.alert).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: "Broadcast.composer.whatsappImageTooLarge:grande.png",
+          }),
+        ),
+      );
+      expect(storageMock.upload).not.toHaveBeenCalled();
+    });
+
+    it("uma imagem de 6 MB junta no Teams bloqueia o envio ao passar para o WhatsApp", async () => {
+      render(<BroadcastPage />);
+      await screen.findByText("Pedro Silva");
+
+      /* No staging, o Teams também abre com o menu inicial. */
+      const blank = screen.queryByText("Broadcast.start.blank");
+      if (blank) fireEvent.click(blank);
+
+      fireEvent.change(screen.getByTestId("file-input"), {
+        target: { files: [imageOfMb("grande.png", 6)] },
+      });
+      await screen.findByAltText("grande.png");
+      expect(
+        screen.queryByText("Broadcast.composer.whatsappImageTooLarge:grande.png"),
+      ).toBeNull();
+
+      fireEvent.click(screen.getByRole("button", { name: "WhatsApp" }));
+      const blankOnWhatsapp = screen.queryByText("Broadcast.start.blank");
+      if (blankOnWhatsapp) fireEvent.click(blankOnWhatsapp);
+      fireEvent.click(screen.getByText("Pedro Silva"));
+
+      expect(
+        screen.getByText("Broadcast.composer.whatsappImageTooLarge:grande.png"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Broadcast.send" }),
+      ).toBeDisabled();
+    });
+
     it("no Teams, o link entra no texto e deixa enviar só o link", async () => {
       render(<BroadcastPage />);
       await screen.findByText("Pedro Silva");

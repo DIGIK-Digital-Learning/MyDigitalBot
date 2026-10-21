@@ -10,6 +10,7 @@ import {
   BROADCAST_MEDIA_ACCEPT,
   BROADCAST_MEDIA_BUCKET,
   broadcastMediaRejection,
+  isWhatsappImageTooLarge,
   buildBroadcastMediaKey,
 } from "@/lib/uploads/broadcastMedia";
 import {
@@ -1030,6 +1031,22 @@ export default function BroadcastPage() {
         broadcastMediaRejection(contentTypeOf(file), file.size) ||
         (Number(file.size) > fileSizeLimitBytes ? "size" : null);
 
+      /* No WhatsApp, as imagens acima de 5 MB não chegam ao contacto. */
+      if (
+        !reason &&
+        channel === "whatsapp" &&
+        isWhatsappImageTooLarge({
+          contentType: contentTypeOf(file),
+          size: file.size,
+        })
+      ) {
+        throw new Error(
+          translation("Broadcast.composer.whatsappImageTooLarge", {
+            name: file.name,
+          }),
+        );
+      }
+
       if (reason) {
         throw new Error(
           translation(
@@ -1062,6 +1079,7 @@ export default function BroadcastPage() {
           url: pub.publicUrl,
           name: file.name || "file",
           contentType: ct,
+          size: file.size,
         });
       }
     }
@@ -1587,8 +1605,23 @@ export default function BroadcastPage() {
       )
     : -1;
 
-  const composerWarning =
-    chainStepNeedingText >= 0
+  /*
+   * Imagem acima de 5 MB numa mensagem de WhatsApp: acontece quando se junta
+   * no Teams e depois se muda de canal. Enviar fica desativado até a tirar.
+   */
+  const whatsappImageTooLarge =
+    channel === "whatsapp"
+      ? (chainMode
+          ? chainSteps.flatMap((step) => step.files || [])
+          : composerFiles
+        ).find(isWhatsappImageTooLarge)
+      : null;
+
+  const composerWarning = whatsappImageTooLarge
+    ? translation("Broadcast.composer.whatsappImageTooLarge", {
+        name: whatsappImageTooLarge.name,
+      })
+    : chainStepNeedingText >= 0
       ? translation("Broadcast.composer.chainStepNeedsText", {
           step: chainStepNeedingText + 1,
         })
@@ -1633,6 +1666,7 @@ export default function BroadcastPage() {
     !scheduleInvalid &&
     !scheduledFull &&
     !composerContentOverLimit &&
+    !whatsappImageTooLarge &&
     !showStartMenu;
 
   function buildRecipients(chosen) {
@@ -2979,6 +3013,24 @@ export default function BroadcastPage() {
           onAdd={async (picked) => {
             /* Ficheiros por mensagem (#187): a escolha a mais fica por juntar. */
             if (!(await acceptComposerFiles(picked.length))) return false;
+
+            /* No WhatsApp, as imagens acima de 5 MB não chegam ao contacto. */
+            const tooLarge =
+              channel === "whatsapp"
+                ? picked.find(isWhatsappImageTooLarge)
+                : null;
+            if (tooLarge) {
+              await showAlert({
+                title: translation("Common.error"),
+                message: translation(
+                  "Broadcast.composer.whatsappImageTooLarge",
+                  { name: tooLarge.name },
+                ),
+                tone: "warning",
+              });
+              return false;
+            }
+
             setComposerFiles((prev) => [...prev, ...picked]);
             return true;
           }}

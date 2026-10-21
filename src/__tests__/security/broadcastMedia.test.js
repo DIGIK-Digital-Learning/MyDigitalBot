@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   broadcastMediaRejection,
+  isWhatsappImageTooLarge,
   buildBroadcastMediaKey,
 } from "@/lib/uploads/broadcastMedia";
 
@@ -27,5 +28,31 @@ describe("broadcastMediaRejection", () => {
       "size",
     );
     expect(broadcastMediaRejection("video/quicktime", 1024)).toBe("type");
+  });
+});
+
+describe("isWhatsappImageTooLarge", () => {
+  const MB = 1024 * 1024;
+
+  it("recusa imagens acima de 5 MB e deixa os vídeos e PDF", () => {
+    expect(
+      isWhatsappImageTooLarge({ contentType: "image/png", size: 5 * MB }),
+    ).toBe(false);
+    expect(
+      isWhatsappImageTooLarge({ contentType: "image/png", size: 5 * MB + 1 }),
+    ).toBe(true);
+    expect(
+      isWhatsappImageTooLarge({ contentType: "video/mp4", size: 40 * MB }),
+    ).toBe(false);
+    expect(
+      isWhatsappImageTooLarge({
+        contentType: "application/pdf",
+        size: 40 * MB,
+      }),
+    ).toBe(false);
+  });
+
+  it("sem tamanho conhecido não bloqueia", () => {
+    expect(isWhatsappImageTooLarge({ contentType: "image/png" })).toBe(false);
   });
 });
