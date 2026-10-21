@@ -58,9 +58,10 @@ describe("messageContentProblem", () => {
 
 describe("effectiveFileSizeMb (4b)", () => {
   it.each([
-    [50, 20, "o plano diz 50, valem os 20 técnicos"],
+    [50, 50, "o plano diz 50, valem os 50"],
     [10, 10, "um plano mais baixo manda"],
-    [null, 20, "sem valor no plano, valem os 20 técnicos"],
+    [null, 50, "sem valor no plano, valem os 50 técnicos"],
+    [80, 50, "um plano acima do bucket fica nos 50 técnicos"],
   ])("plano %s → %i MB (%s)", (plan, expected) => {
     expect(effectiveFileSizeMb(plan)).toBe(expected);
   });

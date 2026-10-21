@@ -58,11 +58,11 @@ export function messageContentProblem({ message = "", files = [] }, limits = {})
 }
 
 /* O máximo técnico por ficheiro, hoje (bucket broadcast-media no Supabase). */
-export const TECHNICAL_FILE_MAX_MB = 20;
+export const TECHNICAL_FILE_MAX_MB = 50;
 
 /**
- * MB por ficheiro: o mais baixo entre o máximo técnico (20 MB) e o do plano
- * (#187, 4b). Hoje o plano diz 50, por isso valem os 20 técnicos.
+ * MB por ficheiro: o mais baixo entre o máximo técnico (50 MB) e o do plano
+ * (#187, 4b). Hoje os dois dizem 50.
  */
 export function effectiveFileSizeMb(planFileSizeMb) {
   if (planFileSizeMb === null || planFileSizeMb === undefined) {

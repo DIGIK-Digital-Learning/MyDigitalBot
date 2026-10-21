@@ -260,8 +260,8 @@ export default function BroadcastPage() {
    */
   const messageCharLimit = planLimits?.messageChars ?? null;
   const filesPerMessageLimit = planLimits?.filesPerMessage ?? null;
-  const fileSizeLimitBytes =
-    effectiveFileSizeMb(planLimits?.fileSizeMb) * 1024 * 1024;
+  const fileSizeLimitMb = effectiveFileSizeMb(planLimits?.fileSizeMb);
+  const fileSizeLimitBytes = fileSizeLimitMb * 1024 * 1024;
   const chainStepsLimit = planLimits
     ? (planLimits.chainMessages ?? Infinity)
     : 10;
@@ -1024,7 +1024,7 @@ export default function BroadcastPage() {
     for (const file of pickedFiles) {
       /*
        * Tamanho: o mais baixo entre o máximo técnico e o do plano (#187).
-       * Hoje são os 20 MB técnicos; um plano mais baixo passaria a mandar.
+       * Hoje são os 50 MB do plano; um plano mais baixo passaria a mandar.
        */
       const reason =
         broadcastMediaRejection(contentTypeOf(file), file.size) ||
@@ -1036,7 +1036,7 @@ export default function BroadcastPage() {
             reason === "size"
               ? "Broadcast.composer.fileTooLarge"
               : "Broadcast.composer.fileTypeNotAllowed",
-            { name: file.name },
+            { name: file.name, limit: fileSizeLimitMb },
           ),
         );
       }

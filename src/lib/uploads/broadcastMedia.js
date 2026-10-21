@@ -9,8 +9,9 @@ export const BROADCAST_MEDIA_BUCKETS = [
   LEGACY_BROADCAST_BUCKET,
 ];
 
-// Iguais aos do bucket na migração 20261002120000_broadcast_media_bucket.sql.
-export const BROADCAST_MEDIA_MAX_BYTES = 20 * 1024 * 1024;
+// Iguais aos do bucket (50 MB desde 20261021120000_broadcast_media_50mb.sql,
+// o máximo do plano Free do Supabase).
+export const BROADCAST_MEDIA_MAX_BYTES = 50 * 1024 * 1024;
 
 export const BROADCAST_IMAGE_TYPES = [
   "image/png",

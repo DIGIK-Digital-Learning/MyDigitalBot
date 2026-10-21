@@ -20,10 +20,10 @@ describe("buildBroadcastMediaKey", () => {
 });
 
 describe("broadcastMediaRejection", () => {
-  it("aceita PDF e MP4 até 20 MB e recusa o resto", () => {
+  it("aceita PDF e MP4 até 50 MB e recusa o resto", () => {
     expect(broadcastMediaRejection("application/pdf", 1024)).toBeNull();
-    expect(broadcastMediaRejection("video/mp4", 20 * 1024 * 1024)).toBeNull();
-    expect(broadcastMediaRejection("video/mp4", 20 * 1024 * 1024 + 1)).toBe(
+    expect(broadcastMediaRejection("video/mp4", 50 * 1024 * 1024)).toBeNull();
+    expect(broadcastMediaRejection("video/mp4", 50 * 1024 * 1024 + 1)).toBe(
       "size",
     );
     expect(broadcastMediaRejection("video/quicktime", 1024)).toBe("type");
