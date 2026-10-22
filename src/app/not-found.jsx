@@ -17,7 +17,7 @@ export default async function NotFound() {
   const c = await cookies();
   const isAuthed = !!(c.get("sb-access-token") || c.get("sb:token"));
 
-  const targetHref = `/${locale}${isAuthed ? "/users" : "/login"}`;
+  const targetHref = `/${locale}${isAuthed ? "/dashboard" : "/login"}`;
   const targetLabel = isAuthed ? "Ir para Utilizadores" : "Ir para Login";
 
   return (
