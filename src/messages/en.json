@@ -952,6 +952,7 @@
     "list": {
       "name": "Name",
       "phone": "Phone Number",
+      "thisWeek": "This week",
       "tags": "Tags",
       "assistant": "Assistant"
     },
@@ -4845,6 +4846,8 @@
       "dailyShort": "Sends today",
       "dailyLabel": "Today's sends on this channel",
       "dailyHint": "Each send counts 1, however many people it goes to. A chain counts 1 per message and a scheduled message counts on the day it is scheduled. Automations don't count. Resets at {time}.",
+      "weeklyLabel": "Messages this week on {channel}",
+      "weeklyHint": "Messages each collaborator sent this week on each channel: to the assistant and answers to quizzes, surveys and open questions. Above the limit the assistant stops answering until Monday at 00:00.",
       "scheduledHint": "Counts the messages you scheduled that are still waiting to be sent. Automation messages and chains do not count."
     }
   }

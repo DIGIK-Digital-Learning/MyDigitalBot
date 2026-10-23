@@ -13,3 +13,21 @@ export async function fetchPlanLimits(orgId) {
 
   return data;
 }
+
+/**
+ * Mensagens usadas esta semana por cada colaborador:
+ * `{ limit, resetsAt, usage: { [userId]: { whatsapp, teams } } }`.
+ */
+export async function fetchCollaboratorWeeklyUsage(orgId) {
+  const res = await fetch(
+    `/api/plans/collaborator-usage?orgId=${encodeURIComponent(orgId)}`,
+    { cache: "no-store" },
+  );
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(data?.error || "Could not load weekly usage");
+  }
+
+  return data;
+}

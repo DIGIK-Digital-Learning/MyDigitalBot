@@ -26,6 +26,7 @@ import { useAuth } from "@/app/AuthContext.jsx";
 import { useConfirm } from "@/app/components/Confirm/ConfirmProvider";
 import usePlanLimitPrompt from "@/app/hooks/usePlanLimitPrompt";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
+import useCollaboratorWeeklyUsage from "@/app/hooks/useCollaboratorWeeklyUsage";
 import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 import FilterMenu from "./FilterMenu";
@@ -126,6 +127,14 @@ export default function UsersPage() {
     planLimits?.users != null &&
     planUsage?.users != null &&
     planUsage.users >= planLimits.users;
+
+  /*
+   * Mensagens de cada colaborador esta semana, por canal (100 em cada).
+   * Só o administrador vê estes números; o colaborador recebe apenas o
+   * aviso quando passa o limite.
+   */
+  const weeklyUsage = useCollaboratorWeeklyUsage(orgId);
+  const weeklyHint = translation("Plans.usage.weeklyHint");
 
   const usersUsageCounter = (
     <UsageCounter
@@ -780,6 +789,9 @@ async function openCreateUserModal() {
               <div className={styles.cellHead}>
                 {translation("Users.list.phone")}
               </div>
+              <div className={styles.cellHead} title={weeklyHint}>
+                {translation("Users.list.thisWeek")}
+              </div>
               <div className={styles.cellHead}>
                 {translation("Users.list.tags")}
               </div>
@@ -824,6 +836,25 @@ async function openCreateUserModal() {
 
                   <div className={styles.cellPhone}>
                     {u.phoneNational || u.phone || "—"}
+                  </div>
+
+                  <div className={styles.cellWeek} title={weeklyHint}>
+                    {weeklyUsage.limit !== null &&
+                      ["whatsapp", "teams"].map((channel) => (
+                        <span key={channel} className={styles.weekLine}>
+                          <span className={styles.weekChannel}>
+                            {channel === "whatsapp" ? "WhatsApp" : "Teams"}
+                          </span>
+                          <UsageCounter
+                            used={weeklyUsage.usage[u.id]?.[channel] ?? 0}
+                            limit={weeklyUsage.limit}
+                            label={translation("Plans.usage.weeklyLabel", {
+                              channel:
+                                channel === "whatsapp" ? "WhatsApp" : "Teams",
+                            })}
+                          />
+                        </span>
+                      ))}
                   </div>
 
                   <div className={styles.cellTags}>
