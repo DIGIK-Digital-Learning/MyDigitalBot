@@ -29,8 +29,8 @@ vi.mock("@/lib/repos/trackedLinks.repo", () => ({
   createTrackedLink: vi.fn(),
 }));
 
-vi.mock("@/lib/repos/trackedLinkLibrary.repo", () => ({
-  getTrackedLinkLibraryByOrg: vi.fn(),
+vi.mock("@/lib/repos/trackedLinkSaved.repo", () => ({
+  listSavedTrackedLinks: vi.fn(),
 }));
 
 /*

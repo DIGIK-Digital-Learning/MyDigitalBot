@@ -1,5 +1,5 @@
 import { createTrackedLink } from "@/lib/repos/trackedLinks.repo";
-import { getTrackedLinkLibraryByOrg } from "@/lib/repos/trackedLinkLibrary.repo";
+import { listSavedTrackedLinks } from "@/lib/repos/trackedLinkSaved.repo";
 import crypto from "crypto";
 import { isAllowedDestinationUrl } from "@/lib/security/destinationUrl";
 import { withButtonLinksInText } from "@/lib/whatsapp/linkButton";
@@ -97,7 +97,8 @@ export async function createTrackedLinkForRecipient({
  * com um destino que o envio recusaria não aparece.
  */
 export async function listReusableTrackedLinks(orgId) {
-  const rows = await getTrackedLinkLibraryByOrg(orgId);
+  /* Os links guardados e não eliminados (#189). */
+  const rows = await listSavedTrackedLinks(orgId);
   const seen = new Set();
   const items = [];
 
@@ -112,6 +113,7 @@ export async function listReusableTrackedLinks(orgId) {
     seen.add(identity);
 
     items.push({
+      id: row.id,
       key: String(row.link_key || "").trim(),
       label,
       destinationUrl,

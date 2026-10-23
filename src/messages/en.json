@@ -1476,6 +1476,11 @@
     "linkBubbleTag": "Separate bubble",
     "linkBubbleText": "Bubble text (optional)",
     "linkLibrary": {
+      "delete": "Delete the link {label}",
+      "deleteConfirm": { "title": "Delete link", "message": "The link \"{label}\" leaves the list and no longer counts towards your plan's links. Messages where it was already used keep working and its clicks stay in Metrics.", "confirm": "Delete" },
+      "inUseTitle": "Link in use",
+      "inUseScheduled": "This link is in a scheduled message. Cancel it first to delete the link.",
+      "inUseChain": "This link is in a chain that is still running. You can delete it once the chain ends.",
       "title": "Links already used",
       "search": "Search by name or URL",
       "use": "Use",
@@ -3035,6 +3040,7 @@
         "message": "Individual messages",
         "template": "Templates",
         "media": "Media",
+        "tracked_link": "Tracked links",
         "organization": "Organization"
       },
       "Channels": {
@@ -3068,6 +3074,7 @@
         "message_template_sent": "Template sent to a user",
         "template_created": "WhatsApp template created",
         "media_deleted": "Media file deleted",
+        "tracked_link_deleted": "Tracked link deleted",
         "organization_created": "Organization created",
         "organization_settings_updated": "Organization settings changed",
         "automation_triggered": "Automation triggered",
@@ -4627,6 +4634,7 @@
       "message": "Individual messages",
       "template": "Templates",
       "media": "Media",
+      "tracked_link": "Tracked links",
       "organization": "Organization"
     },
     "Channels": {
@@ -4660,6 +4668,7 @@
       "message_template_sent": "Template sent to a user",
       "template_created": "WhatsApp template created",
       "media_deleted": "Media file deleted",
+      "tracked_link_deleted": "Tracked link deleted",
       "organization_created": "Organization created",
       "organization_settings_updated": "Organization settings changed",
       "automation_triggered": "Automation triggered",
@@ -4822,6 +4831,8 @@
       "filesRemaining": "You can only add {remaining, plural, =0 {no more files} one {# more file} other {# more files}} ({limit} per assistant). Pick fewer files or remove some from the collection.",
       "automationsTitle": "Automation limit reached",
       "automations": "Each account can have up to {limit, plural, one {# automation} other {# automations}}. Delete one to create another.",
+      "trackedLinksTitle": "Link limit reached",
+      "trackedLinksFull": "You've reached your plan's {limit} links. Delete a link in \"Links already used\" to create a new one.",
       "scheduledTitle": "Scheduled message limit reached",
       "dailyTitle": "Today's send limit reached",
       "daily": "You've used today's {limit} sends on {channel}. The counter resets at {time}.",
@@ -4842,6 +4853,8 @@
       "assistantsHint": "Counts all assistants in the account.",
       "automationsLabel": "Automations",
       "automationsHint": "All automations in the account count, active and inactive.",
+      "trackedLinksLabel": "Saved links",
+      "trackedLinksHint": "Each link (name and destination) counts once, even if it's used in several messages. Delete the ones you no longer use to free up space.",
       "scheduledLabel": "Scheduled messages",
       "dailyShort": "Sends today",
       "dailyLabel": "Today's sends on this channel",

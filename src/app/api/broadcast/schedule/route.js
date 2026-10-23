@@ -9,6 +9,7 @@ import {
   hasRoomFor,
   limitReachedBody,
   releaseDailySend,
+  saveTrackedLinksWithinPlan,
 } from "@/lib/services/plans/planLimits";
 import { setAdminDailySendSource } from "@/lib/repos/adminDailySends.repo";
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
@@ -96,6 +97,17 @@ export async function POST(req) {
 
     if (built.error) {
       return NextResponse.json({ error: built.error }, { status: 400 });
+    }
+
+    /*
+     * Links rastreados do plano (#189): os links novos entram na biblioteca
+     * da organização, até 100. Reutilizar um link guardado não conta.
+     */
+    const links = await saveTrackedLinksWithinPlan(orgAuth.orgId, built.payload.trackedLinks, {
+      orgLimits: orgLimits,
+    });
+    if (links.body) {
+      return NextResponse.json(links.body, { status: 409 });
     }
 
     /*

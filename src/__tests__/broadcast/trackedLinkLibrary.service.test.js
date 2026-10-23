@@ -8,9 +8,9 @@ vi.mock("@/lib/repos/trackedLinks.repo", () => ({
   createTrackedLink: vi.fn(async (row) => row),
 }));
 
-vi.mock("@/lib/repos/trackedLinkLibrary.repo", () => ({
-  getTrackedLinkLibraryByOrg: (...args) =>
-    mocks.getTrackedLinkLibraryByOrg(...args),
+/* A biblioteca passou a ser a tabela dos links guardados (#189). */
+vi.mock("@/lib/repos/trackedLinkSaved.repo", () => ({
+  listSavedTrackedLinks: (...args) => mocks.getTrackedLinkLibraryByOrg(...args),
 }));
 
 import {

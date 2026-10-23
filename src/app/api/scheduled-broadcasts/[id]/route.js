@@ -13,6 +13,7 @@ import {
 import { buildScheduledPayload } from "@/lib/services/broadcast/scheduledPayload";
 import { refundScheduledSend } from "@/lib/repos/adminDailySends.repo";
 import { dailySendsDayStart } from "@/lib/plans/dailySends";
+import { saveTrackedLinksWithinPlan } from "@/lib/services/plans/planLimits";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -194,6 +195,15 @@ export async function PATCH(req, { params }) {
 
       if (built.error) {
         return NextResponse.json({ error: built.error }, { status: 400 });
+      }
+
+      /* Links rastreados do plano (#189): um link novo na edição conta. */
+      const links = await saveTrackedLinksWithinPlan(
+        orgAuth.orgId,
+        built.payload.trackedLinks,
+      );
+      if (links.body) {
+        return NextResponse.json(links.body, { status: 409 });
       }
 
       patch.payload = built.payload;
