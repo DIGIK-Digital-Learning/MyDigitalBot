@@ -187,6 +187,93 @@ describe("BroadcastPage", () => {
     });
   });
 
+  describe("envios de hoje (#188)", () => {
+    function withDailySends(dailySends) {
+      const baseFetch = mocks.fetch.getMockImplementation();
+      mocks.fetch.mockImplementation((input, init = {}) => {
+        const url = typeof input === "string" ? input : input.url;
+        if (url.startsWith("/api/plans/limits")) {
+          return makeResponse({
+            plan: { name: "Starter" },
+            limits: { dailyMessagesPerChannel: 10 },
+            usage: { dailySends },
+            dailySendsResetAt: "2026-10-22T23:01:00.000Z",
+          });
+        }
+        return baseFetch(input, init);
+      });
+    }
+
+    it("mostra os envios de hoje do canal escolhido", async () => {
+      withDailySends({ teams: 3, whatsapp: 7 });
+      render(<BroadcastPage />);
+      await screen.findByText("Pedro Silva");
+
+      expect(await screen.findByTestId("daily-sends")).toHaveTextContent(
+        "3 / 10",
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "WhatsApp" }));
+      expect(screen.getByTestId("daily-sends")).toHaveTextContent("7 / 10");
+    });
+
+    it("no 10/10 desativa Enviar e diz quando repõe", async () => {
+      withDailySends({ teams: 0, whatsapp: 10 });
+      await openWhatsapp();
+      fireEvent.click(screen.getByText("Broadcast.start.blank"));
+      typeInEditor(
+        screen.getByRole("textbox", { name: "Broadcast.message" }),
+        "Olá",
+      );
+      fireEvent.click(screen.getByText("Pedro Silva"));
+
+      expect(await screen.findByTestId("daily-sends")).toHaveTextContent(
+        "10 / 10",
+      );
+      expect(
+        screen.getByText(/Plans.limits.daily(?![A-Za-z])/),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Broadcast.send" }),
+      ).toBeDisabled();
+    });
+
+    it("se o servidor recusar, avisa com o limite de hoje", async () => {
+      const baseFetch = mocks.fetch.getMockImplementation();
+      mocks.fetch.mockImplementation((input, init = {}) => {
+        const url = typeof input === "string" ? input : input.url;
+        if (url === "/api/broadcast/whatsapp") {
+          return makeResponse(
+            {
+              code: "DAILY_LIMIT_REACHED",
+              channel: "whatsapp",
+              limit: 10,
+              remaining: 0,
+              resetsAt: "2026-10-22T23:01:00.000Z",
+            },
+            false,
+          );
+        }
+        return baseFetch(input, init);
+      });
+
+      await openWhatsapp();
+      fireEvent.click(screen.getByText("Broadcast.start.blank"));
+      typeInEditor(
+        screen.getByRole("textbox", { name: "Broadcast.message" }),
+        "Olá",
+      );
+      fireEvent.click(screen.getByText("Pedro Silva"));
+      fireEvent.click(screen.getByRole("button", { name: "Broadcast.send" }));
+
+      await waitFor(() =>
+        expect(appMocks.alert).toHaveBeenCalledWith(
+          expect.objectContaining({ title: "Plans.limits.dailyTitle" }),
+        ),
+      );
+    });
+  });
+
   it("mostra o envio em curso e bloqueia o ecrã até o servidor responder", async () => {
     let respond;
     const baseFetch = mocks.fetch.getMockImplementation();

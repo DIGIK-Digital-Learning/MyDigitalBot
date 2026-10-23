@@ -59,6 +59,7 @@ import useTextSuggestion from "./lib/useTextSuggestion";
 import useImageSuggestion from "./hooks/useImageSuggestion";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
 import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
+import { DAILY_SENDS_TIME_ZONE } from "@/lib/plans/dailySends";
 import useTrackedLinkLibrary from "./hooks/useTrackedLinkLibrary";
 import {
   asList,
@@ -116,6 +117,21 @@ function getChannelLabel(channel) {
   return channel === "whatsapp" ? "WhatsApp" : "Teams";
 }
 
+/*
+ * Hora a que os envios de hoje voltam a 0 (#188), sempre na hora de Lisboa
+ * ("00:01"). Sem a hora do servidor, mostra a regra.
+ */
+function formatDailyResetTime(resetsAt, locale) {
+  const date = resetsAt ? new Date(resetsAt) : null;
+  if (!date || Number.isNaN(date.getTime())) return "00:01";
+
+  return new Intl.DateTimeFormat(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: DAILY_SENDS_TIME_ZONE,
+  }).format(date);
+}
+
 export default function BroadcastPage() {
   const { user } = useAuth();
   const { org } = useOrganization(user);
@@ -124,6 +140,7 @@ export default function BroadcastPage() {
   const {
     limits: planLimits,
     usage: planUsage,
+    dailySendsResetAt,
     reload: reloadPlanUsage,
   } = usePlanLimits(org?.id);
 
@@ -1617,11 +1634,45 @@ export default function BroadcastPage() {
         ).find(isWhatsappImageTooLarge)
       : null;
 
+  /*
+   * Envios de hoje no canal (#188): 10 por dia em cada canal, para a conta
+   * toda. Um envio gasta 1, seja para quantos colaboradores for; uma corrente
+   * gasta 1 por mensagem. Sem os números (ainda a carregar ou sem limite no
+   * plano) nada é bloqueado: o servidor decide na mesma.
+   */
+  const dailySendsLimit = planLimits?.dailyMessagesPerChannel ?? null;
+  const dailySendsUsed = planUsage?.dailySends?.[channel] ?? null;
+  const dailySendsNeeded = chainMode ? chainSteps.length : 1;
+  const dailySendsRemaining =
+    dailySendsLimit === null || dailySendsUsed === null
+      ? null
+      : Math.max(dailySendsLimit - dailySendsUsed, 0);
+  const dailySendsFull =
+    dailySendsRemaining !== null && dailySendsNeeded > dailySendsRemaining;
+  const dailySendsResetTime = formatDailyResetTime(dailySendsResetAt, locale);
+
+  const dailySendsWarning = !dailySendsFull
+    ? null
+    : chainMode && dailySendsRemaining > 0
+      ? translation("Plans.limits.dailyChain", {
+          steps: dailySendsNeeded,
+          remaining: dailySendsRemaining,
+          channel: getChannelLabel(channel),
+          time: dailySendsResetTime,
+        })
+      : translation("Plans.limits.daily", {
+          limit: dailySendsLimit,
+          channel: getChannelLabel(channel),
+          time: dailySendsResetTime,
+        });
+
   const composerWarning = whatsappImageTooLarge
     ? translation("Broadcast.composer.whatsappImageTooLarge", {
         name: whatsappImageTooLarge.name,
       })
-    : chainStepNeedingText >= 0
+    : dailySendsWarning
+      ? dailySendsWarning
+      : chainStepNeedingText >= 0
       ? translation("Broadcast.composer.chainStepNeedsText", {
           step: chainStepNeedingText + 1,
         })
@@ -1667,6 +1718,7 @@ export default function BroadcastPage() {
     !scheduledFull &&
     !composerContentOverLimit &&
     !whatsappImageTooLarge &&
+    !dailySendsFull &&
     !showStartMenu;
 
   function buildRecipients(chosen) {
@@ -2088,6 +2140,35 @@ export default function BroadcastPage() {
    * se era esse o erro, para quem chama não mostrar outro aviso.
    */
   async function showContentLimitAlert(data) {
+    /*
+     * Limite diário de envios (#188): o servidor diz quantos sobram e quando
+     * o contador volta a 0. Os números do ecrã acompanham.
+     */
+    if (data?.code === "DAILY_LIMIT_REACHED") {
+      reloadPlanUsage();
+      const time = formatDailyResetTime(data.resetsAt, locale);
+      const channelName = getChannelLabel(data.channel || channel);
+
+      await showAlert({
+        title: translation("Plans.limits.dailyTitle"),
+        message:
+          chainMode && data.remaining > 0
+            ? translation("Plans.limits.dailyChain", {
+                steps: chainSteps.length,
+                remaining: data.remaining,
+                channel: channelName,
+                time,
+              })
+            : translation("Plans.limits.daily", {
+                limit: data.limit,
+                channel: channelName,
+                time,
+              }),
+        tone: "warning",
+      });
+      return true;
+    }
+
     const keys = {
       MESSAGE_TOO_LONG: "messageTooLong",
       TOO_MANY_FILES: "messageFiles",
@@ -2155,6 +2236,7 @@ export default function BroadcastPage() {
       });
     } finally {
       setSending(false);
+      reloadPlanUsage();
     }
   }
 
@@ -2215,6 +2297,7 @@ export default function BroadcastPage() {
       });
     } finally {
       setSending(false);
+      reloadPlanUsage();
     }
   }
 
@@ -2310,6 +2393,7 @@ export default function BroadcastPage() {
         });
       } finally {
         setSending(false);
+        reloadPlanUsage();
       }
 
       return;
@@ -2408,6 +2492,7 @@ export default function BroadcastPage() {
       });
     } finally {
       setSending(false);
+      reloadPlanUsage();
     }
   }
 
@@ -2542,6 +2627,7 @@ export default function BroadcastPage() {
         });
       } finally {
         setSending(false);
+        reloadPlanUsage();
       }
 
       return;
@@ -2640,6 +2726,7 @@ export default function BroadcastPage() {
       });
     } finally {
       setSending(false);
+      reloadPlanUsage();
     }
   }
 
@@ -2987,6 +3074,21 @@ export default function BroadcastPage() {
         selectedCount={isGroupAudience ? selectedGroups.size : selected.size}
         sending={sending}
         canSend={canSend}
+        dailyCounter={
+          <UsageCounter
+            used={dailySendsUsed}
+            limit={dailySendsLimit}
+            label={translation("Plans.usage.dailyLabel")}
+            hint={translation("Plans.usage.dailyHint", {
+              time: dailySendsResetTime,
+            })}
+          />
+        }
+        dailyCounterLabel={
+          dailySendsLimit !== null && dailySendsUsed !== null
+            ? translation("Plans.usage.dailyShort")
+            : null
+        }
         deliveryMode={deliveryMode}
         scheduleActionLabel={scheduleActionLabel}
         onPrimaryClick={

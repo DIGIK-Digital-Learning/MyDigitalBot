@@ -11,6 +11,8 @@ import {
   requireOrgForScheduledBroadcast,
 } from "@/lib/auth/guards";
 import { buildScheduledPayload } from "@/lib/services/broadcast/scheduledPayload";
+import { refundScheduledSend } from "@/lib/repos/adminDailySends.repo";
+import { dailySendsDayStart } from "@/lib/plans/dailySends";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -213,6 +215,14 @@ export async function PATCH(req, { params }) {
       patch,
     );
 
+    /*
+     * Limite diário de envios (#188): cancelar uma agendada no dia em que
+     * foi agendada devolve o envio ao canal dela. Noutro dia não muda nada.
+     */
+    if (patch.status === "cancelled") {
+      await refundScheduledSend(orgAuth.broadcastId, dailySendsDayStart());
+    }
+
     await recordAuditEvent(orgAuth, {
       action: AUDIT_ACTIONS.BROADCAST_SCHEDULE_UPDATED,
       entityType: "scheduled_broadcast",
@@ -262,6 +272,9 @@ export async function DELETE(_req, { params }) {
     await deleteScheduledBroadcast(
       orgAuth.broadcastId,
     );
+
+    /* Eliminar no mesmo dia também devolve o envio (#188). */
+    await refundScheduledSend(orgAuth.broadcastId, dailySendsDayStart());
 
     await recordAuditEvent(orgAuth, {
       action: AUDIT_ACTIONS.BROADCAST_SCHEDULE_DELETED,

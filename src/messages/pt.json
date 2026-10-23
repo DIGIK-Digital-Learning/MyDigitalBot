@@ -4830,6 +4830,9 @@
       "automationsTitle": "Limite de automações atingido",
       "automations": "Cada conta pode ter até {limit, plural, one {# automação} other {# automações}}. Apaga uma para criares outra.",
       "scheduledTitle": "Limite de mensagens agendadas atingido",
+      "dailyTitle": "Limite de envios de hoje atingido",
+      "daily": "Já usaste os {limit} envios de hoje no {channel}. O contador volta a 0 às {time}.",
+      "dailyChain": "Esta corrente precisa de {steps} envios, mas hoje só te {remaining, plural, one {resta # envio} other {restam # envios}} no {channel}. Encurta a corrente ou espera pelas {time}.",
       "scheduled": "Podes ter até {limit, plural, one {# mensagem agendada} other {# mensagens agendadas}} à espera de envio. Cancela ou apaga uma nas mensagens agendadas para agendares outra."
     },
     "counter": {
@@ -4847,6 +4850,9 @@
       "automationsLabel": "Automações",
       "automationsHint": "Contam todas as automações da conta, ativas e inativas.",
       "scheduledLabel": "Mensagens agendadas",
+      "dailyShort": "Envios hoje",
+      "dailyLabel": "Envios de hoje neste canal",
+      "dailyHint": "Cada envio conta 1, seja para quantos colaboradores for. Uma corrente conta 1 por mensagem e uma agendada conta no dia em que é agendada. As automações não contam. Volta a 0 às {time}.",
       "scheduledHint": "Conta as mensagens agendadas por ti que ainda estão à espera de envio. As das automações e as correntes não contam."
     }
   }

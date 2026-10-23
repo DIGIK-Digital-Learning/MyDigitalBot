@@ -4822,6 +4822,9 @@
       "automationsTitle": "Automation limit reached",
       "automations": "Each account can have up to {limit, plural, one {# automation} other {# automations}}. Delete one to create another.",
       "scheduledTitle": "Scheduled message limit reached",
+      "dailyTitle": "Today's send limit reached",
+      "daily": "You've used today's {limit} sends on {channel}. The counter resets at {time}.",
+      "dailyChain": "This chain needs {steps} sends, but you only have {remaining, plural, one {# send} other {# sends}} left today on {channel}. Shorten the chain or wait until {time}.",
       "scheduled": "You can have up to {limit, plural, one {# scheduled message} other {# scheduled messages}} waiting to be sent. Cancel or delete one in scheduled messages to schedule another."
     },
     "counter": {
@@ -4839,6 +4842,9 @@
       "automationsLabel": "Automations",
       "automationsHint": "All automations in the account count, active and inactive.",
       "scheduledLabel": "Scheduled messages",
+      "dailyShort": "Sends today",
+      "dailyLabel": "Today's sends on this channel",
+      "dailyHint": "Each send counts 1, however many people it goes to. A chain counts 1 per message and a scheduled message counts on the day it is scheduled. Automations don't count. Resets at {time}.",
       "scheduledHint": "Counts the messages you scheduled that are still waiting to be sent. Automation messages and chains do not count."
     }
   }

@@ -10,7 +10,12 @@ import {
 import { sendReadChainStep } from "@/lib/services/broadcast/readChains/sendReadChainStep";
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
-import { checkMessageContent } from "@/lib/services/plans/planLimits";
+import {
+  checkMessageContent,
+  claimDailySend,
+  releaseDailySend,
+} from "@/lib/services/plans/planLimits";
+import { setAdminDailySendSource } from "@/lib/repos/adminDailySends.repo";
 import {
   attachChainStepQuestions,
   parseChainStepQuestions,
@@ -197,15 +202,37 @@ export async function POST(req) {
       );
     }
 
-    const chain = await createMessageChain({
-      organizationId: orgAuth.orgId,
-      createdByUserId: orgAuth.user.id,
-      channel,
-      status: isScheduled ? "scheduled" : "active",
-      scheduledFor: scheduledForIso,
-      timezone: timezone || null,
-      recipientCount: dedupedRecipients.length,
+    /*
+     * Limite diário de envios do canal (#188): uma corrente de N passos
+     * conta N, todos no dia em que é criada (agendada ou não). Assim nunca
+     * fica parada a meio por falta de envios num dia seguinte.
+     */
+    const daily = await claimDailySend(orgAuth.orgId, channel, {
+      units: steps.length,
+      sourceType: "message_chain",
+      orgLimits: content.orgLimits,
     });
+    if (daily.body) {
+      return NextResponse.json(daily.body, { status: 409 });
+    }
+
+    let chain;
+    try {
+      chain = await createMessageChain({
+        organizationId: orgAuth.orgId,
+        createdByUserId: orgAuth.user.id,
+        channel,
+        status: isScheduled ? "scheduled" : "active",
+        scheduledFor: scheduledForIso,
+        timezone: timezone || null,
+        recipientCount: dedupedRecipients.length,
+      });
+    } catch (err) {
+      await releaseDailySend(daily.claimKey);
+      throw err;
+    }
+
+    await setAdminDailySendSource(daily.claimKey, chain.id);
 
     /*
      * Os passos com pergunta ganham a sua linha em `question`, partilhada
