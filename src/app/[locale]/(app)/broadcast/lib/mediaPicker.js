@@ -25,7 +25,15 @@ export function mediaForPicker(items = [], kind, attachedUrls = []) {
     .map((item) => ({ ...item, attached: attached.has(item.url) }));
 }
 
-/* Formato dos anexos do composer, igual ao que sai de um upload. */
+/*
+ * Formato dos anexos do composer, igual ao que sai de um upload. O tamanho
+ * serve para o limite das imagens no WhatsApp.
+ */
 export function toComposerFile(item) {
-  return { url: item.url, name: item.name, contentType: item.contentType };
+  return {
+    url: item.url,
+    name: item.name,
+    contentType: item.contentType,
+    size: item.size,
+  };
 }

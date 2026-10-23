@@ -10,6 +10,7 @@ import {
 } from "@/lib/auth/guards";
 import { parseOpeningOptions } from "@/lib/services/broadcast/openingOptions";
 import { parseQuestionOptions } from "@/lib/services/broadcast/questionOptions";
+import { checkMessageContent } from "@/lib/services/plans/planLimits";
 
 export async function POST(req) {
   try {
@@ -37,6 +38,19 @@ export async function POST(req) {
 
     if (question.error) {
       return NextResponse.json({ error: question.error }, { status: 400 });
+    }
+
+    /*
+     * Conteúdo da mensagem dentro do plano (#187): caracteres e ficheiros.
+     * Os imageUrls são as mesmas imagens que já vão em files, por isso só se
+     * contam os files.
+     */
+    const content = await checkMessageContent(orgAuth.orgId, {
+      message: body?.message || "",
+      files: Array.isArray(body?.files) ? body.files : [],
+    });
+    if (content.body) {
+      return NextResponse.json(content.body, { status: 400 });
     }
 
     const result = await sendWhatsappBroadcast({

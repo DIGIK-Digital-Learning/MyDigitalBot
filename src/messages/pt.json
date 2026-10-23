@@ -1652,7 +1652,8 @@
         "addImage": "Imagem",
         "addVideo": "Vídeo",
         "addDocument": "Documento",
-        "fileTooLarge": "O ficheiro {name} tem mais de 20 MB.",
+        "fileTooLarge": "O ficheiro {name} tem mais de {limit} MB.",
+        "whatsappImageTooLarge": "A imagem {name} tem mais de 5 MB. No WhatsApp as imagens podem ter até 5 MB.",
         "fileTypeNotAllowed": "O ficheiro {name} não é suportado. Usa imagens (PNG, JPG, WebP, GIF), PDF ou MP4.",
         "addLink": "Link rastreado",
         "linkButtonHint": "No WhatsApp, o link vai neste botão.",
@@ -3227,7 +3228,8 @@
       "addImage": "Imagem",
       "addVideo": "Vídeo",
       "addDocument": "Documento",
-      "fileTooLarge": "O ficheiro {name} tem mais de 20 MB.",
+      "fileTooLarge": "O ficheiro {name} tem mais de {limit} MB.",
+      "whatsappImageTooLarge": "A imagem {name} tem mais de 5 MB. No WhatsApp as imagens podem ter até 5 MB.",
       "fileTypeNotAllowed": "O ficheiro {name} não é suportado. Usa imagens (PNG, JPG, WebP, GIF), PDF ou MP4.",
       "addLink": "Link rastreado",
       "linkButtonHint": "No WhatsApp, o link vai neste botão.",
@@ -4804,6 +4806,14 @@
   },
   "Plans": {
     "limits": {
+      "messageTooLongTitle": "Mensagem demasiado longa",
+      "messageTooLong": "Cada mensagem pode ter até {limit} caracteres. Encurta o texto para enviares.",
+      "messageFilesTitle": "Limite de ficheiros atingido",
+      "messageFiles": "Cada mensagem pode ter até {limit, plural, one {# ficheiro} other {# ficheiros}}. Tira algum para juntares outro.",
+      "messageFilesRemaining": "Podes juntar só mais {remaining, plural, =0 {nenhum ficheiro} one {# ficheiro} other {# ficheiros}} a esta mensagem (máximo de {limit}). Escolhe menos ou tira algum.",
+      "chainTooLongTitle": "Corrente demasiado longa",
+      "chainTooLong": "Uma corrente pode ter até {limit} mensagens.",
+      "inStep": "Na mensagem {step} da corrente:",
       "assistantsTitle": "Limite de assistentes atingido",
       "assistants": "O plano {plan} permite criar {limit, plural, one {# assistente} other {# assistentes}}. Atualiza o teu plano para criares mais.",
       "assistantsNoDetail": "Chegaste ao limite de assistentes do teu plano. Atualiza o teu plano para criares mais.",
@@ -4826,6 +4836,8 @@
       "olderThanLimit": "Criado antes do limite de {limit} caracteres: pode ficar com o tamanho que tem, mas não aumentar."
     },
     "usage": {
+      "messageFilesLabel": "Ficheiros da mensagem",
+      "messageFilesHint": "Cada mensagem pode levar até este número de ficheiros.",
       "usersLabel": "Utilizadores",
       "usersHint": "Conta todos os utilizadores da conta.",
       "filesLabel": "Ficheiros do assistente",

@@ -9,8 +9,12 @@ export const BROADCAST_MEDIA_BUCKETS = [
   LEGACY_BROADCAST_BUCKET,
 ];
 
-// Iguais aos do bucket na migração 20261002120000_broadcast_media_bucket.sql.
-export const BROADCAST_MEDIA_MAX_BYTES = 20 * 1024 * 1024;
+// Iguais aos do bucket (50 MB desde 20261021120000_broadcast_media_50mb.sql,
+// o máximo do plano Free do Supabase).
+export const BROADCAST_MEDIA_MAX_BYTES = 50 * 1024 * 1024;
+
+// O WhatsApp só aceita imagens até 5 MB. Vídeos e PDF ficam no limite do bucket.
+export const WHATSAPP_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 
 export const BROADCAST_IMAGE_TYPES = [
   "image/png",
@@ -65,4 +69,15 @@ export function broadcastMediaRejection(contentType, size) {
   if (!BROADCAST_MEDIA_TYPES.includes(contentType)) return "type";
   if (Number(size) > BROADCAST_MEDIA_MAX_BYTES) return "size";
   return null;
+}
+
+/**
+ * Imagem grande demais para o WhatsApp. Ficheiros sem tamanho conhecido
+ * (anexos de antes de guardarmos o tamanho) não são bloqueados.
+ */
+export function isWhatsappImageTooLarge(file) {
+  return (
+    BROADCAST_IMAGE_TYPES.includes(file?.contentType) &&
+    Number(file?.size) > WHATSAPP_IMAGE_MAX_BYTES
+  );
 }

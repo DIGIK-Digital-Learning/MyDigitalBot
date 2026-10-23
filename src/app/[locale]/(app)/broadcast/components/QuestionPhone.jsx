@@ -7,6 +7,7 @@ import WhatsAppPhone, {
 import styles from "../broadcast.module.css";
 import { BubbleImages, FileBubbles } from "./ComposerAttachments";
 import { ImageSuggestBubble } from "./ImageSuggestInPhone";
+import MessageLimitsRow from "./MessageLimitsRow";
 import LinkButtonPreview, { LinkBubblesPreview } from "./LinkButtonPreview";
 import { PlusMenuBar } from "./PlusMenu";
 import { SuggestBubble } from "./SuggestInPhone";
@@ -82,6 +83,17 @@ export default function QuestionPhone({
               ariaLabel={bodyLabel}
             />
           </div>
+
+          {/*
+            Ficheiros da pergunta dentro do plano (#187). Os caracteres não:
+            o enunciado tem o seu limite (1.024).
+          */}
+          {tools?.messageLimits ? (
+            <MessageLimitsRow
+              limits={{ ...tools.messageLimits, charLimit: null }}
+              translation={translation}
+            />
+          ) : null}
         </WhatsAppBubble>
 
         {/* Botão só na pergunta aberta: quiz e sondagem têm as opções. */}

@@ -12,6 +12,7 @@ import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
 import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
 import { buildScheduledPayload } from "@/lib/services/broadcast/scheduledPayload";
+import { messageContentProblem } from "@/lib/plans/messageLimits";
 
 export async function POST(req) {
   try {
@@ -61,6 +62,26 @@ export async function POST(req) {
       return NextResponse.json(
         limitReachedBody("SCHEDULED_LIMIT_REACHED", "scheduledMessages", orgLimits),
         { status: 409 },
+      );
+    }
+
+    /* Conteúdo da mensagem dentro do plano (#187): caracteres e ficheiros. */
+    const contentProblem = messageContentProblem(
+      {
+        message: payload?.message || "",
+        files: Array.isArray(payload?.files) ? payload.files : [],
+      },
+      orgLimits.limits,
+    );
+    if (contentProblem) {
+      return NextResponse.json(
+        {
+          error: `Plan limit reached: ${contentProblem.code}`,
+          code: contentProblem.code,
+          plan: orgLimits.plan?.name ?? null,
+          limit: contentProblem.limit,
+        },
+        { status: 400 },
       );
     }
 

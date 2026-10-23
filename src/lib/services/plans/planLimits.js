@@ -1,5 +1,7 @@
 import { getOrganizationPlan } from "@/lib/repos/plans.repo";
 
+import { messageContentProblem } from "@/lib/plans/messageLimits";
+
 /* As regras puras vivem em limitRules.js (servem também aos ecrãs). */
 export { hasRoomFor, limitKeepingCurrent } from "@/lib/plans/limitRules";
 
@@ -80,4 +82,35 @@ export function limitReachedBody(code, limitName, orgLimits = null) {
     plan: orgLimits?.plan?.name ?? null,
     limit: orgLimits?.limits?.[limitName] ?? null,
   };
+}
+
+/**
+ * Verifica o conteúdo de uma ou mais mensagens (#187): até 1.500 caracteres
+ * (contados como a pessoa os vê) e até 5 ficheiros cada. `messages` é uma
+ * lista de `{ message, files }` — numa corrente, um por passo.
+ *
+ * Devolve `{ orgLimits }` se estiver tudo dentro, ou `{ orgLimits, body }`
+ * com a resposta 400 a dar (com `step` quando é um passo de uma corrente).
+ */
+export async function checkMessageContent(orgId, messages, { deps = {} } = {}) {
+  const orgLimits = await getOrgLimits(orgId, { deps });
+  const list = Array.isArray(messages) ? messages : [messages];
+
+  for (const [index, item] of list.entries()) {
+    const problem = messageContentProblem(item || {}, orgLimits.limits);
+    if (!problem) continue;
+
+    return {
+      orgLimits,
+      body: {
+        error: `Plan limit reached: ${problem.code}`,
+        code: problem.code,
+        plan: orgLimits.plan?.name ?? null,
+        limit: problem.limit,
+        ...(list.length > 1 ? { step: index + 1 } : {}),
+      },
+    };
+  }
+
+  return { orgLimits };
 }

@@ -1644,7 +1644,8 @@
         "addImage": "Image",
         "addVideo": "Video",
         "addDocument": "Document",
-        "fileTooLarge": "The file {name} is larger than 20 MB.",
+        "fileTooLarge": "The file {name} is larger than {limit} MB.",
+        "whatsappImageTooLarge": "The image {name} is larger than 5 MB. WhatsApp images can be up to 5 MB.",
         "fileTypeNotAllowed": "The file {name} is not supported. Use images (PNG, JPG, WebP, GIF), PDF or MP4.",
         "addLink": "Tracked link",
         "linkButtonHint": "On WhatsApp, the link goes in this button.",
@@ -3219,7 +3220,8 @@
       "addImage": "Image",
       "addVideo": "Video",
       "addDocument": "Document",
-      "fileTooLarge": "The file {name} is larger than 20 MB.",
+      "fileTooLarge": "The file {name} is larger than {limit} MB.",
+      "whatsappImageTooLarge": "The image {name} is larger than 5 MB. WhatsApp images can be up to 5 MB.",
       "fileTypeNotAllowed": "The file {name} is not supported. Use images (PNG, JPG, WebP, GIF), PDF or MP4.",
       "addLink": "Tracked link",
       "linkButtonHint": "On WhatsApp, the link goes in this button.",
@@ -4796,6 +4798,14 @@
   },
   "Plans": {
     "limits": {
+      "messageTooLongTitle": "Message too long",
+      "messageTooLong": "Each message can have up to {limit} characters. Shorten the text to send.",
+      "messageFilesTitle": "File limit reached",
+      "messageFiles": "Each message can have up to {limit, plural, one {# file} other {# files}}. Remove one to add another.",
+      "messageFilesRemaining": "You can only add {remaining, plural, =0 {no more files} one {# more file} other {# more files}} to this message ({limit} max). Pick fewer or remove some.",
+      "chainTooLongTitle": "Chain too long",
+      "chainTooLong": "A chain can have up to {limit} messages.",
+      "inStep": "In chain message {step}:",
       "assistantsTitle": "Assistant limit reached",
       "assistants": "The {plan} plan lets you create {limit, plural, one {# assistant} other {# assistants}}. Upgrade your plan to create more.",
       "assistantsNoDetail": "You have reached your plan's assistant limit. Upgrade your plan to create more.",
@@ -4818,6 +4828,8 @@
       "olderThanLimit": "Created before the {limit}-character limit: it can keep its current length but not grow."
     },
     "usage": {
+      "messageFilesLabel": "Message files",
+      "messageFilesHint": "Each message can carry up to this many files.",
       "usersLabel": "Users",
       "usersHint": "Counts all users in the account.",
       "filesLabel": "Assistant files",

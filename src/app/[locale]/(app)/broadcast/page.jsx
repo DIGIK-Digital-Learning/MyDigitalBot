@@ -10,8 +10,13 @@ import {
   BROADCAST_MEDIA_ACCEPT,
   BROADCAST_MEDIA_BUCKET,
   broadcastMediaRejection,
+  isWhatsappImageTooLarge,
   buildBroadcastMediaKey,
 } from "@/lib/uploads/broadcastMedia";
+import {
+  effectiveFileSizeMb,
+  visibleMessageLength,
+} from "@/lib/plans/messageLimits";
 import { createClient } from "@/utils/supabase/client";
 import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
 import { useAlert } from "@/app/components/Alert/AlertProvider";
@@ -246,6 +251,44 @@ export default function BroadcastPage() {
 
   const composerMessage = chainMode ? activeChainStep?.message || "" : message;
   const composerFiles = chainMode ? activeChainStepFiles : files;
+
+  /*
+   * Limites do conteúdo da mensagem (#187), calculados uma vez e usados em
+   * todo o composer: caracteres (como a pessoa os vê), ficheiros por
+   * mensagem, MB por ficheiro e passos da corrente. Enquanto os limites não
+   * chegam, nada é bloqueado (a corrente fica nos 10 de antes); o servidor
+   * decide na mesma.
+   */
+  const messageCharLimit = planLimits?.messageChars ?? null;
+  const filesPerMessageLimit = planLimits?.filesPerMessage ?? null;
+  const fileSizeLimitMb = effectiveFileSizeMb(planLimits?.fileSizeMb);
+  const fileSizeLimitBytes = fileSizeLimitMb * 1024 * 1024;
+  const chainStepsLimit = planLimits
+    ? (planLimits.chainMessages ?? Infinity)
+    : 10;
+  const composerMessageLength = visibleMessageLength(composerMessage);
+  const composerFilesFull =
+    filesPerMessageLimit !== null &&
+    composerFiles.length >= filesPerMessageLimit;
+
+  /* Os caracteres só contam na mensagem normal e nos passos da corrente. */
+  const countsMessageChars =
+    chainMode || (!isQuizMode && !isSurveyMode && !isOpenQuestionMode);
+
+  function messageOverLimit(text, fileList) {
+    const tooLong =
+      messageCharLimit !== null &&
+      visibleMessageLength(text || "") > messageCharLimit;
+    const tooManyFiles =
+      filesPerMessageLimit !== null &&
+      (fileList || []).length > filesPerMessageLimit;
+    return tooLong || tooManyFiles;
+  }
+
+  /* Numa corrente vê-se cada passo; fora dela, a mensagem do composer. */
+  const composerContentOverLimit = chainMode
+    ? chainSteps.some((step) => messageOverLimit(step.message, step.files))
+    : messageOverLimit(countsMessageChars ? composerMessage : "", composerFiles);
   const composerTrackedLinks = chainMode
     ? activeChainStepTrackedLinks
     : trackedLinks;
@@ -395,7 +438,7 @@ export default function BroadcastPage() {
 
   function addChainStep() {
     setChainSteps((prev) => {
-      if (prev.length >= 10) return prev;
+      if (prev.length >= chainStepsLimit) return prev;
 
       const next = [...prev, makeChainStep()];
       setActiveChainStepIndex(next.length - 1);
@@ -406,7 +449,7 @@ export default function BroadcastPage() {
 
   function duplicateChainStep() {
     setChainSteps((prev) => {
-      if (prev.length >= 10) return prev;
+      if (prev.length >= chainStepsLimit) return prev;
 
       const current = prev[activeChainStepIndex] || makeChainStep();
 
@@ -980,7 +1023,29 @@ export default function BroadcastPage() {
 
     /* Valida todos antes de subir o primeiro, para não ficar meio envio. */
     for (const file of pickedFiles) {
-      const reason = broadcastMediaRejection(contentTypeOf(file), file.size);
+      /*
+       * Tamanho: o mais baixo entre o máximo técnico e o do plano (#187).
+       * Hoje são os 50 MB do plano; um plano mais baixo passaria a mandar.
+       */
+      const reason =
+        broadcastMediaRejection(contentTypeOf(file), file.size) ||
+        (Number(file.size) > fileSizeLimitBytes ? "size" : null);
+
+      /* No WhatsApp, as imagens acima de 5 MB não chegam ao contacto. */
+      if (
+        !reason &&
+        channel === "whatsapp" &&
+        isWhatsappImageTooLarge({
+          contentType: contentTypeOf(file),
+          size: file.size,
+        })
+      ) {
+        throw new Error(
+          translation("Broadcast.composer.whatsappImageTooLarge", {
+            name: file.name,
+          }),
+        );
+      }
 
       if (reason) {
         throw new Error(
@@ -988,7 +1053,7 @@ export default function BroadcastPage() {
             reason === "size"
               ? "Broadcast.composer.fileTooLarge"
               : "Broadcast.composer.fileTypeNotAllowed",
-            { name: file.name },
+            { name: file.name, limit: fileSizeLimitMb },
           ),
         );
       }
@@ -1014,6 +1079,7 @@ export default function BroadcastPage() {
           url: pub.publicUrl,
           name: file.name || "file",
           contentType: ct,
+          size: file.size,
         });
       }
     }
@@ -1021,9 +1087,34 @@ export default function BroadcastPage() {
     return uploaded;
   };
 
+  /*
+   * Ficheiros por mensagem (#187): quantos ainda cabem. Uma escolha que passe
+   * o limite é recusada inteira, antes de enviar qualquer coisa para o
+   * armazenamento, com o aviso de quantos ainda se podem juntar.
+   */
+  async function acceptComposerFiles(adding) {
+    if (filesPerMessageLimit === null) return true;
+    if (composerFiles.length + adding <= filesPerMessageLimit) return true;
+
+    await showAlert({
+      title: translation("Plans.limits.messageFilesTitle"),
+      message: translation("Plans.limits.messageFilesRemaining", {
+        remaining: Math.max(filesPerMessageLimit - composerFiles.length, 0),
+        limit: filesPerMessageLimit,
+      }),
+      tone: "warning",
+    });
+    return false;
+  }
+
   async function handlePickFiles(e) {
     const picked = Array.from(e.target.files || []);
     if (!picked.length) return;
+
+    if (!(await acceptComposerFiles(picked.length))) {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
 
     try {
       const uploaded = await supabaseUpload(picked);
@@ -1189,6 +1280,11 @@ export default function BroadcastPage() {
     orgId: org?.id,
     resetKey: `${channel}:${composeMode}:${chainMode}:${activeChainStepIndex}`,
     onUse: async (file) => {
+      /* Ficheiros por mensagem (#187): sem lugar, a imagem fica por usar. */
+      if (!(await acceptComposerFiles(1))) {
+        throw new Error("Plan limit reached: filesPerMessage");
+      }
+
       const uploaded = await supabaseUpload([file]);
       setComposerFiles((prev) => [...prev, ...uploaded]);
     },
@@ -1263,6 +1359,23 @@ export default function BroadcastPage() {
     imageSuggest: imageSuggestion,
     linkPreview,
     onRemoveLink: removeTrackedLink,
+    /*
+     * Limites da mensagem (#187), para o balão (contadores) e o "+"
+     * (tipos de ficheiro desativados no limite).
+     */
+    messageLimits: {
+      length: composerMessageLength,
+      charLimit: countsMessageChars ? messageCharLimit : null,
+      files: composerFiles.length,
+      filesLimit: filesPerMessageLimit,
+      filesFull: composerFilesFull,
+      filesFullHint:
+        filesPerMessageLimit !== null
+          ? translation("Plans.limits.messageFiles", {
+              limit: filesPerMessageLimit,
+            })
+          : undefined,
+    },
   };
 
   /* Num grupo não há links rastreados (#166): o "+" deixa de os oferecer. */
@@ -1492,8 +1605,23 @@ export default function BroadcastPage() {
       )
     : -1;
 
-  const composerWarning =
-    chainStepNeedingText >= 0
+  /*
+   * Imagem acima de 5 MB numa mensagem de WhatsApp: acontece quando se junta
+   * no Teams e depois se muda de canal. Enviar fica desativado até a tirar.
+   */
+  const whatsappImageTooLarge =
+    channel === "whatsapp"
+      ? (chainMode
+          ? chainSteps.flatMap((step) => step.files || [])
+          : composerFiles
+        ).find(isWhatsappImageTooLarge)
+      : null;
+
+  const composerWarning = whatsappImageTooLarge
+    ? translation("Broadcast.composer.whatsappImageTooLarge", {
+        name: whatsappImageTooLarge.name,
+      })
+    : chainStepNeedingText >= 0
       ? translation("Broadcast.composer.chainStepNeedsText", {
           step: chainStepNeedingText + 1,
         })
@@ -1532,8 +1660,14 @@ export default function BroadcastPage() {
     planUsage?.scheduledMessages != null &&
     planUsage.scheduledMessages >= planLimits.scheduledMessages;
 
+  /* Mensagem acima dos limites (#187): enviar e agendar ficam desativados. */
   const canSend =
-    baseCanSend && !scheduleInvalid && !scheduledFull && !showStartMenu;
+    baseCanSend &&
+    !scheduleInvalid &&
+    !scheduledFull &&
+    !composerContentOverLimit &&
+    !whatsappImageTooLarge &&
+    !showStartMenu;
 
   function buildRecipients(chosen) {
     return chosen
@@ -1948,6 +2082,32 @@ export default function BroadcastPage() {
     return true;
   }
 
+  /*
+   * Conteúdo acima dos limites do plano (#187), recusado pelo servidor:
+   * aviso simples, só com OK. Numa corrente diz qual é o passo. Devolve true
+   * se era esse o erro, para quem chama não mostrar outro aviso.
+   */
+  async function showContentLimitAlert(data) {
+    const keys = {
+      MESSAGE_TOO_LONG: "messageTooLong",
+      TOO_MANY_FILES: "messageFiles",
+      CHAIN_TOO_LONG: "chainTooLong",
+    };
+    const key = keys[data?.code];
+    if (!key) return false;
+
+    const message = translation(`Plans.limits.${key}`, { limit: data.limit });
+
+    await showAlert({
+      title: translation(`Plans.limits.${key}Title`),
+      message: data.step
+        ? `${translation("Plans.limits.inStep", { step: data.step })} ${message}`
+        : message,
+      tone: "warning",
+    });
+    return true;
+  }
+
   async function sendToGroups() {
     if (!(await validateGroupBroadcast("send"))) return;
 
@@ -1973,6 +2133,7 @@ export default function BroadcastPage() {
 
       const data = await res.json().catch(() => ({}));
 
+      if (await showContentLimitAlert(data)) return;
       if (!res.ok) throw new Error(data?.error || translation("Common.error"));
 
       const summary = groupResultSummary(data);
@@ -2032,6 +2193,7 @@ export default function BroadcastPage() {
       const data = await res.json().catch(() => ({}));
 
       if (await showScheduledLimitAlert(data)) return;
+      if (await showContentLimitAlert(data)) return;
       if (!res.ok) throw new Error(data?.error || translation("Common.error"));
 
       await showAlert({
@@ -2107,6 +2269,7 @@ export default function BroadcastPage() {
 
         const data = await res.json().catch(() => ({}));
 
+        if (await showContentLimitAlert(data)) return;
         if (!res.ok) {
           throw new Error(data?.error || "Failed to send read chain.");
         }
@@ -2198,6 +2361,8 @@ export default function BroadcastPage() {
 
       if (!res.ok) {
         console.error("Broadcast send error", data);
+
+        if (await showContentLimitAlert(data)) return;
 
         await showAlert({
           title: translation("Common.error"),
@@ -2336,6 +2501,7 @@ export default function BroadcastPage() {
 
         const data = await res.json().catch(() => ({}));
 
+        if (await showContentLimitAlert(data)) return;
         if (!res.ok) {
           throw new Error(data?.error || "Failed to schedule read chain.");
         }
@@ -2428,6 +2594,7 @@ export default function BroadcastPage() {
         console.error("Schedule broadcast error", data);
 
         if (await showScheduledLimitAlert(data)) return;
+        if (await showContentLimitAlert(data)) return;
 
         await showAlert({
           title: translation("Common.error"),
@@ -2758,6 +2925,7 @@ export default function BroadcastPage() {
               onChangeStepKind={(kind) =>
                 updateChainStepKind(activeChainStepIndex, kind)
               }
+              maxSteps={chainStepsLimit}
               translation={translation}
             />
           )
@@ -2842,7 +3010,30 @@ export default function BroadcastPage() {
           kind={mediaPickerKind}
           orgId={org?.id}
           attachedUrls={composerFiles.map((f) => f.url)}
-          onAdd={(picked) => setComposerFiles((prev) => [...prev, ...picked])}
+          onAdd={async (picked) => {
+            /* Ficheiros por mensagem (#187): a escolha a mais fica por juntar. */
+            if (!(await acceptComposerFiles(picked.length))) return false;
+
+            /* No WhatsApp, as imagens acima de 5 MB não chegam ao contacto. */
+            const tooLarge =
+              channel === "whatsapp"
+                ? picked.find(isWhatsappImageTooLarge)
+                : null;
+            if (tooLarge) {
+              await showAlert({
+                title: translation("Common.error"),
+                message: translation(
+                  "Broadcast.composer.whatsappImageTooLarge",
+                  { name: tooLarge.name },
+                ),
+                tone: "warning",
+              });
+              return false;
+            }
+
+            setComposerFiles((prev) => [...prev, ...picked]);
+            return true;
+          }}
           onClose={() => setMediaPickerKind(null)}
           translation={translation}
         />
