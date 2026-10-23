@@ -4,6 +4,7 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useAuth } from "@/app/AuthContext";
 import useOrganization from "@/app/hooks/useOrganization";
+import usePlatformAdmin from "@/app/hooks/usePlatformAdmin";
 import styles from "./navbar.module.css";
 import {
   Home,
@@ -22,6 +23,7 @@ import {
   Images,
   Zap,
   BarChart3,
+  ShieldCheck,
 } from "lucide-react";
 import { useState, useCallback, useEffect } from "react";
 import { useMobileNav } from "@/app/components/MobileNav/MobileNavContext";
@@ -38,7 +40,13 @@ export default function Navbar() {
 
   const pathNoLocale = pathName.replace(/^\/(en|pt)(?=\/|$)/, "") || "/";
   const [pendingHref, setPendingHref] = useState(null);
-  const isAdmin = !!org && org.id === 1;
+  /*
+   * A Administração (#208) só aparece à equipa DIGIK no plano Interno. A
+   * experimentar outro plano, o separador desaparece: volta-se pela faixa
+   * "Voltar ao Interno". Quem decide o acesso é sempre o servidor.
+   */
+  const platformAdmin = usePlatformAdmin();
+  const isAdmin = platformAdmin.isAdmin && !platformAdmin.trying;
 
   const isActive = useCallback(
     (href) => {
@@ -288,12 +296,25 @@ export default function Navbar() {
 
             </nav>
 
+            {isAdmin && (
+              <Link
+                href="/platform-admin"
+                onClick={onNavClick("/platform-admin")}
+                className={`${styles.navItem} ${styles.options} ${
+                  isActive("/platform-admin") ? styles.active : ""
+                }`}
+              >
+                <ShieldCheck aria-hidden className={styles.icon} />
+                <span>{translation("Nav.admin")}</span>
+              </Link>
+            )}
+
             <Link
               href="/settings"
               onClick={onNavClick("/settings")}
               className={`${styles.navItem} ${styles.options} ${
-                isActive("/settings") ? styles.active : ""
-              }`}
+                isAdmin ? styles.afterAdmin : ""
+              } ${isActive("/settings") ? styles.active : ""}`}
             >
               <Settings aria-hidden className={styles.icon} />
               <span>{translation("Nav.options")}</span>

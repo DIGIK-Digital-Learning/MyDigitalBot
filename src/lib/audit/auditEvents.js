@@ -54,6 +54,7 @@ export const AUDIT_ACTIONS = Object.freeze({
 
   ORGANIZATION_CREATED: "organization.created",
   ORGANIZATION_SETTINGS_UPDATED: "organization.settings_updated",
+  ORGANIZATION_PLAN_CHANGED: "organization.plan_changed",
 
   TEAMS_GROUP_UPDATED: "teams_group.updated",
 });
