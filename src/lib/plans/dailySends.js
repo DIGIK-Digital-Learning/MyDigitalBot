@@ -10,7 +10,7 @@ export const DAILY_RESET_MINUTE = 1;
 const MINUTE_MS = 60 * 1000;
 
 /* Data e hora de Lisboa num instante, em números. */
-function lisbonParts(date) {
+export function lisbonParts(date) {
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: DAILY_SENDS_TIME_ZONE,
     year: "numeric",
@@ -49,7 +49,7 @@ function lisbonOffsetMs(date) {
 }
 
 /* O instante em que os relógios de Lisboa marcam esta data e hora. */
-function lisbonWallTime(year, month, day, hour, minute) {
+export function lisbonWallTime(year, month, day, hour, minute) {
   const guess = Date.UTC(year, month - 1, day, hour, minute);
   const first = guess - lisbonOffsetMs(new Date(guess));
   /* Perto da mudança de hora o desvio pode ser outro: confirma uma vez. */

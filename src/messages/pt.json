@@ -966,6 +966,7 @@
     "list": {
       "name": "Nome",
       "phone": "Nº. Telemóvel",
+      "thisWeek": "Esta semana",
       "tags": "Tags",
       "assistant": "Assistente"
     },
@@ -4853,6 +4854,8 @@
       "dailyShort": "Envios hoje",
       "dailyLabel": "Envios de hoje neste canal",
       "dailyHint": "Cada envio conta 1, seja para quantos colaboradores for. Uma corrente conta 1 por mensagem e uma agendada conta no dia em que é agendada. As automações não contam. Volta a 0 às {time}.",
+      "weeklyLabel": "Mensagens desta semana no {channel}",
+      "weeklyHint": "Mensagens que cada colaborador enviou esta semana em cada canal: ao assistente e respostas a quizzes, sondagens e perguntas abertas. Acima do limite o assistente deixa de responder até segunda-feira às 00:00.",
       "scheduledHint": "Conta as mensagens agendadas por ti que ainda estão à espera de envio. As das automações e as correntes não contam."
     }
   }

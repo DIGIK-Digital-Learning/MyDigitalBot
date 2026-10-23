@@ -25,6 +25,7 @@ import {
 } from "@/lib/repos/messages.repo";
 
 import { handleQuestionReply } from "@/lib/services/questions/handleQuestionReply";
+import { claimCollaboratorWeeklyMessage } from "@/lib/services/plans/collaboratorWeeklyLimit";
 
 import {
   linkTeamsUserByEmail,
@@ -1107,6 +1108,20 @@ async function handleUserInteraction(activity) {
   }
 
   /*
+   * Limite semanal do colaborador: 100 mensagens por
+   * semana no Teams, contando também as menções ao bot
+   * nos grupos.
+   */
+  const claimWeeklyMessage = ({ kind }) =>
+    claimCollaboratorWeeklyMessage({
+      organization: org,
+      user,
+      channel: "teams",
+      kind,
+      sourceId: activity?.id ?? null,
+    });
+
+  /*
    * Quiz, survey or open question (#151): the
    * answer is recorded and gets its feedback
    * without going to the assistant.
@@ -1124,9 +1139,24 @@ async function handleUserInteraction(activity) {
       thread,
 
       conversationId: openAiConversationId,
+
+      claimWeeklyMessage,
     });
 
     if (questionResult.handled) return;
+  }
+
+  /*
+   * Acima do limite da semana o assistente não é
+   * chamado: só a primeira vez recebe o aviso, as
+   * seguintes ficam sem resposta até segunda-feira.
+   */
+  const weekly = await claimWeeklyMessage({ kind: "assistant" });
+
+  if (!weekly.allowed) {
+    if (weekly.notice) await sendReply(activity, weekly.notice);
+
+    return;
   }
 
   /*
@@ -1226,6 +1256,7 @@ async function handleTeamsQuestionReply({
   assistant,
   thread,
   conversationId,
+  claimWeeklyMessage,
 }) {
   const reply = extractTeamsReply(activity);
 
@@ -1256,6 +1287,8 @@ async function handleTeamsQuestionReply({
     contactId: activity?.from?.id ?? null,
 
     organization: org,
+
+    claimWeeklyMessage,
 
     sendText: async (text) => {
       const sent = await sendReply(activity, text);

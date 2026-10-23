@@ -8,6 +8,7 @@ import styles from "./topbar.module.css";
 import LanguageSwitch from "./LanguageSwitch";
 import { Menu, X } from "lucide-react";
 import { useMobileNav } from "../MobileNav/MobileNavContext";
+import { saveOrganizationLocale } from "@/lib/organizations/organizations.api";
 
 export default function TopBar() {
   const { user } = useAuth();
@@ -36,7 +37,11 @@ export default function TopBar() {
         {/* RIGHT SIDE (pushes to the far right) */}
         <div className={styles.right}>
           {/* put other right-side controls here later if you want */}
-          <LanguageSwitch />
+          <LanguageSwitch
+            onChoose={(locale) => {
+              if (org?.id) saveOrganizationLocale(org.id, locale);
+            }}
+          />
         </div>
       </div>
     </header>

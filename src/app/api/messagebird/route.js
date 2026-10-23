@@ -76,6 +76,7 @@ import { followUpBodies } from "@/lib/whatsapp/linkButton";
 import { processReadChainAfterRead } from "@/lib/services/broadcast/readChains/processReadChainAfterRead";
 
 import { handleQuestionReply } from "@/lib/services/questions/handleQuestionReply";
+import { claimCollaboratorWeeklyMessage } from "@/lib/services/plans/collaboratorWeeklyLimit";
 import { handleAssistantSwitch } from "@/lib/services/assistants/handleAssistantSwitch";
 
 import { assertAssistantBelongsToOrg } from "@/lib/auth/guards";
@@ -1173,6 +1174,16 @@ async function handleEvent(rawJSON) {
    * Não passa pelo assistente. Só a primeira
    * resposta de cada contacto conta.
    */
+  /* Limite semanal do colaborador: 100 mensagens por semana neste canal. */
+  const claimWeeklyMessage = ({ kind }) =>
+    claimCollaboratorWeeklyMessage({
+      organization,
+      user,
+      channel: "whatsapp",
+      kind,
+      sourceId: inboundMsgId,
+    });
+
   const questionResult = await handleQuestionReply({
     user,
 
@@ -1183,6 +1194,8 @@ async function handleEvent(rawJSON) {
     contactId,
 
     organization,
+
+    claimWeeklyMessage,
 
     sendText: (replyText) =>
       sendBirdMessage({
@@ -1284,6 +1297,44 @@ async function handleEvent(rawJSON) {
       inboundMsgId,
 
       ...questionResult,
+    });
+
+    return;
+  }
+
+  /*
+   * =========================================================
+   * LIMITE SEMANAL DO COLABORADOR
+   * =========================================================
+   *
+   * Cada mensagem ao assistente conta 1 nas 100 da semana
+   * neste canal. Acima do limite o assistente não é
+   * chamado; só a primeira vez da semana recebe o aviso,
+   * as seguintes ficam sem resposta até segunda-feira.
+   */
+  const weekly = await claimWeeklyMessage({ kind: "assistant" });
+
+  if (!weekly.allowed) {
+    if (weekly.notice) {
+      await sendBirdMessage({
+        channelId: normalizeId(organization.channel_id) || sentChannelId,
+
+        contactId,
+
+        phoneNumber: identity.phoneNumber || user.phone_number,
+
+        whatsappBsuid: identity.whatsappBsuid || user.whatsapp_bsuid,
+
+        body: { type: "text", text: { text: weekly.notice } },
+      });
+    }
+
+    console.log("Weekly message limit reached", {
+      userId: user.id,
+
+      inboundMsgId,
+
+      notified: Boolean(weekly.notice),
     });
 
     return;

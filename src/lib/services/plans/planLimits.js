@@ -25,6 +25,7 @@ const LIMIT_COLUMNS = {
   scheduledMessages: "max_scheduled_messages",
   trackedLinks: "max_tracked_links",
   dailyMessagesPerChannel: "max_daily_messages_per_channel",
+  collaboratorWeeklyMessages: "max_collaborator_weekly_messages",
   messageChars: "max_message_chars",
   filesPerMessage: "max_files_per_message",
   fileSizeMb: "max_file_size_mb",

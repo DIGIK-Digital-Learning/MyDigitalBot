@@ -179,3 +179,14 @@ export async function updateOrganizationOpeningBody(orgId, body) {
 
   return data?.whatsapp_opening_body ?? null;
 }
+
+/* Língua da organização (pt ou en), escolhida no topo do site. */
+export async function updateOrganizationLocale(orgId, locale) {
+  const sb = getSupabaseAdminClient();
+  const { error } = await sb
+    .from("organization")
+    .update({ locale })
+    .eq("id", orgId);
+
+  if (error) throw error;
+}
