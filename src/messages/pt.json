@@ -2525,11 +2525,6 @@
         "title": "Falta de Contacto",
         "message": "Adiciona pelo menos um método de contacto: telemóvel, Teams ou email",
         "ok": "OK"
-      },
-      "fullOrg": {
-        "title": "Limite de Utilizadores",
-        "message": "Chegou ao limite de utilizadores para esta organização.",
-        "ok": "OK"
       }
     },
     "PillSelect": {
@@ -4121,11 +4116,6 @@
       "title": "Falta de Contacto",
       "message": "Adiciona pelo menos um método de contacto: telemóvel, Teams ou email",
       "ok": "OK"
-    },
-    "fullOrg": {
-      "title": "Limite de Utilizadores",
-      "message": "Chegou ao limite de utilizadores para esta organização.",
-      "ok": "OK"
     }
   },
   "PillSelect": {
@@ -4821,7 +4811,15 @@
       "users": "O plano {plan} permite criar {limit, plural, one {# utilizador} other {# utilizadores}}. Atualiza o teu plano para criares mais.",
       "usersNoDetail": "Chegaste ao limite de utilizadores do teu plano. Atualiza o teu plano para criares mais.",
       "upgrade": "Atualizar plano",
-      "later": "Agora não"
+      "later": "Agora não",
+      "instructionsTitle": "Instruções demasiado longas",
+      "instructions": "As instruções podem ter até {limit} caracteres. Encurta o texto para guardares.",
+      "filesTitle": "Limite de ficheiros atingido",
+      "files": "Cada assistente pode ter até {limit, plural, one {# ficheiro} other {# ficheiros}}. Tira algum antes de juntares outro.",
+      "filesRemaining": "Podes juntar só mais {remaining, plural, =0 {nenhum ficheiro} one {# ficheiro} other {# ficheiros}} (máximo de {limit} por assistente). Escolhe menos ficheiros ou tira algum da coleção."
+    },
+    "counter": {
+      "olderThanLimit": "Criado antes do limite de {limit} caracteres: pode ficar com o tamanho que tem, mas não aumentar."
     }
   }
 }

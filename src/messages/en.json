@@ -2517,11 +2517,6 @@
         "title": "Missing Contact",
         "message": "Add at least one contact method: phone, Teams, or email.",
         "ok": "OK"
-      },
-      "fullOrg": {
-        "title": "User Limits",
-        "message": "This organization has reached its user limit.",
-        "ok": "OK"
       }
     },
     "PillSelect": {
@@ -4113,11 +4108,6 @@
       "title": "Missing Contact",
       "message": "Add at least one contact method: phone, Teams, or email.",
       "ok": "OK"
-    },
-    "fullOrg": {
-      "title": "User Limits",
-      "message": "This organization has reached its user limit.",
-      "ok": "OK"
     }
   },
   "PillSelect": {
@@ -4813,7 +4803,15 @@
       "users": "The {plan} plan lets you create {limit, plural, one {# user} other {# users}}. Upgrade your plan to create more.",
       "usersNoDetail": "You have reached your plan's user limit. Upgrade your plan to create more.",
       "upgrade": "Upgrade plan",
-      "later": "Not now"
+      "later": "Not now",
+      "instructionsTitle": "Instructions too long",
+      "instructions": "Instructions can have up to {limit} characters. Shorten the text to save.",
+      "filesTitle": "File limit reached",
+      "files": "Each assistant can have up to {limit, plural, one {# file} other {# files}}. Remove one before adding another.",
+      "filesRemaining": "You can only add {remaining, plural, =0 {no more files} one {# more file} other {# more files}} ({limit} per assistant). Pick fewer files or remove some from the collection."
+    },
+    "counter": {
+      "olderThanLimit": "Created before the {limit}-character limit: it can keep its current length but not grow."
     }
   }
 }

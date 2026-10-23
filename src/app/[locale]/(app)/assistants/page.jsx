@@ -16,6 +16,10 @@ import {
   ASSISTANT_FILE_ACCEPT,
   resolveAssistantFileType,
 } from "@/lib/uploads/assistantFiles";
+import { useAlert } from "@/app/components/Alert/AlertProvider";
+import CharCounter from "@/app/components/CharCounter/CharCounter";
+import usePlanLimits from "@/app/hooks/usePlanLimits";
+import { limitKeepingCurrent } from "@/lib/plans/limitRules";
 
 const STORAGE_BUCKET = "assistant-uploads";
 
@@ -25,6 +29,8 @@ export default function AssistantsHub() {
   const { user, loading: authLoading, supabase } = useAuth();
   const { org, loading: orgLoading } = useOrganization(user);
   const orgId = org?.id || null;
+  const showAlert = useAlert();
+  const { limits } = usePlanLimits(orgId);
 
   const { startLoading, stopLoading } = useGlobalLoader();
   const [assistants, setAssistants] = useState([]);
@@ -143,6 +149,69 @@ export default function AssistantsHub() {
     }
   }
 
+  /*
+   * Limites do plano (#185). As instruções podem ir até ao maior entre o
+   * limite e o tamanho guardado: um assistente criado antes do limite (ex.:
+   * 7.405 caracteres) fica como está, mas não cresce. Sem limites carregados,
+   * nada é bloqueado aqui; o servidor decide na mesma.
+   */
+  const instructionsPlanLimit = limits?.assistantInstructionChars ?? null;
+  const instructionsLimit = limitKeepingCurrent(
+    instructionsPlanLimit,
+    String(selected?.instructions ?? "").length,
+  );
+  const draftInstructionsLength = String(draft?.instructions ?? "").length;
+  const instructionsTooLong =
+    instructionsLimit !== null && draftInstructionsLength > instructionsLimit;
+
+  /* Avisos simples (só OK) dos limites de instruções e ficheiros. */
+  async function showLimitAlert(error) {
+    if (error?.code === "INSTRUCTIONS_TOO_LONG") {
+      await showAlert({
+        title: translation("Plans.limits.instructionsTitle"),
+        message: translation("Plans.limits.instructions", { limit: error.limit }),
+        tone: "warning",
+      });
+      return true;
+    }
+
+    if (error?.code === "ASSISTANT_FILE_LIMIT_REACHED") {
+      await showAlert({
+        title: translation("Plans.limits.filesTitle"),
+        message: translation("Plans.limits.files", { limit: error.limit }),
+        tone: "warning",
+      });
+      return true;
+    }
+
+    return false;
+  }
+
+  /*
+   * Ficheiros (#185): a escolha é verificada logo ao escolher, antes de
+   * qualquer envio, porque guardar envia primeiro os ficheiros para o
+   * armazenamento e só depois pergunta ao servidor. Se passar do limite, é
+   * recusada inteira e o campo fica limpo.
+   */
+  async function acceptFilesWithinLimit(picked, existing, kept) {
+    const filesLimit = limitKeepingCurrent(
+      limits?.filesPerAssistant ?? null,
+      existing,
+    );
+
+    if (filesLimit === null || kept + picked.length <= filesLimit) return true;
+
+    await showAlert({
+      title: translation("Plans.limits.filesTitle"),
+      message: translation("Plans.limits.filesRemaining", {
+        remaining: Math.max(filesLimit - kept, 0),
+        limit: filesLimit,
+      }),
+      tone: "warning",
+    });
+    return false;
+  }
+
   // save applies the draft
   async function handleSave() {
     if (!selected || !draft) return;
@@ -162,6 +231,7 @@ export default function AssistantsHub() {
       });
       if (!res.ok) {
         const payload = await res.json().catch(() => ({}));
+        if (await showLimitAlert(payload)) return;
         alert("Erro ao guardar: " + (payload.error || res.statusText));
         return;
       }
@@ -253,6 +323,7 @@ export default function AssistantsHub() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        if (await showLimitAlert(data)) return;
         alert("Erro: " + (data.error || "Falha ao criar a store"));
         return;
       }
@@ -317,6 +388,7 @@ export default function AssistantsHub() {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
+        if (await showLimitAlert(data)) return;
         alert("Erro: " + (data.error || "Falha ao atualizar a coleção"));
         return;
       }
@@ -477,6 +549,11 @@ export default function AssistantsHub() {
                       "Assistants.details.instructionsPlaceholder",
                     )}
                   />
+                  <CharCounter
+                    length={draftInstructionsLength}
+                    limit={instructionsLimit}
+                    planLimit={instructionsPlanLimit}
+                  />
                 </>
               ) : (
                 <>
@@ -559,7 +636,7 @@ export default function AssistantsHub() {
                     <>
                       <button
                         className={styles.ctaPrimary}
-                        disabled={isSaving}
+                        disabled={isSaving || instructionsTooLong}
                         onClick={handleSave}
                       >
                         {isSaving
@@ -625,9 +702,19 @@ export default function AssistantsHub() {
                     type="file"
                     accept={ASSISTANT_FILE_ACCEPT}
                     multiple
-                    onChange={(e) =>
-                      setVsFiles(Array.from(e.target.files || []))
-                    }
+                    onChange={async (e) => {
+                      const input = e.target;
+                      const picked = Array.from(input.files || []);
+
+                      /* Coleção nova: ainda não tem ficheiros. */
+                      if (!(await acceptFilesWithinLimit(picked, 0, 0))) {
+                        input.value = "";
+                        setVsFiles([]);
+                        return;
+                      }
+
+                      setVsFiles(picked);
+                    }}
                   />
                   <div className={styles.rowEnd}>
                     <button
@@ -737,11 +824,28 @@ export default function AssistantsHub() {
                         className={styles.input}
                         type="file"
                         multiple
-                        onChange={(e) =>
-                          setVectorStoreEditFiles(
-                            Array.from(e.target.files || []),
-                          )
-                        }
+                        onChange={async (e) => {
+                          const input = e.target;
+                          const picked = Array.from(input.files || []);
+                          const existing = vectorStore?.files?.length ?? 0;
+
+                          /* Ficam os existentes menos os marcados para tirar. */
+                          const kept = existing - removedVectorFileIds.length;
+
+                          if (
+                            !(await acceptFilesWithinLimit(
+                              picked,
+                              existing,
+                              kept,
+                            ))
+                          ) {
+                            input.value = "";
+                            setVectorStoreEditFiles([]);
+                            return;
+                          }
+
+                          setVectorStoreEditFiles(picked);
+                        }}
                       />
 
                       {vectorStoreEditFiles.length > 0 && (

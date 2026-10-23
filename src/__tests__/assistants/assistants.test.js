@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 
 import {
+  appMocks,
   registerAppModulePacks,
   setDefaultAppMockReturns,
   resetAppMocks,
@@ -504,6 +505,96 @@ describe("AssistantsHub Page", () => {
       storeName: "Knowledge base",
       files: [],
       removedFileIds: [7],
+    });
+  });
+
+  describe("limites do plano (#185)", () => {
+    const LIMITS = {
+      plan: { id: 1, name: "Demo", level: 0 },
+      limits: { assistantInstructionChars: 5000, filesPerAssistant: 5 },
+    };
+
+    function mockWith(details) {
+      mocks.fetch.mockImplementation((input, init = {}) => {
+        const url = typeof input === "string" ? input : input.url;
+        const method = (init.method || "GET").toUpperCase();
+
+        if (url === `/api/plans/limits?orgId=${ORG_ID}`) return makeResponse(LIMITS);
+        if (url === `/api/assistants?orgId=${ORG_ID}`) return makeResponse(LIST);
+        if (url === `/api/assistants/asst_1` && method === "GET") {
+          return makeResponse(details);
+        }
+        if (url === `/api/assistants/asst_1/vector-store/42` && method === "GET") {
+          return makeResponse(VECTOR_STORE);
+        }
+        return makeResponse({});
+      });
+    }
+
+    const pdf = (name) => new File(["x"], name, { type: "application/pdf" });
+
+    it("um assistente criado antes do limite mostra o tamanho dele e não pode crescer", async () => {
+      const user = userEvent.setup();
+      mockWith({ ...DETAILS_1, instructions: "a".repeat(7405) });
+      renderPage();
+
+      await screen.findByRole("heading", { name: "Alpha" });
+      await user.click(
+        screen.getByRole("button", { name: "Assistants.details.edit" }),
+      );
+
+      expect(await screen.findByText(/7\.?405 \/ 7\.?405/)).toBeInTheDocument();
+      expect(screen.getByText("olderThanLimit")).toBeInTheDocument();
+
+      const save = screen.getByRole("button", { name: "Assistants.details.save" });
+      expect(save).not.toBeDisabled();
+
+      const textarea = screen.getByDisplayValue("a".repeat(7405));
+      fireEvent.change(textarea, { target: { value: "a".repeat(7406) } });
+
+      expect(save).toBeDisabled();
+    });
+
+    it("ao editar a coleção, escolher ficheiros a mais é recusado antes de enviar", async () => {
+      const user = userEvent.setup({ applyAccept: false });
+      mockWith({ ...DETAILS_1, vectorStoreId: 42 });
+      renderPage();
+
+      await screen.findByText("old.pdf");
+      await user.click(
+        screen.getByRole("button", { name: "Assistants.vector.edit" }),
+      );
+
+      /* Tem 1; 5 novos dariam 6. */
+      const input = document.getElementById("vector-store-edit-files");
+      await user.upload(input, ["a", "b", "c", "d", "e"].map((n) => pdf(`${n}.pdf`)));
+
+      await waitFor(() =>
+        expect(appMocks.alert).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: "Plans.limits.filesTitle",
+            message: "Plans.limits.filesRemaining",
+          }),
+        ),
+      );
+      expect(screen.queryByText("a.pdf")).not.toBeInTheDocument();
+    });
+
+    it("ao editar a coleção, escolher até ao limite é aceite", async () => {
+      const user = userEvent.setup({ applyAccept: false });
+      mockWith({ ...DETAILS_1, vectorStoreId: 42 });
+      renderPage();
+
+      await screen.findByText("old.pdf");
+      await user.click(
+        screen.getByRole("button", { name: "Assistants.vector.edit" }),
+      );
+
+      const input = document.getElementById("vector-store-edit-files");
+      await user.upload(input, ["a", "b", "c", "d"].map((n) => pdf(`${n}.pdf`)));
+
+      expect(await screen.findByText("a.pdf")).toBeInTheDocument();
+      expect(appMocks.alert).not.toHaveBeenCalled();
     });
   });
 });
