@@ -1,6 +1,14 @@
 import { getOrganizationPlan } from "@/lib/repos/plans.repo";
+import {
+  claimAdminDailySend,
+  releaseAdminDailySend,
+} from "@/lib/repos/adminDailySends.repo";
 
 import { messageContentProblem } from "@/lib/plans/messageLimits";
+import {
+  dailySendsDayStart,
+  dailySendsResetAt,
+} from "@/lib/plans/dailySends";
 
 /* As regras puras vivem em limitRules.js (servem também aos ecrãs). */
 export { hasRoomFor, limitKeepingCurrent } from "@/lib/plans/limitRules";
@@ -113,4 +121,82 @@ export async function checkMessageContent(orgId, messages, { deps = {} } = {}) {
   }
 
   return { orgLimits };
+}
+
+/**
+ * Corpo da resposta 409 quando o limite diário de envios do canal acabou
+ * (#188). Leva o que sobra e quando repõe, para o aviso dizer "repõe às
+ * 00:01" e, numa corrente, quantos passos ainda cabem.
+ */
+export function dailyLimitBody({ channel, used, orgLimits, now = new Date() }) {
+  const limit = orgLimits?.limits?.dailyMessagesPerChannel ?? null;
+
+  return {
+    error: "Plan limit reached: dailyMessagesPerChannel",
+    code: "DAILY_LIMIT_REACHED",
+    plan: orgLimits?.plan?.name ?? null,
+    limit,
+    channel,
+    used,
+    remaining: limit === null ? null : Math.max(limit - used, 0),
+    resetsAt: dailySendsResetAt(now).toISOString(),
+  };
+}
+
+/**
+ * Reserva envios no limite diário do administrador (#188): 1 por envio,
+ * seja para quantos colaboradores for; N numa corrente de N passos. A
+ * reserva é feita antes de enviar, para dois envios ao mesmo tempo não
+ * passarem o limite.
+ *
+ * Devolve `{ claimKey, used, limit }`, ou `{ body }` com a resposta 409
+ * quando não cabe. Se o envio falhar por completo, devolve-se com
+ * releaseDailySend(claimKey).
+ */
+export async function claimDailySend(
+  orgId,
+  channel,
+  {
+    units = 1,
+    sourceType = "broadcast",
+    sourceId = null,
+    orgLimits = null,
+    now = new Date(),
+    deps = {},
+  } = {},
+) {
+  const limits = orgLimits || (await getOrgLimits(orgId, { now, deps }));
+  const claim = deps.claimAdminDailySend || claimAdminDailySend;
+  const claimKey = (deps.randomUUID || (() => crypto.randomUUID()))();
+
+  const result = await claim({
+    organizationId: orgId,
+    channel,
+    sourceType,
+    sourceId,
+    units,
+    limit: limits.limits.dailyMessagesPerChannel,
+    since: dailySendsDayStart(now),
+    claimKey,
+  });
+
+  if (!result.ok) {
+    return {
+      body: dailyLimitBody({
+        channel,
+        used: result.used,
+        orgLimits: limits,
+        now,
+      }),
+    };
+  }
+
+  return { claimKey, used: result.used, limit: result.limit };
+}
+
+/* Devolve uma reserva cujo envio não chegou a ninguém. */
+export async function releaseDailySend(claimKey, { deps = {} } = {}) {
+  if (!claimKey) return;
+  const release = deps.releaseAdminDailySend || releaseAdminDailySend;
+  await release(claimKey);
 }

@@ -7,7 +7,11 @@ import {
 } from "@/lib/auth/guards";
 
 import { sendTeamsBroadcast } from "@/lib/services/broadcast/sendTeamsBroadcast";
-import { checkMessageContent } from "@/lib/services/plans/planLimits";
+import {
+  checkMessageContent,
+  claimDailySend,
+  releaseDailySend,
+} from "@/lib/services/plans/planLimits";
 
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
@@ -74,32 +78,54 @@ export async function POST(req) {
      * SEND TEAMS BROADCAST
      * =========================================================
      */
-    const result = await sendTeamsBroadcast({
-      orgId: orgAuth.orgId,
-
-      userIds,
-
-      message: typeof body?.message === "string" ? body.message : "",
-
-      files: Array.isArray(body?.files) ? body.files : [],
-
-      imageUrls: Array.isArray(body?.imageUrls) ? body.imageUrls : [],
-
-      trackedLinks: Array.isArray(body?.trackedLinks) ? body.trackedLinks : [],
-
-      /* Quiz, survey or open question (#151), validated by the service. */
-      question: body?.question ?? null,
-
-      /*
-       * This is an immediate broadcast.
-       *
-       * Scheduled broadcasts can provide these
-       * values from their own execution path.
-       */
-      scheduledBroadcastId: null,
-
-      createdByUserId: null,
+    /*
+     * Limite diário de envios do canal (#188): este envio conta 1, seja para
+     * quantos colaboradores for. Reserva-se antes de enviar; se não chegar a
+     * ninguém, devolve-se.
+     */
+    const daily = await claimDailySend(orgAuth.orgId, "teams", {
+      orgLimits: content.orgLimits,
     });
+    if (daily.body) {
+      return NextResponse.json(daily.body, { status: 409 });
+    }
+
+    let result;
+    try {
+      result = await sendTeamsBroadcast({
+        orgId: orgAuth.orgId,
+
+        userIds,
+
+        message: typeof body?.message === "string" ? body.message : "",
+
+        files: Array.isArray(body?.files) ? body.files : [],
+
+        imageUrls: Array.isArray(body?.imageUrls) ? body.imageUrls : [],
+
+        trackedLinks: Array.isArray(body?.trackedLinks)
+          ? body.trackedLinks
+          : [],
+
+        /* Quiz, survey or open question (#151), validated by the service. */
+        question: body?.question ?? null,
+
+        /*
+         * This is an immediate broadcast.
+         *
+         * Scheduled broadcasts can provide these
+         * values from their own execution path.
+         */
+        scheduledBroadcastId: null,
+
+        createdByUserId: null,
+      });
+    } catch (err) {
+      await releaseDailySend(daily.claimKey);
+      throw err;
+    }
+
+    if (!result?.ok) await releaseDailySend(daily.claimKey);
 
     await recordAuditEvent(orgAuth, {
       action: AUDIT_ACTIONS.BROADCAST_SENT,

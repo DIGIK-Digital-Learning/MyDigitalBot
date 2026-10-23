@@ -4,10 +4,13 @@ import {
   createScheduledBroadcast,
 } from "@/lib/repos/scheduledBroadcasts.repo";
 import {
+  claimDailySend,
   getOrgLimits,
   hasRoomFor,
   limitReachedBody,
+  releaseDailySend,
 } from "@/lib/services/plans/planLimits";
+import { setAdminDailySendSource } from "@/lib/repos/adminDailySends.repo";
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
 import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
@@ -95,16 +98,37 @@ export async function POST(req) {
       return NextResponse.json({ error: built.error }, { status: 400 });
     }
 
-    const row = await createScheduledBroadcast({
-      organization_id: orgAuth.orgId,
-      created_by_user_id: orgAuth.user.id,
-      channel,
-      status: "queued",
-      scheduled_for: when.toISOString(),
-      timezone: timezone || null,
-      payload: built.payload,
-      recipient_count: built.recipientCount,
+    /*
+     * Limite diário de envios do canal (#188): uma agendada conta no dia em
+     * que é agendada, não no dia em que sai. Cancelá-la ou eliminá-la no
+     * mesmo dia devolve o envio.
+     */
+    const daily = await claimDailySend(orgAuth.orgId, channel, {
+      sourceType: "scheduled_broadcast",
+      orgLimits,
     });
+    if (daily.body) {
+      return NextResponse.json(daily.body, { status: 409 });
+    }
+
+    let row;
+    try {
+      row = await createScheduledBroadcast({
+        organization_id: orgAuth.orgId,
+        created_by_user_id: orgAuth.user.id,
+        channel,
+        status: "queued",
+        scheduled_for: when.toISOString(),
+        timezone: timezone || null,
+        payload: built.payload,
+        recipient_count: built.recipientCount,
+      });
+    } catch (err) {
+      await releaseDailySend(daily.claimKey);
+      throw err;
+    }
+
+    await setAdminDailySendSource(daily.claimKey, row.id);
 
     const isGroupBroadcast = Array.isArray(built.payload.groupIds);
 

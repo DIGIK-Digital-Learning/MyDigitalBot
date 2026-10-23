@@ -4,11 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 
 import { fetchPlanLimits } from "@/lib/plans/plans.api";
 
-const EMPTY = { plan: null, limits: null, usage: null };
+const EMPTY = { plan: null, limits: null, usage: null, dailySendsResetAt: null };
 
 /**
  * Os limites do plano da organização e quanto já está gasto, para contadores
- * e avisos no ecrã ("6 / 20" automações, "2 / 100" agendadas).
+ * e avisos no ecrã ("6 / 20" automações, "2 / 100" agendadas, "3 / 10"
+ * envios de hoje em cada canal, que voltam a 0 em `dailySendsResetAt`).
  *
  * Enquanto não chegam (ou se o pedido falhar), `limits` e `usage` são null e
  * o ecrã não bloqueia nada: quem decide é o servidor, que recusa na mesma o
@@ -33,6 +34,7 @@ export default function usePlanLimits(orgId) {
             plan: data.plan ?? null,
             limits: data.limits ?? null,
             usage: data.usage ?? null,
+            dailySendsResetAt: data.dailySendsResetAt ?? null,
           });
         }
       })

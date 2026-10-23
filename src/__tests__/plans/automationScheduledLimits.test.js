@@ -42,6 +42,14 @@ vi.mock("@/lib/auth/guards", () => ({
   },
 }));
 
+/* Limite diário de envios (#188): tem testes próprios; aqui há sempre espaço. */
+vi.mock("@/lib/repos/adminDailySends.repo", () => ({
+  claimAdminDailySend: vi.fn(async () => ({ ok: true, used: 1, limit: 10 })),
+  setAdminDailySendSource: vi.fn(async () => {}),
+  releaseAdminDailySend: vi.fn(async () => {}),
+  refundScheduledSend: vi.fn(async () => {}),
+  countAdminDailySends: vi.fn(async () => ({ whatsapp: 0, teams: 0 })),
+}));
 vi.mock("@/lib/services/plans/planLimits", async (importOriginal) => ({
   ...(await importOriginal()),
   getOrgLimits: mocks.getOrgLimits,

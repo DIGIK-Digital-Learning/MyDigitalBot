@@ -6,6 +6,14 @@ vi.mock("@/lib/repos/scheduledBroadcasts.repo", () => ({
   })),
   countManualQueuedBroadcasts: vi.fn(async () => 0),
 }));
+/* Limite diário de envios (#188): tem testes próprios; aqui há sempre espaço. */
+vi.mock("@/lib/repos/adminDailySends.repo", () => ({
+  claimAdminDailySend: vi.fn(async () => ({ ok: true, used: 1, limit: 10 })),
+  setAdminDailySendSource: vi.fn(async () => {}),
+  releaseAdminDailySend: vi.fn(async () => {}),
+  refundScheduledSend: vi.fn(async () => {}),
+  countAdminDailySends: vi.fn(async () => ({ whatsapp: 0, teams: 0 })),
+}));
 /* O limite de agendadas tem testes próprios (automationScheduledLimits); aqui, sem limite. */
 vi.mock("@/lib/services/plans/planLimits", async (importOriginal) => ({
   ...(await importOriginal()),
