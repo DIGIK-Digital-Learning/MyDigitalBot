@@ -22,6 +22,8 @@ import {
 } from "./helpers/scheduled.helpers";
 
 import ScheduledHeader from "./components/ScheduledHeader";
+import usePlanLimits from "@/app/hooks/usePlanLimits";
+import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import ScheduledStats from "./components/ScheduledStats";
 import ScheduledFilters from "./components/ScheduledFilters";
 import ScheduledTable from "./components/ScheduledTable";
@@ -37,9 +39,17 @@ const USERS_PAGE_SIZE = 200;
 
 export default function ScheduledPage() {
   const t = useTranslations("BroadcastScheduled");
+  const usageTranslation = useTranslations("Plans.usage");
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const { org, loading: orgLoading } = useOrganization(user);
+
+  /* Limite de agendadas do plano (#186): contador "2 / 100" no cabeçalho. */
+  const {
+    limits: planLimits,
+    usage: planUsage,
+    reload: reloadPlanUsage,
+  } = usePlanLimits(org?.id);
   const confirm = useConfirm();
   const showAlert = useAlert();
 
@@ -73,6 +83,9 @@ export default function ScheduledPage() {
 
   const loadItems = useCallback(
     async (showSuccessAlert = false) => {
+      /* O contador do limite acompanha a lista (cancelar, apagar, editar). */
+      reloadPlanUsage();
+
       if (!org?.id) {
         if (showSuccessAlert) {
           await showAlertRef.current({
@@ -121,7 +134,7 @@ export default function ScheduledPage() {
         setLoading(false);
       }
     },
-    [org?.id, t],
+    [org?.id, t, reloadPlanUsage],
   );
 
   useEffect(() => {
@@ -564,6 +577,14 @@ export default function ScheduledPage() {
         onDateChange={setDateFilter}
         onClearDate={() => setDateFilter("")}
         onRefresh={() => loadItems(true)}
+        usage={
+          <UsageCounter
+            used={planUsage?.scheduledMessages}
+            limit={planLimits?.scheduledMessages}
+            label={usageTranslation("scheduledLabel")}
+            hint={usageTranslation("scheduledHint")}
+          />
+        }
       />
 
       {error ? <div className={styles.errorBox}>{error}</div> : null}

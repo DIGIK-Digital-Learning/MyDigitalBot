@@ -16,6 +16,7 @@ export default function ScheduledFilters({
   onDateChange,
   onClearDate,
   onRefresh,
+  usage = null,
 }) {
   return (
     <div className={styles.toolbar}>
@@ -89,6 +90,9 @@ export default function ScheduledFilters({
         <RefreshCw aria-hidden className={styles.buttonIcon} />
         <span>{translation("Refresh")}</span>
       </button>
+
+      {/* Contador do limite do plano ("2 / 100", #186), sempre à direita. */}
+      {usage ? <div className={styles.usageSlot}>{usage}</div> : null}
     </div>
   );
 }

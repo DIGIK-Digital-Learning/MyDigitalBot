@@ -52,6 +52,8 @@ import MediaPickerModal from "./components/MediaPickerModal";
 import { COMPANY_KEYS, MAX_TRACKED_LINKS, NAME_KEYS } from "./lib/constants";
 import useTextSuggestion from "./lib/useTextSuggestion";
 import useImageSuggestion from "./hooks/useImageSuggestion";
+import usePlanLimits from "@/app/hooks/usePlanLimits";
+import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import useTrackedLinkLibrary from "./hooks/useTrackedLinkLibrary";
 import {
   asList,
@@ -112,6 +114,13 @@ function getChannelLabel(channel) {
 export default function BroadcastPage() {
   const { user } = useAuth();
   const { org } = useOrganization(user);
+
+  /* Limites do plano e o gasto, para o contador das agendadas (#186). */
+  const {
+    limits: planLimits,
+    usage: planUsage,
+    reload: reloadPlanUsage,
+  } = usePlanLimits(org?.id);
 
   const locale = useLocale();
   const translation = useTranslations();
@@ -1512,7 +1521,19 @@ export default function BroadcastPage() {
     deliveryMode === "schedule" &&
     (!scheduledFor || scheduledFor.getTime() <= Date.now() || !!timeError);
 
-  const canSend = baseCanSend && !scheduleInvalid && !showStartMenu;
+  /*
+   * Limite de agendadas do plano (#186): com a conta cheia, Agendar fica
+   * desativado (enviar já continua possível). As correntes não contam.
+   */
+  const scheduledFull =
+    deliveryMode === "schedule" &&
+    !chainMode &&
+    planLimits?.scheduledMessages != null &&
+    planUsage?.scheduledMessages != null &&
+    planUsage.scheduledMessages >= planLimits.scheduledMessages;
+
+  const canSend =
+    baseCanSend && !scheduleInvalid && !scheduledFull && !showStartMenu;
 
   function buildRecipients(chosen) {
     return chosen
@@ -1912,6 +1933,21 @@ export default function BroadcastPage() {
     };
   }
 
+  /*
+   * Limite de mensagens agendadas do plano (#186): aviso simples, só com OK.
+   * Devolve true se era esse o erro, para quem chama não mostrar outro aviso.
+   */
+  async function showScheduledLimitAlert(data) {
+    if (data?.code !== "SCHEDULED_LIMIT_REACHED") return false;
+
+    await showAlert({
+      title: translation("Plans.limits.scheduledTitle"),
+      message: translation("Plans.limits.scheduled", { limit: data.limit }),
+      tone: "warning",
+    });
+    return true;
+  }
+
   async function sendToGroups() {
     if (!(await validateGroupBroadcast("send"))) return;
 
@@ -1995,6 +2031,7 @@ export default function BroadcastPage() {
 
       const data = await res.json().catch(() => ({}));
 
+      if (await showScheduledLimitAlert(data)) return;
       if (!res.ok) throw new Error(data?.error || translation("Common.error"));
 
       await showAlert({
@@ -2006,6 +2043,7 @@ export default function BroadcastPage() {
         tone: "success",
       });
 
+      reloadPlanUsage();
       setDeliveryMode("now");
     } catch (err) {
       await showAlert({
@@ -2389,6 +2427,8 @@ export default function BroadcastPage() {
       if (!res.ok) {
         console.error("Schedule broadcast error", data);
 
+        if (await showScheduledLimitAlert(data)) return;
+
         await showAlert({
           title: translation("Common.error"),
           message: data?.error || translation("Common.error"),
@@ -2421,6 +2461,7 @@ export default function BroadcastPage() {
         tone: counts.failed > 0 ? "warning" : "success",
       });
 
+      reloadPlanUsage();
       setDeliveryMode("now");
     } catch (err) {
       console.error(err);
@@ -2547,6 +2588,23 @@ export default function BroadcastPage() {
       scheduleInvalid={scheduleInvalid}
       browserTimeZone={browserTimeZone}
       translation={translation}
+      usage={
+        chainMode ? null : (
+          <UsageCounter
+            used={planUsage?.scheduledMessages}
+            limit={planLimits?.scheduledMessages}
+            label={translation("Plans.usage.scheduledLabel")}
+            hint={translation("Plans.usage.scheduledHint")}
+          />
+        )
+      }
+      limitWarning={
+        scheduledFull
+          ? translation("Plans.limits.scheduled", {
+              limit: planLimits.scheduledMessages,
+            })
+          : null
+      }
     />
   );
 

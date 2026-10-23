@@ -161,6 +161,16 @@
   color: #0f1c3f;
 }
 
+/*
+ * Última célula do cabeçalho (coluna das ações): o contador do limite de
+ * utilizadores ("3 / 100"), encostado à direita, à altura dos títulos.
+ */
+.cellHeadRight {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
 /* checkbox (custom look) */
 .cellChk {
   display: flex;
@@ -1481,6 +1491,41 @@
 
 .createMenuItem:hover {
   background: #f7fbff;
+}
+
+/* No limite de utilizadores do plano: "Novo utilizador" fica por usar. */
+.createMenuItem:disabled {
+  color: #9ca3af;
+  background: transparent;
+  cursor: not-allowed;
+}
+
+/*
+ * Contador do limite de utilizadores ("3 / 100"), por cima da lista e
+ * encostado à direita, como nas automações e nas agendadas.
+ */
+.usageRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 6px;
+}
+
+.usageRow:empty {
+  display: none;
+}
+
+/*
+ * Na vista de lista o contador está no cabeçalho da tabela: esta linha só
+ * aparece quando o cabeçalho se esconde (ecrãs até 900px).
+ */
+.usageRowNoHeader {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .usageRowNoHeader:not(:empty) {
+    display: flex;
+  }
 }
 
 @media (max-width: 900px) {

@@ -25,6 +25,8 @@ import { useConfirm } from "@/app/components/Confirm/ConfirmProvider";
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 import { RuleModal } from "./RuleModal/RuleModal";
 import { useTranslations } from "next-intl";
+import usePlanLimits from "@/app/hooks/usePlanLimits";
+import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 
 const TRIGGER_OPTIONS = [
   {
@@ -156,6 +158,8 @@ export default function AutomationsPage() {
   }, [showAlert]);
 
   const translation = useTranslations("Automations");
+  const planTranslation = useTranslations("Plans.limits");
+  const usageTranslation = useTranslations("Plans.usage");
 
   const translatedTriggerOptions = useMemo(
     () =>
@@ -201,8 +205,22 @@ export default function AutomationsPage() {
     return map;
   }, [rules]);
 
+  /*
+   * Limite de automações do plano (#186): contador "6 / 20" ao lado do botão
+   * de criar, que fica desativado quando a conta está cheia.
+   */
+  const { limits: planLimits, usage: planUsage, reload: reloadPlanUsage } =
+    usePlanLimits(orgId);
+  const automationsFull =
+    planLimits?.automations != null &&
+    planUsage?.automations != null &&
+    planUsage.automations >= planLimits.automations;
+
   const refreshAll = useCallback(
     async (showSuccessAlert = false) => {
+      /* O contador acompanha cada criação, alteração e remoção. */
+      reloadPlanUsage();
+
       if (!orgId) {
         if (showSuccessAlert && typeof showAlertRef.current === "function") {
           await showAlertRef.current({
@@ -305,7 +323,7 @@ export default function AutomationsPage() {
         stopLoading();
       }
     },
-    [orgId, startLoading, stopLoading, translation],
+    [orgId, startLoading, stopLoading, translation, reloadPlanUsage],
   );
 
   useEffect(() => {
@@ -451,6 +469,20 @@ export default function AutomationsPage() {
       });
 
       const data = await res.json().catch(() => ({}));
+
+      /*
+       * Limite de automações do plano (#186): aviso simples, só com OK. O
+       * formulário fica aberto, com os dados, para apagar outra automação
+       * e voltar a tentar.
+       */
+      if (data?.code === "AUTOMATION_LIMIT_REACHED") {
+        await showAlert({
+          title: planTranslation("automationsTitle"),
+          message: planTranslation("automations", { limit: data.limit }),
+          tone: "warning",
+        });
+        return;
+      }
 
       if (!res.ok) {
         throw new Error(data?.error || "Failed to save automation rule");
@@ -679,6 +711,14 @@ export default function AutomationsPage() {
               type="button"
               className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}
               onClick={() => setCreateMenuOpen((v) => !v)}
+              disabled={automationsFull}
+              title={
+                automationsFull
+                  ? planTranslation("automations", {
+                      limit: planLimits.automations,
+                    })
+                  : undefined
+              }
             >
               <Plus size={16} />
               <span>{translation("newAutomation")}</span>
@@ -735,6 +775,16 @@ export default function AutomationsPage() {
         >
           {translation("deliveries")} ({materialized.length})
         </button>
+
+        {/* Contador do limite do plano ("6 / 20", #186), sempre à direita. */}
+        <div className={styles.usageSlot}>
+          <UsageCounter
+            used={planUsage?.automations}
+            limit={planLimits?.automations}
+            label={usageTranslation("automationsLabel")}
+            hint={usageTranslation("automationsHint")}
+          />
+        </div>
       </div>
 
       {tab === "rules" ? (

@@ -208,7 +208,13 @@
   border-color: var(--brand-1);
 }
 
+/* O fuso horário à esquerda e o contador das agendadas ("2 / 100") à direita. */
 .scheduleHint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 10px;
   font-size: 12px;
   color: #666;

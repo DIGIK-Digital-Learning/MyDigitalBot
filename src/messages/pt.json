@@ -4816,10 +4816,26 @@
       "instructions": "As instruções podem ter até {limit} caracteres. Encurta o texto para guardares.",
       "filesTitle": "Limite de ficheiros atingido",
       "files": "Cada assistente pode ter até {limit, plural, one {# ficheiro} other {# ficheiros}}. Tira algum antes de juntares outro.",
-      "filesRemaining": "Podes juntar só mais {remaining, plural, =0 {nenhum ficheiro} one {# ficheiro} other {# ficheiros}} (máximo de {limit} por assistente). Escolhe menos ficheiros ou tira algum da coleção."
+      "filesRemaining": "Podes juntar só mais {remaining, plural, =0 {nenhum ficheiro} one {# ficheiro} other {# ficheiros}} (máximo de {limit} por assistente). Escolhe menos ficheiros ou tira algum da coleção.",
+      "automationsTitle": "Limite de automações atingido",
+      "automations": "Cada conta pode ter até {limit, plural, one {# automação} other {# automações}}. Apaga uma para criares outra.",
+      "scheduledTitle": "Limite de mensagens agendadas atingido",
+      "scheduled": "Podes ter até {limit, plural, one {# mensagem agendada} other {# mensagens agendadas}} à espera de envio. Cancela ou apaga uma nas mensagens agendadas para agendares outra."
     },
     "counter": {
       "olderThanLimit": "Criado antes do limite de {limit} caracteres: pode ficar com o tamanho que tem, mas não aumentar."
+    },
+    "usage": {
+      "usersLabel": "Utilizadores",
+      "usersHint": "Conta todos os utilizadores da conta.",
+      "filesLabel": "Ficheiros do assistente",
+      "filesHint": "Cada assistente pode ter até este número de ficheiros na coleção.",
+      "assistantsLabel": "Assistentes",
+      "assistantsHint": "Conta todos os assistentes da conta.",
+      "automationsLabel": "Automações",
+      "automationsHint": "Contam todas as automações da conta, ativas e inativas.",
+      "scheduledLabel": "Mensagens agendadas",
+      "scheduledHint": "Conta as mensagens agendadas por ti que ainda estão à espera de envio. As das automações e as correntes não contam."
     }
   }
 }

@@ -18,6 +18,7 @@ import {
 } from "@/lib/uploads/assistantFiles";
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 import CharCounter from "@/app/components/CharCounter/CharCounter";
+import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
 import { limitKeepingCurrent } from "@/lib/plans/limitRules";
 
@@ -30,7 +31,21 @@ export default function AssistantsHub() {
   const { org, loading: orgLoading } = useOrganization(user);
   const orgId = org?.id || null;
   const showAlert = useAlert();
-  const { limits } = usePlanLimits(orgId);
+  const {
+    plan,
+    limits,
+    usage,
+    reload: reloadPlanUsage,
+  } = usePlanLimits(orgId);
+
+  /*
+   * Limite de assistentes do plano: contador "1 / 20" no cabeçalho da lista
+   * e o botão de criar desativado quando a conta está cheia.
+   */
+  const assistantsFull =
+    limits?.assistants != null &&
+    usage?.assistants != null &&
+    usage.assistants >= limits.assistants;
 
   const { startLoading, stopLoading } = useGlobalLoader();
   const [assistants, setAssistants] = useState([]);
@@ -138,6 +153,7 @@ export default function AssistantsHub() {
     const newest = list[list.length - 1];
     setSelectedId(newest ? newest.id : null);
     setIsModalOpen(false);
+    reloadPlanUsage();
   }
 
   // unified field changer — writes to draft while editing
@@ -163,6 +179,20 @@ export default function AssistantsHub() {
   const draftInstructionsLength = String(draft?.instructions ?? "").length;
   const instructionsTooLong =
     instructionsLimit !== null && draftInstructionsLength > instructionsLimit;
+
+  /*
+   * Contador de ficheiros do assistente ("3 / 5"). O limite segue a regra do
+   * servidor: uma coleção antiga acima do limite fica com o tamanho que tem.
+   * Na edição conta os que ficam (existentes − marcados para tirar) mais os
+   * novos escolhidos, para se ver o resultado antes de guardar.
+   */
+  const existingFileCount = vectorStore?.files?.length ?? 0;
+  const filesLimit = limitKeepingCurrent(
+    limits?.filesPerAssistant ?? null,
+    existingFileCount,
+  );
+  const filesAfterEdit =
+    existingFileCount - removedVectorFileIds.length + vectorStoreEditFiles.length;
 
   /* Avisos simples (só OK) dos limites de instruções e ficheiros. */
   async function showLimitAlert(error) {
@@ -267,6 +297,7 @@ export default function AssistantsHub() {
       setAssistants(remaining);
       setSelected(null);
       setSelectedId(remaining[0] ? remaining[0].id : null);
+      reloadPlanUsage();
     } finally {
       stopLoading();
     }
@@ -466,6 +497,12 @@ export default function AssistantsHub() {
       <aside className={styles.listCol}>
         <div className={styles.listHeader}>
           <span>{translation("Assistants.myAssistants")}</span>
+          <UsageCounter
+            used={usage?.assistants}
+            limit={limits?.assistants}
+            label={translation("Plans.usage.assistantsLabel")}
+            hint={translation("Plans.usage.assistantsHint")}
+          />
         </div>
 
         <div className={styles.list}>
@@ -496,8 +533,15 @@ export default function AssistantsHub() {
           <button
             className={styles.ctaPrimary}
             onClick={openCreate}
-            disabled={!orgId}
-            title={translation("Assistants.createAssistant")}
+            disabled={!orgId || assistantsFull}
+            title={
+              assistantsFull
+                ? translation("Plans.limits.assistants", {
+                    plan: plan?.name ?? "",
+                    limit: limits.assistants,
+                  })
+                : translation("Assistants.createAssistant")
+            }
           >
             {translation("Assistants.createAssistant")}
           </button>
@@ -694,9 +738,18 @@ export default function AssistantsHub() {
                       "Assistants.vector.collectionNamePlaceholder",
                     )} ${selected.name}`}
                   />
-                  <label className={styles.label}>
-                    {translation("Assistants.vector.chooseFiles")}
-                  </label>
+                  <div className={styles.filesLabelRow}>
+                    <label className={styles.label}>
+                      {translation("Assistants.vector.chooseFiles")}
+                    </label>
+                    {/* Coleção nova: os escolhidos sobre o limite ("2 / 5"). */}
+                    <UsageCounter
+                      used={vsFiles.length}
+                      limit={limitKeepingCurrent(limits?.filesPerAssistant ?? null, 0)}
+                      label={translation("Plans.usage.filesLabel")}
+                      hint={translation("Plans.usage.filesHint")}
+                    />
+                  </div>
                   <input
                     className={styles.input}
                     type="file"
@@ -770,9 +823,17 @@ export default function AssistantsHub() {
                       </p>
 
                       <div>
-                        <span className={styles.metaLabel}>
-                          {translation("Assistants.vector.filenames")}
-                        </span>
+                        <div className={styles.filesLabelRow}>
+                          <span className={styles.metaLabel}>
+                            {translation("Assistants.vector.filenames")}
+                          </span>
+                          <UsageCounter
+                            used={filesAfterEdit}
+                            limit={filesLimit}
+                            label={translation("Plans.usage.filesLabel")}
+                            hint={translation("Plans.usage.filesHint")}
+                          />
+                        </div>
                         {vectorStore?.files?.length ? (
                           <ul className={styles.vectorFileList}>
                             {vectorStore.files.map((file) => {
@@ -906,7 +967,17 @@ export default function AssistantsHub() {
                               <span className={styles.metaLabel}>
                                 {translation("Assistants.vector.quantity")}
                               </span>
-                              <span>{vectorStore.files?.length || 0}</span>
+                              {/* "3 / 5" com limite no plano; sem limite, só o número. */}
+                              {filesLimit !== null ? (
+                                <UsageCounter
+                                  used={existingFileCount}
+                                  limit={filesLimit}
+                                  label={translation("Plans.usage.filesLabel")}
+                                  hint={translation("Plans.usage.filesHint")}
+                                />
+                              ) : (
+                                <span>{existingFileCount}</span>
+                              )}
                             </div>
                           </>
                         )}

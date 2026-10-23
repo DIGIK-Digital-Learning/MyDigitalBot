@@ -4,6 +4,15 @@ vi.mock("@/lib/repos/scheduledBroadcasts.repo", () => ({
     id: "schedule-1",
     ...row,
   })),
+  countManualQueuedBroadcasts: vi.fn(async () => 0),
+}));
+/* O limite de agendadas tem testes próprios (automationScheduledLimits); aqui, sem limite. */
+vi.mock("@/lib/services/plans/planLimits", async (importOriginal) => ({
+  ...(await importOriginal()),
+  getOrgLimits: vi.fn(async () => ({
+    plan: { id: 4, name: "Enterprise", level: 4 },
+    limits: { scheduledMessages: null },
+  })),
 }));
 vi.mock("@/lib/auth/guards", () => ({
   requireOwnedOrg: vi.fn(async () => ({

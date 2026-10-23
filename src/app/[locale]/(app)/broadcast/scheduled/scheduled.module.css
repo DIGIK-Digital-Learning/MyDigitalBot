@@ -27,6 +27,17 @@
   color: #0f1c3f;
 }
 
+/*
+ * Contador do limite do plano ("2 / 100", #186), no fim da barra dos filtros:
+ * à altura do "Atualizar" e por cima das ações da tabela. O margin-left:auto
+ * mantém-no encostado à direita mesmo quando a barra parte em duas linhas.
+ */
+.usageSlot {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+}
+
 .subtitle {
   margin: 6px 0 0;
   color: var(--ui-muted, #6b7280);

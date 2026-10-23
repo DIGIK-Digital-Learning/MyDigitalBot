@@ -1,5 +1,13 @@
 import { NextResponse } from "next/server";
-import { createScheduledBroadcast } from "@/lib/repos/scheduledBroadcasts.repo";
+import {
+  countManualQueuedBroadcasts,
+  createScheduledBroadcast,
+} from "@/lib/repos/scheduledBroadcasts.repo";
+import {
+  getOrgLimits,
+  hasRoomFor,
+  limitReachedBody,
+} from "@/lib/services/plans/planLimits";
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
 import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
@@ -37,6 +45,22 @@ export async function POST(req) {
       return NextResponse.json(
         { error: "Scheduled date must be in the future" },
         { status: 400 },
+      );
+    }
+
+    /*
+     * Limite de mensagens agendadas do plano (#186): contam só as agendadas
+     * à mão que ainda estão à espera (queued). As das automações não contam
+     * e nunca são bloqueadas. Antes de montar o envio, que vai buscar os
+     * destinatários: se a conta está cheia, não vale a pena.
+     */
+    const orgLimits = await getOrgLimits(orgAuth.orgId);
+    const queuedCount = await countManualQueuedBroadcasts(orgAuth.orgId);
+
+    if (!hasRoomFor(orgLimits.limits.scheduledMessages, queuedCount)) {
+      return NextResponse.json(
+        limitReachedBody("SCHEDULED_LIMIT_REACHED", "scheduledMessages", orgLimits),
+        { status: 409 },
       );
     }
 

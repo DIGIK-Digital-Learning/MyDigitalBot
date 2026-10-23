@@ -1,18 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { fetchPlanLimits } from "@/lib/plans/plans.api";
 
+const EMPTY = { plan: null, limits: null, usage: null };
+
 /**
- * Os limites do plano da organização, para contadores e avisos no ecrã.
+ * Os limites do plano da organização e quanto já está gasto, para contadores
+ * e avisos no ecrã ("6 / 20" automações, "2 / 100" agendadas).
  *
- * Enquanto não chegam (ou se o pedido falhar), `limits` é null e o ecrã não
- * bloqueia nada: quem decide é o servidor, que recusa na mesma o que passar
- * do limite. Assim uma falha aqui nunca deixa a pessoa presa.
+ * Enquanto não chegam (ou se o pedido falhar), `limits` e `usage` são null e
+ * o ecrã não bloqueia nada: quem decide é o servidor, que recusa na mesma o
+ * que passar do limite. Assim uma falha aqui nunca deixa a pessoa presa.
+ *
+ * `reload()` volta a pedir os números, para o contador acompanhar depois de
+ * criar, apagar ou agendar.
  */
 export default function usePlanLimits(orgId) {
-  const [state, setState] = useState({ plan: null, limits: null });
+  const [state, setState] = useState(EMPTY);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (!orgId) return undefined;
@@ -21,16 +28,24 @@ export default function usePlanLimits(orgId) {
 
     fetchPlanLimits(orgId)
       .then((data) => {
-        if (!cancelled) setState({ plan: data.plan, limits: data.limits });
+        if (!cancelled) {
+          setState({
+            plan: data.plan ?? null,
+            limits: data.limits ?? null,
+            usage: data.usage ?? null,
+          });
+        }
       })
       .catch(() => {
-        if (!cancelled) setState({ plan: null, limits: null });
+        if (!cancelled) setState(EMPTY);
       });
 
     return () => {
       cancelled = true;
     };
-  }, [orgId]);
+  }, [orgId, attempt]);
 
-  return state;
+  const reload = useCallback(() => setAttempt((n) => n + 1), []);
+
+  return { ...state, reload };
 }
