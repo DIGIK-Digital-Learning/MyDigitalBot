@@ -93,6 +93,67 @@
   font-weight: 700;
 }
 
+/* Linhas que pedem atenção: Demo terminada ou algum limite ultrapassado. */
+.rowAttention td {
+  background: #fff8f6;
+}
+
+.badge {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fee4e2;
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.search {
+  width: min(360px, 100%);
+  border: 1px solid #d0d7e2;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font: inherit;
+}
+
+.deadline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dateInput {
+  border: 1px solid #d0d7e2;
+  border-radius: 10px;
+  padding: 3px 8px;
+  font: inherit;
+  font-size: 13px;
+  color: #0f172a;
+  background: #fff;
+}
+
+.linkButton {
+  border: 1px solid #30a9e0;
+  background: #fff;
+  color: #1d7fae;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.linkButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.input:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+}
+
 .sends {
   display: grid;
   gap: 2px;

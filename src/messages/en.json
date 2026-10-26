@@ -3094,7 +3094,9 @@
         "broadcast_scheduled_sent": "Scheduled message sent",
         "message_received": "Message received",
         "teams_group_updated": "Teams group edited",
-        "unknown": "Unknown action"
+        "unknown": "Unknown action",
+        "organization_plan_extended": "Plan extended",
+        "organization_plan_end_changed": "Plan end changed"
       },
       "Table": {
         "when": "When",
@@ -4689,7 +4691,9 @@
       "broadcast_scheduled_sent": "Scheduled message sent",
       "message_received": "Message received",
       "teams_group_updated": "Teams group edited",
-      "unknown": "Unknown action"
+      "unknown": "Unknown action",
+      "organization_plan_extended": "Plan extended",
+      "organization_plan_end_changed": "Plan end changed"
     },
     "Table": {
       "when": "When",
@@ -4907,7 +4911,17 @@
       "confirmTitle": "Change plan",
       "confirmMessage": "{org} moves to the {plan} plan. The limits change now and the change goes into the organization's history.",
       "confirmOwn": "Your organization moves to the {plan} plan so you can try its limits. Go back to Interno whenever you want.",
-      "confirm": "Change"
+      "confirm": "Change",
+      "search": "Search by name or owner email",
+      "overLimit": "{count, plural, one {Over # limit} other {Over # limits}}",
+      "extendShort": "+7 days",
+      "extendTitle": "Extend the Demo",
+      "extendMessage": "{org} gets 7 more days on the {plan} plan, counting from the current end (or from today, if it has ended). This goes into the organization's history.",
+      "extend": "Extend",
+      "endsOn": "Day {org}'s Demo ends",
+      "endTitle": "Change the Demo end",
+      "endMessage": "{org} stays on the {plan} plan until {date} at 23:59. This goes into the organization's history.",
+      "endConfirm": "Change"
     },
     "plans": {
       "title": "Plans",
@@ -4918,7 +4932,8 @@
       "save": "Save",
       "confirmTitle": "Save the {plan} plan",
       "confirmMessage": "{count, plural, =0 {No organization is on this plan.} one {This changes the limits of # organization, now.} other {This changes the limits of # organizations, now.}} Continue?",
-      "hint": "Technical maximums: 10 messages per chain and 50 MB per file."
+      "hint": "Technical maximums: 10 messages per chain and 50 MB per file.",
+      "locked": "DIGIK plan, not editable"
     },
     "limits": {
       "durationDays": "Duration (days)",

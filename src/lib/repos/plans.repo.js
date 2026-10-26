@@ -36,7 +36,7 @@ export async function listOrganizationsWithPlan() {
 
   const { data, error } = await sb
     .from("organization")
-    .select("id, name, plan_started_at, max_users_override, plan_id")
+    .select("id, name, owner_user_id, plan_started_at, max_users_override, plan_id")
     .order("name", { ascending: true });
 
   if (error) throw error;
@@ -72,6 +72,45 @@ export async function setOrganizationPlan(orgId, planId, { now = new Date() } = 
 
   if (error) throw error;
   return data;
+}
+
+/* Muda só o início do plano (prolongar a Demo sem mudar de plano). */
+export async function setOrganizationPlanStart(orgId, startedAt) {
+  const sb = getSupabaseAdminClient();
+
+  const { data, error } = await sb
+    .from("organization")
+    .update({ plan_started_at: startedAt.toISOString() })
+    .eq("id", orgId)
+    .select("id, plan_id, plan_started_at")
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+/*
+ * O email do dono de cada organização, para a equipa DIGIK saber a quem
+ * ligar. Devolve `{ [ownerUserId]: email }`.
+ */
+export async function listOwnerEmails(ownerUserIds) {
+  const wanted = new Set(ownerUserIds.filter(Boolean));
+  if (!wanted.size) return {};
+
+  const sb = getSupabaseAdminClient();
+  const emails = {};
+
+  for (let page = 1; page <= 20 && Object.keys(emails).length < wanted.size; page += 1) {
+    const { data, error } = await sb.auth.admin.listUsers({ page, perPage: 1000 });
+    if (error) throw error;
+
+    for (const user of data?.users || []) {
+      if (wanted.has(user.id)) emails[user.id] = user.email ?? null;
+    }
+    if ((data?.users || []).length < 1000) break;
+  }
+
+  return emails;
 }
 
 /* Grava os limites de um plano (`patch` já com os nomes das colunas). */

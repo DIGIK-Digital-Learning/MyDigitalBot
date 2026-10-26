@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { useAlert } from "@/app/components/Alert/AlertProvider";
@@ -9,7 +9,9 @@ import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import {
   announceAdminPlanChanged,
   changeOrganizationPlan,
+  extendOrganizationPlan,
   fetchAdminOverview,
+  setOrganizationPlanEnd,
   updatePlanLimits,
 } from "@/lib/admin/admin.api";
 
@@ -41,6 +43,39 @@ const USAGE_COLUMNS = [
   ["trackedLinks", "trackedLinks"],
 ];
 
+const INTERNAL_PLAN_NAME = "Interno";
+
+/* O dia de uma data em Lisboa, no formato dos campos de data ("2026-11-04"). */
+function lisbonDate(value) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Lisbon",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(value));
+}
+
+/* Até onde se pode levar uma Demo de uma vez (o servidor valida o mesmo). */
+const MAX_END_DAYS_AHEAD = 90;
+
+/*
+ * Ordem da lista: primeiro o que pede atenção (Demos terminadas, depois as que
+ * acabam mais cedo, depois as que passaram algum limite) e o resto por nome.
+ */
+function attentionRank(org) {
+  if (org.expired) return 0;
+  if (org.expiresAt) return 1;
+  if (org.overLimits?.length) return 2;
+  return 3;
+}
+
+function compareOrganizations(a, b) {
+  const rank = attentionRank(a) - attentionRank(b);
+  if (rank) return rank;
+  if (a.expiresAt && b.expiresAt) return (a.daysLeft ?? 0) - (b.daysLeft ?? 0);
+  return String(a.name).localeCompare(String(b.name), "pt");
+}
+
 /* Os valores de um plano como texto, para os campos ("" = sem limite). */
 function planDraft(plan) {
   const draft = { durationDays: plan.durationDays ?? "" };
@@ -62,6 +97,22 @@ export default function AdminPage() {
   const [status, setStatus] = useState("loading");
   const [drafts, setDrafts] = useState({});
   const [busy, setBusy] = useState(false);
+  const [query, setQuery] = useState("");
+
+  /* Pesquisa pelo nome ou pelo email do dono, com o que pede atenção no topo. */
+  const organizations = useMemo(() => {
+    const term = query.trim().toLowerCase();
+    return (data?.organizations || [])
+      .filter(
+        (org) =>
+          !term ||
+          String(org.name).toLowerCase().includes(term) ||
+          String(org.ownerEmail || "")
+            .toLowerCase()
+            .includes(term),
+      )
+      .sort(compareOrganizations);
+  }, [data, query]);
 
   const load = useCallback(async () => {
     try {
@@ -114,6 +165,65 @@ export default function AdminPage() {
     try {
       await changeOrganizationPlan(org.id, plan.id);
       if (own) announceAdminPlanChanged();
+      await load();
+    } catch (error) {
+      await showError(error);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /*
+   * Escolher o dia em que a Demo termina: corrige um "+7 dias" a mais ou dá
+   * um prazo à medida. O dia conta até às 23:59.
+   */
+  async function changePlanEnd(org, endsOn) {
+    if (!endsOn || endsOn === lisbonDate(org.expiresAt)) return;
+
+    const [year, month, day] = endsOn.split("-");
+    const confirmed = await confirm({
+      title: translation("Admin.organizations.endTitle"),
+      message: translation("Admin.organizations.endMessage", {
+        org: org.name,
+        plan: org.plan?.name ?? "",
+        date: `${day}/${month}/${year}`,
+      }),
+      confirmText: translation("Admin.organizations.endConfirm"),
+      cancelText: translation("Admin.cancel"),
+    });
+
+    setBusy(true);
+    try {
+      if (confirmed) {
+        await setOrganizationPlanEnd(org.id, endsOn);
+        if (org.id === data.adminOrgId) announceAdminPlanChanged();
+      }
+      /* Também ao cancelar: o campo volta à data verdadeira. */
+      await load();
+    } catch (error) {
+      await showError(error);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /* Mais 7 dias de Demo, sem mudar de plano (#208). */
+  async function extendPlan(org) {
+    const confirmed = await confirm({
+      title: translation("Admin.organizations.extendTitle"),
+      message: translation("Admin.organizations.extendMessage", {
+        org: org.name,
+        plan: org.plan?.name ?? "",
+      }),
+      confirmText: translation("Admin.organizations.extend"),
+      cancelText: translation("Admin.cancel"),
+    });
+    if (!confirmed) return;
+
+    setBusy(true);
+    try {
+      await extendOrganizationPlan(org.id, 7);
+      if (org.id === data.adminOrgId) announceAdminPlanChanged();
       await load();
     } catch (error) {
       await showError(error);
@@ -191,7 +301,6 @@ export default function AdminPage() {
 
   return (
     <div className={styles.page}>
-
       {/* Experimentar a app como outro plano, na própria organização. */}
       {ownOrg ? (
         <section className={styles.section}>
@@ -224,6 +333,15 @@ export default function AdminPage() {
           <p>{translation("Admin.organizations.description")}</p>
         </div>
 
+        <input
+          type="search"
+          className={styles.search}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={translation("Admin.organizations.search")}
+          aria-label={translation("Admin.organizations.search")}
+        />
+
         <div className={styles.tableWrap}>
           <table className={styles.table}>
             <thead>
@@ -238,11 +356,28 @@ export default function AdminPage() {
               </tr>
             </thead>
             <tbody>
-              {data.organizations.map((org) => (
-                <tr key={org.id}>
+              {organizations.map((org) => (
+                <tr
+                  key={org.id}
+                  className={
+                    org.expired || org.overLimits?.length
+                      ? styles.rowAttention
+                      : undefined
+                  }
+                >
                   <td>
                     <strong>{org.name}</strong>
-                    <span className={styles.muted}>#{org.id}</span>
+                    <span className={styles.muted}>
+                      #{org.id}
+                      {org.ownerEmail ? ` · ${org.ownerEmail}` : ""}
+                    </span>
+                    {org.overLimits?.length ? (
+                      <span className={styles.badge}>
+                        {translation("Admin.organizations.overLimit", {
+                          count: org.overLimits.length,
+                        })}
+                      </span>
+                    ) : null}
                   </td>
                   <td>
                     <select
@@ -255,24 +390,67 @@ export default function AdminPage() {
                       onChange={(e) => switchPlan(org, e.target.value)}
                     >
                       {!org.plan && <option value="">—</option>}
-                      {data.plans.map((plan) => (
-                        <option key={plan.id} value={plan.id}>
-                          {plan.name}
-                        </option>
-                      ))}
+                      {/* O Interno só aparece às organizações da DIGIK. */}
+                      {data.plans
+                        .filter(
+                          (plan) =>
+                            org.isPlatformOrg ||
+                            plan.name !== INTERNAL_PLAN_NAME ||
+                            plan.id === org.plan?.id,
+                        )
+                        .map((plan) => (
+                          <option key={plan.id} value={plan.id}>
+                            {plan.name}
+                          </option>
+                        ))}
                     </select>
                   </td>
                   <td>
                     {org.expiresAt ? (
-                      org.expired ? (
-                        <span className={styles.danger}>
-                          {translation("Admin.organizations.ended")}
-                        </span>
-                      ) : (
-                        translation("Admin.organizations.daysLeft", {
-                          days: org.daysLeft,
-                        })
-                      )
+                      <span className={styles.deadline}>
+                        {org.expired ? (
+                          <span className={styles.danger}>
+                            {translation("Admin.organizations.ended")}
+                          </span>
+                        ) : (
+                          translation("Admin.organizations.daysLeft", {
+                            days: org.daysLeft,
+                          })
+                        )}
+                        <input
+                          type="date"
+                          className={styles.dateInput}
+                          key={org.expiresAt}
+                          defaultValue={lisbonDate(org.expiresAt)}
+                          min={lisbonDate(Date.now())}
+                          max={lisbonDate(
+                            Date.now() +
+                              MAX_END_DAYS_AHEAD * 24 * 60 * 60 * 1000,
+                          )}
+                          disabled={busy}
+                          aria-label={translation(
+                            "Admin.organizations.endsOn",
+                            {
+                              org: org.name,
+                            },
+                          )}
+                          title={translation("Admin.organizations.endsOn", {
+                            org: org.name,
+                          })}
+                          onBlur={(e) => changePlanEnd(org, e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") e.currentTarget.blur();
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className={styles.linkButton}
+                          disabled={busy}
+                          onClick={() => extendPlan(org)}
+                        >
+                          {translation("Admin.organizations.extendShort")}
+                        </button>
+                      </span>
                     ) : (
                       "—"
                     )}
@@ -339,6 +517,8 @@ export default function AdminPage() {
                       <input
                         className={styles.input}
                         inputMode="numeric"
+                        /* O Interno (sem limites) não se edita. */
+                        disabled={plan.name === INTERNAL_PLAN_NAME}
                         value={drafts[plan.id]?.[name] ?? ""}
                         placeholder={translation("Admin.plans.unlimited")}
                         aria-label={`${plan.name}: ${translation(`Admin.limits.${name}`)}`}
@@ -354,14 +534,20 @@ export default function AdminPage() {
                 <td />
                 {data.plans.map((plan) => (
                   <td key={plan.id}>
-                    <button
-                      type="button"
-                      className={styles.button}
-                      disabled={busy}
-                      onClick={() => savePlan(plan)}
-                    >
-                      {translation("Admin.plans.save")}
-                    </button>
+                    {plan.name === INTERNAL_PLAN_NAME ? (
+                      <span className={styles.muted}>
+                        {translation("Admin.plans.locked")}
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        className={styles.button}
+                        disabled={busy}
+                        onClick={() => savePlan(plan)}
+                      >
+                        {translation("Admin.plans.save")}
+                      </button>
+                    )}
                   </td>
                 ))}
               </tr>

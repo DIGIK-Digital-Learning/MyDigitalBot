@@ -2943,7 +2943,9 @@
         "broadcast_scheduled_sent": "Mensagem agendada enviada",
         "message_received": "Mensagem recebida",
         "teams_group_updated": "Grupo Teams editado",
-        "unknown": "Ação desconhecida"
+        "unknown": "Ação desconhecida",
+        "organization_plan_extended": "Plano prolongado",
+        "organization_plan_end_changed": "Fim do plano alterado"
       },
       "Table": {
         "when": "Quando",
@@ -4538,7 +4540,9 @@
       "broadcast_scheduled_sent": "Mensagem agendada enviada",
       "message_received": "Mensagem recebida",
       "teams_group_updated": "Grupo Teams editado",
-      "unknown": "Ação desconhecida"
+      "unknown": "Ação desconhecida",
+      "organization_plan_extended": "Plano prolongado",
+      "organization_plan_end_changed": "Fim do plano alterado"
     },
     "Table": {
       "when": "Quando",
@@ -4907,7 +4911,17 @@
       "confirmTitle": "Mudar de plano",
       "confirmMessage": "A {org} passa para o plano {plan}. Os limites mudam já e a mudança fica no histórico da organização.",
       "confirmOwn": "A tua organização passa para o plano {plan}, para experimentares os limites dele. Voltas ao Interno quando quiseres.",
-      "confirm": "Mudar"
+      "confirm": "Mudar",
+      "search": "Procurar por nome ou email do dono",
+      "overLimit": "{count, plural, one {Acima de # limite} other {Acima de # limites}}",
+      "extendShort": "+7 dias",
+      "extendTitle": "Prolongar a Demo",
+      "extendMessage": "A {org} fica com mais 7 dias no plano {plan}, a contar do fim atual (ou de hoje, se já terminou). Fica no histórico da organização.",
+      "extend": "Prolongar",
+      "endsOn": "Dia em que a Demo da {org} termina",
+      "endTitle": "Mudar o fim da Demo",
+      "endMessage": "A {org} fica no plano {plan} até {date}, às 23:59. Fica no histórico da organização.",
+      "endConfirm": "Mudar"
     },
     "plans": {
       "title": "Planos",
@@ -4918,7 +4932,8 @@
       "save": "Guardar",
       "confirmTitle": "Guardar o plano {plan}",
       "confirmMessage": "{count, plural, =0 {Nenhuma organização está neste plano.} one {Isto muda os limites de # organização, já.} other {Isto muda os limites de # organizações, já.}} Continuar?",
-      "hint": "Máximos técnicos: 10 mensagens por corrente e 50 MB por ficheiro."
+      "hint": "Máximos técnicos: 10 mensagens por corrente e 50 MB por ficheiro.",
+      "locked": "Plano da DIGIK, não se edita"
     },
     "limits": {
       "durationDays": "Duração (dias)",

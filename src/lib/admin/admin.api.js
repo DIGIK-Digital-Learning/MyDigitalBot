@@ -31,6 +31,27 @@ export function changeOrganizationPlan(orgId, planId) {
   });
 }
 
+/* Prolonga a Demo de uma organização (por omissão, mais 7 dias). */
+export function extendOrganizationPlan(orgId, days = 7) {
+  return request(
+    `/api/admin/organizations/${encodeURIComponent(orgId)}/extend`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ days }),
+    },
+  );
+}
+
+/* Escolhe o dia em que a Demo termina (`endsOn`: "2026-11-04"). */
+export function setOrganizationPlanEnd(orgId, endsOn) {
+  return request(`/api/admin/organizations/${encodeURIComponent(orgId)}/end`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ endsOn }),
+  });
+}
+
 /** `body` é `{ limits: { users: 100, … }, durationDays }`; null = sem limite. */
 export function updatePlanLimits(planId, body) {
   return request(`/api/admin/plans/${encodeURIComponent(planId)}`, {

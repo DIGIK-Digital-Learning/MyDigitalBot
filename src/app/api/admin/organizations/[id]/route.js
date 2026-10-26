@@ -32,7 +32,10 @@ export async function PATCH(req, { params }) {
     });
 
     if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 404 });
+      return NextResponse.json(
+        { error: result.error },
+        { status: result.error === "INTERNAL_PLAN_RESERVED" ? 400 : 404 },
+      );
     }
 
     return NextResponse.json(result);

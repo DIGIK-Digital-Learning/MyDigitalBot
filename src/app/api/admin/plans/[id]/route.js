@@ -25,7 +25,14 @@ export async function PATCH(req, { params }) {
     if (result.error) {
       return NextResponse.json(
         { error: result.error },
-        { status: result.error === "PLAN_NOT_FOUND" ? 404 : 400 },
+        {
+          status:
+            result.error === "PLAN_NOT_FOUND"
+              ? 404
+              : result.error === "INTERNAL_PLAN_LOCKED"
+                ? 403
+                : 400,
+        },
       );
     }
 
