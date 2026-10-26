@@ -9,6 +9,7 @@ import useOrganization from "@/app/hooks/useOrganization";
 import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
 import { useTranslations } from "next-intl";
 import styles from "./tracked-links.module.css";
+import SavedLinksSection from "./components/SavedLinksSection";
 
 function formatDate(value) {
   if (!value) return "-";
@@ -147,6 +148,9 @@ export default function TrackedLinksPage() {
           </div>
         </div>
       </div>
+
+      {/* Os links que contam para o plano, com eliminar (#189). */}
+      {org?.id ? <SavedLinksSection orgId={org.id} /> : null}
 
       <div className={styles.toolbarRow}>
         <div className={styles.searchWrap}>

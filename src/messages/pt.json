@@ -3586,6 +3586,11 @@
         "title": "Erro ao carregar links rastreados",
         "message": "Não foi possível carregar os links rastreados. Tenta novamente dentro de alguns segundos."
       }
+    },
+    "saved": {
+      "title": "Links guardados",
+      "description": "Os links que contam para o teu plano. Eliminar um link não apaga as estatísticas dos envios em que foi usado.",
+      "empty": "Ainda não tens links guardados. Os links entram aqui quando os usas numa mensagem."
     }
   },
   "Questions": {
@@ -3829,7 +3834,17 @@
       "save": "Guardar alterações",
       "saving": "A atualizar..."
     },
-    "placeholder": "Seleciona um assistant na coluna da esquerda."
+    "placeholder": "Seleciona um assistant na coluna da esquerda.",
+    "errors": {
+      "save": "Não foi possível guardar o assistente. {detail}",
+      "delete": "Não foi possível eliminar o assistente. {detail}",
+      "fileType": "Este tipo de ficheiro não é aceite.",
+      "upload": "Não foi possível carregar o ficheiro. {detail}",
+      "createCollection": "Não foi possível criar a coleção. {detail}",
+      "loadFiles": "Não foi possível carregar os ficheiros. {detail}",
+      "updateCollection": "Não foi possível atualizar a coleção. {detail}",
+      "deleteCollection": "Não foi possível eliminar a coleção. {detail}"
+    }
   },
   "AssistantPresets": {
     "formal": {

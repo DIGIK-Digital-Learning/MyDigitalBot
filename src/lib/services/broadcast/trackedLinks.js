@@ -117,6 +117,7 @@ export async function listReusableTrackedLinks(orgId) {
       key: String(row.link_key || "").trim(),
       label,
       destinationUrl,
+      createdAt: row.created_at || null,
       lastUsedAt: row.last_used_at || null,
     });
   }

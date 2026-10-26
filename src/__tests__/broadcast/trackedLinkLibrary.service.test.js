@@ -113,6 +113,7 @@ function row(overrides = {}) {
     link_key: "guia",
     link_label: "Guia MFA",
     destination_url: "https://exemplo.pt/mfa",
+    created_at: "2026-09-20T10:00:00Z",
     last_used_at: "2026-10-01T10:00:00Z",
     ...overrides,
   };
@@ -132,6 +133,7 @@ describe("listReusableTrackedLinks", () => {
         key: "guia",
         label: "Guia MFA",
         destinationUrl: "https://exemplo.pt/mfa",
+        createdAt: "2026-09-20T10:00:00Z",
         lastUsedAt: "2026-10-01T10:00:00Z",
       },
     ]);

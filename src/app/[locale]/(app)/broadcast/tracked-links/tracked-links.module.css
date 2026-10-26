@@ -254,6 +254,102 @@
   border-color: #ffd0d0;
 }
 
+/* Links guardados (#189): os que contam para os 100 do plano. */
+.savedCard {
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.savedHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.savedTitle {
+  margin: 0;
+  color: #0f1c3f;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.savedEmpty {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.savedRetry {
+  border: 0;
+  background: none;
+  color: #1d7fae;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.savedList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.savedItem {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--ui-border);
+  border-radius: 12px;
+  background: #fff;
+  min-width: 0;
+}
+
+.savedText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  color: #0f1c3f;
+}
+
+.savedUrl {
+  color: #64748b;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.savedDelete {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  background: #fff;
+  color: #0f1c3f;
+  cursor: pointer;
+}
+
+.savedDelete:hover {
+  background: #fee4e2;
+  color: #b42318;
+}
+
 @media (max-width: 900px) {
   .header {
     align-items: stretch;

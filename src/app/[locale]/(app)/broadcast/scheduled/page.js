@@ -23,6 +23,7 @@ import {
 
 import ScheduledHeader from "./components/ScheduledHeader";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
+import useSeenSince from "@/app/hooks/useSeenSince";
 import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import ScheduledStats from "./components/ScheduledStats";
 import ScheduledFilters from "./components/ScheduledFilters";
@@ -43,6 +44,8 @@ export default function ScheduledPage() {
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const { org, loading: orgLoading } = useOrganization(user);
+  /* Etiqueta "Novo" nas agendadas criadas desde a última visita. */
+  const isNewScheduled = useSeenSince("seen.scheduled", org?.id);
 
   /* Limite de agendadas do plano (#186): contador "2 / 100" no cabeçalho. */
   const {
@@ -599,6 +602,7 @@ export default function ScheduledPage() {
         handleDelete={handleDelete}
         canDeleteItem={canDeleteItem}
         deletingId={deletingId}
+        isNew={isNewScheduled}
       />
 
       {selectedItem ? (

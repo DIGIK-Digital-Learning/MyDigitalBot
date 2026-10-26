@@ -61,7 +61,7 @@ import usePlanLimits from "@/app/hooks/usePlanLimits";
 import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import { DAILY_SENDS_TIME_ZONE } from "@/lib/plans/dailySends";
 import useTrackedLinkLibrary from "./hooks/useTrackedLinkLibrary";
-import { deleteTrackedLinkFromLibrary } from "./lib/broadcast.api";
+import useDeleteTrackedLink from "./hooks/useDeleteTrackedLink";
 import {
   asList,
   buildInitialScheduledDate,
@@ -1312,43 +1312,12 @@ export default function BroadcastPage() {
    * Eliminar um link da biblioteca (#189): deixa de contar para os links do
    * plano. Não se elimina se ainda for sair numa agendada ou numa corrente.
    */
-  async function deleteLibraryLink(item) {
-    const confirmed = await confirm({
-      title: translation("Broadcast.linkLibrary.deleteConfirm.title"),
-      message: translation("Broadcast.linkLibrary.deleteConfirm.message", {
-        label: item.label,
-      }),
-      confirmText: translation("Broadcast.linkLibrary.deleteConfirm.confirm"),
-      cancelText: translation("Broadcast.confirmSend.cancel"),
-    });
-    if (!confirmed) return;
-
-    try {
-      const data = await deleteTrackedLinkFromLibrary(org?.id, item.id);
-
-      if (data?.code === "TRACKED_LINK_IN_USE") {
-        await showAlert({
-          title: translation("Broadcast.linkLibrary.inUseTitle"),
-          message: translation(
-            data.reason === "chain"
-              ? "Broadcast.linkLibrary.inUseChain"
-              : "Broadcast.linkLibrary.inUseScheduled",
-          ),
-          tone: "warning",
-        });
-        return;
-      }
-
+  const deleteLibraryLink = useDeleteTrackedLink(org?.id, {
+    onDeleted: () => {
       trackedLinkLibrary.reload();
       reloadPlanUsage();
-    } catch (err) {
-      await showAlert({
-        title: translation("Common.error"),
-        message: err.message,
-        tone: "danger",
-      });
-    }
-  }
+    },
+  });
 
   /* Links já usados noutros envios, carregados quando o painel abre. */
   const trackedLinkLibrary = useTrackedLinkLibrary({

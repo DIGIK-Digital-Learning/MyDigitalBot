@@ -3586,6 +3586,11 @@
         "title": "Failed to load tracked links",
         "message": "Tracked links could not be loaded. Please try again in a few seconds."
       }
+    },
+    "saved": {
+      "title": "Saved links",
+      "description": "The links that count towards your plan. Deleting a link doesn't remove the stats of the messages it was used in.",
+      "empty": "You don't have saved links yet. Links show up here once you use them in a message."
     }
   },
   "Questions": {
@@ -3829,7 +3834,17 @@
       "save": "Save changes",
       "saving": "Updating..."
     },
-    "placeholder": "Select an assistant from the left column."
+    "placeholder": "Select an assistant from the left column.",
+    "errors": {
+      "save": "Couldn't save the assistant. {detail}",
+      "delete": "Couldn't delete the assistant. {detail}",
+      "fileType": "This file type isn't accepted.",
+      "upload": "Couldn't upload the file. {detail}",
+      "createCollection": "Couldn't create the collection. {detail}",
+      "loadFiles": "Couldn't upload the files. {detail}",
+      "updateCollection": "Couldn't update the collection. {detail}",
+      "deleteCollection": "Couldn't delete the collection. {detail}"
+    }
   },
   "AssistantPresets": {
     "formal": {

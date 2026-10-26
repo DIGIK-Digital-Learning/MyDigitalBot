@@ -262,7 +262,7 @@ export default function AssistantsHub() {
       if (!res.ok) {
         const payload = await res.json().catch(() => ({}));
         if (await showLimitAlert(payload)) return;
-        alert("Erro ao guardar: " + (payload.error || res.statusText));
+        await showError("save", payload.error || res.statusText);
         return;
       }
       setIsEditing(false);
@@ -290,7 +290,7 @@ export default function AssistantsHub() {
       });
       if (!res.ok) {
         const payload = await res.json().catch(() => ({}));
-        alert("Erro: " + (payload.error || res.statusText));
+        await showError("delete", payload.error || res.statusText);
         return;
       }
       const remaining = assistants.filter((a) => a.id !== selected.id);
@@ -303,6 +303,20 @@ export default function AssistantsHub() {
     }
   }
 
+  /*
+   * Erros da página num aviso da app, traduzido. `detail` é o motivo que o
+   * servidor deu (quando deu algum).
+   */
+  async function showError(key, detail = "") {
+    await showAlert({
+      title: translation("Common.error"),
+      message: translation(`Assistants.errors.${key}`, {
+        detail: detail || "",
+      }).trim(),
+      tone: "danger",
+    });
+  }
+
   async function stageFiles(files) {
     const basePath = `${orgId}/${selected.id}/${Date.now()}`;
     const uploaded = [];
@@ -311,7 +325,7 @@ export default function AssistantsHub() {
       const contentType = resolveAssistantFileType(f);
 
       if (!contentType) {
-        throw new Error("Este tipo de ficheiro não é aceite.");
+        throw new Error(translation("Assistants.errors.fileType"));
       }
 
       const path = `${basePath}-${f.name}`;
@@ -324,7 +338,9 @@ export default function AssistantsHub() {
         });
 
       if (error) {
-        throw new Error("Erro no upload: " + error.message);
+        throw new Error(
+          translation("Assistants.errors.upload", { detail: error.message }),
+        );
       }
 
       uploaded.push({
@@ -355,14 +371,14 @@ export default function AssistantsHub() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         if (await showLimitAlert(data)) return;
-        alert("Erro: " + (data.error || "Falha ao criar a store"));
+        await showError("createCollection", data.error);
         return;
       }
       setVsName("");
       setVsFiles([]);
       await fetchOne(selected.id);
     } catch (error) {
-      alert(error?.message || "Erro ao carregar os ficheiros");
+      await showError("loadFiles", error?.message);
     } finally {
       stopLoading();
     }
@@ -420,14 +436,14 @@ export default function AssistantsHub() {
 
       if (!res.ok) {
         if (await showLimitAlert(data)) return;
-        alert("Erro: " + (data.error || "Falha ao atualizar a coleção"));
+        await showError("updateCollection", data.error);
         return;
       }
 
       cancelVectorStoreEdit();
       await fetchOne(selected.id);
     } catch (error) {
-      alert(error?.message || "Erro ao atualizar a coleção");
+      await showError("updateCollection", error?.message);
     } finally {
       setIsSavingVectorStore(false);
       stopLoading();
@@ -453,7 +469,7 @@ export default function AssistantsHub() {
       );
       if (!res.ok) {
         const payload = await res.json().catch(() => ({}));
-        alert("Erro: " + (payload.message || res.statusText));
+        await showError("deleteCollection", payload.message || res.statusText);
         return;
       }
       await fetchOne(selected.id);

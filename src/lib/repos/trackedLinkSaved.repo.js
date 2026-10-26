@@ -12,7 +12,7 @@ export async function listSavedTrackedLinks(orgId, { limit = 200 } = {}) {
   const sb = getRepositoryReadClient();
   const { data, error } = await sb
     .from("tracked_link_saved")
-    .select("id, link_key, link_label, destination_url, last_used_at")
+    .select("id, link_key, link_label, destination_url, created_at, last_used_at")
     .eq("org_id", orgId)
     .is("deleted_at", null)
     .order("last_used_at", { ascending: false })
