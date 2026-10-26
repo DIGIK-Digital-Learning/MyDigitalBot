@@ -1484,6 +1484,11 @@
     "linkBubbleTag": "Balão à parte",
     "linkBubbleText": "Texto do balão (opcional)",
     "linkLibrary": {
+      "delete": "Eliminar o link {label}",
+      "deleteConfirm": { "title": "Eliminar link", "message": "O link \"{label}\" sai da lista e deixa de contar para os links do teu plano. Os envios em que já foi usado continuam a funcionar e os cliques ficam nas Métricas.", "confirm": "Eliminar" },
+      "inUseTitle": "Link em uso",
+      "inUseScheduled": "Este link está numa mensagem agendada. Cancela-a primeiro para o poderes eliminar.",
+      "inUseChain": "Este link está numa corrente que ainda está a decorrer. Só o podes eliminar quando a corrente terminar.",
       "title": "Links já usados",
       "search": "Procurar por nome ou URL",
       "use": "Usar",
@@ -2892,6 +2897,7 @@
         "message": "Mensagens individuais",
         "template": "Templates",
         "media": "Multimédia",
+        "tracked_link": "Links rastreados",
         "organization": "Organização"
       },
       "Channels": {
@@ -2925,6 +2931,7 @@
         "message_template_sent": "Template enviado a um colaborador",
         "template_created": "Template WhatsApp criado",
         "media_deleted": "Ficheiro de multimédia eliminado",
+        "tracked_link_deleted": "Link rastreado eliminado",
         "organization_created": "Organização criada",
         "organization_settings_updated": "Definições da organização alteradas",
         "automation_triggered": "Automação disparada",
@@ -4484,6 +4491,7 @@
       "message": "Mensagens individuais",
       "template": "Templates",
       "media": "Multimédia",
+      "tracked_link": "Links rastreados",
       "organization": "Organização"
     },
     "Channels": {
@@ -4517,6 +4525,7 @@
       "message_template_sent": "Template enviado a um colaborador",
       "template_created": "Template WhatsApp criado",
       "media_deleted": "Ficheiro de multimédia eliminado",
+      "tracked_link_deleted": "Link rastreado eliminado",
       "organization_created": "Organização criada",
       "organization_settings_updated": "Definições da organização alteradas",
       "automation_triggered": "Automação disparada",
@@ -4830,6 +4839,8 @@
       "filesRemaining": "Podes juntar só mais {remaining, plural, =0 {nenhum ficheiro} one {# ficheiro} other {# ficheiros}} (máximo de {limit} por assistente). Escolhe menos ficheiros ou tira algum da coleção.",
       "automationsTitle": "Limite de automações atingido",
       "automations": "Cada conta pode ter até {limit, plural, one {# automação} other {# automações}}. Apaga uma para criares outra.",
+      "trackedLinksTitle": "Limite de links atingido",
+      "trackedLinksFull": "Chegaste aos {limit} links do teu plano. Elimina um link em \"Links já usados\" para poderes criar um novo.",
       "scheduledTitle": "Limite de mensagens agendadas atingido",
       "dailyTitle": "Limite de envios de hoje atingido",
       "daily": "Já usaste os {limit} envios de hoje no {channel}. O contador volta a 0 às {time}.",
@@ -4850,6 +4861,8 @@
       "assistantsHint": "Conta todos os assistentes da conta.",
       "automationsLabel": "Automações",
       "automationsHint": "Contam todas as automações da conta, ativas e inativas.",
+      "trackedLinksLabel": "Links guardados",
+      "trackedLinksHint": "Cada link (nome e destino) conta uma vez, mesmo que seja usado em vários envios. Elimina os que já não usas para libertares espaço.",
       "scheduledLabel": "Mensagens agendadas",
       "dailyShort": "Envios hoje",
       "dailyLabel": "Envios de hoje neste canal",

@@ -34,6 +34,10 @@ vi.mock("@/lib/repos/adminDailySends.repo", () => ({
   refundScheduledSend: vi.fn(async () => {}),
   countAdminDailySends: vi.fn(async () => ({ whatsapp: 0, teams: 0 })),
 }));
+vi.mock("@/lib/repos/trackedLinkSaved.repo", () => ({
+  countSavedTrackedLinks: vi.fn(async () => 37),
+  saveTrackedLinks: vi.fn(async () => ({ ok: true, used: 37, limit: 100, added: 0 })),
+}));
 vi.mock("@/lib/services/plans/planLimits", async (importOriginal) => ({
   ...(await importOriginal()),
   getOrgLimits: mocks.getOrgLimits,
@@ -212,6 +216,7 @@ describe("GET /api/plans/limits", () => {
         automations: 6,
         scheduledMessages: 2,
         dailySends: { whatsapp: 0, teams: 0 },
+        trackedLinks: 37,
       },
       dailySendsResetAt: expect.any(String),
       expiresAt: null,

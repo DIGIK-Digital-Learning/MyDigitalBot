@@ -11,6 +11,7 @@ import {
   checkMessageContent,
   claimDailySend,
   releaseDailySend,
+  saveTrackedLinksWithinPlan,
 } from "@/lib/services/plans/planLimits";
 
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
@@ -78,6 +79,17 @@ export async function POST(req) {
      * SEND TEAMS BROADCAST
      * =========================================================
      */
+    /*
+     * Links rastreados do plano (#189): os links novos entram na biblioteca
+     * da organização, até 100. Reutilizar um link guardado não conta.
+     */
+    const links = await saveTrackedLinksWithinPlan(orgAuth.orgId, body?.trackedLinks, {
+      orgLimits: content.orgLimits,
+    });
+    if (links.body) {
+      return NextResponse.json(links.body, { status: 409 });
+    }
+
     /*
      * Limite diário de envios do canal (#188): este envio conta 1, seja para
      * quantos colaboradores for. Reserva-se antes de enviar; se não chegar a

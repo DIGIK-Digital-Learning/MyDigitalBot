@@ -14,6 +14,7 @@ import {
   checkMessageContent,
   claimDailySend,
   releaseDailySend,
+  saveTrackedLinksWithinPlan,
 } from "@/lib/services/plans/planLimits";
 
 export async function POST(req) {
@@ -55,6 +56,17 @@ export async function POST(req) {
     });
     if (content.body) {
       return NextResponse.json(content.body, { status: 400 });
+    }
+
+    /*
+     * Links rastreados do plano (#189): os links novos entram na biblioteca
+     * da organização, até 100. Reutilizar um link guardado não conta.
+     */
+    const links = await saveTrackedLinksWithinPlan(orgAuth.orgId, body?.trackedLinks, {
+      orgLimits: content.orgLimits,
+    });
+    if (links.body) {
+      return NextResponse.json(links.body, { status: 409 });
     }
 
     /*

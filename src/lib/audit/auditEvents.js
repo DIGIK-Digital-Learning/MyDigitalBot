@@ -50,6 +50,8 @@ export const AUDIT_ACTIONS = Object.freeze({
 
   MEDIA_DELETED: "media.deleted",
 
+  TRACKED_LINK_DELETED: "tracked_link.deleted",
+
   ORGANIZATION_CREATED: "organization.created",
   ORGANIZATION_SETTINGS_UPDATED: "organization.settings_updated",
 
@@ -88,6 +90,7 @@ export const AUDIT_ENTITY_TYPES = Object.freeze({
   WHATSAPP_TEMPLATE: "whatsapp_template",
   ORGANIZATION: "organization",
   TEAMS_GROUP: "teams_group",
+  TRACKED_LINK: "tracked_link",
 });
 
 const MAX_LABEL_LENGTH = 200;

@@ -669,6 +669,13 @@
   margin-bottom: 12px;
 }
 
+/* Contador dos links do plano (#189) ao lado do "Adicionar link". */
+.trackedLinksHeadActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .modalHelpText {
   font-size: 13px;
   color: #666;

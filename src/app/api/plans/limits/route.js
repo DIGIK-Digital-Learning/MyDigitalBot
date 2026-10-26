@@ -11,6 +11,7 @@ import { countUsersByOrg } from "@/lib/repos/user.repo";
 import { countAutomationRulesByOrg } from "@/lib/repos/automationRules.repo";
 import { countManualQueuedBroadcasts } from "@/lib/repos/scheduledBroadcasts.repo";
 import { countAdminDailySends } from "@/lib/repos/adminDailySends.repo";
+import { countSavedTrackedLinks } from "@/lib/repos/trackedLinkSaved.repo";
 import {
   dailySendsDayStart,
   dailySendsResetAt,
@@ -45,6 +46,7 @@ export async function GET(req) {
       automations,
       scheduledMessages,
       dailySends,
+      trackedLinks,
     ] = await Promise.all([
       getOrgLimits(orgAuth.orgId),
       countUsersByOrg(orgAuth.orgId),
@@ -52,12 +54,20 @@ export async function GET(req) {
       countAutomationRulesByOrg(orgAuth.orgId),
       countManualQueuedBroadcasts(orgAuth.orgId),
       countAdminDailySends(orgAuth.orgId, dailySendsDayStart(now)),
+      countSavedTrackedLinks(orgAuth.orgId),
     ]);
 
     return NextResponse.json({
       plan,
       limits,
-      usage: { users, assistants, automations, scheduledMessages, dailySends },
+      usage: {
+        users,
+        assistants,
+        automations,
+        scheduledMessages,
+        dailySends,
+        trackedLinks,
+      },
       /* Quando os envios de hoje voltam a 0 (00:01 de Lisboa, #188). */
       dailySendsResetAt: dailySendsResetAt(now),
       expiresAt,

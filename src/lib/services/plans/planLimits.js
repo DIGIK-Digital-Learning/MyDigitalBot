@@ -3,6 +3,7 @@ import {
   claimAdminDailySend,
   releaseAdminDailySend,
 } from "@/lib/repos/adminDailySends.repo";
+import { saveTrackedLinks } from "@/lib/repos/trackedLinkSaved.repo";
 
 import { messageContentProblem } from "@/lib/plans/messageLimits";
 import {
@@ -200,4 +201,47 @@ export async function releaseDailySend(claimKey, { deps = {} } = {}) {
   if (!claimKey) return;
   const release = deps.releaseAdminDailySend || releaseAdminDailySend;
   await release(claimKey);
+}
+
+/**
+ * Grava os links rastreados de um envio na biblioteca da organização (#189)
+ * e verifica o limite: 100 links, cada um um par nome + destino. Reutilizar
+ * um link que já está guardado não conta; um novo só entra se houver espaço.
+ * `links` é a lista `trackedLinks` do envio (numa corrente, de todos os
+ * passos juntos).
+ *
+ * Devolve `{}` quando está tudo dentro, ou `{ body }` com a resposta 409:
+ * é preciso eliminar links para criar novos.
+ */
+export async function saveTrackedLinksWithinPlan(
+  orgId,
+  links,
+  { orgLimits = null, deps = {} } = {},
+) {
+  const list = (Array.isArray(links) ? links : [])
+    .map((link) => ({
+      label: String(link?.label || "").trim(),
+      destinationUrl: String(link?.destinationUrl || "").trim(),
+      key: String(link?.key || "").trim(),
+    }))
+    .filter((link) => link.label && link.destinationUrl);
+
+  if (!list.length) return {};
+
+  const limits = orgLimits || (await getOrgLimits(orgId, { deps }));
+  const save = deps.saveTrackedLinks || saveTrackedLinks;
+  const result = await save(orgId, list, limits.limits.trackedLinks);
+
+  if (result.ok) return {};
+
+  return {
+    body: {
+      error: "Plan limit reached: trackedLinks",
+      code: "TRACKED_LINKS_LIMIT_REACHED",
+      plan: limits.plan?.name ?? null,
+      limit: result.limit,
+      used: result.used,
+      added: result.added,
+    },
+  };
 }
