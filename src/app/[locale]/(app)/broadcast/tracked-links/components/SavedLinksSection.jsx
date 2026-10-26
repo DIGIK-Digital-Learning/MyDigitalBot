@@ -1,115 +1,104 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import NewBadge from "@/app/components/NewBadge/NewBadge";
-import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
-import usePlanLimits from "@/app/hooks/usePlanLimits";
-import useSeenSince from "@/app/hooks/useSeenSince";
+import Pagination from "@/app/components/Pagination/Pagination";
 
-import useDeleteTrackedLink from "../../hooks/useDeleteTrackedLink";
-import useTrackedLinkLibrary from "../../hooks/useTrackedLinkLibrary";
 import styles from "../tracked-links.module.css";
 
 /**
- * Links guardados da organização (#189): os que contam para os 100 do plano,
- * com o ✕ para eliminar (as mesmas regras do composer). Os criados desde a
- * última visita a esta página têm a etiqueta "Novo". As estatísticas dos
- * envios continuam na tabela por baixo.
+ * Links criados (#189): os que contam para os 100 do plano, com o ✕ para
+ * eliminar e a etiqueta "Novo" nos criados desde a última visita. Por
+ * páginas, para a lista não crescer sem fim.
  */
-export default function SavedLinksSection({ orgId }) {
+export default function SavedLinksSection({ links, loading, isNew, onDelete }) {
   const translation = useTranslations();
-  const library = useTrackedLinkLibrary({ orgId, enabled: Boolean(orgId) });
-  const { limits, usage, reload: reloadPlanUsage } = usePlanLimits(orgId);
-  const isNew = useSeenSince("seen.trackedLinks", orgId);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(8);
 
-  const deleteLink = useDeleteTrackedLink(orgId, {
-    onDeleted: () => {
-      library.reload();
-      reloadPlanUsage();
-    },
-  });
+  useEffect(() => {
+    setPage(1);
+  }, [pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(links.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const visible = links.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
 
   return (
     <section className={styles.savedCard}>
-      <div className={styles.savedHeader}>
-        <div>
-          <h2 className={styles.savedTitle}>
-            {translation("TrackedLinks.saved.title")}
-          </h2>
-          <p className={styles.subtitle}>
-            {translation("TrackedLinks.saved.description")}
-          </p>
-        </div>
-        <UsageCounter
-          used={usage?.trackedLinks}
-          limit={limits?.trackedLinks}
-          label={translation("Plans.usage.trackedLinksLabel")}
-          hint={translation("Plans.usage.trackedLinksHint")}
-        />
+      <div>
+        <h2 className={styles.savedTitle}>
+          {translation("TrackedLinks.saved.title")}
+        </h2>
+        <p className={styles.subtitle}>
+          {translation("TrackedLinks.saved.description")}
+        </p>
       </div>
 
-      {library.loading && !library.items.length ? (
+      {loading && !links.length ? (
         <div className={styles.savedEmpty}>
-          {translation("Broadcast.linkLibrary.loading")}
+          {translation("TrackedLinks.loading")}
         </div>
       ) : null}
 
-      {library.failed ? (
-        <div className={styles.savedEmpty}>
-          {translation("Broadcast.linkLibrary.failed")}{" "}
-          <button
-            type="button"
-            className={styles.savedRetry}
-            onClick={library.reload}
-          >
-            {translation("Broadcast.linkLibrary.retry")}
-          </button>
-        </div>
-      ) : null}
-
-      {!library.loading && !library.failed && !library.items.length ? (
+      {!loading && !links.length ? (
         <div className={styles.savedEmpty}>
           {translation("TrackedLinks.saved.empty")}
         </div>
       ) : null}
 
-      {library.items.length ? (
+      {visible.length ? (
         <ul className={styles.savedList}>
-          {library.items.map((item) => (
-            <li
-              key={item.id || `${item.label}\n${item.destinationUrl}`}
-              className={styles.savedItem}
-            >
+          {visible.map((link) => (
+            <li key={link.id} className={styles.savedItem}>
               <div className={styles.savedText}>
                 <strong>
-                  {item.label}
-                  {isNew(item.createdAt) ? <NewBadge /> : null}
+                  {link.label}
+                  {isNew(link.createdAt) ? <NewBadge /> : null}
                 </strong>
-                <span className={styles.savedUrl} title={item.destinationUrl}>
-                  {item.destinationUrl}
+                <span className={styles.savedUrl} title={link.destinationUrl}>
+                  {link.destinationUrl}
                 </span>
               </div>
 
-              {item.id ? (
-                <button
-                  type="button"
-                  className={styles.savedDelete}
-                  onClick={() => deleteLink(item)}
-                  aria-label={translation("Broadcast.linkLibrary.delete", {
-                    label: item.label,
-                  })}
-                  title={translation("Broadcast.linkLibrary.delete", {
-                    label: item.label,
-                  })}
-                >
-                  <X size={14} />
-                </button>
-              ) : null}
+              <button
+                type="button"
+                className={styles.savedDelete}
+                onClick={() => onDelete(link)}
+                aria-label={translation("Broadcast.linkLibrary.delete", {
+                  label: link.label,
+                })}
+                title={translation("Broadcast.linkLibrary.delete", {
+                  label: link.label,
+                })}
+              >
+                <X size={14} />
+              </button>
             </li>
           ))}
         </ul>
+      ) : null}
+
+      {links.length > pageSize ? (
+        <Pagination
+          page={currentPage}
+          pageSize={pageSize}
+          total={links.length}
+          sizes={[8, 16, 32]}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+          summary={translation("TrackedLinks.pagination", {
+            page: currentPage,
+            pages: totalPages,
+            total: links.length,
+          })}
+        />
       ) : null}
     </section>
   );

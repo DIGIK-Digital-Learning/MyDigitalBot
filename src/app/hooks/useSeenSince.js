@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 /* A hora da última visita a uma página, guardada neste browser. */
 function readSeenAt(key) {
@@ -21,6 +21,17 @@ function writeSeenAt(key) {
   }
 }
 
+/*
+ * As visitas em curso, por página: a hora da visita anterior, lida uma só vez.
+ * Uma página pode ser montada duas vezes seguidas (o React em desenvolvimento,
+ * ou quando a organização acaba de carregar); a segunda montagem continua a
+ * mesma visita e não pode ler a hora que a primeira acabou de gravar.
+ */
+const visits = new Map();
+
+/* Quanto tempo uma página desmontada ainda conta como a mesma visita. */
+const SAME_VISIT_MS = 1500;
+
 /**
  * Etiqueta "Novo": diz se uma data é posterior à última visita a esta página,
  * neste browser. A hora da visita só é guardada ao sair da página, para os
@@ -33,26 +44,29 @@ function writeSeenAt(key) {
 export default function useSeenSince(key, scope) {
   const storageKey = scope ? `${key}:${scope}` : null;
   const [seenAt, setSeenAt] = useState(null);
-  /*
-   * Lido uma só vez: em desenvolvimento o React monta a página duas vezes e a
-   * segunda leitura já veria a hora gravada pela primeira saída.
-   */
-  const previous = useRef({ key: null, value: null });
 
   useEffect(() => {
     if (!storageKey) return undefined;
 
-    if (previous.current.key !== storageKey) {
-      previous.current = { key: storageKey, value: readSeenAt(storageKey) };
+    let visit = visits.get(storageKey);
+    if (visit) {
+      clearTimeout(visit.timer);
+    } else {
+      visit = { previous: readSeenAt(storageKey), timer: null };
+      visits.set(storageKey, visit);
     }
-    setSeenAt(previous.current.value);
+    setSeenAt(visit.previous);
 
-    const save = () => writeSeenAt(storageKey);
-    window.addEventListener("pagehide", save);
+    const endVisit = () => {
+      writeSeenAt(storageKey);
+      visits.delete(storageKey);
+    };
+    window.addEventListener("pagehide", endVisit);
 
     return () => {
-      window.removeEventListener("pagehide", save);
-      save();
+      window.removeEventListener("pagehide", endVisit);
+      /* Só é o fim da visita se a página não voltar a montar logo a seguir. */
+      visit.timer = setTimeout(endVisit, SAME_VISIT_MS);
     };
   }, [storageKey]);
 

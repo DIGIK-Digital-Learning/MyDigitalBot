@@ -3520,11 +3520,12 @@
         "title": "Erro ao eliminar mensagem",
         "message": "Não foi possível eliminar a mensagem agendada."
       }
-    }
+    },
+    "pagination": "Página {page} de {pages} · {total, plural, one {# mensagem} other {# mensagens}}"
   },
   "TrackedLinks": {
     "title": "Links Rastreados",
-    "subtitle": "Vê as estatísticas do links rastreados da tua organização.",
+    "subtitle": "Os links que criaste e as estatísticas dos que já foram enviados.",
     "totalLinks": "Total de Links",
     "search": "Procura por nome, chave, destino ou canal",
     "loading": "A carregar links",
@@ -3538,7 +3539,9 @@
       "clicked": "Clicado",
       "totalClicks": "Total de cliques",
       "clickRate": "Percentagem de cliques",
-      "created": "Criado"
+      "created": "Criado",
+      "sends": "Envios",
+      "lastSent": "Último envio"
     },
     "view": "Ver",
     "detail": {
@@ -3588,9 +3591,20 @@
       }
     },
     "saved": {
-      "title": "Links guardados",
+      "title": "Links criados",
       "description": "Os links que contam para o teu plano. Eliminar um link não apaga as estatísticas dos envios em que foi usado.",
-      "empty": "Ainda não tens links guardados. Os links entram aqui quando os usas numa mensagem."
+      "empty": "Ainda não tens links criados. Os links entram aqui quando os usas numa mensagem."
+    },
+    "showDeleted": "Mostrar eliminados",
+    "deleted": "Eliminado",
+    "showSends": "Ver os envios de {label}",
+    "hideSends": "Esconder os envios de {label}",
+    "pagination": "Página {page} de {pages} · {total, plural, one {# link} other {# links}}",
+    "createdCard": "Links criados",
+    "sentCard": "Links enviados",
+    "sent": {
+      "title": "Links enviados",
+      "description": "Um grupo por link, com os totais de todos os envios. Abre um grupo para veres cada envio. Os links eliminados aparecem noutra cor."
     }
   },
   "Questions": {
@@ -4970,5 +4984,12 @@
       "fileSizeMb": "MB por ficheiro",
       "chainMessages": "Mensagens por corrente"
     }
+  },
+  "Pagination": {
+    "label": "Páginas",
+    "perPageLabel": "Quantos por página",
+    "perPage": "{count} / página",
+    "previous": "Anterior",
+    "next": "Seguinte"
   }
 }

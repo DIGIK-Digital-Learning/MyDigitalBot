@@ -254,7 +254,18 @@
   border-color: #ffd0d0;
 }
 
-/* Links guardados (#189): os que contam para os 100 do plano. */
+/* Cartões do topo: links criados (x / 100) e links enviados. */
+.statLimit {
+  font-size: 0.55em;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.statFull {
+  color: #b42318;
+}
+
+/* Links criados (#189): os que contam para os 100 do plano. */
 .savedCard {
   background: var(--ui-bg);
   border: 1px solid var(--ui-border);
@@ -262,13 +273,6 @@
   padding: 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-.savedHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
   gap: 12px;
 }
 
@@ -284,14 +288,6 @@
   font-size: 0.95rem;
 }
 
-.savedRetry {
-  border: 0;
-  background: none;
-  color: #1d7fae;
-  font-weight: 700;
-  cursor: pointer;
-}
-
 .savedList {
   list-style: none;
   margin: 0;
@@ -299,8 +295,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 10px;
-  max-height: 320px;
-  overflow: auto;
 }
 
 .savedItem {
@@ -348,6 +342,78 @@
 .savedDelete:hover {
   background: #fee4e2;
   color: #b42318;
+}
+
+/* Links enviados: um grupo por link, com os envios ao abrir. */
+.sentSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #0f1c3f;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.expandCell {
+  width: 36px;
+}
+
+.expandBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  background: #fff;
+  color: #0f1c3f;
+  cursor: pointer;
+}
+
+/* Grupo de um link eliminado: outra cor (as estatísticas ficam). */
+.table tbody tr.rowDeleted td {
+  background: #fdf2f2;
+  color: #9b6b6b;
+}
+
+.rowDeleted .mainText {
+  color: #9b6b6b;
+}
+
+.deletedTag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #fde2e2;
+  color: #b42318;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.table tbody tr.sendRow td {
+  background: #f8fbff;
+  font-size: 0.9rem;
+}
+
+.table tbody tr.sendRowDeleted td {
+  background: #fff8f8;
+}
+
+.sendDate {
+  margin-left: 10px;
+  color: #475569;
 }
 
 @media (max-width: 900px) {

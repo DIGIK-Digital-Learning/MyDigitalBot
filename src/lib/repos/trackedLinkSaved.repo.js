@@ -22,6 +22,43 @@ export async function listSavedTrackedLinks(orgId, { limit = 200 } = {}) {
   return Array.isArray(data) ? data : [];
 }
 
+/**
+ * Todos os links guardados, incluindo os eliminados (a página dos links
+ * mostra-os no fim, porque as estatísticas ficam).
+ */
+export async function listAllSavedTrackedLinks(orgId) {
+  const sb = getRepositoryReadClient();
+  const { data, error } = await sb
+    .from("tracked_link_saved")
+    .select(
+      "id, link_key, link_label, destination_url, created_at, last_used_at, deleted_at",
+    )
+    .eq("org_id", orgId)
+    .order("last_used_at", { ascending: false })
+    .limit(1000);
+
+  if (error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
+/*
+ * As linhas dos envios com links (uma por destinatário e por envio) e os
+ * cliques de cada uma, para as estatísticas por link.
+ */
+export async function getTrackedLinkSendRows(orgId) {
+  const sb = getRepositoryReadClient();
+  const { data, error } = await sb
+    .from("tracked_link")
+    .select(
+      "id, channel, recipient_user_id, scheduled_broadcast_id, send_group_id, destination_url, link_label, created_at, tracked_link_event (id)",
+    )
+    .eq("org_id", orgId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
 /** Quantos links ativos tem a organização (o "37 / 100"). */
 export async function countSavedTrackedLinks(orgId) {
   const sb = getSupabaseAdminClient();

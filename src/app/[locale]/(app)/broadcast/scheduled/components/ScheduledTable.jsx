@@ -15,6 +15,7 @@ export default function ScheduledTable({
   canDeleteItem,
   deletingId,
   isNew = () => false,
+  footer = null,
 }) {
   function statusClassName(status) {
     switch (status) {
@@ -137,6 +138,9 @@ export default function ScheduledTable({
           </table>
         </div>
       )}
+
+      {/* Paginação, por baixo da tabela. */}
+      {!loading && filteredItems.length > 0 ? footer : null}
     </div>
   );
 }

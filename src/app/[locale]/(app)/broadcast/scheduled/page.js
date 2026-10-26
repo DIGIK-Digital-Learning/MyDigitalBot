@@ -28,6 +28,7 @@ import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import ScheduledStats from "./components/ScheduledStats";
 import ScheduledFilters from "./components/ScheduledFilters";
 import ScheduledTable from "./components/ScheduledTable";
+import Pagination from "@/app/components/Pagination/Pagination";
 import ScheduledViewModal from "./components/ScheduledViewModal";
 import ScheduledEditModal from "./components/ScheduledEditModal";
 
@@ -269,6 +270,22 @@ export default function ScheduledPage() {
     });
   }, [items, search, statusFilter, channelFilter, dateFilter]);
 
+  /* Páginas: com muitas agendadas, a lista não cresce sem fim. */
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter, channelFilter, dateFilter, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const pageItems = useMemo(
+    () =>
+      filteredItems.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [filteredItems, currentPage, pageSize],
+  );
+
   const stats = useMemo(() => {
     return {
       total: items.length,
@@ -369,10 +386,7 @@ export default function ScheduledPage() {
       return;
     }
 
-    if (
-      (!questionResult && !formData.message.trim()) ||
-      !scheduledIso
-    ) {
+    if ((!questionResult && !formData.message.trim()) || !scheduledIso) {
       setError(t("Errors.invalidForm"));
 
       await showAlert({
@@ -595,7 +609,7 @@ export default function ScheduledPage() {
       <ScheduledTable
         loading={loading}
         translation={t}
-        filteredItems={filteredItems}
+        filteredItems={pageItems}
         openViewModal={openViewModal}
         openEditModal={openEditModal}
         canEditItem={canEditItem}
@@ -603,6 +617,21 @@ export default function ScheduledPage() {
         canDeleteItem={canDeleteItem}
         deletingId={deletingId}
         isNew={isNewScheduled}
+        footer={
+          <Pagination
+            page={currentPage}
+            pageSize={pageSize}
+            total={filteredItems.length}
+            sizes={[6, 12, 24]}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+            summary={t("pagination", {
+              page: currentPage,
+              pages: totalPages,
+              total: filteredItems.length,
+            })}
+          />
+        }
       />
 
       {selectedItem ? (
