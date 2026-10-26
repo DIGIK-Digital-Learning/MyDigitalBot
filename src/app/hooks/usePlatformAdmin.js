@@ -7,7 +7,13 @@ import {
   fetchAdminStatus,
 } from "@/lib/admin/admin.api";
 
-const NOT_ADMIN = { isAdmin: false, orgId: null, plan: null, trying: false };
+const NOT_ADMIN = {
+  isAdmin: false,
+  orgId: null,
+  plan: null,
+  internalPlanId: null,
+  trying: false,
+};
 
 /**
  * Se quem está a ver é administrador da plataforma (#208) e em que plano está

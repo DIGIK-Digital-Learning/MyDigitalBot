@@ -4891,7 +4891,8 @@
     "cancel": "Cancelar",
     "banner": {
       "trying": "Estás a experimentar o plano {plan}.",
-      "back": "Voltar ao Interno"
+      "back": "Voltar ao Interno",
+      "noInternal": "O plano Interno ainda não existe nesta base de dados: falta correr a migração 20261023160000_internal_plan.sql."
     },
     "try": {
       "title": "Experimentar como",

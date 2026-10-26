@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
   updatePlan: vi.fn(),
   setOrganizationPlanStart: vi.fn(),
   listOwnerEmails: vi.fn(),
+  getPlanByName: vi.fn(),
   recordSystemAuditEvent: vi.fn(),
 }));
 
@@ -40,6 +41,7 @@ vi.mock("@/lib/repos/plans.repo", () => ({
   listOwnerEmails: mocks.listOwnerEmails,
   updatePlan: mocks.updatePlan,
   getOrganizationPlan: vi.fn(),
+  getPlanByName: mocks.getPlanByName,
 }));
 
 vi.mock("@/lib/services/audit/recordAuditEvent", () => ({
@@ -133,6 +135,9 @@ const params = (id) => ({ params: Promise.resolve({ id: String(id) }) });
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.listOwnerEmails.mockResolvedValue({ o9: "dona@homa.pt" });
+  mocks.getPlanByName.mockImplementation(async (name) =>
+    PLANS.find((plan) => plan.name === name) || null,
+  );
   delete process.env.PLATFORM_ADMIN_ORG_IDS;
   mocks.listPlans.mockResolvedValue(PLANS);
   mocks.getPlanById.mockImplementation(
@@ -204,6 +209,7 @@ describe("quem é administrador", () => {
       isAdmin: true,
       orgId: 2,
       plan: { id: 1, name: "Demo" },
+      internalPlanId: 7,
       trying: true,
     });
   });
@@ -509,5 +515,21 @@ describe("escolher o dia em que a Demo termina", () => {
 
     expect((await setEnd("2026-11-04")).status).toBe(403);
     expect(mocks.setOrganizationPlanStart).not.toHaveBeenCalled();
+  });
+});
+
+describe("antes de correr a migração do plano Interno", () => {
+  it("sem o plano Interno, não conta como estar a experimentar", async () => {
+    signedInAs(1, 6);
+    mocks.getPlanById.mockResolvedValue({ id: 6, name: "Enterprise" });
+    mocks.getPlanByName.mockResolvedValue(null);
+
+    expect(await (await meRoute()).json()).toEqual({
+      isAdmin: true,
+      orgId: 1,
+      plan: { id: 6, name: "Enterprise" },
+      internalPlanId: null,
+      trying: false,
+    });
   });
 });

@@ -4891,7 +4891,8 @@
     "cancel": "Cancel",
     "banner": {
       "trying": "You're trying the {plan} plan.",
-      "back": "Back to Interno"
+      "back": "Back to Interno",
+      "noInternal": "The Interno plan doesn't exist in this database yet: the 20261023160000_internal_plan.sql migration still needs to run."
     },
     "try": {
       "title": "Try as",

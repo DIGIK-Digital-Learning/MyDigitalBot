@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
+import { useAlert } from "@/app/components/Alert/AlertProvider";
 import usePlatformAdmin from "@/app/hooks/usePlatformAdmin";
 import {
   announceAdminPlanChanged,
   changeOrganizationPlan,
-  fetchAdminOverview,
 } from "@/lib/admin/admin.api";
 
 import styles from "./AdminPlanBanner.module.css";
@@ -18,7 +18,8 @@ import styles from "./AdminPlanBanner.module.css";
  */
 export default function AdminPlanBanner() {
   const translation = useTranslations();
-  const { isAdmin, trying, plan, orgId } = usePlatformAdmin();
+  const showAlert = useAlert();
+  const { isAdmin, trying, plan, orgId, internalPlanId } = usePlatformAdmin();
   const [busy, setBusy] = useState(false);
 
   if (!isAdmin || !trying) return null;
@@ -26,12 +27,18 @@ export default function AdminPlanBanner() {
   async function backToInternal() {
     setBusy(true);
     try {
-      const { internalPlanId } = await fetchAdminOverview();
-      if (internalPlanId) {
-        await changeOrganizationPlan(orgId, internalPlanId);
-        announceAdminPlanChanged();
-        window.location.reload();
-      }
+      if (!internalPlanId)
+        throw new Error(translation("Admin.banner.noInternal"));
+
+      await changeOrganizationPlan(orgId, internalPlanId);
+      announceAdminPlanChanged();
+      window.location.reload();
+    } catch (error) {
+      await showAlert({
+        title: translation("Common.error"),
+        message: error.message,
+        tone: "danger",
+      });
     } finally {
       setBusy(false);
     }

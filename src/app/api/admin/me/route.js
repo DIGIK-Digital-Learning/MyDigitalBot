@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { handleApiError, requireUser } from "@/lib/auth/guards";
 import { getPlatformAdminStatus } from "@/lib/auth/platformAdmin";
-import { getPlanById } from "@/lib/repos/plans.repo";
+import { getPlanById, getPlanByName } from "@/lib/repos/plans.repo";
 import { INTERNAL_PLAN_NAME } from "@/lib/services/plans/platformAdmin.service";
 
 /*
@@ -18,13 +18,25 @@ export async function GET() {
     const { org, isAdmin } = await getPlatformAdminStatus(auth);
     if (!isAdmin) return NextResponse.json({ isAdmin: false });
 
-    const plan = org.plan_id ? await getPlanById(org.plan_id) : null;
+    const [plan, internalPlan] = await Promise.all([
+      org.plan_id ? getPlanById(org.plan_id) : null,
+      getPlanByName(INTERNAL_PLAN_NAME),
+    ]);
 
+    /*
+     * "A experimentar" é estar fora do Interno. Sem o plano Interno na base
+     * de dados (a migração ainda não correu), não há para onde voltar: não
+     * conta como estar a experimentar.
+     */
     return NextResponse.json({
       isAdmin: true,
       orgId: org.id,
       plan: plan ? { id: plan.id, name: plan.name } : null,
-      trying: Boolean(plan) && plan.name !== INTERNAL_PLAN_NAME,
+      internalPlanId: internalPlan?.id ?? null,
+      trying:
+        Boolean(plan) &&
+        Boolean(internalPlan) &&
+        plan.name !== INTERNAL_PLAN_NAME,
     });
   } catch (err) {
     return handleApiError(err, "Failed to load admin status");

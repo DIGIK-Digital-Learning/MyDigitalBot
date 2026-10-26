@@ -43,6 +43,20 @@ export async function listOrganizationsWithPlan() {
   return data || [];
 }
 
+/* Um plano pelo nome (por exemplo, o "Interno" da DIGIK). */
+export async function getPlanByName(name) {
+  const sb = getSupabaseAdminClient();
+
+  const { data, error } = await sb
+    .from("plan")
+    .select("id, name")
+    .eq("name", name)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
 export async function getPlanById(planId) {
   const sb = getSupabaseAdminClient();
 
