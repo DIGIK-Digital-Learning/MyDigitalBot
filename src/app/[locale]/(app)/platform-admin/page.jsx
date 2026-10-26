@@ -98,6 +98,13 @@ export default function AdminPage() {
   const [drafts, setDrafts] = useState({});
   const [busy, setBusy] = useState(false);
   const [query, setQuery] = useState("");
+  /* A data escolhida no calendário de cada organização, ainda por aplicar. */
+  const [endDrafts, setEndDrafts] = useState({});
+  /*
+   * Os prazos anteriores de cada organização, mudados nesta visita à página:
+   * "Desfazer" volta ao último. Ao recarregar, a lista começa vazia.
+   */
+  const [endHistory, setEndHistory] = useState({});
 
   /* Pesquisa pelo nome ou pelo email do dono, com o que pede atenção no topo. */
   const organizations = useMemo(() => {
@@ -173,11 +180,28 @@ export default function AdminPage() {
     }
   }
 
+  /* Guarda o prazo atual antes de o mudar, para o "Desfazer". */
+  function rememberEnd(org) {
+    setEndHistory((prev) => ({
+      ...prev,
+      [org.id]: [...(prev[org.id] || []), lisbonDate(org.expiresAt)],
+    }));
+  }
+
+  function clearEndDraft(orgId) {
+    setEndDrafts((prev) => {
+      const next = { ...prev };
+      delete next[orgId];
+      return next;
+    });
+  }
+
   /*
-   * Escolher o dia em que a Demo termina: corrige um "+7 dias" a mais ou dá
-   * um prazo à medida. O dia conta até às 23:59.
+   * "Aplicar": a Demo passa a terminar no dia escolhido no calendário (até às
+   * 23:59). Corrige um "+7 dias" a mais ou dá um prazo à medida.
    */
-  async function changePlanEnd(org, endsOn) {
+  async function applyPlanEnd(org) {
+    const endsOn = endDrafts[org.id];
     if (!endsOn || endsOn === lisbonDate(org.expiresAt)) return;
 
     const [year, month, day] = endsOn.split("-");
@@ -191,14 +215,41 @@ export default function AdminPage() {
       confirmText: translation("Admin.organizations.endConfirm"),
       cancelText: translation("Admin.cancel"),
     });
+    if (!confirmed) return;
 
     setBusy(true);
     try {
-      if (confirmed) {
-        await setOrganizationPlanEnd(org.id, endsOn);
-        if (org.id === data.adminOrgId) announceAdminPlanChanged();
-      }
-      /* Também ao cancelar: o campo volta à data verdadeira. */
+      await setOrganizationPlanEnd(org.id, endsOn);
+      rememberEnd(org);
+      clearEndDraft(org.id);
+      if (org.id === data.adminOrgId) announceAdminPlanChanged();
+      await load();
+    } catch (error) {
+      await showError(error);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /*
+   * "Desfazer": volta ao prazo de antes da última mudança feita nesta visita.
+   * Um prazo que já tinha passado volta a hoje (o fim não pode ser no
+   * passado). Fica no histórico do cliente, como as outras mudanças.
+   */
+  async function undoPlanEnd(org) {
+    const history = endHistory[org.id] || [];
+    const previous = history[history.length - 1];
+    if (!previous) return;
+
+    const today = lisbonDate(Date.now());
+    const endsOn = previous < today ? today : previous;
+
+    setBusy(true);
+    try {
+      await setOrganizationPlanEnd(org.id, endsOn);
+      setEndHistory((prev) => ({ ...prev, [org.id]: history.slice(0, -1) }));
+      clearEndDraft(org.id);
+      if (org.id === data.adminOrgId) announceAdminPlanChanged();
       await load();
     } catch (error) {
       await showError(error);
@@ -223,6 +274,8 @@ export default function AdminPage() {
     setBusy(true);
     try {
       await extendOrganizationPlan(org.id, 7);
+      rememberEnd(org);
+      clearEndDraft(org.id);
       if (org.id === data.adminOrgId) announceAdminPlanChanged();
       await load();
     } catch (error) {
@@ -420,8 +473,7 @@ export default function AdminPage() {
                         <input
                           type="date"
                           className={styles.dateInput}
-                          key={org.expiresAt}
-                          defaultValue={lisbonDate(org.expiresAt)}
+                          value={endDrafts[org.id] ?? lisbonDate(org.expiresAt)}
                           min={lisbonDate(Date.now())}
                           max={lisbonDate(
                             Date.now() +
@@ -437,11 +489,25 @@ export default function AdminPage() {
                           title={translation("Admin.organizations.endsOn", {
                             org: org.name,
                           })}
-                          onBlur={(e) => changePlanEnd(org, e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") e.currentTarget.blur();
-                          }}
+                          onChange={(e) =>
+                            setEndDrafts((prev) => ({
+                              ...prev,
+                              [org.id]: e.target.value,
+                            }))
+                          }
                         />
+                        {/* Só com uma data nova escolhida. */}
+                        {endDrafts[org.id] &&
+                        endDrafts[org.id] !== lisbonDate(org.expiresAt) ? (
+                          <button
+                            type="button"
+                            className={styles.applyButton}
+                            disabled={busy}
+                            onClick={() => applyPlanEnd(org)}
+                          >
+                            {translation("Admin.organizations.apply")}
+                          </button>
+                        ) : null}
                         <button
                           type="button"
                           className={styles.linkButton}
@@ -450,6 +516,25 @@ export default function AdminPage() {
                         >
                           {translation("Admin.organizations.extendShort")}
                         </button>
+                        {/* Depois de uma mudança nesta visita à página. */}
+                        {endHistory[org.id]?.length ? (
+                          <button
+                            type="button"
+                            className={styles.linkButton}
+                            disabled={busy}
+                            title={translation("Admin.organizations.undoHint", {
+                              date: endHistory[org.id][
+                                endHistory[org.id].length - 1
+                              ]
+                                .split("-")
+                                .reverse()
+                                .join("/"),
+                            })}
+                            onClick={() => undoPlanEnd(org)}
+                          >
+                            {translation("Admin.organizations.undo")}
+                          </button>
+                        ) : null}
                       </span>
                     ) : (
                       "—"

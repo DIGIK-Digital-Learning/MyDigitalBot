@@ -133,6 +133,22 @@
   background: #fff;
 }
 
+.applyButton {
+  border: 0;
+  background: #30a9e0;
+  color: #fff;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.applyButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .linkButton {
   border: 1px solid #30a9e0;
   background: #fff;

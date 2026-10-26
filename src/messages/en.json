@@ -4921,7 +4921,10 @@
       "endsOn": "Day {org}'s Demo ends",
       "endTitle": "Change the Demo end",
       "endMessage": "{org} stays on the {plan} plan until {date} at 23:59. This goes into the organization's history.",
-      "endConfirm": "Change"
+      "endConfirm": "Change",
+      "apply": "Apply",
+      "undo": "Undo",
+      "undoHint": "Go back to the previous end ({date})"
     },
     "plans": {
       "title": "Plans",
