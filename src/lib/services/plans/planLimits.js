@@ -17,7 +17,7 @@ export { hasRoomFor, limitKeepingCurrent } from "@/lib/plans/limitRules";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /* Nome de cada limite no código e a coluna da tabela plan onde está guardado. */
-const LIMIT_COLUMNS = {
+export const LIMIT_COLUMNS = {
   users: "max_users",
   assistants: "max_assistants",
   assistantInstructionChars: "max_assistant_instruction_chars",

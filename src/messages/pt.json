@@ -1485,7 +1485,11 @@
     "linkBubbleText": "Texto do balão (opcional)",
     "linkLibrary": {
       "delete": "Eliminar o link {label}",
-      "deleteConfirm": { "title": "Eliminar link", "message": "O link \"{label}\" sai da lista e deixa de contar para os links do teu plano. Os envios em que já foi usado continuam a funcionar e os cliques ficam nas Métricas.", "confirm": "Eliminar" },
+      "deleteConfirm": {
+        "title": "Eliminar link",
+        "message": "O link \"{label}\" sai da lista e deixa de contar para os links do teu plano. Os envios em que já foi usado continuam a funcionar e os cliques ficam nas Métricas.",
+        "confirm": "Eliminar"
+      },
       "inUseTitle": "Link em uso",
       "inUseScheduled": "Este link está numa mensagem agendada. Cancela-a primeiro para o poderes eliminar.",
       "inUseChain": "Este link está numa corrente que ainda está a decorrer. Só o podes eliminar quando a corrente terminar.",
@@ -2934,11 +2938,14 @@
         "tracked_link_deleted": "Link rastreado eliminado",
         "organization_created": "Organização criada",
         "organization_settings_updated": "Definições da organização alteradas",
+        "organization_plan_changed": "Plano alterado",
         "automation_triggered": "Automação disparada",
         "broadcast_scheduled_sent": "Mensagem agendada enviada",
         "message_received": "Mensagem recebida",
         "teams_group_updated": "Grupo Teams editado",
-        "unknown": "Ação desconhecida"
+        "unknown": "Ação desconhecida",
+        "organization_plan_extended": "Plano prolongado",
+        "organization_plan_end_changed": "Fim do plano alterado"
       },
       "Table": {
         "when": "Quando",
@@ -4528,11 +4535,14 @@
       "tracked_link_deleted": "Link rastreado eliminado",
       "organization_created": "Organização criada",
       "organization_settings_updated": "Definições da organização alteradas",
+      "organization_plan_changed": "Plano alterado",
       "automation_triggered": "Automação disparada",
       "broadcast_scheduled_sent": "Mensagem agendada enviada",
       "message_received": "Mensagem recebida",
       "teams_group_updated": "Grupo Teams editado",
-      "unknown": "Ação desconhecida"
+      "unknown": "Ação desconhecida",
+      "organization_plan_extended": "Plano prolongado",
+      "organization_plan_end_changed": "Fim do plano alterado"
     },
     "Table": {
       "when": "Quando",
@@ -4870,6 +4880,80 @@
       "weeklyLabel": "Mensagens desta semana no {channel}",
       "weeklyHint": "Mensagens que cada colaborador enviou esta semana em cada canal: ao assistente e respostas a quizzes, sondagens e perguntas abertas. Acima do limite o assistente deixa de responder até segunda-feira às 00:00.",
       "scheduledHint": "Conta as mensagens agendadas por ti que ainda estão à espera de envio. As das automações e as correntes não contam."
+    }
+  },
+  "Admin": {
+    "title": "Administração",
+    "loading": "A carregar…",
+    "forbidden": "Esta página é só para a equipa DIGIK.",
+    "failed": "Não foi possível carregar a administração.",
+    "retry": "Tentar novamente",
+    "cancel": "Cancelar",
+    "banner": {
+      "trying": "Estás a experimentar o plano {plan}.",
+      "back": "Voltar ao Interno",
+      "noInternal": "O plano Interno ainda não existe nesta base de dados: falta correr a migração 20261023160000_internal_plan.sql."
+    },
+    "try": {
+      "title": "Experimentar como",
+      "description": "Muda o plano da {org} para veres a app com os limites de outro plano. A Demo começa a contar os 7 dias quando a escolhes.",
+      "label": "Plano"
+    },
+    "organizations": {
+      "title": "Organizações",
+      "description": "O plano de cada organização e o que já gastou de cada limite.",
+      "name": "Organização",
+      "plan": "Plano",
+      "demo": "Prazo",
+      "sendsToday": "Envios hoje",
+      "daysLeft": "{days, plural, one {Falta # dia} other {Faltam # dias}}",
+      "ended": "Terminou",
+      "planFor": "Plano da {org}",
+      "confirmTitle": "Mudar de plano",
+      "confirmMessage": "A {org} passa para o plano {plan}. Os limites mudam já e a mudança fica no histórico da organização.",
+      "confirmOwn": "A tua organização passa para o plano {plan}, para experimentares os limites dele. Voltas ao Interno quando quiseres.",
+      "confirm": "Mudar",
+      "search": "Procurar por nome ou email do dono",
+      "overLimit": "{count, plural, one {Acima de # limite} other {Acima de # limites}}",
+      "extendShort": "+7 dias",
+      "extendTitle": "Prolongar a Demo",
+      "extendMessage": "A {org} fica com mais 7 dias no plano {plan}, a contar do fim atual (ou de hoje, se já terminou). Fica no histórico da organização.",
+      "extend": "Prolongar",
+      "endsOn": "Dia em que a Demo da {org} termina",
+      "endTitle": "Mudar o fim da Demo",
+      "endMessage": "A {org} fica no plano {plan} até {date}, às 23:59. Fica no histórico da organização.",
+      "endConfirm": "Mudar",
+      "apply": "Aplicar",
+      "undo": "Desfazer",
+      "undoHint": "Volta ao prazo anterior ({date})"
+    },
+    "plans": {
+      "title": "Planos",
+      "description": "Os limites de cada plano. Vazio quer dizer sem limite.",
+      "limit": "Limite",
+      "orgCount": "{count, plural, =0 {sem organizações} one {# organização} other {# organizações}}",
+      "unlimited": "sem limite",
+      "save": "Guardar",
+      "confirmTitle": "Guardar o plano {plan}",
+      "confirmMessage": "{count, plural, =0 {Nenhuma organização está neste plano.} one {Isto muda os limites de # organização, já.} other {Isto muda os limites de # organizações, já.}} Continuar?",
+      "hint": "Máximos técnicos: 10 mensagens por corrente e 50 MB por ficheiro.",
+      "locked": "Plano da DIGIK, não se edita"
+    },
+    "limits": {
+      "durationDays": "Duração (dias)",
+      "users": "Utilizadores",
+      "assistants": "Assistentes",
+      "assistantInstructionChars": "Caracteres das instruções",
+      "filesPerAssistant": "Ficheiros por assistente",
+      "automations": "Automações",
+      "scheduledMessages": "Agendadas à espera",
+      "trackedLinks": "Links rastreados",
+      "dailyMessagesPerChannel": "Envios por dia (cada canal)",
+      "collaboratorWeeklyMessages": "Mensagens do colaborador por semana (cada canal)",
+      "messageChars": "Caracteres por mensagem",
+      "filesPerMessage": "Ficheiros por mensagem",
+      "fileSizeMb": "MB por ficheiro",
+      "chainMessages": "Mensagens por corrente"
     }
   }
 }

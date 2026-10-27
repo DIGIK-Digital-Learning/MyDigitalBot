@@ -13,6 +13,7 @@ const PRIVATE_ROUTE_ROOTS = new Set([
   "broadcast",
   "dashboard",
   "options",
+  "platform-admin",
   "private",
   "settings",
   "teams-groups",

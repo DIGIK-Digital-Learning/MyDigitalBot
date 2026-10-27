@@ -425,12 +425,20 @@
       "setup": {
         "title": "Setup and rollout",
         "description": "Use these rows to explain onboarding, implementation, and configuration differences.",
-        "rows": ["Initial setup", "Custom branding", "Migration help"]
+        "rows": [
+          "Initial setup",
+          "Custom branding",
+          "Migration help"
+        ]
       },
       "automation": {
         "title": "Automation and AI",
         "description": "Use this area to show what becomes more powerful as plans grow.",
-        "rows": ["Automated flows", "Usage reporting", "Advanced logic"]
+        "rows": [
+          "Automated flows",
+          "Usage reporting",
+          "Advanced logic"
+        ]
       },
       "governance": {
         "title": "Governance and control",
@@ -891,7 +899,7 @@
     "trackedLinks": "Tracked Links",
     "questions": "Questions",
     "media": "Media",
-    "admin": "Admin",
+    "admin": "Administration",
     "login": "Login",
     "options": "Settings",
     "logout": "Sign out",
@@ -1477,7 +1485,11 @@
     "linkBubbleText": "Bubble text (optional)",
     "linkLibrary": {
       "delete": "Delete the link {label}",
-      "deleteConfirm": { "title": "Delete link", "message": "The link \"{label}\" leaves the list and no longer counts towards your plan's links. Messages where it was already used keep working and its clicks stay in Metrics.", "confirm": "Delete" },
+      "deleteConfirm": {
+        "title": "Delete link",
+        "message": "The link \"{label}\" leaves the list and no longer counts towards your plan's links. Messages where it was already used keep working and its clicks stay in Metrics.",
+        "confirm": "Delete"
+      },
       "inUseTitle": "Link in use",
       "inUseScheduled": "This link is in a scheduled message. Cancel it first to delete the link.",
       "inUseChain": "This link is in a chain that is still running. You can delete it once the chain ends.",
@@ -3077,11 +3089,14 @@
         "tracked_link_deleted": "Tracked link deleted",
         "organization_created": "Organization created",
         "organization_settings_updated": "Organization settings changed",
+        "organization_plan_changed": "Plan changed",
         "automation_triggered": "Automation triggered",
         "broadcast_scheduled_sent": "Scheduled message sent",
         "message_received": "Message received",
         "teams_group_updated": "Teams group edited",
-        "unknown": "Unknown action"
+        "unknown": "Unknown action",
+        "organization_plan_extended": "Plan extended",
+        "organization_plan_end_changed": "Plan end changed"
       },
       "Table": {
         "when": "When",
@@ -4671,11 +4686,14 @@
       "tracked_link_deleted": "Tracked link deleted",
       "organization_created": "Organization created",
       "organization_settings_updated": "Organization settings changed",
+      "organization_plan_changed": "Plan changed",
       "automation_triggered": "Automation triggered",
       "broadcast_scheduled_sent": "Scheduled message sent",
       "message_received": "Message received",
       "teams_group_updated": "Teams group edited",
-      "unknown": "Unknown action"
+      "unknown": "Unknown action",
+      "organization_plan_extended": "Plan extended",
+      "organization_plan_end_changed": "Plan end changed"
     },
     "Table": {
       "when": "When",
@@ -4862,6 +4880,80 @@
       "weeklyLabel": "Messages this week on {channel}",
       "weeklyHint": "Messages each collaborator sent this week on each channel: to the assistant and answers to quizzes, surveys and open questions. Above the limit the assistant stops answering until Monday at 00:00.",
       "scheduledHint": "Counts the messages you scheduled that are still waiting to be sent. Automation messages and chains do not count."
+    }
+  },
+  "Admin": {
+    "title": "Administration",
+    "loading": "Loading…",
+    "forbidden": "This page is for the DIGIK team only.",
+    "failed": "Could not load the administration.",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "banner": {
+      "trying": "You're trying the {plan} plan.",
+      "back": "Back to Interno",
+      "noInternal": "The Interno plan doesn't exist in this database yet: the 20261023160000_internal_plan.sql migration still needs to run."
+    },
+    "try": {
+      "title": "Try as",
+      "description": "Change {org}'s plan to see the app with another plan's limits. The Demo starts its 7 days when you pick it.",
+      "label": "Plan"
+    },
+    "organizations": {
+      "title": "Organizations",
+      "description": "Each organization's plan and how much of each limit it has used.",
+      "name": "Organization",
+      "plan": "Plan",
+      "demo": "Time left",
+      "sendsToday": "Sends today",
+      "daysLeft": "{days, plural, one {# day left} other {# days left}}",
+      "ended": "Ended",
+      "planFor": "{org}'s plan",
+      "confirmTitle": "Change plan",
+      "confirmMessage": "{org} moves to the {plan} plan. The limits change now and the change goes into the organization's history.",
+      "confirmOwn": "Your organization moves to the {plan} plan so you can try its limits. Go back to Interno whenever you want.",
+      "confirm": "Change",
+      "search": "Search by name or owner email",
+      "overLimit": "{count, plural, one {Over # limit} other {Over # limits}}",
+      "extendShort": "+7 days",
+      "extendTitle": "Extend the Demo",
+      "extendMessage": "{org} gets 7 more days on the {plan} plan, counting from the current end (or from today, if it has ended). This goes into the organization's history.",
+      "extend": "Extend",
+      "endsOn": "Day {org}'s Demo ends",
+      "endTitle": "Change the Demo end",
+      "endMessage": "{org} stays on the {plan} plan until {date} at 23:59. This goes into the organization's history.",
+      "endConfirm": "Change",
+      "apply": "Apply",
+      "undo": "Undo",
+      "undoHint": "Go back to the previous end ({date})"
+    },
+    "plans": {
+      "title": "Plans",
+      "description": "Each plan's limits. Empty means no limit.",
+      "limit": "Limit",
+      "orgCount": "{count, plural, =0 {no organizations} one {# organization} other {# organizations}}",
+      "unlimited": "no limit",
+      "save": "Save",
+      "confirmTitle": "Save the {plan} plan",
+      "confirmMessage": "{count, plural, =0 {No organization is on this plan.} one {This changes the limits of # organization, now.} other {This changes the limits of # organizations, now.}} Continue?",
+      "hint": "Technical maximums: 10 messages per chain and 50 MB per file.",
+      "locked": "DIGIK plan, not editable"
+    },
+    "limits": {
+      "durationDays": "Duration (days)",
+      "users": "Users",
+      "assistants": "Assistants",
+      "assistantInstructionChars": "Instruction characters",
+      "filesPerAssistant": "Files per assistant",
+      "automations": "Automations",
+      "scheduledMessages": "Scheduled waiting",
+      "trackedLinks": "Tracked links",
+      "dailyMessagesPerChannel": "Sends per day (each channel)",
+      "collaboratorWeeklyMessages": "Collaborator messages per week (each channel)",
+      "messageChars": "Characters per message",
+      "filesPerMessage": "Files per message",
+      "fileSizeMb": "MB per file",
+      "chainMessages": "Messages per chain"
     }
   }
 }
