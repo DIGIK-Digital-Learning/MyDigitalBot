@@ -83,6 +83,7 @@ export default function ScheduledPage() {
   /* Correntes: as que estão abertas na tabela e a que está a ser cancelada. */
   const [expandedChains, setExpandedChains] = useState(() => new Set());
   const [closingChainId, setClosingChainId] = useState(null);
+  const [removingStepKey, setRemovingStepKey] = useState(null);
 
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -666,6 +667,71 @@ export default function ScheduledPage() {
     }
   }
 
+  /*
+   * Tira uma mensagem da corrente. A lista volta a ser lida para mostrar a
+   * numeração nova; a corrente continua aberta.
+   */
+  async function handleRemoveStep(item, step) {
+    const running = item.status === "running";
+
+    const confirmed = await confirm({
+      title: t("Chain.confirmRemove.title", { index: step.index }),
+      message: running
+        ? t("Chain.confirmRemove.running")
+        : t("Chain.confirmRemove.scheduled", {
+            count: item.chain.stepCount - 1,
+          }),
+      confirmText: t("Chain.confirmRemove.confirm"),
+      cancelText: t("Chain.keep"),
+      tone: "danger",
+    });
+
+    if (!confirmed) return;
+
+    setRemovingStepKey(`${item.id}:${step.index}`);
+
+    try {
+      const response = await fetch(
+        `/api/message-chains/${item.id}/steps/${step.index}?orgId=${org?.id}`,
+        { method: "DELETE" },
+      );
+      const result = await response.json().catch(() => ({}));
+
+      /* Entretanto alguém chegou a esta mensagem (ou a corrente mudou). */
+      if (response.status === 409) {
+        await showAlert({
+          title: t("Chain.stepGone.title"),
+          message: t("Chain.stepGone.message"),
+          tone: "warning",
+        });
+        await loadItems();
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to remove the message");
+      }
+
+      await loadItems();
+
+      await showAlert({
+        title: t("Chain.stepRemoved.title"),
+        message: t("Chain.stepRemoved.message"),
+        tone: "success",
+      });
+    } catch (err) {
+      console.warn("[Scheduled] remove chain step error:", err);
+
+      await showAlert({
+        title: t("Chain.error.title"),
+        message: t("Chain.error.message"),
+        tone: "danger",
+      });
+    } finally {
+      setRemovingStepKey(null);
+    }
+  }
+
   return (
     <div className={styles.scheduledScreen}>
       <ScheduledHeader translation={t} />
@@ -713,6 +779,8 @@ export default function ScheduledPage() {
         onToggleChain={toggleChain}
         onCloseChain={handleCloseChain}
         closingChainId={closingChainId}
+        onRemoveStep={handleRemoveStep}
+        removingStepKey={removingStepKey}
         footer={
           <Pagination
             page={currentPage}

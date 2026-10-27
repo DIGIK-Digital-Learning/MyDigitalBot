@@ -516,7 +516,7 @@ export async function listOpenMessageChains(organizationId) {
   const { data, error } = await sb
     .from("message_chain")
     .select(
-      "id, organization_id, created_by_user_id, channel, status, scheduled_for, timezone, recipient_count, started_at, created_at, message_chain_step (step_index, payload), message_chain_recipient (status, current_step_index)",
+      "id, organization_id, created_by_user_id, channel, status, scheduled_for, timezone, recipient_count, started_at, created_at, message_chain_step (step_index, payload), message_chain_recipient (status, current_step_index), message_chain_delivery (step_index)",
     )
     .eq("organization_id", Number(organizationId))
     .in("status", ["scheduled", "processing", "active"])
@@ -566,4 +566,100 @@ export async function closeMessageChain({
   if (recipientsError) throw recipientsError;
 
   return data;
+}
+
+export async function listMessageChainSteps(chainId) {
+  const { data, error } = await sb
+    .from("message_chain_step")
+    .select("id, step_index, payload")
+    .eq("chain_id", chainId)
+    .order("step_index", { ascending: true });
+
+  if (error) throw error;
+
+  return data || [];
+}
+
+/*
+ * Se alguém já chegou a este passo ou a um seguinte: já recebeu, ou tem o
+ * envio marcado (à espera do tempo depois da leitura ou da abertura do
+ * WhatsApp).
+ */
+export async function messageChainStepTouched({ chainId, stepId, stepIndex }) {
+  const [recipients, deliveries, outreach] = await Promise.all([
+    sb
+      .from("message_chain_recipient")
+      .select("id", { count: "exact", head: true })
+      .eq("chain_id", chainId)
+      .gte("current_step_index", stepIndex),
+    sb
+      .from("message_chain_delivery")
+      .select("id", { count: "exact", head: true })
+      .eq("chain_id", chainId)
+      .gte("step_index", stepIndex),
+    sb
+      .from("pending_outreach")
+      .select("id", { count: "exact", head: true })
+      .eq("message_chain_step_id", stepId),
+  ]);
+
+  for (const result of [recipients, deliveries, outreach]) {
+    if (result.error) throw result.error;
+  }
+
+  return (
+    (recipients.count || 0) + (deliveries.count || 0) + (outreach.count || 0) >
+    0
+  );
+}
+
+/*
+ * Tira um passo e renumera os seguintes (o 3 passa a 2, o 4 a 3...), por
+ * ordem, para não chocar com a numeração única de cada corrente.
+ */
+export async function removeMessageChainStep({
+  chainId,
+  stepId,
+  stepIndex,
+  steps,
+}) {
+  const { error } = await sb
+    .from("message_chain_step")
+    .delete()
+    .eq("id", stepId)
+    .eq("chain_id", chainId);
+
+  if (error) throw error;
+
+  const later = steps
+    .filter((step) => step.step_index > stepIndex)
+    .sort((a, b) => a.step_index - b.step_index);
+
+  for (const step of later) {
+    const { error: moveError } = await sb
+      .from("message_chain_step")
+      .update({ step_index: step.step_index - 1 })
+      .eq("id", step.id);
+
+    if (moveError) throw moveError;
+  }
+
+  await sb
+    .from("message_chain")
+    .update({ updated_at: nowIso() })
+    .eq("id", chainId);
+}
+
+/* A pergunta de um passo que nunca chegou a sair (sai das Perguntas). */
+export async function deleteUnsentChainQuestion({
+  questionId,
+  organizationId,
+}) {
+  const { error } = await sb
+    .from("question")
+    .delete()
+    .eq("id", questionId)
+    .eq("organization_id", Number(organizationId));
+
+  if (error) throw error;
 }

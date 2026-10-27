@@ -3281,6 +3281,7 @@
         "broadcast_read_chain_created": "Read chain created",
         "broadcast_read_chain_cancelled": "Message chain cancelled",
         "broadcast_read_chain_stopped": "Message chain stopped",
+        "broadcast_read_chain_step_removed": "Message removed from a chain",
         "message_template_sent": "Template sent to a user",
         "template_created": "WhatsApp template created",
         "media_deleted": "Media file deleted",
@@ -3573,6 +3574,23 @@
       "cancel": "Cancel chain",
       "stop": "Stop chain",
       "keep": "Keep it",
+      "removeStep": "Remove this message",
+      "stepLocked": "Already received or waiting to go out: it can't be removed.",
+      "minSteps": "A chain needs at least 2 messages. To remove more, cancel the chain.",
+      "confirmRemove": {
+        "title": "Remove message {index}?",
+        "scheduled": "The chain keeps {count} messages. If it was created today, 1 send goes back to today's limit.",
+        "running": "Nobody received it yet: the chain goes from the previous message straight to the next one.",
+        "confirm": "Remove message"
+      },
+      "stepRemoved": {
+        "title": "Message removed",
+        "message": "The chain carries on without this message."
+      },
+      "stepGone": {
+        "title": "It can no longer be removed",
+        "message": "Meanwhile someone received this message or the next one. The list was refreshed."
+      },
       "confirmCancel": {
         "title": "Cancel this chain?",
         "message": "No message goes out. If the chain was created today, its sends go back to today's limit.",
@@ -5132,6 +5150,7 @@
       "broadcast_read_chain_created": "Read chain created",
       "broadcast_read_chain_cancelled": "Message chain cancelled",
       "broadcast_read_chain_stopped": "Message chain stopped",
+      "broadcast_read_chain_step_removed": "Message removed from a chain",
       "message_template_sent": "Template sent to a user",
       "template_created": "WhatsApp template created",
       "media_deleted": "Media file deleted",

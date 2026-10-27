@@ -11,6 +11,7 @@ vi.mock("@/lib/repos/adminDailySends.repo", () => ({}));
 import {
   closeChain,
   listOpenChains,
+  removeChainStep,
   previewText,
 } from "@/lib/services/broadcast/readChains/openChains";
 
@@ -179,5 +180,117 @@ describe("closeChain", () => {
       code: "CHAIN_NOT_OPEN",
       status: 409,
     });
+  });
+});
+
+describe("tirar uma mensagem da corrente", () => {
+  const now = new Date("2026-10-27T15:00:00Z");
+  const steps = [
+    { id: "s1", step_index: 1, payload: {} },
+    { id: "s2", step_index: 2, payload: { questionId: 42 } },
+    { id: "s3", step_index: 3, payload: {} },
+  ];
+
+  function setup({ chain = row(), list = steps, touched = false } = {}) {
+    return {
+      getMessageChainById: vi.fn(async () => chain),
+      listMessageChainSteps: vi.fn(async () => list),
+      messageChainStepTouched: vi.fn(async () => touched),
+      removeMessageChainStep: vi.fn(async () => {}),
+      deleteUnsentChainQuestion: vi.fn(async () => {}),
+      refundOneChainSend: vi.fn(async () => {}),
+    };
+  }
+
+  it("agendada: tira, apaga a pergunta e devolve 1 envio de hoje", async () => {
+    const deps = setup();
+
+    const result = await removeChainStep(7, "c1", 2, { now, deps });
+
+    expect(result.stepCount).toBe(2);
+    expect(deps.removeMessageChainStep).toHaveBeenCalledWith(
+      expect.objectContaining({ stepId: "s2", stepIndex: 2, steps }),
+    );
+    expect(deps.deleteUnsentChainQuestion).toHaveBeenCalledWith({
+      questionId: 42,
+      organizationId: 7,
+    });
+    expect(deps.refundOneChainSend).toHaveBeenCalledWith(
+      "c1",
+      new Date("2026-10-27T00:01:00Z"),
+    );
+  });
+
+  it("a decorrer: tira uma mensagem a que ninguém chegou, sem devolver envios", async () => {
+    const deps = setup({ chain: row({ status: "active" }) });
+
+    const result = await removeChainStep(7, "c1", 3, { now, deps });
+
+    expect(result.stepCount).toBe(2);
+    expect(deps.refundOneChainSend).not.toHaveBeenCalled();
+  });
+
+  it("não tira uma mensagem que alguém já recebeu ou tem marcada", async () => {
+    const deps = setup({ chain: row({ status: "active" }), touched: true });
+
+    expect(await removeChainStep(7, "c1", 2, { now, deps })).toEqual({
+      code: "STEP_ALREADY_SENT",
+      status: 409,
+    });
+    expect(deps.removeMessageChainStep).not.toHaveBeenCalled();
+  });
+
+  it("fica sempre com pelo menos 2 mensagens", async () => {
+    const deps = setup({ list: steps.slice(0, 2) });
+
+    expect(await removeChainStep(7, "c1", 1, { now, deps })).toEqual({
+      code: "CHAIN_MIN_STEPS",
+      status: 409,
+    });
+    expect(deps.removeMessageChainStep).not.toHaveBeenCalled();
+  });
+
+  it("não mexe numa corrente que está a sair, de outra organização ou sem esse passo", async () => {
+    expect(
+      await removeChainStep(7, "c1", 2, {
+        now,
+        deps: setup({ chain: row({ status: "processing" }) }),
+      }),
+    ).toEqual({ code: "CHAIN_SENDING", status: 409 });
+
+    expect(
+      await removeChainStep(7, "c1", 2, {
+        now,
+        deps: setup({ chain: row({ organization_id: 8 }) }),
+      }),
+    ).toEqual({ code: "CHAIN_NOT_FOUND", status: 404 });
+
+    expect(await removeChainStep(7, "c1", 9, { now, deps: setup() })).toEqual({
+      code: "STEP_NOT_FOUND",
+      status: 404,
+    });
+  });
+
+  it("na lista, a mensagem fica bloqueada se alguém lá chegou ou a tem marcada", async () => {
+    const [chain] = await listOpenChains(7, {
+      deps: {
+        listOpenMessageChains: async () => [
+          row({
+            status: "active",
+            message_chain_step: [
+              { step_index: 1, payload: {} },
+              { step_index: 2, payload: {} },
+              { step_index: 3, payload: {} },
+            ],
+            message_chain_recipient: [
+              { status: "active", current_step_index: 1 },
+            ],
+            message_chain_delivery: [{ step_index: 1 }, { step_index: 2 }],
+          }),
+        ],
+      },
+    });
+
+    expect(chain.steps.map((s) => s.locked)).toEqual([true, true, false]);
   });
 });

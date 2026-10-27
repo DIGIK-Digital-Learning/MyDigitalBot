@@ -1738,3 +1738,16 @@
 .chainStepMeta {
   color: var(--ui-muted, #6b7280);
 }
+
+/* O 🗑 de cada mensagem da corrente, encostado à direita. */
+.chainStepRemove {
+  width: 30px;
+  height: 30px;
+  margin-left: auto;
+  border-radius: 10px;
+}
+
+.chainStepRemove svg {
+  width: 16px;
+  height: 16px;
+}

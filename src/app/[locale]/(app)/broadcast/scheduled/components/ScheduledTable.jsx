@@ -35,7 +35,17 @@ export default function ScheduledTable({
   onToggleChain = () => {},
   onCloseChain = () => {},
   closingChainId = null,
+  onRemoveStep = () => {},
+  removingStepKey = null,
 }) {
+  /* Porque é que uma mensagem da corrente não se pode tirar (ou null). */
+  function stepBlockedReason(item, step) {
+    if (item.status === "sending") return translation("Chain.stepLocked");
+    if (step.locked) return translation("Chain.stepLocked");
+    if (item.chain.stepCount <= 2) return translation("Chain.minSteps");
+    return null;
+  }
+
   function statusClassName(status) {
     switch (status) {
       case "scheduled":
@@ -266,6 +276,24 @@ export default function ScheduledTable({
                                     total: chain.recipientCount,
                                   })}
                                 </span>
+                                {/* Tirar só esta mensagem da corrente. */}
+                                <button
+                                  type="button"
+                                  className={`${styles.iconButton} ${styles.dangerButton} ${styles.chainStepRemove}`}
+                                  onClick={() => onRemoveStep(item, step)}
+                                  disabled={
+                                    Boolean(stepBlockedReason(item, step)) ||
+                                    removingStepKey ===
+                                      `${item.id}:${step.index}`
+                                  }
+                                  title={
+                                    stepBlockedReason(item, step) ||
+                                    translation("Chain.removeStep")
+                                  }
+                                  aria-label={translation("Chain.removeStep")}
+                                >
+                                  <Trash2 aria-hidden />
+                                </button>
                               </div>
                             </td>
                           </tr>

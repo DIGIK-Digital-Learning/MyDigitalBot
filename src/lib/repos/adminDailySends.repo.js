@@ -111,3 +111,28 @@ export async function refundChainSend(chainId, since) {
 
   if (error) throw error;
 }
+
+/*
+ * Devolve 1 envio de uma corrente a que se tirou uma mensagem, só se a
+ * corrente foi contada hoje (#188). A corrente fica sempre com 2 ou mais.
+ */
+export async function refundOneChainSend(chainId, since) {
+  const sb = getSupabaseAdminClient();
+  const { data, error } = await sb
+    .from("admin_daily_send")
+    .select("id, units")
+    .eq("source_type", "message_chain")
+    .eq("source_id", String(chainId))
+    .gte("counted_at", since.toISOString())
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data || Number(data.units) <= 1) return;
+
+  const { error: updateError } = await sb
+    .from("admin_daily_send")
+    .update({ units: Number(data.units) - 1 })
+    .eq("id", data.id);
+
+  if (updateError) throw updateError;
+}

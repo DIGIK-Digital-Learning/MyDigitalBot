@@ -44,6 +44,7 @@ export const AUDIT_ACTIONS = Object.freeze({
   BROADCAST_READ_CHAIN_CREATED: "broadcast.read_chain_created",
   BROADCAST_READ_CHAIN_CANCELLED: "broadcast.read_chain_cancelled",
   BROADCAST_READ_CHAIN_STOPPED: "broadcast.read_chain_stopped",
+  BROADCAST_READ_CHAIN_STEP_REMOVED: "broadcast.read_chain_step_removed",
 
   MESSAGE_TEMPLATE_SENT: "message.template_sent",
   MESSAGE_RECEIVED: "message.received",

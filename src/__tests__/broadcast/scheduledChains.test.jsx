@@ -121,3 +121,52 @@ describe("correntes nas agendadas", () => {
     ).toBeTruthy();
   });
 });
+
+describe("tirar mensagens na tabela", () => {
+  function expandedTable(item, props = {}) {
+    return render(
+      <ScheduledTable
+        loading={false}
+        translation={t}
+        filteredItems={[item]}
+        openViewModal={vi.fn()}
+        openEditModal={vi.fn()}
+        canEditItem={canEditItem}
+        handleDelete={vi.fn()}
+        canDeleteItem={canDeleteItem}
+        deletingId={null}
+        expandedChains={new Set([item.id])}
+        {...props}
+      />,
+    );
+  }
+
+  it("cada mensagem tem o seu botão; as recebidas ficam bloqueadas", () => {
+    const onRemoveStep = vi.fn();
+    const item = chainItem("running");
+    item.chain.steps[0].locked = true;
+    item.chain.steps.push({ index: 3, preview: "Fim", reached: 0 });
+    item.chain.stepCount = 3;
+
+    expandedTable(item, { onRemoveStep });
+
+    const buttons = screen.getAllByRole("button", { name: "Chain.removeStep" });
+    expect(buttons).toHaveLength(3);
+    expect(buttons[0].disabled).toBe(true);
+    expect(buttons[0].title).toBe("Chain.stepLocked");
+
+    fireEvent.click(buttons[2]);
+    expect(onRemoveStep).toHaveBeenCalledWith(item, item.chain.steps[2]);
+  });
+
+  it("com 2 mensagens, nenhuma se tira (cancela-se a corrente)", () => {
+    expandedTable(chainItem());
+
+    for (const button of screen.getAllByRole("button", {
+      name: "Chain.removeStep",
+    })) {
+      expect(button.disabled).toBe(true);
+      expect(button.title).toBe("Chain.minSteps");
+    }
+  });
+});

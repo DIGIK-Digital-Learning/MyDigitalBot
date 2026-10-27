@@ -2934,6 +2934,7 @@
         "broadcast_read_chain_created": "Sequência de leitura criada",
         "broadcast_read_chain_cancelled": "Corrente cancelada",
         "broadcast_read_chain_stopped": "Corrente parada",
+        "broadcast_read_chain_step_removed": "Mensagem tirada de uma corrente",
         "message_template_sent": "Template enviado a um colaborador",
         "template_created": "Template WhatsApp criado",
         "media_deleted": "Ficheiro de multimédia eliminado",
@@ -3380,6 +3381,23 @@
       "cancel": "Cancelar corrente",
       "stop": "Parar corrente",
       "keep": "Manter",
+      "removeStep": "Tirar esta mensagem",
+      "stepLocked": "Já foi recebida ou está à espera de sair: não se pode tirar.",
+      "minSteps": "Uma corrente precisa de pelo menos 2 mensagens. Para tirar mais, cancela a corrente.",
+      "confirmRemove": {
+        "title": "Tirar a mensagem {index}?",
+        "scheduled": "A corrente fica com {count} mensagens. Se foi criada hoje, 1 envio volta ao teu limite de hoje.",
+        "running": "Ninguém a recebeu ainda: a corrente passa da mensagem anterior para a seguinte.",
+        "confirm": "Tirar mensagem"
+      },
+      "stepRemoved": {
+        "title": "Mensagem tirada",
+        "message": "A corrente segue sem esta mensagem."
+      },
+      "stepGone": {
+        "title": "Já não dá para a tirar",
+        "message": "Entretanto alguém recebeu esta mensagem ou a seguinte. A lista foi atualizada."
+      },
       "confirmCancel": {
         "title": "Cancelar esta corrente?",
         "message": "Nenhuma mensagem chega a sair. Se a corrente foi criada hoje, os envios voltam ao teu limite de hoje.",
@@ -4606,6 +4624,7 @@
       "broadcast_read_chain_created": "Sequência de leitura criada",
       "broadcast_read_chain_cancelled": "Corrente cancelada",
       "broadcast_read_chain_stopped": "Corrente parada",
+      "broadcast_read_chain_step_removed": "Mensagem tirada de uma corrente",
       "message_template_sent": "Template enviado a um colaborador",
       "template_created": "Template WhatsApp criado",
       "media_deleted": "Ficheiro de multimédia eliminado",
