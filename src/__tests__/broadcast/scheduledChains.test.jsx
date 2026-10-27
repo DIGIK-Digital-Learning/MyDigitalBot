@@ -16,6 +16,7 @@ vi.mock("@/i18n/navigation", () => ({
 }));
 
 import ScheduledTable from "@/app/[locale]/(app)/broadcast/scheduled/components/ScheduledTable";
+import ChainStepEditModal from "@/app/[locale]/(app)/broadcast/scheduled/components/ChainStepEditModal";
 import {
   canCloseChain,
   canDeleteItem,
@@ -168,5 +169,66 @@ describe("tirar mensagens na tabela", () => {
       expect(button.disabled).toBe(true);
       expect(button.title).toBe("Chain.minSteps");
     }
+  });
+});
+
+describe("editar mensagens na tabela", () => {
+  it("o lápis abre a edição; bloqueado nas recebidas e nas perguntas", () => {
+    const onEditStep = vi.fn();
+    const item = chainItem("running");
+    item.chain.steps[0].locked = true;
+    item.chain.steps[1].hasQuestion = true;
+    item.chain.steps.push({ index: 3, preview: "Fim", reached: 0 });
+    item.chain.stepCount = 3;
+
+    render(
+      <ScheduledTable
+        loading={false}
+        translation={t}
+        filteredItems={[item]}
+        openViewModal={vi.fn()}
+        openEditModal={vi.fn()}
+        canEditItem={canEditItem}
+        handleDelete={vi.fn()}
+        canDeleteItem={canDeleteItem}
+        deletingId={null}
+        expandedChains={new Set([item.id])}
+        onEditStep={onEditStep}
+      />,
+    );
+
+    const buttons = screen.getAllByRole("button", { name: "Chain.editStep" });
+    expect(buttons.map((b) => [b.disabled, b.title])).toEqual([
+      [true, "Chain.stepLockedEdit"],
+      [true, "Chain.questionNoEdit"],
+      [false, "Chain.editStep"],
+    ]);
+
+    fireEvent.click(buttons[2]);
+    expect(onEditStep).toHaveBeenCalledWith(item, item.chain.steps[2]);
+  });
+
+  it("o modal grava o texto novo e bloqueia acima do limite", () => {
+    const onSave = vi.fn();
+    render(
+      <ChainStepEditModal
+        step={{ index: 3, message: "Fim", fileCount: 0 }}
+        isOpen
+        onClose={vi.fn()}
+        onSave={onSave}
+        charLimit={10}
+        translation={t}
+      />,
+    );
+
+    const box = screen.getByRole("textbox");
+    const save = screen.getByRole("button", { name: "Chain.editModal.save" });
+
+    fireEvent.change(box, { target: { value: "Texto muito comprido" } });
+    expect(save.disabled).toBe(true);
+
+    fireEvent.change(box, { target: { value: "Até já" } });
+    fireEvent.click(save);
+    expect(onSave).toHaveBeenCalledWith("Até já");
   });
 });

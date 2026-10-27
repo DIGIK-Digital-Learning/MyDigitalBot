@@ -37,7 +37,17 @@ export default function ScheduledTable({
   closingChainId = null,
   onRemoveStep = () => {},
   removingStepKey = null,
+  onEditStep = () => {},
 }) {
+  /* Porque é que o texto de uma mensagem da corrente não se edita (ou null). */
+  function stepEditBlockedReason(item, step) {
+    if (item.status === "sending" || step.locked) {
+      return translation("Chain.stepLockedEdit");
+    }
+    if (step.hasQuestion) return translation("Chain.questionNoEdit");
+    return null;
+  }
+
   /* Porque é que uma mensagem da corrente não se pode tirar (ou null). */
   function stepBlockedReason(item, step) {
     if (item.status === "sending") return translation("Chain.stepLocked");
@@ -276,24 +286,42 @@ export default function ScheduledTable({
                                     total: chain.recipientCount,
                                   })}
                                 </span>
-                                {/* Tirar só esta mensagem da corrente. */}
-                                <button
-                                  type="button"
-                                  className={`${styles.iconButton} ${styles.dangerButton} ${styles.chainStepRemove}`}
-                                  onClick={() => onRemoveStep(item, step)}
-                                  disabled={
-                                    Boolean(stepBlockedReason(item, step)) ||
-                                    removingStepKey ===
-                                      `${item.id}:${step.index}`
-                                  }
-                                  title={
-                                    stepBlockedReason(item, step) ||
-                                    translation("Chain.removeStep")
-                                  }
-                                  aria-label={translation("Chain.removeStep")}
-                                >
-                                  <Trash2 aria-hidden />
-                                </button>
+                                <div className={styles.chainStepActions}>
+                                  {/* Mudar só o texto desta mensagem. */}
+                                  <button
+                                    type="button"
+                                    className={`${styles.iconButton} ${styles.chainStepButton}`}
+                                    onClick={() => onEditStep(item, step)}
+                                    disabled={Boolean(
+                                      stepEditBlockedReason(item, step),
+                                    )}
+                                    title={
+                                      stepEditBlockedReason(item, step) ||
+                                      translation("Chain.editStep")
+                                    }
+                                    aria-label={translation("Chain.editStep")}
+                                  >
+                                    <Pencil aria-hidden />
+                                  </button>
+                                  {/* Tirar só esta mensagem da corrente. */}
+                                  <button
+                                    type="button"
+                                    className={`${styles.iconButton} ${styles.dangerButton} ${styles.chainStepButton}`}
+                                    onClick={() => onRemoveStep(item, step)}
+                                    disabled={
+                                      Boolean(stepBlockedReason(item, step)) ||
+                                      removingStepKey ===
+                                        `${item.id}:${step.index}`
+                                    }
+                                    title={
+                                      stepBlockedReason(item, step) ||
+                                      translation("Chain.removeStep")
+                                    }
+                                    aria-label={translation("Chain.removeStep")}
+                                  >
+                                    <Trash2 aria-hidden />
+                                  </button>
+                                </div>
                               </div>
                             </td>
                           </tr>

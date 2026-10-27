@@ -1739,15 +1739,25 @@
   color: var(--ui-muted, #6b7280);
 }
 
-/* O 🗑 de cada mensagem da corrente, encostado à direita. */
-.chainStepRemove {
+/* O ✏ e o 🗑 de cada mensagem da corrente, encostados à direita. */
+.chainStepActions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.chainStepButton {
   width: 30px;
   height: 30px;
-  margin-left: auto;
   border-radius: 10px;
 }
 
-.chainStepRemove svg {
+.chainStepButton svg {
   width: 16px;
   height: 16px;
+}
+
+/* Aviso no modal de editar (texto vazio ou acima do limite). */
+.chainEditError {
+  color: #b91c1c;
 }

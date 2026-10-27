@@ -2935,6 +2935,7 @@
         "broadcast_read_chain_cancelled": "Corrente cancelada",
         "broadcast_read_chain_stopped": "Corrente parada",
         "broadcast_read_chain_step_removed": "Mensagem tirada de uma corrente",
+        "broadcast_read_chain_step_edited": "Mensagem de uma corrente editada",
         "message_template_sent": "Template enviado a um colaborador",
         "template_created": "Template WhatsApp criado",
         "media_deleted": "Ficheiro de multimédia eliminado",
@@ -3380,6 +3381,29 @@
       "noEdit": "As correntes não se editam: cancela esta e cria outra.",
       "cancel": "Cancelar corrente",
       "stop": "Parar corrente",
+      "editStep": "Editar esta mensagem",
+      "stepLockedEdit": "Já foi recebida ou está à espera de sair: não se pode editar.",
+      "questionNoEdit": "As perguntas não se editam aqui: só o texto das mensagens.",
+      "editModal": {
+        "title": "Editar a mensagem {index}",
+        "hint": "Só muda o texto. Ficheiros, imagens, links e o tempo entre mensagens ficam como estão.",
+        "linksHint": "Os links aparecem entre chavetas duplas: deixa-os como estão para continuarem a ser rastreados.",
+        "label": "Texto",
+        "chars": "{count} / {limit} caracteres",
+        "tooLong": "Passa do limite de caracteres do teu plano.",
+        "empty": "A mensagem não pode ficar vazia.",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "saving": "A guardar…"
+      },
+      "stepSaved": {
+        "title": "Mensagem atualizada",
+        "message": "A corrente vai enviar o texto novo."
+      },
+      "stepEditGone": {
+        "title": "Já não dá para a editar",
+        "message": "Entretanto alguém recebeu esta mensagem ou a seguinte. A lista foi atualizada."
+      },
       "keep": "Manter",
       "removeStep": "Tirar esta mensagem",
       "stepLocked": "Já foi recebida ou está à espera de sair: não se pode tirar.",
@@ -4625,6 +4649,7 @@
       "broadcast_read_chain_cancelled": "Corrente cancelada",
       "broadcast_read_chain_stopped": "Corrente parada",
       "broadcast_read_chain_step_removed": "Mensagem tirada de uma corrente",
+      "broadcast_read_chain_step_edited": "Mensagem de uma corrente editada",
       "message_template_sent": "Template enviado a um colaborador",
       "template_created": "Template WhatsApp criado",
       "media_deleted": "Ficheiro de multimédia eliminado",

@@ -663,3 +663,23 @@ export async function deleteUnsentChainQuestion({
 
   if (error) throw error;
 }
+
+/* Grava o payload de um passo (hoje só muda o texto da mensagem). */
+export async function updateMessageChainStepPayload({
+  chainId,
+  stepId,
+  payload,
+}) {
+  const { error } = await sb
+    .from("message_chain_step")
+    .update({ payload })
+    .eq("id", stepId)
+    .eq("chain_id", chainId);
+
+  if (error) throw error;
+
+  await sb
+    .from("message_chain")
+    .update({ updated_at: nowIso() })
+    .eq("id", chainId);
+}

@@ -3282,6 +3282,7 @@
         "broadcast_read_chain_cancelled": "Message chain cancelled",
         "broadcast_read_chain_stopped": "Message chain stopped",
         "broadcast_read_chain_step_removed": "Message removed from a chain",
+        "broadcast_read_chain_step_edited": "Chain message edited",
         "message_template_sent": "Template sent to a user",
         "template_created": "WhatsApp template created",
         "media_deleted": "Media file deleted",
@@ -3573,6 +3574,29 @@
       "noEdit": "Chains can't be edited: cancel this one and create another.",
       "cancel": "Cancel chain",
       "stop": "Stop chain",
+      "editStep": "Edit this message",
+      "stepLockedEdit": "Already received or waiting to go out: it can't be edited.",
+      "questionNoEdit": "Questions can't be edited here: only the text of messages.",
+      "editModal": {
+        "title": "Edit message {index}",
+        "hint": "Only the text changes. Files, images, links and the time between messages stay as they are.",
+        "linksHint": "Links show between double curly braces: leave them as they are so they keep being tracked.",
+        "label": "Text",
+        "chars": "{count} / {limit} characters",
+        "tooLong": "It goes over your plan's character limit.",
+        "empty": "The message can't be empty.",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving…"
+      },
+      "stepSaved": {
+        "title": "Message updated",
+        "message": "The chain will send the new text."
+      },
+      "stepEditGone": {
+        "title": "It can no longer be edited",
+        "message": "Meanwhile someone received this message or the next one. The list was refreshed."
+      },
       "keep": "Keep it",
       "removeStep": "Remove this message",
       "stepLocked": "Already received or waiting to go out: it can't be removed.",
@@ -5151,6 +5175,7 @@
       "broadcast_read_chain_cancelled": "Message chain cancelled",
       "broadcast_read_chain_stopped": "Message chain stopped",
       "broadcast_read_chain_step_removed": "Message removed from a chain",
+      "broadcast_read_chain_step_edited": "Chain message edited",
       "message_template_sent": "Template sent to a user",
       "template_created": "WhatsApp template created",
       "media_deleted": "Media file deleted",

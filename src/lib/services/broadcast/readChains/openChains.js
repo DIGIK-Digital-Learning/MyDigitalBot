@@ -6,12 +6,14 @@ import {
   listOpenMessageChains,
   messageChainStepTouched,
   removeMessageChainStep,
+  updateMessageChainStepPayload,
 } from "@/lib/repos/messageChain.repo";
 import {
   refundChainSend,
   refundOneChainSend,
 } from "@/lib/repos/adminDailySends.repo";
 import { dailySendsDayStart } from "@/lib/plans/dailySends";
+import { checkMessageContent } from "@/lib/services/plans/planLimits";
 
 /*
  * Correntes nas Mensagens agendadas: as que esperam pela hora (podem ser
@@ -71,6 +73,8 @@ export function summarizeChain(row) {
     steps: steps.map((step) => ({
       index: step.step_index,
       preview: stepPreview(step.payload),
+      /* O texto inteiro, para o editar. */
+      message: String(step.payload?.message || ""),
       fileCount:
         (step.payload?.files?.length || 0) +
         (step.payload?.imageUrls?.length || 0),
@@ -233,4 +237,82 @@ export async function removeChainStep(
   }
 
   return { stepCount: steps.length - 1, chain };
+}
+
+/**
+ * Muda o texto de uma mensagem da corrente. Ficheiros, imagens, links e o
+ * tempo entre mensagens ficam como estão.
+ *
+ * - Agendada: qualquer mensagem; a decorrer: só uma a que ninguém chegou nem
+ *   está marcada para sair (a mesma regra de tirar).
+ * - Uma mensagem com pergunta não se edita aqui: o que sai é a pergunta, não
+ *   o texto.
+ * - O texto respeita o limite de caracteres do plano (#187) e só fica vazio
+ *   se a mensagem tiver ficheiros ou imagens.
+ *
+ * Devolve `{ chain, changed }`, ou `{ code, status, body? }` quando não é
+ * possível.
+ */
+export async function editChainStep(
+  orgId,
+  chainId,
+  stepIndex,
+  message,
+  { deps = {} } = {},
+) {
+  const getChain = deps.getMessageChainById || getMessageChainById;
+  const listSteps = deps.listMessageChainSteps || listMessageChainSteps;
+  const touched = deps.messageChainStepTouched || messageChainStepTouched;
+  const save =
+    deps.updateMessageChainStepPayload || updateMessageChainStepPayload;
+  const checkContent = deps.checkMessageContent || checkMessageContent;
+
+  const chain = await getChain(chainId);
+  if (!chain || Number(chain.organization_id) !== Number(orgId)) {
+    return { code: "CHAIN_NOT_FOUND", status: 404 };
+  }
+
+  if (chain.status === "processing") {
+    return { code: "CHAIN_SENDING", status: 409 };
+  }
+  if (!["scheduled", "active"].includes(chain.status)) {
+    return { code: "CHAIN_NOT_OPEN", status: 409 };
+  }
+
+  const steps = await listSteps(chainId);
+  const step = steps.find((s) => Number(s.step_index) === Number(stepIndex));
+  if (!step) return { code: "STEP_NOT_FOUND", status: 404 };
+
+  const payload = step.payload || {};
+  if (payload.question || payload.questionId) {
+    return { code: "STEP_HAS_QUESTION", status: 409 };
+  }
+
+  const text = String(message ?? "");
+  const files = Array.isArray(payload.files) ? payload.files : [];
+  const images = Array.isArray(payload.imageUrls) ? payload.imageUrls : [];
+  if (!text.trim() && files.length === 0 && images.length === 0) {
+    return { code: "STEP_EMPTY", status: 400 };
+  }
+
+  if (text === String(payload.message || "")) {
+    return { chain, changed: false };
+  }
+
+  const content = await checkContent(orgId, { message: text, files });
+  if (content.body) {
+    return { code: content.body.code, status: 400, body: content.body };
+  }
+
+  if (await touched({ chainId, stepId: step.id, stepIndex: step.step_index })) {
+    return { code: "STEP_ALREADY_SENT", status: 409 };
+  }
+
+  await save({
+    chainId,
+    stepId: step.id,
+    payload: { ...payload, message: text },
+  });
+
+  return { chain, changed: true };
 }

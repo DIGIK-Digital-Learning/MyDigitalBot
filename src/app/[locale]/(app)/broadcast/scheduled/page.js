@@ -32,6 +32,7 @@ import ScheduledTable from "./components/ScheduledTable";
 import Pagination from "@/app/components/Pagination/Pagination";
 import ScheduledViewModal from "./components/ScheduledViewModal";
 import ScheduledEditModal from "./components/ScheduledEditModal";
+import ChainStepEditModal from "./components/ChainStepEditModal";
 
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 
@@ -84,11 +85,15 @@ export default function ScheduledPage() {
   const [expandedChains, setExpandedChains] = useState(() => new Set());
   const [closingChainId, setClosingChainId] = useState(null);
   const [removingStepKey, setRemovingStepKey] = useState(null);
+  /* A mensagem da corrente a ser editada: { item, step }. */
+  const [editingStep, setEditingStep] = useState(null);
+  const [isStepModalOpen, setIsStepModalOpen] = useState(false);
+  const [savingStep, setSavingStep] = useState(false);
 
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const closeTimersRef = useRef({ view: null, edit: null });
+  const closeTimersRef = useRef({ view: null, edit: null, step: null });
 
   const loadItems = useCallback(
     async (showSuccessAlert = false) => {
@@ -732,6 +737,85 @@ export default function ScheduledPage() {
     }
   }
 
+  function openStepModal(item, step) {
+    if (closeTimersRef.current.step) {
+      clearTimeout(closeTimersRef.current.step);
+    }
+
+    setEditingStep({ item, step });
+    setIsStepModalOpen(true);
+  }
+
+  function closeStepModal() {
+    setIsStepModalOpen(false);
+
+    if (closeTimersRef.current.step) {
+      clearTimeout(closeTimersRef.current.step);
+    }
+
+    closeTimersRef.current.step = setTimeout(() => {
+      setEditingStep(null);
+    }, MODAL_CLOSE_MS);
+  }
+
+  /* Grava o texto novo de uma mensagem da corrente e volta a ler a lista. */
+  async function handleSaveStep(message) {
+    if (!editingStep) return;
+
+    const { item, step } = editingStep;
+    setSavingStep(true);
+
+    try {
+      const response = await fetch(
+        `/api/message-chains/${item.id}/steps/${step.index}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orgId: org?.id, message }),
+        },
+      );
+      const result = await response.json().catch(() => ({}));
+
+      /* Entretanto alguém chegou a esta mensagem (ou a corrente mudou). */
+      if (response.status === 409) {
+        closeStepModal();
+        await loadItems();
+
+        await showAlert({
+          title: t("Chain.stepEditGone.title"),
+          message: t("Chain.stepEditGone.message"),
+          tone: "warning",
+        });
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to edit the message");
+      }
+
+      closeStepModal();
+      await loadItems();
+
+      if (result.changed) {
+        await showAlert({
+          title: t("Chain.stepSaved.title"),
+          message: t("Chain.stepSaved.message"),
+          tone: "success",
+        });
+      }
+    } catch (err) {
+      console.warn("[Scheduled] edit chain step error:", err);
+
+      await showAlert({
+        title: t("Chain.error.title"),
+        message: t("Chain.error.message"),
+        tone: "danger",
+      });
+    } finally {
+      setSavingStep(false);
+    }
+  }
+
   return (
     <div className={styles.scheduledScreen}>
       <ScheduledHeader translation={t} />
@@ -781,6 +865,7 @@ export default function ScheduledPage() {
         closingChainId={closingChainId}
         onRemoveStep={handleRemoveStep}
         removingStepKey={removingStepKey}
+        onEditStep={openStepModal}
         footer={
           <Pagination
             page={currentPage}
@@ -822,6 +907,19 @@ export default function ScheduledPage() {
           closeEditModal={closeEditModal}
           onSave={handleSaveEdit}
           saving={saving}
+        />
+      ) : null}
+
+      {editingStep ? (
+        <ChainStepEditModal
+          key={`${editingStep.item.id}:${editingStep.step.index}`}
+          step={editingStep.step}
+          isOpen={isStepModalOpen}
+          onClose={closeStepModal}
+          onSave={handleSaveStep}
+          saving={savingStep}
+          charLimit={planLimits?.messageChars ?? null}
+          translation={t}
         />
       ) : null}
     </div>

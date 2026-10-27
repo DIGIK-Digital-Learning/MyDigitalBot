@@ -10,6 +10,7 @@ vi.mock("@/lib/repos/adminDailySends.repo", () => ({}));
 
 import {
   closeChain,
+  editChainStep,
   listOpenChains,
   removeChainStep,
   previewText,
@@ -292,5 +293,88 @@ describe("tirar uma mensagem da corrente", () => {
     });
 
     expect(chain.steps.map((s) => s.locked)).toEqual([true, true, false]);
+  });
+});
+
+describe("editar o texto de uma mensagem da corrente", () => {
+  const steps = [
+    { id: "s1", step_index: 1, payload: { message: "Olá", files: ["a.pdf"] } },
+    { id: "s2", step_index: 2, payload: { questionId: 42, question: {} } },
+    { id: "s3", step_index: 3, payload: { message: "Fim" } },
+  ];
+
+  function setup({ chain = row(), touched = false, content = {} } = {}) {
+    return {
+      getMessageChainById: vi.fn(async () => chain),
+      listMessageChainSteps: vi.fn(async () => steps),
+      messageChainStepTouched: vi.fn(async () => touched),
+      updateMessageChainStepPayload: vi.fn(async () => {}),
+      checkMessageContent: vi.fn(async () => content),
+    };
+  }
+
+  it("grava só o texto e mantém o resto do payload", async () => {
+    const deps = setup({ chain: row({ status: "active" }) });
+
+    const result = await editChainStep(7, "c1", 1, "Olá a todos", { deps });
+
+    expect(result.changed).toBe(true);
+    expect(deps.checkMessageContent).toHaveBeenCalledWith(7, {
+      message: "Olá a todos",
+      files: ["a.pdf"],
+    });
+    expect(deps.updateMessageChainStepPayload).toHaveBeenCalledWith({
+      chainId: "c1",
+      stepId: "s1",
+      payload: { message: "Olá a todos", files: ["a.pdf"] },
+    });
+  });
+
+  it("o mesmo texto não grava nada", async () => {
+    const deps = setup();
+
+    expect((await editChainStep(7, "c1", 3, "Fim", { deps })).changed).toBe(
+      false,
+    );
+    expect(deps.updateMessageChainStepPayload).not.toHaveBeenCalled();
+  });
+
+  it("recusa perguntas, texto vazio sem ficheiros e o que alguém já recebeu", async () => {
+    expect(await editChainStep(7, "c1", 2, "x", { deps: setup() })).toEqual({
+      code: "STEP_HAS_QUESTION",
+      status: 409,
+    });
+    expect(await editChainStep(7, "c1", 3, "  ", { deps: setup() })).toEqual({
+      code: "STEP_EMPTY",
+      status: 400,
+    });
+    expect(
+      await editChainStep(7, "c1", 3, "Novo", {
+        deps: setup({ chain: row({ status: "active" }), touched: true }),
+      }),
+    ).toEqual({ code: "STEP_ALREADY_SENT", status: 409 });
+  });
+
+  it("respeita o limite de caracteres do plano", async () => {
+    const body = { code: "MESSAGE_TOO_LONG", limit: 10 };
+    const deps = setup({ content: { body } });
+
+    expect(await editChainStep(7, "c1", 3, "Muito comprido", { deps })).toEqual(
+      { code: "MESSAGE_TOO_LONG", status: 400, body },
+    );
+    expect(deps.updateMessageChainStepPayload).not.toHaveBeenCalled();
+  });
+
+  it("não mexe numa corrente a sair ou de outra organização", async () => {
+    expect(
+      await editChainStep(7, "c1", 3, "x", {
+        deps: setup({ chain: row({ status: "processing" }) }),
+      }),
+    ).toEqual({ code: "CHAIN_SENDING", status: 409 });
+    expect(
+      await editChainStep(7, "c1", 3, "x", {
+        deps: setup({ chain: row({ organization_id: 8 }) }),
+      }),
+    ).toEqual({ code: "CHAIN_NOT_FOUND", status: 404 });
   });
 });
