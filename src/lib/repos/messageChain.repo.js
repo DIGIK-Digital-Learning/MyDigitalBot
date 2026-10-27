@@ -506,3 +506,64 @@ export async function stopMessageChainRecipient({ chainRecipientId, reason }) {
 
   return data;
 }
+
+/*
+ * Correntes abertas da organização, para as Mensagens agendadas: as que
+ * esperam pela hora, as que estão a sair e as que estão a decorrer. Vêm com
+ * os passos e o ponto em que está cada destinatário.
+ */
+export async function listOpenMessageChains(organizationId) {
+  const { data, error } = await sb
+    .from("message_chain")
+    .select(
+      "id, organization_id, created_by_user_id, channel, status, scheduled_for, timezone, recipient_count, started_at, created_at, message_chain_step (step_index, payload), message_chain_recipient (status, current_step_index)",
+    )
+    .eq("organization_id", Number(organizationId))
+    .in("status", ["scheduled", "processing", "active"])
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return data || [];
+}
+
+/*
+ * Muda o estado de uma corrente só se ainda estiver no estado esperado:
+ * se o cron a apanhou entretanto, não muda nada e devolve null.
+ */
+export async function closeMessageChain({
+  chainId,
+  fromStatus,
+  toStatus,
+  reason,
+}) {
+  const { data, error } = await sb
+    .from("message_chain")
+    .update({
+      status: toStatus,
+      error_message: reason || null,
+      updated_at: nowIso(),
+    })
+    .eq("id", chainId)
+    .eq("status", fromStatus)
+    .select("*")
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+
+  /* Os destinatários que ainda esperavam mensagens deixam de as receber. */
+  const { error: recipientsError } = await sb
+    .from("message_chain_recipient")
+    .update({
+      status: toStatus === "cancelled" ? "cancelled" : "stopped",
+      stopped_reason: reason || null,
+      updated_at: nowIso(),
+    })
+    .eq("chain_id", chainId)
+    .eq("status", "active");
+
+  if (recipientsError) throw recipientsError;
+
+  return data;
+}

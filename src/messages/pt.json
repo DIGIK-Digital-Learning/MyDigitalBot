@@ -2932,6 +2932,8 @@
         "broadcast_schedule_updated": "Agendamento editado",
         "broadcast_schedule_deleted": "Agendamento eliminado",
         "broadcast_read_chain_created": "Sequência de leitura criada",
+        "broadcast_read_chain_cancelled": "Corrente cancelada",
+        "broadcast_read_chain_stopped": "Corrente parada",
         "message_template_sent": "Template enviado a um colaborador",
         "template_created": "Template WhatsApp criado",
         "media_deleted": "Ficheiro de multimédia eliminado",
@@ -3362,6 +3364,49 @@
     }
   },
   "BroadcastScheduled": {
+    "Chain": {
+      "tag": "Corrente · {count, plural, one {# mensagem} other {# mensagens}}",
+      "progress": "{done} de {total} pessoas terminaram",
+      "step": "Mensagem {index}",
+      "noText": "Sem texto",
+      "files": "{count, plural, one {# ficheiro} other {# ficheiros}}",
+      "question": "Com pergunta",
+      "afterRead": "Sai quando a anterior é lida",
+      "delay": "Sai {minutes} min depois de a anterior ser lida",
+      "reached": "Recebida por {count} de {total}",
+      "showSteps": "Ver as mensagens da corrente",
+      "hideSteps": "Esconder as mensagens da corrente",
+      "noEdit": "As correntes não se editam: cancela esta e cria outra.",
+      "cancel": "Cancelar corrente",
+      "stop": "Parar corrente",
+      "keep": "Manter",
+      "confirmCancel": {
+        "title": "Cancelar esta corrente?",
+        "message": "Nenhuma mensagem chega a sair. Se a corrente foi criada hoje, os envios voltam ao teu limite de hoje.",
+        "confirm": "Cancelar corrente"
+      },
+      "confirmStop": {
+        "title": "Parar esta corrente?",
+        "message": "As mensagens que faltam já não saem. As que já saíram ficam, e os envios de hoje não são devolvidos.",
+        "confirm": "Parar corrente"
+      },
+      "cancelled": {
+        "title": "Corrente cancelada",
+        "message": "A corrente foi cancelada e não vai sair."
+      },
+      "stopped": {
+        "title": "Corrente parada",
+        "message": "As mensagens que faltavam já não vão sair."
+      },
+      "sending": {
+        "title": "A corrente está a sair agora",
+        "message": "Tenta daqui a um minuto: já não dá para a cancelar, mas vais poder pará-la."
+      },
+      "error": {
+        "title": "Não foi possível",
+        "message": "Não conseguimos cancelar a corrente. Atualiza a página e tenta outra vez."
+      }
+    },
     "Title": "Mensagens agendadas",
     "Subtitle": "Mensagens agendadas da organização {organization}",
     "NewMessage": "Nova mensagem",
@@ -3389,6 +3434,7 @@
       "all": "Todos os estados",
       "scheduled": "Agendada",
       "sending": "A enviar",
+      "running": "A decorrer",
       "sent": "Enviada",
       "failed": "Falhada",
       "cancelled": "Cancelada",
@@ -4558,6 +4604,8 @@
       "broadcast_schedule_updated": "Agendamento editado",
       "broadcast_schedule_deleted": "Agendamento eliminado",
       "broadcast_read_chain_created": "Sequência de leitura criada",
+      "broadcast_read_chain_cancelled": "Corrente cancelada",
+      "broadcast_read_chain_stopped": "Corrente parada",
       "message_template_sent": "Template enviado a um colaborador",
       "template_created": "Template WhatsApp criado",
       "media_deleted": "Ficheiro de multimédia eliminado",

@@ -95,3 +95,19 @@ export async function countAdminDailySends(organizationId, since) {
   }
   return totals;
 }
+
+/*
+ * Devolve os N envios de uma corrente agendada cancelada, só se foram
+ * contados hoje (#188), como nas agendadas.
+ */
+export async function refundChainSend(chainId, since) {
+  const sb = getSupabaseAdminClient();
+  const { error } = await sb
+    .from("admin_daily_send")
+    .delete()
+    .eq("source_type", "message_chain")
+    .eq("source_id", String(chainId))
+    .gte("counted_at", since.toISOString());
+
+  if (error) throw error;
+}

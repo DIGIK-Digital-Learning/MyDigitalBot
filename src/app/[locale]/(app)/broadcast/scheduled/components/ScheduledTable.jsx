@@ -1,7 +1,22 @@
-import { CalendarClock, Pencil, Plus, Eye, Trash2 } from "lucide-react";
+import { Fragment } from "react";
+import {
+  CalendarClock,
+  ChevronDown,
+  ChevronRight,
+  CircleStop,
+  Eye,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import styles from "../scheduled.module.css";
 import { Link } from "@/i18n/navigation";
-import { formatDateTime, previewText } from "../helpers/scheduled.helpers";
+import {
+  canCloseChain,
+  formatDateTime,
+  isChain,
+  previewText,
+} from "../helpers/scheduled.helpers";
 import NewBadge from "@/app/components/NewBadge/NewBadge";
 
 export default function ScheduledTable({
@@ -16,6 +31,10 @@ export default function ScheduledTable({
   deletingId,
   isNew = () => false,
   footer = null,
+  expandedChains = new Set(),
+  onToggleChain = () => {},
+  onCloseChain = () => {},
+  closingChainId = null,
 }) {
   function statusClassName(status) {
     switch (status) {
@@ -23,6 +42,8 @@ export default function ScheduledTable({
         return styles.statusScheduled;
       case "sending":
         return styles.statusSending;
+      case "running":
+        return styles.statusRunning;
       case "sent":
         return styles.statusSent;
       case "failed":
@@ -63,77 +84,196 @@ export default function ScheduledTable({
             </thead>
 
             <tbody>
-              {filteredItems.map((item) => (
-                <tr key={item.id}>
-                  <td>
-                    <div className={styles.messageCell}>
-                      <strong className={styles.messagePreview}>
-                        {previewText(item.message)}
-                        {/* Agendada desde a última visita a esta página. */}
-                        {isNew(item.createdAt) ? <NewBadge /> : null}
-                      </strong>
-                      <span className={styles.secondaryText}>
-                        {item.timezone || "Europe/Lisbon"}
-                      </span>
-                    </div>
-                  </td>
+              {filteredItems.map((item) => {
+                const chain = isChain(item) ? item.chain : null;
+                const expanded = chain && expandedChains.has(item.id);
 
-                  <td>
-                    <span className={styles.channelBadge}>
-                      {translation(`Channels.${item.channel}`)}
-                    </span>
-                  </td>
+                return (
+                  <Fragment key={item.id}>
+                    <tr>
+                      <td>
+                        <div className={styles.messageCell}>
+                          <strong className={styles.messagePreview}>
+                            {previewText(item.message)}
+                            {/* Agendada desde a última visita a esta página. */}
+                            {isNew(item.createdAt) ? <NewBadge /> : null}
+                          </strong>
+                          {chain ? (
+                            <span className={styles.chainTag}>
+                              {translation("Chain.tag", {
+                                count: chain.stepCount,
+                              })}
+                            </span>
+                          ) : null}
+                          <span className={styles.secondaryText}>
+                            {item.timezone || "Europe/Lisbon"}
+                          </span>
+                        </div>
+                      </td>
 
-                  <td>{item.recipientsCount}</td>
+                      <td>
+                        <span className={styles.channelBadge}>
+                          {translation(`Channels.${item.channel}`)}
+                        </span>
+                      </td>
 
-                  <td>{formatDateTime(item.scheduledFor, item.timezone)}</td>
+                      <td>{item.recipientsCount}</td>
 
-                  <td>
-                    <span
-                      className={`${styles.statusPill} ${statusClassName(item.status)}`}
-                    >
-                      {translation(`Statuses.${item.status}`)}
-                    </span>
-                  </td>
+                      <td>
+                        {formatDateTime(item.scheduledFor, item.timezone)}
+                      </td>
 
-                  <td>{item.createdBy || "-"}</td>
+                      <td>
+                        <span
+                          className={`${styles.statusPill} ${statusClassName(item.status)}`}
+                        >
+                          {translation(`Statuses.${item.status}`)}
+                        </span>
+                        {chain && item.status === "running" ? (
+                          <span className={styles.chainProgress}>
+                            {translation("Chain.progress", {
+                              done: chain.recipientsDone,
+                              total: chain.recipientCount,
+                            })}
+                          </span>
+                        ) : null}
+                      </td>
 
-                  <td>
-                    <div className={styles.actions}>
-                      <button
-                        type="button"
-                        className={styles.iconButton}
-                        onClick={() => openViewModal(item)}
-                        title={translation("Actions.view")}
-                      >
-                        <Eye aria-hidden />
-                      </button>
+                      <td>{item.createdBy || "-"}</td>
 
-                      <button
-                        type="button"
-                        className={styles.iconButton}
-                        onClick={() => openEditModal(item)}
-                        disabled={!canEditItem(item)}
-                        title={translation("Actions.edit")}
-                      >
-                        <Pencil aria-hidden />
-                      </button>
+                      <td>
+                        {chain ? (
+                          <div className={styles.actions}>
+                            {/* Uma corrente abre-se na própria tabela, mensagem a mensagem. */}
+                            <button
+                              type="button"
+                              className={styles.iconButton}
+                              onClick={() => onToggleChain(item.id)}
+                              aria-expanded={expanded}
+                              title={translation(
+                                expanded
+                                  ? "Chain.hideSteps"
+                                  : "Chain.showSteps",
+                              )}
+                            >
+                              {expanded ? (
+                                <ChevronDown aria-hidden />
+                              ) : (
+                                <ChevronRight aria-hidden />
+                              )}
+                            </button>
 
-                      <button
-                        type="button"
-                        className={`${styles.iconButton} ${styles.dangerButton}`}
-                        onClick={() => handleDelete(item)}
-                        disabled={
-                          !canDeleteItem(item) || deletingId === item.id
-                        }
-                        title={translation("Actions.delete")}
-                      >
-                        <Trash2 aria-hidden />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                            <button
+                              type="button"
+                              className={styles.iconButton}
+                              disabled
+                              title={translation("Chain.noEdit")}
+                            >
+                              <Pencil aria-hidden />
+                            </button>
+
+                            <button
+                              type="button"
+                              className={`${styles.iconButton} ${styles.dangerButton}`}
+                              onClick={() => onCloseChain(item)}
+                              disabled={
+                                !canCloseChain(item) ||
+                                closingChainId === item.id
+                              }
+                              title={translation(
+                                item.status === "running"
+                                  ? "Chain.stop"
+                                  : "Chain.cancel",
+                              )}
+                            >
+                              <CircleStop aria-hidden />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className={styles.actions}>
+                            <button
+                              type="button"
+                              className={styles.iconButton}
+                              onClick={() => openViewModal(item)}
+                              title={translation("Actions.view")}
+                            >
+                              <Eye aria-hidden />
+                            </button>
+
+                            <button
+                              type="button"
+                              className={styles.iconButton}
+                              onClick={() => openEditModal(item)}
+                              disabled={!canEditItem(item)}
+                              title={translation("Actions.edit")}
+                            >
+                              <Pencil aria-hidden />
+                            </button>
+
+                            <button
+                              type="button"
+                              className={`${styles.iconButton} ${styles.dangerButton}`}
+                              onClick={() => handleDelete(item)}
+                              disabled={
+                                !canDeleteItem(item) || deletingId === item.id
+                              }
+                              title={translation("Actions.delete")}
+                            >
+                              <Trash2 aria-hidden />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+
+                    {expanded
+                      ? chain.steps.map((step) => (
+                          <tr key={step.index} className={styles.chainStepRow}>
+                            <td colSpan={7}>
+                              <div className={styles.chainStep}>
+                                <span className={styles.chainStepIndex}>
+                                  {translation("Chain.step", {
+                                    index: step.index,
+                                  })}
+                                </span>
+                                <span className={styles.chainStepText}>
+                                  {step.preview || translation("Chain.noText")}
+                                </span>
+                                {step.fileCount ? (
+                                  <span className={styles.chainStepMeta}>
+                                    {translation("Chain.files", {
+                                      count: step.fileCount,
+                                    })}
+                                  </span>
+                                ) : null}
+                                {step.hasQuestion ? (
+                                  <span className={styles.chainStepMeta}>
+                                    {translation("Chain.question")}
+                                  </span>
+                                ) : null}
+                                {step.index > 1 ? (
+                                  <span className={styles.chainStepMeta}>
+                                    {step.delayMinutes
+                                      ? translation("Chain.delay", {
+                                          minutes: step.delayMinutes,
+                                        })
+                                      : translation("Chain.afterRead")}
+                                  </span>
+                                ) : null}
+                                <span className={styles.chainStepMeta}>
+                                  {translation("Chain.reached", {
+                                    count: step.reached,
+                                    total: chain.recipientCount,
+                                  })}
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      : null}
+                  </Fragment>
+                );
+              })}
             </tbody>
           </table>
         </div>

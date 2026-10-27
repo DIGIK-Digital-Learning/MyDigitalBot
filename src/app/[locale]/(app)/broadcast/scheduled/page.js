@@ -18,6 +18,7 @@ import {
   canEditItem,
   canDeleteItem,
   getScheduledGroups,
+  normalizeChain,
   toDateInputValue,
 } from "./helpers/scheduled.helpers";
 
@@ -79,6 +80,9 @@ export default function ScheduledPage() {
   const [editingItem, setEditingItem] = useState(null);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  /* Correntes: as que estão abertas na tabela e a que está a ser cancelada. */
+  const [expandedChains, setExpandedChains] = useState(() => new Set());
+  const [closingChainId, setClosingChainId] = useState(null);
 
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -106,15 +110,17 @@ export default function ScheduledPage() {
       setError("");
 
       try {
-        const response = await fetch(
-          `/api/scheduled-broadcasts?orgId=${org.id}&source=manual`,
-          {
+        /* As agendadas e as correntes (agendadas ou a decorrer), juntas. */
+        const [response, chainsResponse] = await Promise.all([
+          fetch(`/api/scheduled-broadcasts?orgId=${org.id}&source=manual`, {
             method: "GET",
             cache: "no-store",
-          },
-        );
+          }),
+          fetch(`/api/message-chains?orgId=${org.id}`, { cache: "no-store" }),
+        ]);
 
         const result = await response.json();
+        const chainsResult = await chainsResponse.json();
 
         if (!response.ok) {
           throw new Error(
@@ -122,7 +128,18 @@ export default function ScheduledPage() {
           );
         }
 
-        const normalizedItems = (result.items ?? []).map(normalizeBroadcast);
+        if (!chainsResponse.ok) {
+          throw new Error(chainsResult?.error || "Failed to load chains.");
+        }
+
+        const normalizedItems = [
+          ...(result.items ?? []).map(normalizeBroadcast),
+          ...(chainsResult.items ?? []).map(normalizeChain),
+        ].sort((a, b) =>
+          String(a.scheduledFor ?? "").localeCompare(
+            String(b.scheduledFor ?? ""),
+          ),
+        );
         setItems(normalizedItems);
       } catch (err) {
         console.warn("[Scheduled] load items error:", err);
@@ -574,9 +591,84 @@ export default function ScheduledPage() {
     }
   }
 
+  function toggleChain(id) {
+    setExpandedChains((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  /*
+   * Cancela uma corrente agendada (os envios de hoje voltam se foi criada
+   * hoje) ou para uma corrente a decorrer.
+   */
+  async function handleCloseChain(item) {
+    const stopping = item.status === "running";
+    const texts = stopping ? "Chain.confirmStop" : "Chain.confirmCancel";
+
+    const confirmed = await confirm({
+      title: t(`${texts}.title`),
+      message: t(`${texts}.message`),
+      confirmText: t(`${texts}.confirm`),
+      /* "Cancelar" ao lado de "Cancelar corrente" confundia. */
+      cancelText: t("Chain.keep"),
+      tone: "danger",
+    });
+
+    if (!confirmed) return;
+
+    setClosingChainId(item.id);
+
+    try {
+      const response = await fetch(`/api/message-chains/${item.id}/cancel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orgId: org?.id }),
+      });
+      const result = await response.json().catch(() => ({}));
+
+      /* O envio começou entretanto: mostra o estado novo. */
+      if (result?.code === "CHAIN_SENDING") {
+        await showAlert({
+          title: t("Chain.sending.title"),
+          message: t("Chain.sending.message"),
+          tone: "warning",
+        });
+        loadItems();
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to close chain");
+      }
+
+      setItems((prev) => prev.filter((row) => row.id !== item.id));
+      reloadPlanUsage();
+
+      const done = result.action === "stopped" ? "stopped" : "cancelled";
+      await showAlert({
+        title: t(`Chain.${done}.title`),
+        message: t(`Chain.${done}.message`),
+        tone: "success",
+      });
+    } catch (err) {
+      console.warn("[Scheduled] close chain error:", err);
+
+      await showAlert({
+        title: t("Chain.error.title"),
+        message: t("Chain.error.message"),
+        tone: "danger",
+      });
+    } finally {
+      setClosingChainId(null);
+    }
+  }
+
   return (
     <div className={styles.scheduledScreen}>
-      <ScheduledHeader translation={t} organizationName={org?.name} />
+      <ScheduledHeader translation={t} />
 
       <ScheduledStats translation={t} stats={stats} />
 
@@ -617,6 +709,10 @@ export default function ScheduledPage() {
         canDeleteItem={canDeleteItem}
         deletingId={deletingId}
         isNew={isNewScheduled}
+        expandedChains={expandedChains}
+        onToggleChain={toggleChain}
+        onCloseChain={handleCloseChain}
+        closingChainId={closingChainId}
         footer={
           <Pagination
             page={currentPage}

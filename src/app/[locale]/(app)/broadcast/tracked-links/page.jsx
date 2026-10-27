@@ -195,13 +195,6 @@ export default function TrackedLinksPage() {
   return (
     <div className={styles.screen}>
       <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <h1 className={styles.title}>{translation("TrackedLinks.title")}</h1>
-          <p className={styles.subtitle}>
-            {translation("TrackedLinks.subtitle")}
-          </p>
-        </div>
-
         <div className={styles.stats}>
           {/* Os que contam para o plano (os eliminados não contam). */}
           <div
