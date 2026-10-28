@@ -880,7 +880,8 @@
     }
   },
   "Nav": {
-    "home": "Home",
+    "home": "Portal",
+    "usersGroup": "Users",
     "users": "Users",
     "teamsGroups": "Teams groups",
     "assistants": "Assistants",
