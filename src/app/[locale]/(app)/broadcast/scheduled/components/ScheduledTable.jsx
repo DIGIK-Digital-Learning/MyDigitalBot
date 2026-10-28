@@ -2,6 +2,7 @@ import { CalendarClock, Pencil, Plus, Eye, Trash2 } from "lucide-react";
 import styles from "../scheduled.module.css";
 import { Link } from "@/i18n/navigation";
 import { formatDateTime, previewText } from "../helpers/scheduled.helpers";
+import NewBadge from "@/app/components/NewBadge/NewBadge";
 
 export default function ScheduledTable({
   loading,
@@ -13,6 +14,8 @@ export default function ScheduledTable({
   handleDelete,
   canDeleteItem,
   deletingId,
+  isNew = () => false,
+  footer = null,
 }) {
   function statusClassName(status) {
     switch (status) {
@@ -66,6 +69,8 @@ export default function ScheduledTable({
                     <div className={styles.messageCell}>
                       <strong className={styles.messagePreview}>
                         {previewText(item.message)}
+                        {/* Agendada desde a última visita a esta página. */}
+                        {isNew(item.createdAt) ? <NewBadge /> : null}
                       </strong>
                       <span className={styles.secondaryText}>
                         {item.timezone || "Europe/Lisbon"}
@@ -133,6 +138,9 @@ export default function ScheduledTable({
           </table>
         </div>
       )}
+
+      {/* Paginação, por baixo da tabela. */}
+      {!loading && filteredItems.length > 0 ? footer : null}
     </div>
   );
 }

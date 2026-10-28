@@ -300,6 +300,41 @@ describe("AssistantsHub Page", () => {
     expect(await screen.findByText("Beta desc")).toBeInTheDocument();
   });
 
+  it("se eliminar falhar, mostra um aviso traduzido da app (e não o alert do browser)", async () => {
+    const user = userEvent.setup();
+    const nativeAlert = vi.spyOn(window, "alert").mockImplementation(() => {});
+    const baseFetch = mocks.fetch.getMockImplementation();
+    mocks.fetch.mockImplementation((input, init = {}) => {
+      const url = typeof input === "string" ? input : input.url;
+      if (url === `/api/assistants/asst_1` && init.method === "DELETE") {
+        return makeResponse({ error: "Em uso" }, false);
+      }
+      return baseFetch(input, init);
+    });
+
+    renderPage();
+
+    await waitFor(() =>
+      expect(mocks.fetch).toHaveBeenCalledWith(`/api/assistants/asst_1`),
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Assistants.details.delete" }),
+    );
+
+    await waitFor(() =>
+      expect(appMocks.alert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "Common.error",
+          message: expect.stringContaining("Assistants.errors.delete"),
+          tone: "danger",
+        }),
+      ),
+    );
+    expect(nativeAlert).not.toHaveBeenCalled();
+    nativeAlert.mockRestore();
+  });
+
   it("opens create modal, then onCreated refreshes list and selects newest", async () => {
     const user = userEvent.setup();
 
