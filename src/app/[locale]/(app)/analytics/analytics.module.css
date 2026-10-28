@@ -34,26 +34,6 @@
   gap: 24px;
 }
 
-.headerCopy {
-  min-width: 0;
-}
-
-.header h1 {
-  margin: 0;
-  color: var(--ink);
-  font-size: clamp(28px, 3.2vw, 34px);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-}
-
-.header p {
-  margin: 6px 0 0;
-  color: var(--an-muted);
-  font-size: 14px;
-  line-height: 1.5;
-}
-
 .headerActions {
   display: flex;
   align-items: center;
@@ -61,6 +41,7 @@
   flex: 0 0 auto;
   flex-wrap: wrap;
   justify-content: flex-end;
+  margin-left: auto;
 }
 
 .updatedAt {
@@ -1302,8 +1283,7 @@ tr[data-medal="gold"] .rankingLabel {
 
 /* Applied only to the cloned DOM used for PDF capture. */
 .exportingPdf .section,
-.exportingPdf .header { box-shadow: none; overflow: visible; }
-.exportingPdf .sectionActions,
+.exportingPdf .header { box-shadow: none; overflow: visible; }.exportingPdf .sectionActions,
 .exportingPdf .lcTooltip { visibility: hidden; }
 
 .exportingPdf .columns > .section:only-child,

@@ -317,6 +317,22 @@
   color: #111827;
 }
 
+/* O nome da mensagem é um link: abre o mesmo que o botão do olho. */
+.messageLink {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.messageLink:hover,
+.messageLink:focus-visible {
+  text-decoration: underline;
+}
+
 .secondaryText {
   color: var(--ui-muted, #6b7280);
   font-size: 0.86rem;

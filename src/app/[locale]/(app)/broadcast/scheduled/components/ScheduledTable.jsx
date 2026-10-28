@@ -114,7 +114,14 @@ export default function ScheduledTable({
                       <td>
                         <div className={styles.messageCell}>
                           <strong className={styles.messagePreview}>
-                            {previewText(item.message)}
+                            {/* Abre o mesmo que o botão do olho. */}
+                            <button
+                              type="button"
+                              className={styles.messageLink}
+                              onClick={() => openViewModal(item)}
+                            >
+                              {previewText(item.message)}
+                            </button>
                             {/* Agendada desde a última visita a esta página. */}
                             {isNew(item.createdAt) ? <NewBadge /> : null}
                           </strong>
