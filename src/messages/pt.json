@@ -2932,6 +2932,10 @@
         "broadcast_schedule_updated": "Agendamento editado",
         "broadcast_schedule_deleted": "Agendamento eliminado",
         "broadcast_read_chain_created": "Sequência de leitura criada",
+        "broadcast_read_chain_cancelled": "Corrente cancelada",
+        "broadcast_read_chain_stopped": "Corrente parada",
+        "broadcast_read_chain_step_removed": "Mensagem tirada de uma corrente",
+        "broadcast_read_chain_step_edited": "Mensagem de uma corrente editada",
         "message_template_sent": "Template enviado a um colaborador",
         "template_created": "Template WhatsApp criado",
         "media_deleted": "Ficheiro de multimédia eliminado",
@@ -3362,6 +3366,89 @@
     }
   },
   "BroadcastScheduled": {
+    "Chain": {
+      "tag": "Corrente · {count, plural, one {# mensagem} other {# mensagens}}",
+      "progress": "{done} de {total} pessoas terminaram",
+      "step": "Mensagem {index}",
+      "noText": "Sem texto",
+      "files": "{count, plural, one {# ficheiro} other {# ficheiros}}",
+      "question": "Com pergunta",
+      "afterRead": "Sai quando a anterior é lida",
+      "delay": "Sai {minutes} min depois de a anterior ser lida",
+      "reached": "Recebida por {count} de {total}",
+      "showSteps": "Ver as mensagens da corrente",
+      "hideSteps": "Esconder as mensagens da corrente",
+      "noEdit": "As correntes não se editam: cancela esta e cria outra.",
+      "cancel": "Cancelar corrente",
+      "stop": "Parar corrente",
+      "editStep": "Editar esta mensagem",
+      "stepLockedEdit": "Já foi recebida ou está à espera de sair: não se pode editar.",
+      "questionNoEdit": "As perguntas não se editam aqui: só o texto das mensagens.",
+      "editModal": {
+        "title": "Editar a mensagem {index}",
+        "hint": "Só muda o texto. Ficheiros, imagens, links e o tempo entre mensagens ficam como estão.",
+        "linksHint": "Os links aparecem entre chavetas duplas: deixa-os como estão para continuarem a ser rastreados.",
+        "label": "Texto",
+        "chars": "{count} / {limit} caracteres",
+        "tooLong": "Passa do limite de caracteres do teu plano.",
+        "empty": "A mensagem não pode ficar vazia.",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "saving": "A guardar…"
+      },
+      "stepSaved": {
+        "title": "Mensagem atualizada",
+        "message": "A corrente vai enviar o texto novo."
+      },
+      "stepEditGone": {
+        "title": "Já não dá para a editar",
+        "message": "Entretanto alguém recebeu esta mensagem ou a seguinte. A lista foi atualizada."
+      },
+      "keep": "Manter",
+      "removeStep": "Tirar esta mensagem",
+      "stepLocked": "Já foi recebida ou está à espera de sair: não se pode tirar.",
+      "minSteps": "Uma corrente precisa de pelo menos 2 mensagens. Para tirar mais, cancela a corrente.",
+      "confirmRemove": {
+        "title": "Tirar a mensagem {index}?",
+        "scheduled": "A corrente fica com {count} mensagens. Se foi criada hoje, 1 envio volta ao teu limite de hoje.",
+        "running": "Ninguém a recebeu ainda: a corrente passa da mensagem anterior para a seguinte.",
+        "confirm": "Tirar mensagem"
+      },
+      "stepRemoved": {
+        "title": "Mensagem tirada",
+        "message": "A corrente segue sem esta mensagem."
+      },
+      "stepGone": {
+        "title": "Já não dá para a tirar",
+        "message": "Entretanto alguém recebeu esta mensagem ou a seguinte. A lista foi atualizada."
+      },
+      "confirmCancel": {
+        "title": "Cancelar esta corrente?",
+        "message": "Nenhuma mensagem chega a sair. Se a corrente foi criada hoje, os envios voltam ao teu limite de hoje.",
+        "confirm": "Cancelar corrente"
+      },
+      "confirmStop": {
+        "title": "Parar esta corrente?",
+        "message": "As mensagens que faltam já não saem. As que já saíram ficam, e os envios de hoje não são devolvidos.",
+        "confirm": "Parar corrente"
+      },
+      "cancelled": {
+        "title": "Corrente cancelada",
+        "message": "A corrente foi cancelada e não vai sair."
+      },
+      "stopped": {
+        "title": "Corrente parada",
+        "message": "As mensagens que faltavam já não vão sair."
+      },
+      "sending": {
+        "title": "A corrente está a sair agora",
+        "message": "Tenta daqui a um minuto: já não dá para a cancelar, mas vais poder pará-la."
+      },
+      "error": {
+        "title": "Não foi possível",
+        "message": "Não conseguimos cancelar a corrente. Atualiza a página e tenta outra vez."
+      }
+    },
     "Title": "Mensagens agendadas",
     "Subtitle": "Mensagens agendadas da organização {organization}",
     "NewMessage": "Nova mensagem",
@@ -3389,6 +3476,7 @@
       "all": "Todos os estados",
       "scheduled": "Agendada",
       "sending": "A enviar",
+      "running": "A decorrer",
       "sent": "Enviada",
       "failed": "Falhada",
       "cancelled": "Cancelada",
@@ -4558,6 +4646,10 @@
       "broadcast_schedule_updated": "Agendamento editado",
       "broadcast_schedule_deleted": "Agendamento eliminado",
       "broadcast_read_chain_created": "Sequência de leitura criada",
+      "broadcast_read_chain_cancelled": "Corrente cancelada",
+      "broadcast_read_chain_stopped": "Corrente parada",
+      "broadcast_read_chain_step_removed": "Mensagem tirada de uma corrente",
+      "broadcast_read_chain_step_edited": "Mensagem de uma corrente editada",
       "message_template_sent": "Template enviado a um colaborador",
       "template_created": "Template WhatsApp criado",
       "media_deleted": "Ficheiro de multimédia eliminado",
