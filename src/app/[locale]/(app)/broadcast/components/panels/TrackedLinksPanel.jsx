@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, X } from "lucide-react";
+import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import { LINK_BUTTON_BODY_MAX_LENGTH } from "@/lib/whatsapp/linkButton";
 
 import styles from "../../broadcast.module.css";
@@ -14,7 +15,14 @@ import {
  * Links já usados noutros envios, para escolher em vez de escrever outra
  * vez. Sem nenhum link usado, a secção não aparece.
  */
-function LinkLibrary({ library, trackedLinks, full, onUse, translation }) {
+function LinkLibrary({
+  library,
+  trackedLinks,
+  full,
+  onUse,
+  onDelete,
+  translation,
+}) {
   const [query, setQuery] = useState("");
   const items = library?.items || [];
 
@@ -101,6 +109,23 @@ function LinkLibrary({ library, trackedLinks, full, onUse, translation }) {
                         : "Broadcast.linkLibrary.use",
                     )}
                   </button>
+
+                  {/* Eliminar liberta espaço nos links do plano (#189). */}
+                  {onDelete && item.id ? (
+                    <button
+                      type="button"
+                      onClick={() => onDelete(item)}
+                      className={styles.kbdBtn}
+                      aria-label={translation("Broadcast.linkLibrary.delete", {
+                        label: item.label,
+                      })}
+                      title={translation("Broadcast.linkLibrary.delete", {
+                        label: item.label,
+                      })}
+                    >
+                      <X size={14} />
+                    </button>
+                  ) : null}
                 </li>
               );
             })}
@@ -125,11 +150,22 @@ export default function TrackedLinksPanel({
   removeTrackedLink,
   library = null,
   onUseLibraryLink,
+  onDeleteLibraryLink = null,
+  savedLinks = null,
   bubbleLinkIds = [],
   translation,
 }) {
   /* Um só link por mensagem: para trocar, tira-se o atual. */
   const full = trackedLinks.length >= MAX_TRACKED_LINKS;
+
+  /*
+   * Links guardados da organização (#189): no limite, não se cria nenhum
+   * novo; reutilizar um da lista continua a poder.
+   */
+  const savedFull =
+    savedLinks?.limit != null &&
+    savedLinks?.used != null &&
+    savedLinks.used >= savedLinks.limit;
 
   return (
     <div className={styles.toolPanelCard}>
@@ -138,16 +174,35 @@ export default function TrackedLinksPanel({
           {translation("Broadcast.trackedLinks")}
         </div>
 
-        <button
-          type="button"
-          onClick={addTrackedLink}
-          disabled={full}
-          className={styles.kbdBtn}
-        >
-          <Plus size={14} />
-          <span>{translation("Broadcast.addLink")}</span>
-        </button>
+        <div className={styles.trackedLinksHeadActions}>
+          {savedLinks ? (
+            <UsageCounter
+              used={savedLinks.used}
+              limit={savedLinks.limit}
+              label={translation("Plans.usage.trackedLinksLabel")}
+              hint={translation("Plans.usage.trackedLinksHint")}
+            />
+          ) : null}
+
+          <button
+            type="button"
+            onClick={addTrackedLink}
+            disabled={full || savedFull}
+            className={styles.kbdBtn}
+          >
+            <Plus size={14} />
+            <span>{translation("Broadcast.addLink")}</span>
+          </button>
+        </div>
       </div>
+
+      {savedFull && (
+        <div className={styles.helpDanger}>
+          {translation("Plans.limits.trackedLinksFull", {
+            limit: savedLinks.limit,
+          })}
+        </div>
+      )}
 
       <div className={styles.modalHelpText}>
         {translation("Broadcast.addPlaceholders.first")}{" "}
@@ -166,6 +221,7 @@ export default function TrackedLinksPanel({
         trackedLinks={trackedLinks}
         full={full}
         onUse={onUseLibraryLink}
+        onDelete={onDeleteLibraryLink}
         translation={translation}
       />
 

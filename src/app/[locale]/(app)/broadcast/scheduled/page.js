@@ -18,15 +18,21 @@ import {
   canEditItem,
   canDeleteItem,
   getScheduledGroups,
+  normalizeChain,
   toDateInputValue,
 } from "./helpers/scheduled.helpers";
 
 import ScheduledHeader from "./components/ScheduledHeader";
+import usePlanLimits from "@/app/hooks/usePlanLimits";
+import useSeenSince from "@/app/hooks/useSeenSince";
+import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import ScheduledStats from "./components/ScheduledStats";
 import ScheduledFilters from "./components/ScheduledFilters";
 import ScheduledTable from "./components/ScheduledTable";
+import Pagination from "@/app/components/Pagination/Pagination";
 import ScheduledViewModal from "./components/ScheduledViewModal";
 import ScheduledEditModal from "./components/ScheduledEditModal";
+import ChainStepEditModal from "./components/ChainStepEditModal";
 
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 
@@ -37,9 +43,19 @@ const USERS_PAGE_SIZE = 200;
 
 export default function ScheduledPage() {
   const t = useTranslations("BroadcastScheduled");
+  const usageTranslation = useTranslations("Plans.usage");
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const { org, loading: orgLoading } = useOrganization(user);
+  /* Etiqueta "Novo" nas agendadas criadas desde a última visita. */
+  const isNewScheduled = useSeenSince("seen.scheduled", org?.id);
+
+  /* Limite de agendadas do plano (#186): contador "2 / 100" no cabeçalho. */
+  const {
+    limits: planLimits,
+    usage: planUsage,
+    reload: reloadPlanUsage,
+  } = usePlanLimits(org?.id);
   const confirm = useConfirm();
   const showAlert = useAlert();
 
@@ -65,14 +81,25 @@ export default function ScheduledPage() {
   const [editingItem, setEditingItem] = useState(null);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  /* Correntes: as que estão abertas na tabela e a que está a ser cancelada. */
+  const [expandedChains, setExpandedChains] = useState(() => new Set());
+  const [closingChainId, setClosingChainId] = useState(null);
+  const [removingStepKey, setRemovingStepKey] = useState(null);
+  /* A mensagem da corrente a ser editada: { item, step }. */
+  const [editingStep, setEditingStep] = useState(null);
+  const [isStepModalOpen, setIsStepModalOpen] = useState(false);
+  const [savingStep, setSavingStep] = useState(false);
 
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const closeTimersRef = useRef({ view: null, edit: null });
+  const closeTimersRef = useRef({ view: null, edit: null, step: null });
 
   const loadItems = useCallback(
     async (showSuccessAlert = false) => {
+      /* O contador do limite acompanha a lista (cancelar, apagar, editar). */
+      reloadPlanUsage();
+
       if (!org?.id) {
         if (showSuccessAlert) {
           await showAlertRef.current({
@@ -89,15 +116,17 @@ export default function ScheduledPage() {
       setError("");
 
       try {
-        const response = await fetch(
-          `/api/scheduled-broadcasts?orgId=${org.id}&source=manual`,
-          {
+        /* As agendadas e as correntes (agendadas ou a decorrer), juntas. */
+        const [response, chainsResponse] = await Promise.all([
+          fetch(`/api/scheduled-broadcasts?orgId=${org.id}&source=manual`, {
             method: "GET",
             cache: "no-store",
-          },
-        );
+          }),
+          fetch(`/api/message-chains?orgId=${org.id}`, { cache: "no-store" }),
+        ]);
 
         const result = await response.json();
+        const chainsResult = await chainsResponse.json();
 
         if (!response.ok) {
           throw new Error(
@@ -105,7 +134,18 @@ export default function ScheduledPage() {
           );
         }
 
-        const normalizedItems = (result.items ?? []).map(normalizeBroadcast);
+        if (!chainsResponse.ok) {
+          throw new Error(chainsResult?.error || "Failed to load chains.");
+        }
+
+        const normalizedItems = [
+          ...(result.items ?? []).map(normalizeBroadcast),
+          ...(chainsResult.items ?? []).map(normalizeChain),
+        ].sort((a, b) =>
+          String(a.scheduledFor ?? "").localeCompare(
+            String(b.scheduledFor ?? ""),
+          ),
+        );
         setItems(normalizedItems);
       } catch (err) {
         console.warn("[Scheduled] load items error:", err);
@@ -121,7 +161,7 @@ export default function ScheduledPage() {
         setLoading(false);
       }
     },
-    [org?.id, t],
+    [org?.id, t, reloadPlanUsage],
   );
 
   useEffect(() => {
@@ -253,6 +293,22 @@ export default function ScheduledPage() {
     });
   }, [items, search, statusFilter, channelFilter, dateFilter]);
 
+  /* Páginas: com muitas agendadas, a lista não cresce sem fim. */
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter, channelFilter, dateFilter, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const pageItems = useMemo(
+    () =>
+      filteredItems.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [filteredItems, currentPage, pageSize],
+  );
+
   const stats = useMemo(() => {
     return {
       total: items.length,
@@ -353,10 +409,7 @@ export default function ScheduledPage() {
       return;
     }
 
-    if (
-      (!questionResult && !formData.message.trim()) ||
-      !scheduledIso
-    ) {
+    if ((!questionResult && !formData.message.trim()) || !scheduledIso) {
       setError(t("Errors.invalidForm"));
 
       await showAlert({
@@ -544,9 +597,228 @@ export default function ScheduledPage() {
     }
   }
 
+  function toggleChain(id) {
+    setExpandedChains((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  /*
+   * Cancela uma corrente agendada (os envios de hoje voltam se foi criada
+   * hoje) ou para uma corrente a decorrer.
+   */
+  async function handleCloseChain(item) {
+    const stopping = item.status === "running";
+    const texts = stopping ? "Chain.confirmStop" : "Chain.confirmCancel";
+
+    const confirmed = await confirm({
+      title: t(`${texts}.title`),
+      message: t(`${texts}.message`),
+      confirmText: t(`${texts}.confirm`),
+      /* "Cancelar" ao lado de "Cancelar corrente" confundia. */
+      cancelText: t("Chain.keep"),
+      tone: "danger",
+    });
+
+    if (!confirmed) return;
+
+    setClosingChainId(item.id);
+
+    try {
+      const response = await fetch(`/api/message-chains/${item.id}/cancel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orgId: org?.id }),
+      });
+      const result = await response.json().catch(() => ({}));
+
+      /* O envio começou entretanto: mostra o estado novo. */
+      if (result?.code === "CHAIN_SENDING") {
+        await showAlert({
+          title: t("Chain.sending.title"),
+          message: t("Chain.sending.message"),
+          tone: "warning",
+        });
+        loadItems();
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to close chain");
+      }
+
+      setItems((prev) => prev.filter((row) => row.id !== item.id));
+      reloadPlanUsage();
+
+      const done = result.action === "stopped" ? "stopped" : "cancelled";
+      await showAlert({
+        title: t(`Chain.${done}.title`),
+        message: t(`Chain.${done}.message`),
+        tone: "success",
+      });
+    } catch (err) {
+      console.warn("[Scheduled] close chain error:", err);
+
+      await showAlert({
+        title: t("Chain.error.title"),
+        message: t("Chain.error.message"),
+        tone: "danger",
+      });
+    } finally {
+      setClosingChainId(null);
+    }
+  }
+
+  /*
+   * Tira uma mensagem da corrente. A lista volta a ser lida para mostrar a
+   * numeração nova; a corrente continua aberta.
+   */
+  async function handleRemoveStep(item, step) {
+    const running = item.status === "running";
+
+    const confirmed = await confirm({
+      title: t("Chain.confirmRemove.title", { index: step.index }),
+      message: running
+        ? t("Chain.confirmRemove.running")
+        : t("Chain.confirmRemove.scheduled", {
+            count: item.chain.stepCount - 1,
+          }),
+      confirmText: t("Chain.confirmRemove.confirm"),
+      cancelText: t("Chain.keep"),
+      tone: "danger",
+    });
+
+    if (!confirmed) return;
+
+    setRemovingStepKey(`${item.id}:${step.index}`);
+
+    try {
+      const response = await fetch(
+        `/api/message-chains/${item.id}/steps/${step.index}?orgId=${org?.id}`,
+        { method: "DELETE" },
+      );
+      const result = await response.json().catch(() => ({}));
+
+      /* Entretanto alguém chegou a esta mensagem (ou a corrente mudou). */
+      if (response.status === 409) {
+        await showAlert({
+          title: t("Chain.stepGone.title"),
+          message: t("Chain.stepGone.message"),
+          tone: "warning",
+        });
+        await loadItems();
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to remove the message");
+      }
+
+      await loadItems();
+
+      await showAlert({
+        title: t("Chain.stepRemoved.title"),
+        message: t("Chain.stepRemoved.message"),
+        tone: "success",
+      });
+    } catch (err) {
+      console.warn("[Scheduled] remove chain step error:", err);
+
+      await showAlert({
+        title: t("Chain.error.title"),
+        message: t("Chain.error.message"),
+        tone: "danger",
+      });
+    } finally {
+      setRemovingStepKey(null);
+    }
+  }
+
+  function openStepModal(item, step) {
+    if (closeTimersRef.current.step) {
+      clearTimeout(closeTimersRef.current.step);
+    }
+
+    setEditingStep({ item, step });
+    setIsStepModalOpen(true);
+  }
+
+  function closeStepModal() {
+    setIsStepModalOpen(false);
+
+    if (closeTimersRef.current.step) {
+      clearTimeout(closeTimersRef.current.step);
+    }
+
+    closeTimersRef.current.step = setTimeout(() => {
+      setEditingStep(null);
+    }, MODAL_CLOSE_MS);
+  }
+
+  /* Grava o texto novo de uma mensagem da corrente e volta a ler a lista. */
+  async function handleSaveStep(message) {
+    if (!editingStep) return;
+
+    const { item, step } = editingStep;
+    setSavingStep(true);
+
+    try {
+      const response = await fetch(
+        `/api/message-chains/${item.id}/steps/${step.index}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orgId: org?.id, message }),
+        },
+      );
+      const result = await response.json().catch(() => ({}));
+
+      /* Entretanto alguém chegou a esta mensagem (ou a corrente mudou). */
+      if (response.status === 409) {
+        closeStepModal();
+        await loadItems();
+
+        await showAlert({
+          title: t("Chain.stepEditGone.title"),
+          message: t("Chain.stepEditGone.message"),
+          tone: "warning",
+        });
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to edit the message");
+      }
+
+      closeStepModal();
+      await loadItems();
+
+      if (result.changed) {
+        await showAlert({
+          title: t("Chain.stepSaved.title"),
+          message: t("Chain.stepSaved.message"),
+          tone: "success",
+        });
+      }
+    } catch (err) {
+      console.warn("[Scheduled] edit chain step error:", err);
+
+      await showAlert({
+        title: t("Chain.error.title"),
+        message: t("Chain.error.message"),
+        tone: "danger",
+      });
+    } finally {
+      setSavingStep(false);
+    }
+  }
+
   return (
     <div className={styles.scheduledScreen}>
-      <ScheduledHeader translation={t} organizationName={org?.name} />
+      <ScheduledHeader translation={t} />
 
       <ScheduledStats translation={t} stats={stats} />
 
@@ -564,6 +836,14 @@ export default function ScheduledPage() {
         onDateChange={setDateFilter}
         onClearDate={() => setDateFilter("")}
         onRefresh={() => loadItems(true)}
+        usage={
+          <UsageCounter
+            used={planUsage?.scheduledMessages}
+            limit={planLimits?.scheduledMessages}
+            label={usageTranslation("scheduledLabel")}
+            hint={usageTranslation("scheduledHint")}
+          />
+        }
       />
 
       {error ? <div className={styles.errorBox}>{error}</div> : null}
@@ -571,13 +851,36 @@ export default function ScheduledPage() {
       <ScheduledTable
         loading={loading}
         translation={t}
-        filteredItems={filteredItems}
+        filteredItems={pageItems}
         openViewModal={openViewModal}
         openEditModal={openEditModal}
         canEditItem={canEditItem}
         handleDelete={handleDelete}
         canDeleteItem={canDeleteItem}
         deletingId={deletingId}
+        isNew={isNewScheduled}
+        expandedChains={expandedChains}
+        onToggleChain={toggleChain}
+        onCloseChain={handleCloseChain}
+        closingChainId={closingChainId}
+        onRemoveStep={handleRemoveStep}
+        removingStepKey={removingStepKey}
+        onEditStep={openStepModal}
+        footer={
+          <Pagination
+            page={currentPage}
+            pageSize={pageSize}
+            total={filteredItems.length}
+            sizes={[6, 12, 24]}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+            summary={t("pagination", {
+              page: currentPage,
+              pages: totalPages,
+              total: filteredItems.length,
+            })}
+          />
+        }
       />
 
       {selectedItem ? (
@@ -604,6 +907,19 @@ export default function ScheduledPage() {
           closeEditModal={closeEditModal}
           onSave={handleSaveEdit}
           saving={saving}
+        />
+      ) : null}
+
+      {editingStep ? (
+        <ChainStepEditModal
+          key={`${editingStep.item.id}:${editingStep.step.index}`}
+          step={editingStep.step}
+          isOpen={isStepModalOpen}
+          onClose={closeStepModal}
+          onSave={handleSaveStep}
+          saving={savingStep}
+          charLimit={planLimits?.messageChars ?? null}
+          translation={t}
         />
       ) : null}
     </div>

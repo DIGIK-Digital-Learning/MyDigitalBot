@@ -9,6 +9,11 @@ import {
 } from "@/lib/auth/guards";
 import { sendTeamsGroupBroadcast } from "@/lib/services/broadcast/sendTeamsGroupBroadcast";
 import {
+  checkMessageContent,
+  claimDailySend,
+  releaseDailySend,
+} from "@/lib/services/plans/planLimits";
+import {
   assertGroupBroadcastContent,
   parseGroupIds,
 } from "@/lib/services/broadcast/groupBroadcastOptions";
@@ -25,19 +30,47 @@ export async function POST(req) {
 
     assertGroupBroadcastContent(body);
 
+    /* Conteúdo da mensagem dentro do plano (#187): caracteres e ficheiros. */
+    const content = await checkMessageContent(orgAuth.orgId, {
+      message: typeof body?.message === "string" ? body.message : "",
+      files: Array.isArray(body?.files) ? body.files : [],
+    });
+    if (content.body) {
+      return NextResponse.json(content.body, { status: 400 });
+    }
+
     const groups = await assertTeamsGroupsBelongToOrg(
       orgAuth.admin,
       orgAuth.orgId,
       parseGroupIds(body?.groupIds),
     );
 
-    const result = await sendTeamsGroupBroadcast({
-      orgId: orgAuth.orgId,
-      groupIds: groups.map((group) => group.id),
-      message: typeof body?.message === "string" ? body.message : "",
-      files: Array.isArray(body?.files) ? body.files : [],
-      imageUrls: Array.isArray(body?.imageUrls) ? body.imageUrls : [],
+    /*
+     * Limite diário de envios do canal (#188): um envio para grupos conta 1
+     * nos envios do Teams, seja para quantos grupos for.
+     */
+    const daily = await claimDailySend(orgAuth.orgId, "teams", {
+      orgLimits: content.orgLimits,
     });
+    if (daily.body) {
+      return NextResponse.json(daily.body, { status: 409 });
+    }
+
+    let result;
+    try {
+      result = await sendTeamsGroupBroadcast({
+        orgId: orgAuth.orgId,
+        groupIds: groups.map((group) => group.id),
+        message: typeof body?.message === "string" ? body.message : "",
+        files: Array.isArray(body?.files) ? body.files : [],
+        imageUrls: Array.isArray(body?.imageUrls) ? body.imageUrls : [],
+      });
+    } catch (err) {
+      await releaseDailySend(daily.claimKey);
+      throw err;
+    }
+
+    if (!result?.ok) await releaseDailySend(daily.claimKey);
 
     await recordAuditEvent(orgAuth, {
       action: AUDIT_ACTIONS.BROADCAST_SENT,

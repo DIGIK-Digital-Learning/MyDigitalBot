@@ -1,9 +1,23 @@
 import { getOrganizationPlan } from "@/lib/repos/plans.repo";
+import {
+  claimAdminDailySend,
+  releaseAdminDailySend,
+} from "@/lib/repos/adminDailySends.repo";
+import { saveTrackedLinks } from "@/lib/repos/trackedLinkSaved.repo";
+
+import { messageContentProblem } from "@/lib/plans/messageLimits";
+import {
+  dailySendsDayStart,
+  dailySendsResetAt,
+} from "@/lib/plans/dailySends";
+
+/* As regras puras vivem em limitRules.js (servem também aos ecrãs). */
+export { hasRoomFor, limitKeepingCurrent } from "@/lib/plans/limitRules";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /* Nome de cada limite no código e a coluna da tabela plan onde está guardado. */
-const LIMIT_COLUMNS = {
+export const LIMIT_COLUMNS = {
   users: "max_users",
   assistants: "max_assistants",
   assistantInstructionChars: "max_assistant_instruction_chars",
@@ -12,6 +26,7 @@ const LIMIT_COLUMNS = {
   scheduledMessages: "max_scheduled_messages",
   trackedLinks: "max_tracked_links",
   dailyMessagesPerChannel: "max_daily_messages_per_channel",
+  collaboratorWeeklyMessages: "max_collaborator_weekly_messages",
   messageChars: "max_message_chars",
   filesPerMessage: "max_files_per_message",
   fileSizeMb: "max_file_size_mb",
@@ -80,10 +95,153 @@ export function limitReachedBody(code, limitName, orgLimits = null) {
 }
 
 /**
- * Ainda cabe? `limit` null quer dizer sem limite. Serve para as verificações
- * das outras issues: "tem 19 assistentes, pode criar mais 1?".
+ * Verifica o conteúdo de uma ou mais mensagens (#187): até 1.500 caracteres
+ * (contados como a pessoa os vê) e até 5 ficheiros cada. `messages` é uma
+ * lista de `{ message, files }` — numa corrente, um por passo.
+ *
+ * Devolve `{ orgLimits }` se estiver tudo dentro, ou `{ orgLimits, body }`
+ * com a resposta 400 a dar (com `step` quando é um passo de uma corrente).
  */
-export function hasRoomFor(limit, current, adding = 1) {
-  if (limit === null || limit === undefined) return true;
-  return current + adding <= limit;
+export async function checkMessageContent(orgId, messages, { deps = {} } = {}) {
+  const orgLimits = await getOrgLimits(orgId, { deps });
+  const list = Array.isArray(messages) ? messages : [messages];
+
+  for (const [index, item] of list.entries()) {
+    const problem = messageContentProblem(item || {}, orgLimits.limits);
+    if (!problem) continue;
+
+    return {
+      orgLimits,
+      body: {
+        error: `Plan limit reached: ${problem.code}`,
+        code: problem.code,
+        plan: orgLimits.plan?.name ?? null,
+        limit: problem.limit,
+        ...(list.length > 1 ? { step: index + 1 } : {}),
+      },
+    };
+  }
+
+  return { orgLimits };
+}
+
+/**
+ * Corpo da resposta 409 quando o limite diário de envios do canal acabou
+ * (#188). Leva o que sobra e quando repõe, para o aviso dizer "repõe às
+ * 00:01" e, numa corrente, quantos passos ainda cabem.
+ */
+export function dailyLimitBody({ channel, used, orgLimits, now = new Date() }) {
+  const limit = orgLimits?.limits?.dailyMessagesPerChannel ?? null;
+
+  return {
+    error: "Plan limit reached: dailyMessagesPerChannel",
+    code: "DAILY_LIMIT_REACHED",
+    plan: orgLimits?.plan?.name ?? null,
+    limit,
+    channel,
+    used,
+    remaining: limit === null ? null : Math.max(limit - used, 0),
+    resetsAt: dailySendsResetAt(now).toISOString(),
+  };
+}
+
+/**
+ * Reserva envios no limite diário do administrador (#188): 1 por envio,
+ * seja para quantos colaboradores for; N numa corrente de N passos. A
+ * reserva é feita antes de enviar, para dois envios ao mesmo tempo não
+ * passarem o limite.
+ *
+ * Devolve `{ claimKey, used, limit }`, ou `{ body }` com a resposta 409
+ * quando não cabe. Se o envio falhar por completo, devolve-se com
+ * releaseDailySend(claimKey).
+ */
+export async function claimDailySend(
+  orgId,
+  channel,
+  {
+    units = 1,
+    sourceType = "broadcast",
+    sourceId = null,
+    orgLimits = null,
+    now = new Date(),
+    deps = {},
+  } = {},
+) {
+  const limits = orgLimits || (await getOrgLimits(orgId, { now, deps }));
+  const claim = deps.claimAdminDailySend || claimAdminDailySend;
+  const claimKey = (deps.randomUUID || (() => crypto.randomUUID()))();
+
+  const result = await claim({
+    organizationId: orgId,
+    channel,
+    sourceType,
+    sourceId,
+    units,
+    limit: limits.limits.dailyMessagesPerChannel,
+    since: dailySendsDayStart(now),
+    claimKey,
+  });
+
+  if (!result.ok) {
+    return {
+      body: dailyLimitBody({
+        channel,
+        used: result.used,
+        orgLimits: limits,
+        now,
+      }),
+    };
+  }
+
+  return { claimKey, used: result.used, limit: result.limit };
+}
+
+/* Devolve uma reserva cujo envio não chegou a ninguém. */
+export async function releaseDailySend(claimKey, { deps = {} } = {}) {
+  if (!claimKey) return;
+  const release = deps.releaseAdminDailySend || releaseAdminDailySend;
+  await release(claimKey);
+}
+
+/**
+ * Grava os links rastreados de um envio na biblioteca da organização (#189)
+ * e verifica o limite: 100 links, cada um um par nome + destino. Reutilizar
+ * um link que já está guardado não conta; um novo só entra se houver espaço.
+ * `links` é a lista `trackedLinks` do envio (numa corrente, de todos os
+ * passos juntos).
+ *
+ * Devolve `{}` quando está tudo dentro, ou `{ body }` com a resposta 409:
+ * é preciso eliminar links para criar novos.
+ */
+export async function saveTrackedLinksWithinPlan(
+  orgId,
+  links,
+  { orgLimits = null, deps = {} } = {},
+) {
+  const list = (Array.isArray(links) ? links : [])
+    .map((link) => ({
+      label: String(link?.label || "").trim(),
+      destinationUrl: String(link?.destinationUrl || "").trim(),
+      key: String(link?.key || "").trim(),
+    }))
+    .filter((link) => link.label && link.destinationUrl);
+
+  if (!list.length) return {};
+
+  const limits = orgLimits || (await getOrgLimits(orgId, { deps }));
+  const save = deps.saveTrackedLinks || saveTrackedLinks;
+  const result = await save(orgId, list, limits.limits.trackedLinks);
+
+  if (result.ok) return {};
+
+  return {
+    body: {
+      error: "Plan limit reached: trackedLinks",
+      code: "TRACKED_LINKS_LIMIT_REACHED",
+      plan: limits.plan?.name ?? null,
+      limit: result.limit,
+      used: result.used,
+      added: result.added,
+    },
+  };
 }

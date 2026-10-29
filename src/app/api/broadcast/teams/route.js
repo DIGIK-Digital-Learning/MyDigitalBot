@@ -7,6 +7,12 @@ import {
 } from "@/lib/auth/guards";
 
 import { sendTeamsBroadcast } from "@/lib/services/broadcast/sendTeamsBroadcast";
+import {
+  checkMessageContent,
+  claimDailySend,
+  releaseDailySend,
+  saveTrackedLinksWithinPlan,
+} from "@/lib/services/plans/planLimits";
 
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
@@ -59,37 +65,79 @@ export async function POST(req) {
      */
     await assertUsersBelongToOrg(orgAuth.admin, orgAuth.orgId, userIds);
 
+    /* Conteúdo da mensagem dentro do plano (#187): caracteres e ficheiros. */
+    const content = await checkMessageContent(orgAuth.orgId, {
+      message: typeof body?.message === "string" ? body.message : "",
+      files: Array.isArray(body?.files) ? body.files : [],
+    });
+    if (content.body) {
+      return NextResponse.json(content.body, { status: 400 });
+    }
+
     /*
      * =========================================================
      * SEND TEAMS BROADCAST
      * =========================================================
      */
-    const result = await sendTeamsBroadcast({
-      orgId: orgAuth.orgId,
-
-      userIds,
-
-      message: typeof body?.message === "string" ? body.message : "",
-
-      files: Array.isArray(body?.files) ? body.files : [],
-
-      imageUrls: Array.isArray(body?.imageUrls) ? body.imageUrls : [],
-
-      trackedLinks: Array.isArray(body?.trackedLinks) ? body.trackedLinks : [],
-
-      /* Quiz, survey or open question (#151), validated by the service. */
-      question: body?.question ?? null,
-
-      /*
-       * This is an immediate broadcast.
-       *
-       * Scheduled broadcasts can provide these
-       * values from their own execution path.
-       */
-      scheduledBroadcastId: null,
-
-      createdByUserId: null,
+    /*
+     * Links rastreados do plano (#189): os links novos entram na biblioteca
+     * da organização, até 100. Reutilizar um link guardado não conta.
+     */
+    const links = await saveTrackedLinksWithinPlan(orgAuth.orgId, body?.trackedLinks, {
+      orgLimits: content.orgLimits,
     });
+    if (links.body) {
+      return NextResponse.json(links.body, { status: 409 });
+    }
+
+    /*
+     * Limite diário de envios do canal (#188): este envio conta 1, seja para
+     * quantos colaboradores for. Reserva-se antes de enviar; se não chegar a
+     * ninguém, devolve-se.
+     */
+    const daily = await claimDailySend(orgAuth.orgId, "teams", {
+      orgLimits: content.orgLimits,
+    });
+    if (daily.body) {
+      return NextResponse.json(daily.body, { status: 409 });
+    }
+
+    let result;
+    try {
+      result = await sendTeamsBroadcast({
+        orgId: orgAuth.orgId,
+
+        userIds,
+
+        message: typeof body?.message === "string" ? body.message : "",
+
+        files: Array.isArray(body?.files) ? body.files : [],
+
+        imageUrls: Array.isArray(body?.imageUrls) ? body.imageUrls : [],
+
+        trackedLinks: Array.isArray(body?.trackedLinks)
+          ? body.trackedLinks
+          : [],
+
+        /* Quiz, survey or open question (#151), validated by the service. */
+        question: body?.question ?? null,
+
+        /*
+         * This is an immediate broadcast.
+         *
+         * Scheduled broadcasts can provide these
+         * values from their own execution path.
+         */
+        scheduledBroadcastId: null,
+
+        createdByUserId: null,
+      });
+    } catch (err) {
+      await releaseDailySend(daily.claimKey);
+      throw err;
+    }
+
+    if (!result?.ok) await releaseDailySend(daily.claimKey);
 
     await recordAuditEvent(orgAuth, {
       action: AUDIT_ACTIONS.BROADCAST_SENT,

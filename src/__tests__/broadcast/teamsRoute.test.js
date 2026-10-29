@@ -23,6 +23,14 @@ vi.mock("@/lib/services/audit/recordAuditEvent", () => ({
   recordAuditEvent: mocks.recordAuditEvent,
 }));
 
+/* O limite do conteúdo tem testes próprios (composerLimits); aqui, dentro do plano. */
+vi.mock("@/lib/services/plans/planLimits", () => ({
+  checkMessageContent: vi.fn(async () => ({ orgLimits: { limits: {} } })),
+  claimDailySend: vi.fn(async () => ({ claimKey: "k", used: 1, limit: 10 })),
+  releaseDailySend: vi.fn(async () => {}),
+  saveTrackedLinksWithinPlan: vi.fn(async () => ({})),
+}));
+
 import { POST } from "@/app/api/broadcast/teams/route";
 
 const request = (body) => ({ json: async () => body });

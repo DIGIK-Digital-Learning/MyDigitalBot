@@ -17,6 +17,7 @@ export const STATUS_OPTIONS = [
   "all",
   "scheduled",
   "sending",
+  "running",
   "sent",
   "failed",
   "cancelled",
@@ -132,13 +133,43 @@ export function normalizeBroadcast(row) {
   };
 }
 
+/*
+ * Uma corrente (/api/message-chains) como linha da tabela. Nas que estão a
+ * decorrer, a data é a do início.
+ */
+export function normalizeChain(chain) {
+  return {
+    id: chain.id,
+    kind: "chain",
+    message: chain.preview || "",
+    questionKind: null,
+    channel: String(chain.channel || "whatsapp").toLowerCase(),
+    scheduledFor: chain.scheduledFor || chain.startedAt || chain.createdAt,
+    timezone: chain.timezone || "Europe/Lisbon",
+    status: chain.status,
+    createdAt: chain.createdAt,
+    createdBy: chain.createdByUserId,
+    recipientsCount: chain.recipientCount,
+    chain,
+  };
+}
+
+export function isChain(item) {
+  return item?.kind === "chain";
+}
+
 /* O servidor só deixa alterar mensagens que ainda estão na fila. */
 export function canEditItem(item) {
-  return item.status === "scheduled";
+  return !isChain(item) && item.status === "scheduled";
 }
 
 export function canDeleteItem(item) {
-  return !["sending", "sent"].includes(item.status);
+  return !isChain(item) && !["sending", "sent"].includes(item.status);
+}
+
+/* Uma corrente cancela-se antes de começar e para-se a decorrer. */
+export function canCloseChain(item) {
+  return isChain(item) && ["scheduled", "running"].includes(item.status);
 }
 
 /* Grupos do Teams de uma mensagem agendada para grupos (#166), ou null. */

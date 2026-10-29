@@ -208,7 +208,13 @@
   border-color: var(--brand-1);
 }
 
+/* O fuso horário à esquerda e o contador das agendadas ("2 / 100") à direita. */
 .scheduleHint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 10px;
   font-size: 12px;
   color: #666;
@@ -661,6 +667,13 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
+}
+
+/* Contador dos links do plano (#189) ao lado do "Adicionar link". */
+.trackedLinksHeadActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .modalHelpText {
@@ -1392,6 +1405,29 @@
 .plusItem:focus-visible {
   background: #f0f2f5;
   outline: none;
+}
+
+/* Ficheiros por mensagem no limite (#187): o tipo de ficheiro fica por usar. */
+.plusItem:disabled {
+  color: #9ca3af;
+  background: transparent;
+  cursor: not-allowed;
+}
+
+/*
+ * Por baixo do texto, dentro do balão: os ficheiros ("2 / 5") à esquerda e
+ * os caracteres ("1.234 / 1.500") à direita (#187).
+ */
+.messageLimitsRow {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.messageLimitsRow:empty {
+  display: none;
 }
 
 .plusLabel {

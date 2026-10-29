@@ -162,6 +162,11 @@
   cursor: pointer;
 }
 
+/* Com a Administração (#208) por cima, as Definições ficam logo a seguir. */
+.afterAdmin {
+  margin-top: 0;
+}
+
 .options:hover {
   opacity: 0.9;
   background: #9c9c9c;

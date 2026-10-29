@@ -12,6 +12,43 @@ export async function createScheduledBroadcast(row) {
   return data;
 }
 
+/*
+ * Uma agendada criada por uma automação (e não à mão no composer). Serve à
+ * lista das agendadas (source manual/automation) e ao limite do plano (#186),
+ * que só conta as manuais.
+ */
+export function isAutomationBroadcast(broadcast) {
+  const payload = broadcast?.payload;
+
+  if (!payload || typeof payload !== "object") {
+    return false;
+  }
+
+  return Boolean(
+    payload._automation ||
+      payload.automationRunId ||
+      payload.automationRuleId ||
+      payload.ruleId ||
+      payload.source === "automation",
+  );
+}
+
+/*
+ * Quantas mensagens agendadas à mão estão à espera de envio (estado queued)
+ * na organização. As das automações não contam (#186).
+ */
+export async function countManualQueuedBroadcasts(organizationId) {
+  const sb = getSupabaseAdminClient();
+  const { data, error } = await sb
+    .from("scheduled_broadcast")
+    .select("id, payload")
+    .eq("organization_id", Number(organizationId))
+    .eq("status", "queued");
+
+  if (error) throw error;
+  return (data || []).filter((row) => !isAutomationBroadcast(row)).length;
+}
+
 export async function getOrgScheduledBroadcasts(
   organizationId,
   { source = "all" } = {},
@@ -26,22 +63,6 @@ export async function getOrgScheduledBroadcasts(
   if (error) throw error;
 
   const rows = data || [];
-
-  function isAutomationBroadcast(broadcast) {
-    const payload = broadcast?.payload;
-
-    if (!payload || typeof payload !== "object") {
-      return false;
-    }
-
-    return Boolean(
-      payload._automation ||
-        payload.automationRunId ||
-        payload.automationRuleId ||
-        payload.ruleId ||
-        payload.source === "automation",
-    );
-  }
 
   if (source === "automation") {
     return rows.filter(isAutomationBroadcast);

@@ -10,6 +10,12 @@ import {
 } from "@/lib/auth/guards";
 import { parseOpeningOptions } from "@/lib/services/broadcast/openingOptions";
 import { parseQuestionOptions } from "@/lib/services/broadcast/questionOptions";
+import {
+  checkMessageContent,
+  claimDailySend,
+  releaseDailySend,
+  saveTrackedLinksWithinPlan,
+} from "@/lib/services/plans/planLimits";
 
 export async function POST(req) {
   try {
@@ -39,20 +45,66 @@ export async function POST(req) {
       return NextResponse.json({ error: question.error }, { status: 400 });
     }
 
-    const result = await sendWhatsappBroadcast({
-      orgId: orgAuth.orgId,
+    /*
+     * Conteúdo da mensagem dentro do plano (#187): caracteres e ficheiros.
+     * Os imageUrls são as mesmas imagens que já vão em files, por isso só se
+     * contam os files.
+     */
+    const content = await checkMessageContent(orgAuth.orgId, {
       message: body?.message || "",
       files: Array.isArray(body?.files) ? body.files : [],
-      imageUrls: Array.isArray(body?.imageUrls) ? body.imageUrls : [],
-      trackedLinks: Array.isArray(body?.trackedLinks) ? body.trackedLinks : [],
-      recipients: recipientUserIds.map((userId) => ({ userId })),
-      openingBody: opening.openingBody,
-      openingOnly: opening.openingOnly,
-      scheduledBroadcastId: null,
-      createdByUserId: null,
-      chainMetadata: null,
-      question: question.question,
     });
+    if (content.body) {
+      return NextResponse.json(content.body, { status: 400 });
+    }
+
+    /*
+     * Links rastreados do plano (#189): os links novos entram na biblioteca
+     * da organização, até 100. Reutilizar um link guardado não conta.
+     */
+    const links = await saveTrackedLinksWithinPlan(orgAuth.orgId, body?.trackedLinks, {
+      orgLimits: content.orgLimits,
+    });
+    if (links.body) {
+      return NextResponse.json(links.body, { status: 409 });
+    }
+
+    /*
+     * Limite diário de envios do canal (#188): este envio conta 1, seja para
+     * quantos colaboradores for. Reserva-se antes de enviar; se não chegar a
+     * ninguém, devolve-se.
+     */
+    const daily = await claimDailySend(orgAuth.orgId, "whatsapp", {
+      orgLimits: content.orgLimits,
+    });
+    if (daily.body) {
+      return NextResponse.json(daily.body, { status: 409 });
+    }
+
+    let result;
+    try {
+      result = await sendWhatsappBroadcast({
+        orgId: orgAuth.orgId,
+        message: body?.message || "",
+        files: Array.isArray(body?.files) ? body.files : [],
+        imageUrls: Array.isArray(body?.imageUrls) ? body.imageUrls : [],
+        trackedLinks: Array.isArray(body?.trackedLinks)
+          ? body.trackedLinks
+          : [],
+        recipients: recipientUserIds.map((userId) => ({ userId })),
+        openingBody: opening.openingBody,
+        openingOnly: opening.openingOnly,
+        scheduledBroadcastId: null,
+        createdByUserId: null,
+        chainMetadata: null,
+        question: question.question,
+      });
+    } catch (err) {
+      await releaseDailySend(daily.claimKey);
+      throw err;
+    }
+
+    if (!result?.ok) await releaseDailySend(daily.claimKey);
 
     await recordAuditEvent(orgAuth, {
       action: AUDIT_ACTIONS.BROADCAST_SENT,

@@ -20,11 +20,27 @@
   min-width: 0;
 }
 
+/* Sem título: o botão "Nova mensagem" fica encostado à direita. */
+.headerActions {
+  justify-content: flex-end;
+}
+
 .title {
   margin: 0;
   font-size: 2rem;
   line-height: 1.1;
   color: #0f1c3f;
+}
+
+/*
+ * Contador do limite do plano ("2 / 100", #186), no fim da barra dos filtros:
+ * à altura do "Atualizar" e por cima das ações da tabela. O margin-left:auto
+ * mantém-no encostado à direita mesmo quando a barra parte em duas linhas.
+ */
+.usageSlot {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
 }
 
 .subtitle {
@@ -301,6 +317,22 @@
   color: #111827;
 }
 
+/* O nome da mensagem é um link: abre o mesmo que o botão do olho. */
+.messageLink {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.messageLink:hover,
+.messageLink:focus-visible {
+  text-decoration: underline;
+}
+
 .secondaryText {
   color: var(--ui-muted, #6b7280);
   font-size: 0.86rem;
@@ -340,6 +372,11 @@
 .statusSending {
   background: #dbeafe;
   color: #1d4ed8;
+}
+
+.statusRunning {
+  background: #e0f2fe;
+  color: #075985;
 }
 
 .statusSent {
@@ -1666,4 +1703,77 @@
     opacity: 1;
     transform: none;
   }
+}
+
+/* Correntes (mensagens em cadeia) nas agendadas. */
+.chainTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #075985;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.chainProgress {
+  display: block;
+  margin-top: 4px;
+  color: var(--ui-muted, #6b7280);
+  font-size: 0.8rem;
+}
+
+.table tbody tr.chainStepRow td {
+  background: #f8fbff;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 0.88rem;
+}
+
+.chainStep {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+.chainStepIndex {
+  font-weight: 700;
+  color: #0f1c3f;
+}
+
+.chainStepText {
+  flex: 1 1 280px;
+  min-width: 0;
+  color: #111827;
+}
+
+.chainStepMeta {
+  color: var(--ui-muted, #6b7280);
+}
+
+/* O ✏ e o 🗑 de cada mensagem da corrente, encostados à direita. */
+.chainStepActions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.chainStepButton {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+}
+
+.chainStepButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Aviso no modal de editar (texto vazio ou acima do limite). */
+.chainEditError {
+  color: #b91c1c;
 }

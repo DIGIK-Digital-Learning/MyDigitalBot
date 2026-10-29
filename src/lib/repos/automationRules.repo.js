@@ -12,6 +12,18 @@ export async function createAutomationRule(row) {
   return data;
 }
 
+/* Quantas automações tem a organização, ativas e inativas (limite do plano, #186). */
+export async function countAutomationRulesByOrg(organizationId) {
+  const sb = getSupabaseAdminClient();
+  const { count, error } = await sb
+    .from("automation_rule")
+    .select("id", { count: "exact", head: true })
+    .eq("organization_id", Number(organizationId));
+
+  if (error) throw error;
+  return count ?? 0;
+}
+
 export async function getAutomationRuleById(id) {
   const sb = getRepositoryReadClient();
   const { data, error } = await sb

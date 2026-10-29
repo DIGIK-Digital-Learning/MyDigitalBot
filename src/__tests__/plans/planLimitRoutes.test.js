@@ -26,9 +26,30 @@ vi.mock("@/lib/auth/guards", () => ({
   },
 }));
 
+/* Limite diário de envios (#188): tem testes próprios; aqui há sempre espaço. */
+vi.mock("@/lib/repos/adminDailySends.repo", () => ({
+  claimAdminDailySend: vi.fn(async () => ({ ok: true, used: 1, limit: 10 })),
+  setAdminDailySendSource: vi.fn(async () => {}),
+  releaseAdminDailySend: vi.fn(async () => {}),
+  refundScheduledSend: vi.fn(async () => {}),
+  countAdminDailySends: vi.fn(async () => ({ whatsapp: 0, teams: 0 })),
+}));
+vi.mock("@/lib/repos/trackedLinkSaved.repo", () => ({
+  countSavedTrackedLinks: vi.fn(async () => 37),
+  saveTrackedLinks: vi.fn(async () => ({ ok: true, used: 37, limit: 100, added: 0 })),
+}));
 vi.mock("@/lib/services/plans/planLimits", async (importOriginal) => ({
   ...(await importOriginal()),
   getOrgLimits: mocks.getOrgLimits,
+}));
+
+/* O gasto (#186) vem das mesmas contagens que as rotas usam para recusar. */
+vi.mock("@/lib/repos/automationRules.repo", () => ({
+  countAutomationRulesByOrg: vi.fn(async () => 6),
+}));
+
+vi.mock("@/lib/repos/scheduledBroadcasts.repo", () => ({
+  countManualQueuedBroadcasts: vi.fn(async () => 2),
 }));
 
 vi.mock("@/lib/repos/assistants.repo", () => ({
@@ -38,6 +59,7 @@ vi.mock("@/lib/repos/assistants.repo", () => ({
 }));
 
 vi.mock("@/lib/repos/user.repo", () => ({
+  countUsersByOrg: vi.fn(async () => 3),
   createUser: vi.fn(),
   getUsersInOrg: vi.fn(),
   updateUser: vi.fn(),
@@ -58,6 +80,8 @@ vi.mock("@/lib/services/audit/auditLookups", () => ({
 
 import { POST as createAssistantRoute } from "@/app/api/assistants/route";
 import { POST as createUserRoute } from "@/app/api/users/route";
+import { GET as planLimitsRoute } from "@/app/api/plans/limits/route";
+import { requireOwnedOrg } from "@/lib/auth/guards";
 
 const request = (body) => ({ json: () => Promise.resolve(body) });
 
@@ -161,5 +185,58 @@ describe("POST /api/users — limite de utilizadores do plano", () => {
     expect(response.status).toBe(409);
     expect(json.code).toBeUndefined();
     expect(json.error).toMatch(/duplicate/i);
+  });
+});
+
+describe("GET /api/plans/limits", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const get = (query) =>
+    planLimitsRoute(new Request(`http://localhost/api/plans/limits${query}`));
+
+  it("devolve o plano, os limites e o gasto ao dono da organização", async () => {
+    mocks.getOrgLimits.mockResolvedValue({
+      ...planWith({ assistantInstructionChars: 5000 }),
+      expiresAt: null,
+      expired: false,
+      startedAt: new Date(),
+    });
+
+    mocks.countAssistantsByOrg.mockResolvedValue(1);
+
+    const response = await get("?orgId=7");
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      plan: { id: 1, name: "Demo", level: 0 },
+      limits: { assistantInstructionChars: 5000 },
+      usage: {
+        users: 3,
+        assistants: 1,
+        automations: 6,
+        scheduledMessages: 2,
+        dailySends: { whatsapp: 0, teams: 0 },
+        trackedLinks: 37,
+      },
+      dailySendsResetAt: expect.any(String),
+      expiresAt: null,
+      expired: false,
+    });
+  });
+
+  it("não mostra os limites de outra organização", async () => {
+    requireOwnedOrg.mockResolvedValueOnce({
+      error: Response.json({ error: "Forbidden" }, { status: 403 }),
+    });
+
+    const response = await get("?orgId=99");
+
+    expect(response.status).toBe(403);
+    expect(mocks.getOrgLimits).not.toHaveBeenCalled();
+  });
+
+  it("sem organização é um pedido inválido", async () => {
+    const response = await get("");
+    expect(response.status).toBe(400);
   });
 });

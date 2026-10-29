@@ -9,6 +9,7 @@ import {
 import {
   getOrgLimits,
   hasRoomFor,
+  limitKeepingCurrent,
   limitReachedBody,
 } from "@/lib/services/plans/planLimits";
 
@@ -117,6 +118,28 @@ export async function POST(req) {
       return NextResponse.json(
         limitReachedBody("ASSISTANT_LIMIT_REACHED", "assistants", orgLimits),
         { status: 409 },
+      );
+    }
+
+    /* Tamanho das instruções (#185): um assistente novo tem o limite do plano. */
+    const instructionsLimit = limitKeepingCurrent(
+      orgLimits.limits.assistantInstructionChars,
+    );
+
+    if (
+      instructionsLimit !== null &&
+      String(body.instructions ?? "").length > instructionsLimit
+    ) {
+      return NextResponse.json(
+        {
+          ...limitReachedBody(
+            "INSTRUCTIONS_TOO_LONG",
+            "assistantInstructionChars",
+            orgLimits,
+          ),
+          limit: instructionsLimit,
+        },
+        { status: 400 },
       );
     }
 

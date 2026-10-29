@@ -53,6 +53,12 @@ export default function PlusMenu({
   variables = [],
   onInsertToken,
   translation,
+  /*
+   * Ficheiros por mensagem no limite (#187): os tipos de ficheiro e o
+   * "Criar imagem" ficam desativados, com a explicação ao passar o rato.
+   */
+  filesFull = false,
+  filesFullHint = undefined,
 }) {
   const [open, setOpen] = useState(false);
   const [expandedKind, setExpandedKind] = useState(null);
@@ -113,6 +119,8 @@ export default function PlusMenu({
                   type="button"
                   role="menuitem"
                   className={styles.plusItem}
+                  disabled={filesFull}
+                  title={filesFull ? filesFullHint : undefined}
                   onClick={() =>
                     pick(() => onAddFile(BROADCAST_MEDIA_ACCEPT[kind]))
                   }
@@ -130,6 +138,8 @@ export default function PlusMenu({
                   role="menuitem"
                   className={styles.plusItem}
                   aria-expanded={isExpanded}
+                  disabled={filesFull}
+                  title={filesFull ? filesFullHint : undefined}
                   onClick={() =>
                     setExpandedKind((prev) => (prev === kind ? null : kind))
                   }
@@ -200,6 +210,8 @@ export default function PlusMenu({
               type="button"
               role="menuitem"
               className={styles.plusItem}
+              disabled={filesFull}
+              title={filesFull ? filesFullHint : undefined}
               onClick={() => pick(onCreateImage)}
             >
               <ImagePlus size={16} />
@@ -263,6 +275,8 @@ export function PlusMenuBar({ tools, translation }) {
         variables={tools.variables}
         onInsertToken={tools.onInsertToken}
         translation={translation}
+        filesFull={Boolean(tools.messageLimits?.filesFull)}
+        filesFullHint={tools.messageLimits?.filesFullHint}
       />
       <EmojiButton editorRef={tools.editorRef} translation={translation} />
       <FormatToolbar editorRef={tools.editorRef} translation={translation} />

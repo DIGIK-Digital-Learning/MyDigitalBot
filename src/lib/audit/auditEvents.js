@@ -42,6 +42,10 @@ export const AUDIT_ACTIONS = Object.freeze({
   BROADCAST_SCHEDULE_DELETED: "broadcast.schedule_deleted",
   BROADCAST_SCHEDULED_SENT: "broadcast.scheduled_sent",
   BROADCAST_READ_CHAIN_CREATED: "broadcast.read_chain_created",
+  BROADCAST_READ_CHAIN_CANCELLED: "broadcast.read_chain_cancelled",
+  BROADCAST_READ_CHAIN_STOPPED: "broadcast.read_chain_stopped",
+  BROADCAST_READ_CHAIN_STEP_REMOVED: "broadcast.read_chain_step_removed",
+  BROADCAST_READ_CHAIN_STEP_EDITED: "broadcast.read_chain_step_edited",
 
   MESSAGE_TEMPLATE_SENT: "message.template_sent",
   MESSAGE_RECEIVED: "message.received",
@@ -50,8 +54,13 @@ export const AUDIT_ACTIONS = Object.freeze({
 
   MEDIA_DELETED: "media.deleted",
 
+  TRACKED_LINK_DELETED: "tracked_link.deleted",
+
   ORGANIZATION_CREATED: "organization.created",
   ORGANIZATION_SETTINGS_UPDATED: "organization.settings_updated",
+  ORGANIZATION_PLAN_CHANGED: "organization.plan_changed",
+  ORGANIZATION_PLAN_EXTENDED: "organization.plan_extended",
+  ORGANIZATION_PLAN_END_CHANGED: "organization.plan_end_changed",
 
   TEAMS_GROUP_UPDATED: "teams_group.updated",
 });
@@ -88,6 +97,7 @@ export const AUDIT_ENTITY_TYPES = Object.freeze({
   WHATSAPP_TEMPLATE: "whatsapp_template",
   ORGANIZATION: "organization",
   TEAMS_GROUP: "teams_group",
+  TRACKED_LINK: "tracked_link",
 });
 
 const MAX_LABEL_LENGTH = 200;

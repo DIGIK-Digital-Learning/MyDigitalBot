@@ -967,6 +967,7 @@
     "list": {
       "name": "Nome",
       "phone": "Nº. Telemóvel",
+      "thisWeek": "Esta semana",
       "tags": "Tags",
       "assistant": "Assistente"
     },
@@ -1484,6 +1485,15 @@
     "linkBubbleTag": "Balão à parte",
     "linkBubbleText": "Texto do balão (opcional)",
     "linkLibrary": {
+      "delete": "Eliminar o link {label}",
+      "deleteConfirm": {
+        "title": "Eliminar link",
+        "message": "O link \"{label}\" sai da lista e deixa de contar para os links do teu plano. Os envios em que já foi usado continuam a funcionar e os cliques ficam nas Métricas.",
+        "confirm": "Eliminar"
+      },
+      "inUseTitle": "Link em uso",
+      "inUseScheduled": "Este link está numa mensagem agendada. Cancela-a primeiro para o poderes eliminar.",
+      "inUseChain": "Este link está numa corrente que ainda está a decorrer. Só o podes eliminar quando a corrente terminar.",
       "title": "Links já usados",
       "search": "Procurar por nome ou URL",
       "use": "Usar",
@@ -1653,7 +1663,8 @@
         "addImage": "Imagem",
         "addVideo": "Vídeo",
         "addDocument": "Documento",
-        "fileTooLarge": "O ficheiro {name} tem mais de 20 MB.",
+        "fileTooLarge": "O ficheiro {name} tem mais de {limit} MB.",
+        "whatsappImageTooLarge": "A imagem {name} tem mais de 5 MB. No WhatsApp as imagens podem ter até 5 MB.",
         "fileTypeNotAllowed": "O ficheiro {name} não é suportado. Usa imagens (PNG, JPG, WebP, GIF), PDF ou MP4.",
         "addLink": "Link rastreado",
         "linkButtonHint": "No WhatsApp, o link vai neste botão.",
@@ -2526,11 +2537,6 @@
         "title": "Falta de Contacto",
         "message": "Adiciona pelo menos um método de contacto: telemóvel, Teams ou email",
         "ok": "OK"
-      },
-      "fullOrg": {
-        "title": "Limite de Utilizadores",
-        "message": "Chegou ao limite de utilizadores para esta organização.",
-        "ok": "OK"
       }
     },
     "PillSelect": {
@@ -2896,6 +2902,7 @@
         "message": "Mensagens individuais",
         "template": "Templates",
         "media": "Multimédia",
+        "tracked_link": "Links rastreados",
         "organization": "Organização"
       },
       "Channels": {
@@ -2926,16 +2933,24 @@
         "broadcast_schedule_updated": "Agendamento editado",
         "broadcast_schedule_deleted": "Agendamento eliminado",
         "broadcast_read_chain_created": "Sequência de leitura criada",
+        "broadcast_read_chain_cancelled": "Corrente cancelada",
+        "broadcast_read_chain_stopped": "Corrente parada",
+        "broadcast_read_chain_step_removed": "Mensagem tirada de uma corrente",
+        "broadcast_read_chain_step_edited": "Mensagem de uma corrente editada",
         "message_template_sent": "Template enviado a um colaborador",
         "template_created": "Template WhatsApp criado",
         "media_deleted": "Ficheiro de multimédia eliminado",
+        "tracked_link_deleted": "Link rastreado eliminado",
         "organization_created": "Organização criada",
         "organization_settings_updated": "Definições da organização alteradas",
+        "organization_plan_changed": "Plano alterado",
         "automation_triggered": "Automação disparada",
         "broadcast_scheduled_sent": "Mensagem agendada enviada",
         "message_received": "Mensagem recebida",
         "teams_group_updated": "Grupo Teams editado",
-        "unknown": "Ação desconhecida"
+        "unknown": "Ação desconhecida",
+        "organization_plan_extended": "Plano prolongado",
+        "organization_plan_end_changed": "Fim do plano alterado"
       },
       "Table": {
         "when": "Quando",
@@ -3233,7 +3248,8 @@
       "addImage": "Imagem",
       "addVideo": "Vídeo",
       "addDocument": "Documento",
-      "fileTooLarge": "O ficheiro {name} tem mais de 20 MB.",
+      "fileTooLarge": "O ficheiro {name} tem mais de {limit} MB.",
+      "whatsappImageTooLarge": "A imagem {name} tem mais de 5 MB. No WhatsApp as imagens podem ter até 5 MB.",
       "fileTypeNotAllowed": "O ficheiro {name} não é suportado. Usa imagens (PNG, JPG, WebP, GIF), PDF ou MP4.",
       "addLink": "Link rastreado",
       "linkButtonHint": "No WhatsApp, o link vai neste botão.",
@@ -3351,6 +3367,89 @@
     }
   },
   "BroadcastScheduled": {
+    "Chain": {
+      "tag": "Corrente · {count, plural, one {# mensagem} other {# mensagens}}",
+      "progress": "{done} de {total} pessoas terminaram",
+      "step": "Mensagem {index}",
+      "noText": "Sem texto",
+      "files": "{count, plural, one {# ficheiro} other {# ficheiros}}",
+      "question": "Com pergunta",
+      "afterRead": "Sai quando a anterior é lida",
+      "delay": "Sai {minutes} min depois de a anterior ser lida",
+      "reached": "Recebida por {count} de {total}",
+      "showSteps": "Ver as mensagens da corrente",
+      "hideSteps": "Esconder as mensagens da corrente",
+      "noEdit": "As correntes não se editam: cancela esta e cria outra.",
+      "cancel": "Cancelar corrente",
+      "stop": "Parar corrente",
+      "editStep": "Editar esta mensagem",
+      "stepLockedEdit": "Já foi recebida ou está à espera de sair: não se pode editar.",
+      "questionNoEdit": "As perguntas não se editam aqui: só o texto das mensagens.",
+      "editModal": {
+        "title": "Editar a mensagem {index}",
+        "hint": "Só muda o texto. Ficheiros, imagens, links e o tempo entre mensagens ficam como estão.",
+        "linksHint": "Os links aparecem entre chavetas duplas: deixa-os como estão para continuarem a ser rastreados.",
+        "label": "Texto",
+        "chars": "{count} / {limit} caracteres",
+        "tooLong": "Passa do limite de caracteres do teu plano.",
+        "empty": "A mensagem não pode ficar vazia.",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "saving": "A guardar…"
+      },
+      "stepSaved": {
+        "title": "Mensagem atualizada",
+        "message": "A corrente vai enviar o texto novo."
+      },
+      "stepEditGone": {
+        "title": "Já não dá para a editar",
+        "message": "Entretanto alguém recebeu esta mensagem ou a seguinte. A lista foi atualizada."
+      },
+      "keep": "Manter",
+      "removeStep": "Tirar esta mensagem",
+      "stepLocked": "Já foi recebida ou está à espera de sair: não se pode tirar.",
+      "minSteps": "Uma corrente precisa de pelo menos 2 mensagens. Para tirar mais, cancela a corrente.",
+      "confirmRemove": {
+        "title": "Tirar a mensagem {index}?",
+        "scheduled": "A corrente fica com {count} mensagens. Se foi criada hoje, 1 envio volta ao teu limite de hoje.",
+        "running": "Ninguém a recebeu ainda: a corrente passa da mensagem anterior para a seguinte.",
+        "confirm": "Tirar mensagem"
+      },
+      "stepRemoved": {
+        "title": "Mensagem tirada",
+        "message": "A corrente segue sem esta mensagem."
+      },
+      "stepGone": {
+        "title": "Já não dá para a tirar",
+        "message": "Entretanto alguém recebeu esta mensagem ou a seguinte. A lista foi atualizada."
+      },
+      "confirmCancel": {
+        "title": "Cancelar esta corrente?",
+        "message": "Nenhuma mensagem chega a sair. Se a corrente foi criada hoje, os envios voltam ao teu limite de hoje.",
+        "confirm": "Cancelar corrente"
+      },
+      "confirmStop": {
+        "title": "Parar esta corrente?",
+        "message": "As mensagens que faltam já não saem. As que já saíram ficam, e os envios de hoje não são devolvidos.",
+        "confirm": "Parar corrente"
+      },
+      "cancelled": {
+        "title": "Corrente cancelada",
+        "message": "A corrente foi cancelada e não vai sair."
+      },
+      "stopped": {
+        "title": "Corrente parada",
+        "message": "As mensagens que faltavam já não vão sair."
+      },
+      "sending": {
+        "title": "A corrente está a sair agora",
+        "message": "Tenta daqui a um minuto: já não dá para a cancelar, mas vais poder pará-la."
+      },
+      "error": {
+        "title": "Não foi possível",
+        "message": "Não conseguimos cancelar a corrente. Atualiza a página e tenta outra vez."
+      }
+    },
     "Title": "Mensagens agendadas",
     "Subtitle": "Mensagens agendadas da organização {organization}",
     "NewMessage": "Nova mensagem",
@@ -3378,6 +3477,7 @@
       "all": "Todos os estados",
       "scheduled": "Agendada",
       "sending": "A enviar",
+      "running": "A decorrer",
       "sent": "Enviada",
       "failed": "Falhada",
       "cancelled": "Cancelada",
@@ -3509,11 +3609,12 @@
         "title": "Erro ao eliminar mensagem",
         "message": "Não foi possível eliminar a mensagem agendada."
       }
-    }
+    },
+    "pagination": "Página {page} de {pages} · {total, plural, one {# mensagem} other {# mensagens}}"
   },
   "TrackedLinks": {
     "title": "Links Rastreados",
-    "subtitle": "Vê as estatísticas do links rastreados da tua organização.",
+    "subtitle": "Os links que criaste e as estatísticas dos que já foram enviados.",
     "totalLinks": "Total de Links",
     "search": "Procura por nome, chave, destino ou canal",
     "loading": "A carregar links",
@@ -3527,7 +3628,9 @@
       "clicked": "Clicado",
       "totalClicks": "Total de cliques",
       "clickRate": "Percentagem de cliques",
-      "created": "Criado"
+      "created": "Criado",
+      "sends": "Envios",
+      "lastSent": "Último envio"
     },
     "view": "Ver",
     "detail": {
@@ -3575,6 +3678,22 @@
         "title": "Erro ao carregar links rastreados",
         "message": "Não foi possível carregar os links rastreados. Tenta novamente dentro de alguns segundos."
       }
+    },
+    "saved": {
+      "title": "Links criados",
+      "description": "Os links que contam para o teu plano. Eliminar um link não apaga as estatísticas dos envios em que foi usado.",
+      "empty": "Ainda não tens links criados. Os links entram aqui quando os usas numa mensagem."
+    },
+    "showDeleted": "Mostrar eliminados",
+    "deleted": "Eliminado",
+    "showSends": "Ver os envios de {label}",
+    "hideSends": "Esconder os envios de {label}",
+    "pagination": "Página {page} de {pages} · {total, plural, one {# link} other {# links}}",
+    "createdCard": "Links criados",
+    "sentCard": "Links enviados",
+    "sent": {
+      "title": "Links enviados",
+      "description": "Um grupo por link, com os totais de todos os envios. Abre um grupo para veres cada envio. Os links eliminados aparecem noutra cor."
     }
   },
   "Questions": {
@@ -3818,7 +3937,17 @@
       "save": "Guardar alterações",
       "saving": "A atualizar..."
     },
-    "placeholder": "Seleciona um assistant na coluna da esquerda."
+    "placeholder": "Seleciona um assistant na coluna da esquerda.",
+    "errors": {
+      "save": "Não foi possível guardar o assistente. {detail}",
+      "delete": "Não foi possível eliminar o assistente. {detail}",
+      "fileType": "Este tipo de ficheiro não é aceite.",
+      "upload": "Não foi possível carregar o ficheiro. {detail}",
+      "createCollection": "Não foi possível criar a coleção. {detail}",
+      "loadFiles": "Não foi possível carregar os ficheiros. {detail}",
+      "updateCollection": "Não foi possível atualizar a coleção. {detail}",
+      "deleteCollection": "Não foi possível eliminar a coleção. {detail}"
+    }
   },
   "AssistantPresets": {
     "formal": {
@@ -4121,11 +4250,6 @@
     "noContact": {
       "title": "Falta de Contacto",
       "message": "Adiciona pelo menos um método de contacto: telemóvel, Teams ou email",
-      "ok": "OK"
-    },
-    "fullOrg": {
-      "title": "Limite de Utilizadores",
-      "message": "Chegou ao limite de utilizadores para esta organização.",
       "ok": "OK"
     }
   },
@@ -4492,6 +4616,7 @@
       "message": "Mensagens individuais",
       "template": "Templates",
       "media": "Multimédia",
+      "tracked_link": "Links rastreados",
       "organization": "Organização"
     },
     "Channels": {
@@ -4522,16 +4647,24 @@
       "broadcast_schedule_updated": "Agendamento editado",
       "broadcast_schedule_deleted": "Agendamento eliminado",
       "broadcast_read_chain_created": "Sequência de leitura criada",
+      "broadcast_read_chain_cancelled": "Corrente cancelada",
+      "broadcast_read_chain_stopped": "Corrente parada",
+      "broadcast_read_chain_step_removed": "Mensagem tirada de uma corrente",
+      "broadcast_read_chain_step_edited": "Mensagem de uma corrente editada",
       "message_template_sent": "Template enviado a um colaborador",
       "template_created": "Template WhatsApp criado",
       "media_deleted": "Ficheiro de multimédia eliminado",
+      "tracked_link_deleted": "Link rastreado eliminado",
       "organization_created": "Organização criada",
       "organization_settings_updated": "Definições da organização alteradas",
+      "organization_plan_changed": "Plano alterado",
       "automation_triggered": "Automação disparada",
       "broadcast_scheduled_sent": "Mensagem agendada enviada",
       "message_received": "Mensagem recebida",
       "teams_group_updated": "Grupo Teams editado",
-      "unknown": "Ação desconhecida"
+      "unknown": "Ação desconhecida",
+      "organization_plan_extended": "Plano prolongado",
+      "organization_plan_end_changed": "Fim do plano alterado"
     },
     "Table": {
       "when": "Quando",
@@ -4815,6 +4948,14 @@
   },
   "Plans": {
     "limits": {
+      "messageTooLongTitle": "Mensagem demasiado longa",
+      "messageTooLong": "Cada mensagem pode ter até {limit} caracteres. Encurta o texto para enviares.",
+      "messageFilesTitle": "Limite de ficheiros atingido",
+      "messageFiles": "Cada mensagem pode ter até {limit, plural, one {# ficheiro} other {# ficheiros}}. Tira algum para juntares outro.",
+      "messageFilesRemaining": "Podes juntar só mais {remaining, plural, =0 {nenhum ficheiro} one {# ficheiro} other {# ficheiros}} a esta mensagem (máximo de {limit}). Escolhe menos ou tira algum.",
+      "chainTooLongTitle": "Corrente demasiado longa",
+      "chainTooLong": "Uma corrente pode ter até {limit} mensagens.",
+      "inStep": "Na mensagem {step} da corrente:",
       "assistantsTitle": "Limite de assistentes atingido",
       "assistants": "O plano {plan} permite criar {limit, plural, one {# assistente} other {# assistentes}}. Atualiza o teu plano para criares mais.",
       "assistantsNoDetail": "Chegaste ao limite de assistentes do teu plano. Atualiza o teu plano para criares mais.",
@@ -4822,7 +4963,126 @@
       "users": "O plano {plan} permite criar {limit, plural, one {# utilizador} other {# utilizadores}}. Atualiza o teu plano para criares mais.",
       "usersNoDetail": "Chegaste ao limite de utilizadores do teu plano. Atualiza o teu plano para criares mais.",
       "upgrade": "Atualizar plano",
-      "later": "Agora não"
+      "later": "Agora não",
+      "instructionsTitle": "Instruções demasiado longas",
+      "instructions": "As instruções podem ter até {limit} caracteres. Encurta o texto para guardares.",
+      "filesTitle": "Limite de ficheiros atingido",
+      "files": "Cada assistente pode ter até {limit, plural, one {# ficheiro} other {# ficheiros}}. Tira algum antes de juntares outro.",
+      "filesRemaining": "Podes juntar só mais {remaining, plural, =0 {nenhum ficheiro} one {# ficheiro} other {# ficheiros}} (máximo de {limit} por assistente). Escolhe menos ficheiros ou tira algum da coleção.",
+      "automationsTitle": "Limite de automações atingido",
+      "automations": "Cada conta pode ter até {limit, plural, one {# automação} other {# automações}}. Apaga uma para criares outra.",
+      "trackedLinksTitle": "Limite de links atingido",
+      "trackedLinksFull": "Chegaste aos {limit} links do teu plano. Elimina um link em \"Links já usados\" para poderes criar um novo.",
+      "scheduledTitle": "Limite de mensagens agendadas atingido",
+      "dailyTitle": "Limite de envios de hoje atingido",
+      "daily": "Já usaste os {limit} envios de hoje no {channel}. O contador volta a 0 às {time}.",
+      "dailyChain": "Esta corrente precisa de {steps} envios, mas hoje só te {remaining, plural, one {resta # envio} other {restam # envios}} no {channel}. Encurta a corrente ou espera pelas {time}.",
+      "scheduled": "Podes ter até {limit, plural, one {# mensagem agendada} other {# mensagens agendadas}} à espera de envio. Cancela ou apaga uma nas mensagens agendadas para agendares outra."
+    },
+    "counter": {
+      "olderThanLimit": "Criado antes do limite de {limit} caracteres: pode ficar com o tamanho que tem, mas não aumentar."
+    },
+    "usage": {
+      "messageFilesLabel": "Ficheiros da mensagem",
+      "messageFilesHint": "Cada mensagem pode levar até este número de ficheiros.",
+      "usersLabel": "Utilizadores",
+      "usersHint": "Conta todos os utilizadores da conta.",
+      "filesLabel": "Ficheiros do assistente",
+      "filesHint": "Cada assistente pode ter até este número de ficheiros na coleção.",
+      "assistantsLabel": "Assistentes",
+      "assistantsHint": "Conta todos os assistentes da conta.",
+      "automationsLabel": "Automações",
+      "automationsHint": "Contam todas as automações da conta, ativas e inativas.",
+      "trackedLinksLabel": "Links guardados",
+      "trackedLinksHint": "Cada link (nome e destino) conta uma vez, mesmo que seja usado em vários envios. Elimina os que já não usas para libertares espaço.",
+      "scheduledLabel": "Mensagens agendadas",
+      "dailyShort": "Envios hoje",
+      "dailyLabel": "Envios de hoje neste canal",
+      "dailyHint": "Cada envio conta 1, seja para quantos colaboradores for. Uma corrente conta 1 por mensagem e uma agendada conta no dia em que é agendada. As automações não contam. Volta a 0 às {time}.",
+      "weeklyLabel": "Mensagens desta semana no {channel}",
+      "weeklyHint": "Mensagens que cada colaborador enviou esta semana em cada canal: ao assistente e respostas a quizzes, sondagens e perguntas abertas. Acima do limite o assistente deixa de responder até segunda-feira às 00:00.",
+      "scheduledHint": "Conta as mensagens agendadas por ti que ainda estão à espera de envio. As das automações e as correntes não contam."
     }
+  },
+  "Admin": {
+    "title": "Administração",
+    "loading": "A carregar…",
+    "forbidden": "Esta página é só para a equipa DIGIK.",
+    "failed": "Não foi possível carregar a administração.",
+    "retry": "Tentar novamente",
+    "cancel": "Cancelar",
+    "banner": {
+      "trying": "Estás a experimentar o plano {plan}.",
+      "back": "Voltar ao Interno",
+      "noInternal": "O plano Interno ainda não existe nesta base de dados: falta correr a migração 20261023160000_internal_plan.sql."
+    },
+    "try": {
+      "title": "Experimentar como",
+      "description": "Muda o plano da {org} para veres a app com os limites de outro plano. A Demo começa a contar os 7 dias quando a escolhes.",
+      "label": "Plano"
+    },
+    "organizations": {
+      "title": "Organizações",
+      "description": "O plano de cada organização e o que já gastou de cada limite.",
+      "name": "Organização",
+      "plan": "Plano",
+      "demo": "Prazo",
+      "sendsToday": "Envios hoje",
+      "daysLeft": "{days, plural, one {Falta # dia} other {Faltam # dias}}",
+      "ended": "Terminou",
+      "planFor": "Plano da {org}",
+      "confirmTitle": "Mudar de plano",
+      "confirmMessage": "A {org} passa para o plano {plan}. Os limites mudam já e a mudança fica no histórico da organização.",
+      "confirmOwn": "A tua organização passa para o plano {plan}, para experimentares os limites dele. Voltas ao Interno quando quiseres.",
+      "confirm": "Mudar",
+      "search": "Procurar por nome ou email do dono",
+      "overLimit": "{count, plural, one {Acima de # limite} other {Acima de # limites}}",
+      "extendShort": "+7 dias",
+      "extendTitle": "Prolongar a Demo",
+      "extendMessage": "A {org} fica com mais 7 dias no plano {plan}, a contar do fim atual (ou de hoje, se já terminou). Fica no histórico da organização.",
+      "extend": "Prolongar",
+      "endsOn": "Dia em que a Demo da {org} termina",
+      "endTitle": "Mudar o fim da Demo",
+      "endMessage": "A {org} fica no plano {plan} até {date}, às 23:59. Fica no histórico da organização.",
+      "endConfirm": "Mudar",
+      "apply": "Aplicar",
+      "undo": "Desfazer",
+      "undoHint": "Volta ao prazo anterior ({date})"
+    },
+    "plans": {
+      "title": "Planos",
+      "description": "Os limites de cada plano. Vazio quer dizer sem limite.",
+      "limit": "Limite",
+      "orgCount": "{count, plural, =0 {sem organizações} one {# organização} other {# organizações}}",
+      "unlimited": "sem limite",
+      "save": "Guardar",
+      "confirmTitle": "Guardar o plano {plan}",
+      "confirmMessage": "{count, plural, =0 {Nenhuma organização está neste plano.} one {Isto muda os limites de # organização, já.} other {Isto muda os limites de # organizações, já.}} Continuar?",
+      "hint": "Máximos técnicos: 10 mensagens por corrente e 50 MB por ficheiro.",
+      "locked": "Plano da DIGIK, não se edita"
+    },
+    "limits": {
+      "durationDays": "Duração (dias)",
+      "users": "Utilizadores",
+      "assistants": "Assistentes",
+      "assistantInstructionChars": "Caracteres das instruções",
+      "filesPerAssistant": "Ficheiros por assistente",
+      "automations": "Automações",
+      "scheduledMessages": "Agendadas à espera",
+      "trackedLinks": "Links rastreados",
+      "dailyMessagesPerChannel": "Envios por dia (cada canal)",
+      "collaboratorWeeklyMessages": "Mensagens do colaborador por semana (cada canal)",
+      "messageChars": "Caracteres por mensagem",
+      "filesPerMessage": "Ficheiros por mensagem",
+      "fileSizeMb": "MB por ficheiro",
+      "chainMessages": "Mensagens por corrente"
+    }
+  },
+  "Pagination": {
+    "label": "Páginas",
+    "perPageLabel": "Quantos por página",
+    "perPage": "{count} / página",
+    "previous": "Anterior",
+    "next": "Seguinte"
   }
 }

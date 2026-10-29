@@ -25,6 +25,9 @@ import useOrganization from "@/app/hooks/useOrganization";
 import { useAuth } from "@/app/AuthContext.jsx";
 import { useConfirm } from "@/app/components/Confirm/ConfirmProvider";
 import usePlanLimitPrompt from "@/app/hooks/usePlanLimitPrompt";
+import usePlanLimits from "@/app/hooks/usePlanLimits";
+import useCollaboratorWeeklyUsage from "@/app/hooks/useCollaboratorWeeklyUsage";
+import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 import FilterMenu from "./FilterMenu";
 import QuickActionsBar from "./QuickActions/QuickActions";
@@ -107,6 +110,40 @@ export default function UsersPage() {
 
   const orgId = org?.id;
   const defaultPhoneCode = org?.default_phone_country_code || "+351";
+
+  /*
+   * Limite de utilizadores do plano: contador "3 / 100" por cima da lista e
+   * "Novo utilizador" (criar um) desativado quando a conta está cheia. O
+   * Importar CSV fica ativo: também atualiza os que já existem, e o servidor
+   * recusa, linha a linha, só os novos que passem o limite.
+   */
+  const {
+    plan: planInfo,
+    limits: planLimits,
+    usage: planUsage,
+    reload: reloadPlanUsage,
+  } = usePlanLimits(orgId);
+  const usersFull =
+    planLimits?.users != null &&
+    planUsage?.users != null &&
+    planUsage.users >= planLimits.users;
+
+  /*
+   * Mensagens de cada colaborador esta semana, por canal (100 em cada).
+   * Só o administrador vê estes números; o colaborador recebe apenas o
+   * aviso quando passa o limite.
+   */
+  const weeklyUsage = useCollaboratorWeeklyUsage(orgId);
+  const weeklyHint = translation("Plans.usage.weeklyHint");
+
+  const usersUsageCounter = (
+    <UsageCounter
+      used={planUsage?.users}
+      limit={planLimits?.users}
+      label={translation("Plans.usage.usersLabel")}
+      hint={translation("Plans.usage.usersHint")}
+    />
+  );
 
   // assistants
     useEffect(() => {
@@ -212,6 +249,9 @@ export default function UsersPage() {
 
   const refreshUsers = useCallback(
   async (showSuccessAlert = false) => {
+    /* O contador acompanha criar, apagar, ações em massa e importação. */
+    reloadPlanUsage();
+
     if (!orgId) {
       if (showSuccessAlert && typeof showAlertRef.current === "function") {
         await showAlertRef.current({
@@ -264,7 +304,7 @@ export default function UsersPage() {
       stopLoading();
     }
   },
-  [orgId, page, pageSize, startLoading, stopLoading, translation],
+  [orgId, page, pageSize, startLoading, stopLoading, translation, reloadPlanUsage],
 );
 
   useEffect(() => {
@@ -619,6 +659,15 @@ async function openCreateUserModal() {
                   type="button"
                   className={styles.createMenuItem}
                   role="menuitem"
+                  disabled={usersFull}
+                  title={
+                    usersFull
+                      ? translation("Plans.limits.users", {
+                          plan: planInfo?.name ?? "",
+                          limit: planLimits.users,
+                        })
+                      : undefined
+                  }
                   onClick={() => {
                     setCreateMenuOpen(false);
                     openCreateUserModal();
@@ -705,6 +754,20 @@ async function openCreateUserModal() {
         </div>
       )}
 
+      {/*
+        Contador do limite de utilizadores ("3 / 100"). Na lista fica dentro
+        do cabeçalho da tabela, à altura de "Assistente". Na vista de cartões
+        (sem cabeçalho) e nos ecrãs pequenos (onde o cabeçalho se esconde),
+        fica numa linha por cima, encostado à direita.
+      */}
+      <div
+        className={`${styles.usageRow} ${
+          view === "list" ? styles.usageRowNoHeader : ""
+        }`}
+      >
+        {usersUsageCounter}
+      </div>
+
       {/* LIST VIEW */}
       {view === "list" && (
         <div className={styles.tableCard}>
@@ -726,13 +789,16 @@ async function openCreateUserModal() {
               <div className={styles.cellHead}>
                 {translation("Users.list.phone")}
               </div>
+              <div className={styles.cellHead} title={weeklyHint}>
+                {translation("Users.list.thisWeek")}
+              </div>
               <div className={styles.cellHead}>
                 {translation("Users.list.tags")}
               </div>
               <div className={styles.cellHead}>
                 {translation("Users.list.assistant")}
               </div>
-              <div className={styles.cellHeadRight} />
+              <div className={styles.cellHeadRight}>{usersUsageCounter}</div>
             </div>
 
             {visible.map((u, i) => {
@@ -770,6 +836,25 @@ async function openCreateUserModal() {
 
                   <div className={styles.cellPhone}>
                     {u.phoneNational || u.phone || "—"}
+                  </div>
+
+                  <div className={styles.cellWeek} title={weeklyHint}>
+                    {weeklyUsage.limit !== null &&
+                      ["whatsapp", "teams"].map((channel) => (
+                        <span key={channel} className={styles.weekLine}>
+                          <span className={styles.weekChannel}>
+                            {channel === "whatsapp" ? "WhatsApp" : "Teams"}
+                          </span>
+                          <UsageCounter
+                            used={weeklyUsage.usage[u.id]?.[channel] ?? 0}
+                            limit={weeklyUsage.limit}
+                            label={translation("Plans.usage.weeklyLabel", {
+                              channel:
+                                channel === "whatsapp" ? "WhatsApp" : "Teams",
+                            })}
+                          />
+                        </span>
+                      ))}
                   </div>
 
                   <div className={styles.cellTags}>
