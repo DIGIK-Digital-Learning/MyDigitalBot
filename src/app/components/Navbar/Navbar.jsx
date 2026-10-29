@@ -65,7 +65,9 @@ export default function Navbar() {
     [pendingHref, pathNoLocale],
   );
 
+  const usersSectionActive = isActive("/users");
   const broadcastSectionActive = isActive("/broadcast");
+  const [usersOpen, setUsersOpen] = useState(usersSectionActive);
   const [broadcastOpen, setBroadcastOpen] = useState(broadcastSectionActive);
 
   useEffect(() => setPendingHref(null), [pathName]);
@@ -75,7 +77,11 @@ export default function Navbar() {
     if (broadcastSectionActive) {
       setBroadcastOpen(true);
     }
-  }, [broadcastSectionActive]);
+
+    if (usersSectionActive) {
+      setUsersOpen(true);
+    }
+  }, [broadcastSectionActive, usersSectionActive]);
 
   const onNavClick = (href) => (e) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1)
@@ -146,27 +152,55 @@ export default function Navbar() {
                 <span>{translation("Nav.home")}</span>
               </Link>
 
-              <Link
-                href="/users"
-                onClick={onNavClick("/users")}
-                className={`${styles.navItem} ${
-                  isActive("/users") ? styles.active : ""
-                }`}
-              >
-                <Users aria-hidden className={styles.icon} />
-                <span>{translation("Nav.users")}</span>
-              </Link>
+              <div className={styles.group}>
+                <button
+                  type="button"
+                  className={`${styles.navItem} ${styles.navToggle} ${
+                    usersSectionActive ? styles.active : ""
+                  }`}
+                  onClick={() => setUsersOpen((prev) => !prev)}
+                  aria-expanded={usersOpen}
+                  aria-controls="users-subnav"
+                >
+                  <span className={styles.navItemMain}>
+                    <Users aria-hidden className={styles.icon} />
+                    <span>{translation("Nav.usersGroup")}</span>
+                  </span>
 
-              <Link
-                href="/teams-groups"
-                onClick={onNavClick("/teams-groups")}
-                className={`${styles.navItem} ${
-                  isActive("/teams-groups") ? styles.active : ""
-                }`}
-              >
-                <UsersRound aria-hidden className={styles.icon} />
-                <span>{translation("Nav.teamsGroups")}</span>
-              </Link>
+                  <ChevronDown
+                    aria-hidden
+                    className={`${styles.chevron} ${
+                      usersOpen ? styles.chevronOpen : ""
+                    }`}
+                  />
+                </button>
+
+                {usersOpen && (
+                  <div id="broadcast-subnav" className={styles.subnav}>
+                    <Link
+                      href="/users"
+                      onClick={onNavClick("/users")}
+                      className={`${styles.navItem} ${
+                        isActive("/users") ? styles.active : ""
+                      }`}
+                    >
+                      <Users aria-hidden className={styles.icon} />
+                      <span>{translation("Nav.users")}</span>
+                    </Link>
+
+                    <Link
+                      href="/teams-groups"
+                      onClick={onNavClick("/teams-groups")}
+                      className={`${styles.navItem} ${
+                        isActive("/teams-groups") ? styles.active : ""
+                      }`}
+                    >
+                      <UsersRound aria-hidden className={styles.icon} />
+                      <span>{translation("Nav.teamsGroups")}</span>
+                    </Link>
+                  </div>
+                )}
+              </div>
 
               <Link
                 href="/assistants"
@@ -190,7 +224,6 @@ export default function Navbar() {
                 <span>{translation("Nav.automations")}</span>
               </Link>
 
-              
               <Link
                 href="/analytics"
                 onClick={onNavClick("/analytics")}
@@ -201,7 +234,6 @@ export default function Navbar() {
                 <BarChart3 aria-hidden className={styles.icon} />
                 <span>{translation("Nav.analytics")}</span>
               </Link>
-
 
               <div className={styles.group}>
                 <button
@@ -293,7 +325,6 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
-
             </nav>
 
             {isAdmin && (
