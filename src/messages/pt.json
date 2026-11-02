@@ -3412,7 +3412,7 @@
       "confirmRemove": {
         "title": "Tirar a mensagem {index}?",
         "scheduled": "A corrente fica com {count} mensagens. Se foi criada hoje, 1 envio volta ao teu limite de hoje.",
-        "running": "Ninguém a recebeu ainda: a corrente passa da mensagem anterior para a seguinte.",
+        "running": "Ninguém a recebeu ainda: a corrente passa da mensagem anterior para a seguinte. Se foi criada hoje, 1 envio volta ao teu limite de hoje.",
         "confirm": "Tirar mensagem"
       },
       "stepRemoved": {
@@ -3430,7 +3430,7 @@
       },
       "confirmStop": {
         "title": "Parar esta corrente?",
-        "message": "As mensagens que faltam já não saem. As que já saíram ficam, e os envios de hoje não são devolvidos.",
+        "message": "As mensagens que faltam já não saem e as que já saíram ficam. Se foi criada hoje, as mensagens que não chegaram a ninguém voltam ao teu limite de hoje.",
         "confirm": "Parar corrente"
       },
       "cancelled": {

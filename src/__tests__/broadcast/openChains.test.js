@@ -110,6 +110,9 @@ describe("closeChain", () => {
       getMessageChainById: vi.fn(async () => chain),
       closeMessageChain: vi.fn(async () => closed),
       refundChainSend: vi.fn(async () => {}),
+      /* As 2 primeiras mensagens chegaram a alguém. */
+      lastDeliveredChainStep: vi.fn(async () => 2),
+      keepChainSends: vi.fn(async () => {}),
     };
     return deps;
   }
@@ -133,7 +136,7 @@ describe("closeChain", () => {
     );
   });
 
-  it("para uma corrente a decorrer, sem devolver envios", async () => {
+  it("para uma corrente a decorrer e fica a contar só o que chegou a alguém", async () => {
     const deps = setup(row({ status: "active" }));
 
     const result = await closeChain(7, "c1", { now, deps });
@@ -142,7 +145,36 @@ describe("closeChain", () => {
     expect(deps.closeMessageChain).toHaveBeenCalledWith(
       expect.objectContaining({ fromStatus: "active", toStatus: "stopped" }),
     );
+    /* Só os envios contados hoje (o repositório filtra por `since`). */
+    expect(deps.keepChainSends).toHaveBeenCalledWith(
+      "c1",
+      new Date("2026-10-27T00:01:00Z"),
+      2,
+    );
     expect(deps.refundChainSend).not.toHaveBeenCalled();
+  });
+
+  it("parar quando a 1.ª falhou para toda a gente deixa 0", async () => {
+    const deps = setup(row({ status: "active" }));
+    deps.lastDeliveredChainStep.mockResolvedValue(0);
+
+    await closeChain(7, "c1", { now, deps });
+
+    expect(deps.keepChainSends).toHaveBeenCalledWith(
+      "c1",
+      new Date("2026-10-27T00:01:00Z"),
+      0,
+    );
+  });
+
+  it("se a corrente mudou entretanto, não para nem devolve", async () => {
+    const deps = setup(row({ status: "active" }), null);
+
+    expect(await closeChain(7, "c1", { now, deps })).toEqual({
+      code: "CHAIN_NOT_OPEN",
+      status: 409,
+    });
+    expect(deps.keepChainSends).not.toHaveBeenCalled();
   });
 
   it("se o envio começou entretanto, não cancela nem devolve", async () => {
@@ -199,7 +231,7 @@ describe("tirar uma mensagem da corrente", () => {
       messageChainStepTouched: vi.fn(async () => touched),
       removeMessageChainStep: vi.fn(async () => {}),
       deleteUnsentChainQuestion: vi.fn(async () => {}),
-      refundOneChainSend: vi.fn(async () => {}),
+      refundChainStepSends: vi.fn(async () => {}),
     };
   }
 
@@ -216,19 +248,22 @@ describe("tirar uma mensagem da corrente", () => {
       questionId: 42,
       organizationId: 7,
     });
-    expect(deps.refundOneChainSend).toHaveBeenCalledWith(
+    expect(deps.refundChainStepSends).toHaveBeenCalledWith(
       "c1",
       new Date("2026-10-27T00:01:00Z"),
     );
   });
 
-  it("a decorrer: tira uma mensagem a que ninguém chegou, sem devolver envios", async () => {
+  it("a decorrer: tira uma mensagem a que ninguém chegou e devolve 1 envio de hoje", async () => {
     const deps = setup({ chain: row({ status: "active" }) });
 
     const result = await removeChainStep(7, "c1", 3, { now, deps });
 
     expect(result.stepCount).toBe(2);
-    expect(deps.refundOneChainSend).not.toHaveBeenCalled();
+    expect(deps.refundChainStepSends).toHaveBeenCalledWith(
+      "c1",
+      new Date("2026-10-27T00:01:00Z"),
+    );
   });
 
   it("não tira uma mensagem que alguém já recebeu ou tem marcada", async () => {

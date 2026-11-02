@@ -18,13 +18,18 @@ vi.mock("@/lib/repos/adminDailySends.repo", () => ({
   releaseAdminDailySend: vi.fn(async () => {}),
   refundScheduledSend: vi.fn(async () => {}),
   countAdminDailySends: vi.fn(async () => ({ whatsapp: 0, teams: 0 })),
+  refundChainStepSends: vi.fn(async () => {}),
 }));
 vi.mock("@/lib/repos/plans.repo", () => ({
   getOrganizationPlan: mocks.getOrganizationPlan,
 }));
 
 vi.mock("@/lib/auth/guards", () => ({
-  requireOwnedOrg: vi.fn(async () => ({ orgId: 1, admin: {}, user: { id: "u" } })),
+  requireOwnedOrg: vi.fn(async () => ({
+    orgId: 1,
+    admin: {},
+    user: { id: "u" },
+  })),
   assertUsersBelongToOrg: vi.fn(),
   requireAllRecipientsToBeKnownUsers: vi.fn(() => [5]),
   handleApiError(error, fallback) {
@@ -87,7 +92,9 @@ beforeEach(() => {
 
 describe("POST /api/broadcast/whatsapp", () => {
   const send = (message, files = []) =>
-    sendWhatsapp(json({ orgId: 1, recipients: [{ userId: 5 }], message, files }));
+    sendWhatsapp(
+      json({ orgId: 1, recipients: [{ userId: 5 }], message, files }),
+    );
 
   it("1.500 caracteres vistos passam, mesmo com marcas de negrito", async () => {
     const response = await send(`*${"a".repeat(1500)}*`);
@@ -108,7 +115,10 @@ describe("POST /api/broadcast/whatsapp", () => {
   });
 
   it("6 ficheiros são recusados antes de enviar", async () => {
-    const response = await send("olá", [1, 2, 3, 4, 5, 6].map((n) => ({ url: `f${n}` })));
+    const response = await send(
+      "olá",
+      [1, 2, 3, 4, 5, 6].map((n) => ({ url: `f${n}` })),
+    );
 
     expect(response.status).toBe(400);
     expect((await response.json()).code).toBe("TOO_MANY_FILES");
@@ -123,7 +133,9 @@ describe("POST /api/broadcast/read-chain", () => {
     }));
 
   const create = (stepList) =>
-    createChain(json({ orgId: 1, recipients: [{ userId: 5 }], steps: stepList }));
+    createChain(
+      json({ orgId: 1, recipients: [{ userId: 5 }], steps: stepList }),
+    );
 
   it("10 passos passam os limites", async () => {
     await create(steps(10)).catch(() => {});
@@ -134,12 +146,17 @@ describe("POST /api/broadcast/read-chain", () => {
     const response = await create(steps(11));
 
     expect(response.status).toBe(400);
-    expect(await response.json()).toMatchObject({ code: "CHAIN_TOO_LONG", limit: 10 });
+    expect(await response.json()).toMatchObject({
+      code: "CHAIN_TOO_LONG",
+      limit: 10,
+    });
     expect(mocks.createMessageChain).not.toHaveBeenCalled();
   });
 
   it("o máximo de passos vem do plano, não está fixo em 10", async () => {
-    mocks.getOrganizationPlan.mockResolvedValue(planWith({ max_chain_messages: 3 }));
+    mocks.getOrganizationPlan.mockResolvedValue(
+      planWith({ max_chain_messages: 3 }),
+    );
 
     const response = await create(steps(4));
 
@@ -151,7 +168,10 @@ describe("POST /api/broadcast/read-chain", () => {
     const response = await create(steps(3, 2));
 
     expect(response.status).toBe(400);
-    expect(await response.json()).toMatchObject({ code: "MESSAGE_TOO_LONG", step: 2 });
+    expect(await response.json()).toMatchObject({
+      code: "MESSAGE_TOO_LONG",
+      step: 2,
+    });
     expect(mocks.createMessageChain).not.toHaveBeenCalled();
   });
 });

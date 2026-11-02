@@ -683,3 +683,43 @@ export async function updateMessageChainStepPayload({
     .update({ updated_at: nowIso() })
     .eq("id", chainId);
 }
+
+/*
+ * A última mensagem da corrente que chegou a alguém: algum destinatário já
+ * passou por ela, foi entregue (um envio falhado não conta) ou está marcada
+ * para sair. 0 quando nenhuma chegou a ninguém.
+ */
+export async function lastDeliveredChainStep(chainId) {
+  const [recipients, deliveries, outreach] = await Promise.all([
+    sb
+      .from("message_chain_recipient")
+      .select("current_step_index")
+      .eq("chain_id", chainId)
+      .order("current_step_index", { ascending: false })
+      .limit(1),
+    sb
+      .from("message_chain_delivery")
+      .select("step_index")
+      .eq("chain_id", chainId)
+      .neq("status", "failed")
+      .order("step_index", { ascending: false })
+      .limit(1),
+    sb
+      .from("pending_outreach")
+      .select("message_chain_step_index")
+      .eq("message_chain_id", chainId)
+      .order("message_chain_step_index", { ascending: false })
+      .limit(1),
+  ]);
+
+  for (const result of [recipients, deliveries, outreach]) {
+    if (result.error) throw result.error;
+  }
+
+  return Math.max(
+    0,
+    Number(recipients.data?.[0]?.current_step_index) || 0,
+    Number(deliveries.data?.[0]?.step_index) || 0,
+    Number(outreach.data?.[0]?.message_chain_step_index) || 0,
+  );
+}
