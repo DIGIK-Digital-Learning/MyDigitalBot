@@ -116,7 +116,7 @@ export default function ViewUserModal({
       setSelectedThreadId(normalized.length ? normalized[0].id : null);
     } catch (err) {
       if (reqId !== threadsReqId.current) return;
-      setThreadsError(err?.message || "Erro ao carregar threads.");
+      setThreadsError(err?.message || translation("threadsFailed"));
     } finally {
       if (reqId === threadsReqId.current) setThreadsLoading(false);
     }
@@ -185,7 +185,7 @@ export default function ViewUserModal({
         return;
       }
 
-      setMessagesError(err?.message || "Erro ao carregar mensagens.");
+      setMessagesError(err?.message || translation("messagesFailed"));
 
       setMessages([]);
     } finally {
@@ -245,14 +245,14 @@ export default function ViewUserModal({
             {!!onEdit && (
               <button
                 className={styles.iconBtn}
-                title="Editar"
+                title={translation("edit")}
                 onClick={onEdit}
               >
                 <Pencil size={18} />
               </button>
             )}
 
-            <button className={styles.iconBtn} title="Fechar" onClick={onClose}>
+            <button className={styles.iconBtn} title={translation("close")} onClick={onClose}>
               <X size={18} />
             </button>
           </div>
@@ -267,7 +267,7 @@ export default function ViewUserModal({
                   <button
                     className={styles.iconBtn}
                     style={{ marginLeft: "auto" }}
-                    title="Recarregar"
+                    title={translation("reload")}
                     onClick={() => loadThreads(user.id)}
                     disabled={threadsLoading}
                   >
@@ -277,7 +277,7 @@ export default function ViewUserModal({
 
                 <div className={`${styles.panelBody} ${styles.threadList}`}>
                   {threadsLoading && (
-                    <div className={styles.emptyNote}>A carregar…</div>
+                    <div className={styles.emptyNote}>{translation("loading")}</div>
                   )}
 
                   {!threadsLoading && threadsError && (
@@ -286,7 +286,7 @@ export default function ViewUserModal({
 
                   {!threadsLoading && !threadsError && !threads.length && (
                     <div className={styles.emptyNote}>
-                      Este utilizador não tem threads.
+                      {translation("noThreads")}
                     </div>
                   )}
 
@@ -339,11 +339,11 @@ export default function ViewUserModal({
               </div>
 
               <div className={styles.panel}>
-                <div className={styles.panelHead}>Mensagens</div>
+                <div className={styles.panelHead}>{translation("messages")}</div>
 
                 <div className={`${styles.panelBody} ${styles.messagesPane}`}>
                   {messagesLoading && (
-                    <div className={styles.emptyNote}>A carregar…</div>
+                    <div className={styles.emptyNote}>{translation("loading")}</div>
                   )}
 
                   {!messagesLoading && messagesError && (
@@ -351,7 +351,7 @@ export default function ViewUserModal({
                   )}
 
                   {!messagesLoading && !messagesError && !messages.length && (
-                    <div className={styles.emptyNote}>Sem mensagens.</div>
+                    <div className={styles.emptyNote}>{translation("noMessages")}</div>
                   )}
 
                   {!messagesLoading && !messagesError && !!messages.length && (
@@ -391,7 +391,7 @@ function extractText(m) {
     if (firstText?.text) return firstText.text;
   }
 
-  return "(sem texto)";
+  return "";
 }
 
 async function safeText(res) {
@@ -432,10 +432,10 @@ function formatWhen(iso) {
   }
 }
 
-function getDisplayRole(role) {
-  if (role === "assistant") return "Assistente";
-  if (role === "system") return "Sistema";
-  if (role === "user") return "Utilizador";
+function getDisplayRole(role, translation) {
+  if (["assistant", "system", "user"].includes(role)) {
+    return translation(`roles.${role}`);
+  }
   return role || "";
 }
 
@@ -558,11 +558,13 @@ function MessageBubble({ message, translation }) {
       }`}
     >
       <div className={styles.msgBubble}>
-        <div className={styles.msgText}>{message?.text || ""}</div>
+        <div className={styles.msgText}>
+          {message?.text || translation("noText")}
+        </div>
 
         <div className={styles.msgMeta}>
           <span className={styles.msgRole}>
-            {getDisplayRole(message?.role)}
+            {getDisplayRole(message?.role, translation)}
           </span>
           <span>·</span>
           <span className={styles.msgWhen}>

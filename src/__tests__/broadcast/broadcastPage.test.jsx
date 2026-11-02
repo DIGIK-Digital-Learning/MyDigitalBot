@@ -327,7 +327,7 @@ describe("BroadcastPage", () => {
     );
     await waitFor(() =>
       expect(appMocks.alert).toHaveBeenCalledWith(
-        expect.objectContaining({ title: "Broadcast sent" }),
+        expect.objectContaining({ title: "Broadcast.feedback.titles.sent" }),
       ),
     );
   });
@@ -625,14 +625,14 @@ describe("BroadcastPage", () => {
     /* O link rastreado abre o painel; depois entra no balão como pastilha. */
     pickFromPlusMenu("Broadcast.composer.addLink");
     fireEvent.click(screen.getByRole("button", { name: "Broadcast.addLink" }));
-    fireEvent.change(screen.getByPlaceholderText("training"), {
+    fireEvent.change(screen.getByPlaceholderText("Broadcast.trackedLinkForm.keyPlaceholder"), {
       target: { value: "curso" },
     });
-    fireEvent.change(screen.getByPlaceholderText("Aceder à formação"), {
+    fireEvent.change(screen.getByPlaceholderText("Broadcast.trackedLinkForm.labelPlaceholder"), {
       target: { value: "Curso" },
     });
     fireEvent.change(
-      screen.getByPlaceholderText("https://example.com/course/123"),
+      screen.getByPlaceholderText("Broadcast.trackedLinkForm.urlPlaceholder"),
       { target: { value: "https://x.test/curso" } },
     );
     pickFromPlusMenu("Link: Curso");
@@ -877,14 +877,14 @@ describe("BroadcastPage", () => {
       fireEvent.click(
         screen.getByRole("button", { name: "Broadcast.addLink" }),
       );
-      fireEvent.change(screen.getByPlaceholderText("training"), {
+      fireEvent.change(screen.getByPlaceholderText("Broadcast.trackedLinkForm.keyPlaceholder"), {
         target: { value: "guia" },
       });
-      fireEvent.change(screen.getByPlaceholderText("Aceder à formação"), {
+      fireEvent.change(screen.getByPlaceholderText("Broadcast.trackedLinkForm.labelPlaceholder"), {
         target: { value: "Guia" },
       });
       fireEvent.change(
-        screen.getByPlaceholderText("https://example.com/course/123"),
+        screen.getByPlaceholderText("Broadcast.trackedLinkForm.urlPlaceholder"),
         { target: { value: "https://x.test/guia" } },
       );
     }

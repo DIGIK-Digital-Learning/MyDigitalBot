@@ -129,7 +129,7 @@ export default function Navbar() {
         id="primary-nav"
         className={`${styles.sidebar} ${open ? styles.open : ""}`}
         aria-hidden={open ? "false" : "true"}
-        aria-label="Main navigation"
+        aria-label={translation("Navbar.mainNavigation")}
       >
         {!authLoading && user ? (
           <>

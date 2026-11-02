@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import Papa from "papaparse";
 import styles from "./import.module.css";
 import PillSelect from "@/app/components/PillSelect/PillSelect";
@@ -38,6 +39,7 @@ export default function ImportUsersModal({
   defaultPhoneCode = "+351",
   onImported,
 }) {
+  const t = useTranslations("ImportUsers");
   const promptPlanLimit = usePlanLimitPrompt();
   const [rows, setRows] = useState([]);
   const [assistantId, setAssistantId] = useState("");
@@ -78,6 +80,10 @@ export default function ImportUsersModal({
 
   const stateClass = isOpen ? styles.open : styles.closing;
 
+  /* Os motivos conhecidos vêm com um código; os outros (erros da base) ficam como vieram. */
+  const rowReason = (item) =>
+    item.code ? t(`reasons.${item.code}`, { tags: item.tags }) : item.reason;
+
   async function readExcelFile(file) {
     const XLSX = await import("xlsx");
 
@@ -92,7 +98,7 @@ export default function ImportUsersModal({
       : workbook.SheetNames[0];
 
     if (!sheetName) {
-      throw new Error("No sheets found in Excel file.");
+      throw new Error(t("errors.noSheets"));
     }
 
     const worksheet = workbook.Sheets[sheetName];
@@ -134,7 +140,7 @@ export default function ImportUsersModal({
         data = await readCsvFile(file);
       } else {
         setRows([]);
-        setError("Please upload a .xlsx or .csv file.");
+        setError(t("errors.fileType"));
         return;
       }
 
@@ -168,7 +174,7 @@ export default function ImportUsersModal({
 
       if (!mapped.length) {
         setRows([]);
-        setError("No valid rows were found in that file.");
+        setError(t("errors.noRows"));
         return;
       }
 
@@ -176,7 +182,7 @@ export default function ImportUsersModal({
     } catch (err) {
       console.error(err);
       setRows([]);
-      setError("There was a problem reading that file.");
+      setError(t("errors.readFailed"));
     }
   }
 
@@ -208,7 +214,7 @@ export default function ImportUsersModal({
         /* A Demo terminou (#209): aviso com "Ativar plano". */
         if (await promptPlanLimit(data)) return;
 
-        setError(data.error || "Import failed.");
+        setError(data.error || t("errors.importFailed"));
         return;
       }
 
@@ -216,7 +222,7 @@ export default function ImportUsersModal({
       await onImported?.();
     } catch (err) {
       console.error(err);
-      setError("Import failed.");
+      setError(t("errors.importFailed"));
     } finally {
       setIsSubmitting(false);
     }
@@ -238,7 +244,7 @@ export default function ImportUsersModal({
         aria-modal="true"
       >
         <div className={styles.modalHeader}>
-          <h3 className={styles.modalTitle}>Import users</h3>
+          <h3 className={styles.modalTitle}>{t("title")}</h3>
 
           <a
             href="/templates/user_import_template.xlsx"
@@ -246,13 +252,13 @@ export default function ImportUsersModal({
             className={styles.templateDownloadButton}
           >
             <Download />
-            Template
+            {t("template")}
           </a>
         </div>
 
         <div className={styles.form}>
           <div className={styles.formGroup}>
-            <label htmlFor="importFile">Import file</label>
+            <label htmlFor="importFile">{t("file")}</label>
 
             <input
               id="importFile"
@@ -263,66 +269,64 @@ export default function ImportUsersModal({
             />
 
             {fileName ? (
-              <div className={styles.helperText}>Selected file: {fileName}</div>
-            ) : (
               <div className={styles.helperText}>
-                Upload an Excel file from the provided template, or a CSV with
-                the same columns.
+                {t("selectedFile", { name: fileName })}
               </div>
+            ) : (
+              <div className={styles.helperText}>{t("fileHelp")}</div>
             )}
           </div>
 
           <div className={styles.formGroup}>
-            <label>Default Assistant</label>
+            <label>{t("assistant")}</label>
             <PillSelect
               options={assistants.map((a) => ({ value: a.id, label: a.name }))}
               value={assistantId ?? ""}
               onChange={(value) => setAssistantId(value)}
-              placeholder="Choose Assistant"
+              placeholder={t("chooseAssistant")}
               fullWidth
               portalToBody
             />
-            <div className={styles.helperText}>
-              If you choose one here, it will be assigned to every imported
-              user.
-            </div>
+            <div className={styles.helperText}>{t("assistantHelp")}</div>
           </div>
 
           <div className={styles.sectionDivider}>
-            <span className={styles.sectionDividerLabel}>Import Preview</span>
+            <span className={styles.sectionDividerLabel}>
+              {t("previewSection")}
+            </span>
           </div>
 
           {error ? <div className={styles.errorBox}>{error}</div> : null}
 
           {!rows.length && !error ? (
-            <div className={styles.emptyState}>
-              Upload a file to preview the users before importing.
-            </div>
+            <div className={styles.emptyState}>{t("empty")}</div>
           ) : null}
 
           {rows.length > 0 && (
             <div className={styles.previewCard}>
               <div className={styles.previewTop}>
                 <div>
-                  <div className={styles.previewTitle}>Preview</div>
+                  <div className={styles.previewTitle}>{t("preview")}</div>
                   <div className={styles.previewText}>
-                    {rows.length} row{rows.length === 1 ? "" : "s"} ready to
-                    import
+                    {t("ready", { count: rows.length })}
                   </div>
                 </div>
                 <span className={styles.previewBadge}>
-                  Showing {Math.min(rows.length, PREVIEW_LIMIT)} / {rows.length}
+                  {t("showing", {
+                    shown: Math.min(rows.length, PREVIEW_LIMIT),
+                    total: rows.length,
+                  })}
                 </span>
               </div>
 
               <div className={styles.previewTable}>
                 <div className={`${styles.previewRow} ${styles.previewHead}`}>
-                  <div>Name</div>
-                  <div>Email</div>
-                  <div>Teams AAD Object ID</div>
-                  <div>Phone</div>
-                  <div>Assistant</div>
-                  <div>Tags</div>
+                  <div>{t("columns.name")}</div>
+                  <div>{t("columns.email")}</div>
+                  <div>{t("columns.teams")}</div>
+                  <div>{t("columns.phone")}</div>
+                  <div>{t("columns.assistant")}</div>
+                  <div>{t("columns.tags")}</div>
                 </div>
 
                 {previewRows.map((row, index) => (
@@ -357,44 +361,54 @@ export default function ImportUsersModal({
             <>
               <div className={styles.sectionDivider}>
                 <span className={styles.sectionDividerLabel}>
-                  Import Result
+                  {t("resultSection")}
                 </span>
               </div>
 
               <div className={styles.summaryBox}>
                 <div className={styles.summaryGrid}>
                   <div className={styles.summaryItem}>
-                    <span className={styles.summaryLabel}>Created</span>
+                    <span className={styles.summaryLabel}>
+                      {t("result.created")}
+                    </span>
                     <strong>{summary.created || 0}</strong>
                   </div>
 
                   <div className={styles.summaryItem}>
-                    <span className={styles.summaryLabel}>Updated</span>
+                    <span className={styles.summaryLabel}>
+                      {t("result.updated")}
+                    </span>
                     <strong>{summary.updated || 0}</strong>
                   </div>
 
                   <div className={styles.summaryItem}>
-                    <span className={styles.summaryLabel}>Skipped</span>
+                    <span className={styles.summaryLabel}>
+                      {t("result.skipped")}
+                    </span>
                     <strong>{summary.skipped || 0}</strong>
                   </div>
 
                   <div className={styles.summaryItem}>
-                    <span className={styles.summaryLabel}>Failed</span>
+                    <span className={styles.summaryLabel}>
+                      {t("result.failed")}
+                    </span>
                     <strong>{summary.failed || 0}</strong>
                   </div>
 
                   <div className={styles.summaryItem}>
-                    <span className={styles.summaryLabel}>Received</span>
+                    <span className={styles.summaryLabel}>
+                      {t("result.received")}
+                    </span>
                     <strong>{summary.totalReceived || 0}</strong>
                   </div>
                 </div>
 
                 {!!summary.skippedRows?.length && (
                   <div className={styles.resultList}>
-                    <h5 className={styles.resultHeading}>Skipped rows</h5>
+                    <h5 className={styles.resultHeading}>{t("skippedRows")}</h5>
                     {summary.skippedRows.slice(0, 10).map((item, i) => (
                       <div key={i} className={styles.resultRow}>
-                        Row {item.row}: {item.reason}
+                        {t("row", { row: item.row, reason: rowReason(item) })}
                         {item.name ? ` - ${item.name}` : ""}
                       </div>
                     ))}
@@ -403,10 +417,10 @@ export default function ImportUsersModal({
 
                 {!!summary.failedRows?.length && (
                   <div className={styles.resultList}>
-                    <h5 className={styles.resultHeading}>Failed rows</h5>
+                    <h5 className={styles.resultHeading}>{t("failedRows")}</h5>
                     {summary.failedRows.slice(0, 10).map((item, i) => (
                       <div key={i} className={styles.resultRow}>
-                        Row {item.row}: {item.reason}
+                        {t("row", { row: item.row, reason: rowReason(item) })}
                         {item.name ? ` - ${item.name}` : ""}
                       </div>
                     ))}
@@ -418,7 +432,7 @@ export default function ImportUsersModal({
 
           <div className={styles.buttonGroup}>
             <button type="button" onClick={onClose} disabled={isSubmitting}>
-              Close
+              {t("close")}
             </button>
             <button
               type="button"
@@ -426,7 +440,7 @@ export default function ImportUsersModal({
               onClick={handleImport}
               disabled={!rows.length || isSubmitting}
             >
-              {isSubmitting ? "Importing..." : "Import users"}
+              {isSubmitting ? t("importing") : t("submit")}
             </button>
           </div>
         </div>

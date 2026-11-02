@@ -290,6 +290,7 @@ export async function POST(req) {
         skippedRows.push({
           row: rowNumber,
           name,
+          code: "noIdentifier",
           reason: "No email, Teams AAD Object ID, or phone number found",
         });
         return;
@@ -306,6 +307,7 @@ export async function POST(req) {
         skippedRows.push({
           row: rowNumber,
           name,
+          code: "conflict",
           reason:
             "Multiple matching users found. Email, phone, or Teams AAD Object ID belong to different users.",
         });
@@ -320,6 +322,7 @@ export async function POST(req) {
         skippedRows.push({
           row: rowNumber,
           name: "",
+          code: "missingName",
           reason: "Missing name",
         });
         return;
@@ -329,7 +332,9 @@ export async function POST(req) {
         skippedRows.push({
           row: rowNumber,
           name: displayName,
+          code: "unknownTags",
           reason: `Unknown tag(s): ${missingTagNames.join(", ")}`,
+          tags: missingTagNames.join(", "),
         });
         return;
       }
@@ -338,6 +343,7 @@ export async function POST(req) {
         skippedRows.push({
           row: rowNumber,
           name: displayName,
+          code: "duplicateUser",
           reason: "Duplicate row for the same existing user",
         });
         return;
@@ -347,6 +353,7 @@ export async function POST(req) {
         skippedRows.push({
           row: rowNumber,
           name: displayName,
+          code: "duplicateEmail",
           reason: "Duplicate email in import file",
         });
         return;
@@ -356,6 +363,7 @@ export async function POST(req) {
         skippedRows.push({
           row: rowNumber,
           name: displayName,
+          code: "duplicateTeams",
           reason: "Duplicate Teams AAD Object ID in import file",
         });
         return;
@@ -365,6 +373,7 @@ export async function POST(req) {
         skippedRows.push({
           row: rowNumber,
           name: displayName,
+          code: "duplicatePhone",
           reason: "Duplicate phone number in import file",
         });
         return;

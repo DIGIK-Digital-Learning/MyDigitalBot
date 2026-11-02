@@ -1535,12 +1535,12 @@ export default function BroadcastPage() {
       const rawMinute = String(minuteValue || "").trim();
 
       if (!rawHour || !rawMinute) {
-        setTimeError("Fill in both hour and minute.");
+        setTimeError(translation("Broadcast.feedback.time.bothParts"));
         return false;
       }
 
       if (!/^\d{1,2}$/.test(rawHour) || !/^\d{1,2}$/.test(rawMinute)) {
-        setTimeError("Use only numbers.");
+        setTimeError(translation("Broadcast.feedback.time.numbersOnly"));
         return false;
       }
 
@@ -1548,12 +1548,12 @@ export default function BroadcastPage() {
       const minutes = Number(rawMinute);
 
       if (Number.isNaN(hours) || Number.isNaN(minutes)) {
-        setTimeError("Enter a valid time.");
+        setTimeError(translation("Broadcast.feedback.time.invalid"));
         return false;
       }
 
       if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
-        setTimeError("Enter a valid time.");
+        setTimeError(translation("Broadcast.feedback.time.invalid"));
         return false;
       }
 
@@ -1562,7 +1562,7 @@ export default function BroadcastPage() {
       const maxMinutes = 20 * 60;
 
       if (totalMinutes < minMinutes || totalMinutes > maxMinutes) {
-        setTimeError("Choose a time between 08:00 and 20:00.");
+        setTimeError(translation("Broadcast.feedback.time.range"));
         return false;
       }
 
@@ -1576,7 +1576,7 @@ export default function BroadcastPage() {
 
       return true;
     },
-    [scheduledFor],
+    [scheduledFor, translation],
   );
 
   function handleHourChange(value) {
@@ -1869,7 +1869,7 @@ export default function BroadcastPage() {
   }
 
   function getResultReason(result) {
-    if (!result) return "Unknown error.";
+    if (!result) return translation("Broadcast.feedback.unknownError");
 
     if (result.error) return String(result.error);
     if (result.reason) return String(result.reason);
@@ -1883,10 +1883,12 @@ export default function BroadcastPage() {
     if (result.data?.detail) return String(result.data.detail);
 
     if (result.status) {
-      return `Request failed with status ${result.status}.`;
+      return translation("Broadcast.feedback.requestFailed", {
+        status: result.status,
+      });
     }
 
-    return "Unknown error.";
+    return translation("Broadcast.feedback.unknownError");
   }
 
   function getFailedRecipients(data, selectedUsers, channel) {
@@ -1931,7 +1933,7 @@ export default function BroadcastPage() {
           r.birdContactId ||
           r.userId ||
           r.email ||
-          "Unknown recipient";
+          translation("Broadcast.feedback.unknownRecipient");
 
         const label =
           matchedUser?.name ||
@@ -1978,10 +1980,12 @@ export default function BroadcastPage() {
     const hiddenCount = failedRecipients.length - visible.length;
 
     if (hiddenCount > 0) {
-      lines.push(`- And ${hiddenCount} more...`);
+      lines.push(
+        translation("Broadcast.feedback.andMore", { count: hiddenCount }),
+      );
     }
 
-    return `Failed recipients:\n${lines.join("\n")}`;
+    return `${translation("Broadcast.feedback.failedRecipients")}\n${lines.join("\n")}`;
   }
 
   function formatBroadcastResultMessage({
@@ -1992,12 +1996,11 @@ export default function BroadcastPage() {
     note,
     failedRecipients = [],
   }) {
-    const channelLabel = channel === "whatsapp" ? "WhatsApp" : "Teams";
-
-    const successLabel = ok === 1 ? "1 success" : `${ok} successes`;
-    const failedLabel = failed === 1 ? "1 fail" : `${failed} fails`;
-
-    const mainMessage = `${channelLabel} broadcast ${action} with ${successLabel} and ${failedLabel}.`;
+    const mainMessage = translation(`Broadcast.feedback.summary.${action}`, {
+      channel: channel === "whatsapp" ? "WhatsApp" : "Teams",
+      ok,
+      failed,
+    });
     const failureDetails = formatFailedRecipients(failedRecipients);
 
     return [mainMessage, note, failureDetails].filter(Boolean).join("\n\n");
@@ -2340,7 +2343,7 @@ export default function BroadcastPage() {
     if (!(await validateTrackedDestinationsBeforeAction())) return;
     if (!selectedUsers.length) {
       await showAlert({
-        title: "Choose recipients",
+        title: translation("Broadcast.feedback.chooseRecipients"),
         message: translation("Broadcast.chooseRecipients"),
         tone: "warning",
       });
@@ -2350,8 +2353,8 @@ export default function BroadcastPage() {
     if (chainMode) {
       if (!readChainsFeatureEnabled) {
         await showAlert({
-          title: "Read chains are disabled",
-          message: "Enable read chain messages in Automations first.",
+          title: translation("Broadcast.feedback.chainDisabled.title"),
+          message: translation("Broadcast.feedback.chainDisabled.message"),
           tone: "warning",
         });
         return;
@@ -2359,9 +2362,8 @@ export default function BroadcastPage() {
 
       if (!chainValid) {
         await showAlert({
-          title: "Complete the chain",
-          message:
-            "A read chain needs 2 to 10 freeform messages, and every message must have text or attachments. Tracked links must also be complete.",
+          title: translation("Broadcast.feedback.chainIncomplete.title"),
+          message: translation("Broadcast.feedback.chainIncomplete.message"),
           tone: "warning",
         });
         return;
@@ -2384,7 +2386,7 @@ export default function BroadcastPage() {
 
         if (await showContentLimitAlert(data)) return;
         if (!res.ok) {
-          throw new Error(data?.error || "Failed to send read chain.");
+          throw new Error(data?.error || translation("Broadcast.feedback.chainSendFailed"));
         }
 
         const counts = getBroadcastCounts(data, selectedUsers.length);
@@ -2397,8 +2399,8 @@ export default function BroadcastPage() {
         await showAlert({
           title:
             counts.failed > 0
-              ? "Read chain started with issues"
-              : "Read chain started",
+              ? translation("Broadcast.feedback.titles.chainStartedIssues")
+              : translation("Broadcast.feedback.titles.chainStarted"),
           message: formatBroadcastResultMessage({
             channel,
             action: "started",
@@ -2407,8 +2409,8 @@ export default function BroadcastPage() {
             note:
               data?.note ||
               (isWhatsapp
-                ? "Message 1 was sent if the 24h window was open. If not, the opening message was sent and the chain waits for a reply."
-                : "Message 1 was sent. Each next message follows once the previous one is read."),
+                ? translation("Broadcast.feedback.notes.chainWhatsapp")
+                : translation("Broadcast.feedback.notes.chainTeams")),
             failedRecipients,
           }),
           tone: counts.failed > 0 ? "warning" : "success",
@@ -2438,8 +2440,8 @@ export default function BroadcastPage() {
       !trackedLinksValid
     ) {
       await showAlert({
-        title: "Invalid tracked links",
-        message: "Please complete all tracked links and avoid duplicate keys.",
+        title: translation("Broadcast.feedback.invalidLinks.title"),
+        message: translation("Broadcast.feedback.invalidLinks.message"),
         tone: "warning",
       });
       return;
@@ -2500,8 +2502,8 @@ export default function BroadcastPage() {
       await showAlert({
         title:
           counts.failed > 0
-            ? "Broadcast completed with issues"
-            : "Broadcast sent",
+            ? translation("Broadcast.feedback.titles.sentIssues")
+            : translation("Broadcast.feedback.titles.sent"),
         message: formatBroadcastResultMessage({
           channel,
           action: "sent",
@@ -2530,7 +2532,7 @@ export default function BroadcastPage() {
     if (!(await validateTrackedDestinationsBeforeAction())) return;
     if (!isGroupAudience && !selectedUsers.length) {
       await showAlert({
-        title: "Choose recipients",
+        title: translation("Broadcast.feedback.chooseRecipients"),
         message: translation("Broadcast.chooseRecipients"),
         tone: "warning",
       });
@@ -2541,8 +2543,8 @@ export default function BroadcastPage() {
 
     if (!committed) {
       await showAlert({
-        title: "Invalid time",
-        message: "Please enter a valid time between 08:00 and 20:00.",
+        title: translation("Broadcast.feedback.invalidTime.title"),
+        message: translation("Broadcast.feedback.invalidTime.message"),
         tone: "warning",
       });
       return;
@@ -2550,8 +2552,8 @@ export default function BroadcastPage() {
 
     if (!scheduledFor || Number.isNaN(scheduledFor.getTime())) {
       await showAlert({
-        title: "Choose date and time",
-        message: "Choose a date and time.",
+        title: translation("Broadcast.feedback.chooseDateTime.title"),
+        message: translation("Broadcast.feedback.chooseDateTime.message"),
         tone: "warning",
       });
       return;
@@ -2562,8 +2564,8 @@ export default function BroadcastPage() {
 
     if (scheduledDate.getTime() <= Date.now()) {
       await showAlert({
-        title: "Invalid schedule date",
-        message: "The scheduled date must be in the future.",
+        title: translation("Broadcast.feedback.pastDate.title"),
+        message: translation("Broadcast.feedback.pastDate.message"),
         tone: "warning",
       });
       return;
@@ -2577,8 +2579,8 @@ export default function BroadcastPage() {
     if (chainMode) {
       if (!readChainsFeatureEnabled) {
         await showAlert({
-          title: "Read chains are disabled",
-          message: "Enable read chain messages in Automations first.",
+          title: translation("Broadcast.feedback.chainDisabled.title"),
+          message: translation("Broadcast.feedback.chainDisabled.message"),
           tone: "warning",
         });
         return;
@@ -2586,9 +2588,8 @@ export default function BroadcastPage() {
 
       if (!chainValid) {
         await showAlert({
-          title: "Complete the chain",
-          message:
-            "A scheduled read chain needs 2 to 10 freeform messages, and every message must have text or attachments. Tracked links must also be complete.",
+          title: translation("Broadcast.feedback.chainIncomplete.title"),
+          message: translation("Broadcast.feedback.chainIncomplete.scheduledMessage"),
           tone: "warning",
         });
         return;
@@ -2618,7 +2619,7 @@ export default function BroadcastPage() {
 
         if (await showContentLimitAlert(data)) return;
         if (!res.ok) {
-          throw new Error(data?.error || "Failed to schedule read chain.");
+          throw new Error(data?.error || translation("Broadcast.feedback.chainScheduleFailed"));
         }
 
         const counts = getBroadcastCounts(data, selectedUsers.length);
@@ -2631,16 +2632,15 @@ export default function BroadcastPage() {
         await showAlert({
           title:
             counts.failed > 0
-              ? "Read chain scheduled with issues"
-              : "Read chain scheduled",
+              ? translation("Broadcast.feedback.titles.chainScheduledIssues")
+              : translation("Broadcast.feedback.titles.chainScheduled"),
           message: formatBroadcastResultMessage({
             channel,
             action: "scheduled",
             ok: counts.ok,
             failed: counts.failed,
             note:
-              data?.note ||
-              "Message 1 will be sent at the scheduled time. The next messages will continue after read receipts.",
+              data?.note || translation("Broadcast.feedback.notes.chainScheduled"),
             failedRecipients,
           }),
           tone: counts.failed > 0 ? "warning" : "success",
@@ -2672,8 +2672,8 @@ export default function BroadcastPage() {
       !trackedLinksValid
     ) {
       await showAlert({
-        title: "Invalid tracked links",
-        message: "Please complete all tracked links and avoid duplicate keys.",
+        title: translation("Broadcast.feedback.invalidLinks.title"),
+        message: translation("Broadcast.feedback.invalidLinks.message"),
         tone: "warning",
       });
       return;
@@ -2731,14 +2731,14 @@ export default function BroadcastPage() {
       await showAlert({
         title:
           counts.failed > 0
-            ? "Broadcast scheduled with issues"
-            : "Broadcast scheduled",
+            ? translation("Broadcast.feedback.titles.scheduledIssues")
+            : translation("Broadcast.feedback.titles.scheduled"),
         message: formatBroadcastResultMessage({
           channel,
           action: "scheduled",
           ok: counts.ok,
           failed: counts.failed,
-          note: "These counts mean the broadcast was scheduled for those recipients. Delivery success will only be known when the scheduled broadcast is actually sent.",
+          note: translation("Broadcast.feedback.notes.scheduled"),
           failedRecipients,
         }),
         tone: counts.failed > 0 ? "warning" : "success",

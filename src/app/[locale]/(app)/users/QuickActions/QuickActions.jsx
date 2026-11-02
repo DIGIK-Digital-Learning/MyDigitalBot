@@ -283,7 +283,7 @@ export default function QuickActionsBar({
             onClick={() => tagPop.setOpen((v) => !v)}
             type="button"
             disabled={!tags?.length}
-            title={!tags?.length ? "No tags yet" : undefined}
+            title={!tags?.length ? t("QuickActions.noTags") : undefined}
           >
             {t("QuickActions.tag")} {tagIds.length ? `(${tagIds.length})` : ""}
           </button>

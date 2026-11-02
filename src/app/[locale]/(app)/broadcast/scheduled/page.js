@@ -429,7 +429,7 @@ export default function ScheduledPage() {
 
       await showAlert({
         title: t("Alerts.invalidForm.title"),
-        message: "Choose at least one recipient.",
+        message: t("Alerts.invalidForm.noRecipients"),
         tone: "warning",
       });
 
