@@ -43,6 +43,22 @@ export async function listOrganizationsWithPlan() {
   return data || [];
 }
 
+/*
+ * As organizações num plano com prazo (a Demo), com o início do plano: os
+ * crons usam-nas para saber quais já terminaram (#209).
+ */
+export async function listOrganizationsWithPlanDuration() {
+  const sb = getSupabaseAdminClient();
+
+  const { data, error } = await sb
+    .from("organization")
+    .select("id, plan_started_at, plan:plan_id!inner (duration_days)")
+    .not("plan.duration_days", "is", null);
+
+  if (error) throw error;
+  return data || [];
+}
+
 /* Um plano pelo nome (por exemplo, o "Interno" da DIGIK). */
 export async function getPlanByName(name) {
   const sb = getSupabaseAdminClient();

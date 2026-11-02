@@ -11,6 +11,7 @@ import { sendTeamsGroupBroadcast } from "@/lib/services/broadcast/sendTeamsGroup
 import {
   checkMessageContent,
   claimDailySend,
+  planExpiredBody,
   releaseDailySend,
 } from "@/lib/services/plans/planLimits";
 import {
@@ -35,6 +36,10 @@ export async function POST(req) {
       message: typeof body?.message === "string" ? body.message : "",
       files: Array.isArray(body?.files) ? body.files : [],
     });
+    /* A Demo terminou (#209): ver continua, criar e enviar não. */
+    const expired = planExpiredBody(content.orgLimits);
+    if (expired) return NextResponse.json(expired, { status: 403 });
+
     if (content.body) {
       return NextResponse.json(content.body, { status: 400 });
     }

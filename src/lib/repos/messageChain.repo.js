@@ -209,14 +209,32 @@ export async function getMessageChainRecipientsByChainId(chainId) {
   return data || [];
 }
 
-export async function claimDueScheduledMessageChains({ limit = 25 } = {}) {
-  const { data: dueChains, error: selectError } = await sb
+/*
+ * `excludeOrganizationIds`: organizações cujas correntes ficam à espera (a
+ * Demo terminou, #209). Ficam de fora da consulta para não ocuparem o lugar
+ * das outras.
+ */
+export async function claimDueScheduledMessageChains({
+  limit = 25,
+  excludeOrganizationIds = [],
+} = {}) {
+  let query = sb
     .from("message_chain")
     .select("*")
     .eq("status", "scheduled")
     .lte("scheduled_for", nowIso())
     .order("scheduled_for", { ascending: true })
     .limit(limit);
+
+  if (excludeOrganizationIds.length) {
+    query = query.not(
+      "organization_id",
+      "in",
+      `(${excludeOrganizationIds.join(",")})`,
+    );
+  }
+
+  const { data: dueChains, error: selectError } = await query;
 
   if (selectError) throw selectError;
 
@@ -347,14 +365,32 @@ export async function getMessageChainDelivery({ chainRecipientId, stepIndex }) {
   return data ?? null;
 }
 
-export async function claimDueScheduledMessageChainDeliveries({ limit = 50 }) {
-  const { data: dueDeliveries, error: selectError } = await sb
+/* A organização vem da corrente: a entrega não a guarda. */
+export async function claimDueScheduledMessageChainDeliveries({
+  limit = 50,
+  excludeOrganizationIds = [],
+}) {
+  let query = sb
     .from("message_chain_delivery")
-    .select("*")
+    .select(
+      excludeOrganizationIds.length
+        ? "*, chain:message_chain!inner (organization_id)"
+        : "*",
+    )
     .eq("status", "scheduled")
     .lte("due_at", nowIso())
     .order("due_at", { ascending: true })
     .limit(limit);
+
+  if (excludeOrganizationIds.length) {
+    query = query.not(
+      "chain.organization_id",
+      "in",
+      `(${excludeOrganizationIds.join(",")})`,
+    );
+  }
+
+  const { data: dueDeliveries, error: selectError } = await query;
 
   if (selectError) throw selectError;
 

@@ -13,6 +13,7 @@ import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
 import {
   checkMessageContent,
   claimDailySend,
+  planExpiredBody,
   releaseDailySend,
   saveTrackedLinksWithinPlan,
 } from "@/lib/services/plans/planLimits";
@@ -168,6 +169,11 @@ export async function POST(req) {
       orgAuth.orgId,
       steps.map((step) => ({ message: step.message, files: step.files })),
     );
+
+    /* A Demo terminou (#209): ver continua, criar e enviar não. */
+    const expired = planExpiredBody(content.orgLimits);
+    if (expired) return NextResponse.json(expired, { status: 403 });
+
     const maxSteps = content.orgLimits.limits.chainMessages ?? Infinity;
 
     if (steps.length < 2 || steps.length > maxSteps) {

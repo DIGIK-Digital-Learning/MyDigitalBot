@@ -8,6 +8,7 @@ import {
   getOrgLimits,
   hasRoomFor,
   limitReachedBody,
+  planExpiredBody,
   releaseDailySend,
   saveTrackedLinksWithinPlan,
 } from "@/lib/services/plans/planLimits";
@@ -60,6 +61,11 @@ export async function POST(req) {
      * destinatários: se a conta está cheia, não vale a pena.
      */
     const orgLimits = await getOrgLimits(orgAuth.orgId);
+
+    /* A Demo terminou (#209): ver continua, criar e enviar não. */
+    const expired = planExpiredBody(orgLimits);
+    if (expired) return NextResponse.json(expired, { status: 403 });
+
     const queuedCount = await countManualQueuedBroadcasts(orgAuth.orgId);
 
     if (!hasRoomFor(orgLimits.limits.scheduledMessages, queuedCount)) {

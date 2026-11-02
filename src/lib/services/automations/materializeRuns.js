@@ -5,6 +5,7 @@ import {
 } from "@/lib/repos/automationRuns.repo";
 import { createScheduledBroadcast } from "@/lib/repos/scheduledBroadcasts.repo";
 import { getUserById } from "@/lib/repos/user.repo";
+import { getExpiredOrganizationIds } from "@/lib/services/plans/planLimits";
 
 async function materializeOne(run) {
   try {
@@ -140,7 +141,11 @@ async function materializeOne(run) {
 
 export async function materializeDueRuns({ limit = 200, organizationId = null } = {}) {
   console.log("[materialize] now:", new Date().toISOString());
-  const dueRuns = await getDueAutomationRuns(limit, { organizationId });
+  /* A Demo terminou (#209): as automações dessas empresas ficam à espera. */
+  const dueRuns = await getDueAutomationRuns(limit, {
+    organizationId,
+    excludeOrganizationIds: await getExpiredOrganizationIds(),
+  });
   console.log(
     "[materialize] dueRuns:",
     dueRuns.map((r) => ({

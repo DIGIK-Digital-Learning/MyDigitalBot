@@ -1,0 +1,54 @@
+/* Faixa da Demo de 7 dias (#209). */
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-bottom: 1px solid;
+}
+
+/* Ainda faltam mais de 2 dias: discreta. */
+.active {
+  background: #f3f6fb;
+  border-color: #d9e1ee;
+  color: #33415c;
+}
+
+/* Faltam 2 dias ou menos. */
+.warning {
+  background: #fff4e5;
+  border-color: #f5c27a;
+  color: #8a4b00;
+}
+
+/* A Demo terminou: fica à vista ao rolar. */
+.ended {
+  position: sticky;
+  top: 0;
+  z-index: 39;
+  padding: 10px 16px;
+  background: #fdecec;
+  border-color: #f2b8b5;
+  color: #a01c1c;
+}
+
+.button {
+  border: 1px solid currentColor;
+  background: #fff;
+  color: inherit;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ended .button {
+  background: #c62828;
+  border-color: #c62828;
+  color: #fff;
+}

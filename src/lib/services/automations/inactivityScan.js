@@ -2,6 +2,7 @@ import { getActiveAutomationRules } from "@/lib/repos/automationRules.repo";
 import { getUsersInOrg } from "@/lib/repos/user.repo";
 import { getLastInboundForUserAssistant } from "@/lib/repos/messages.repo";
 import { queueAutomationRunForRule } from "@/lib/services/automations/automationEngine";
+import { getExpiredOrganizationIds } from "@/lib/services/plans/planLimits";
 
 const PAGE_SIZE = 500;
 
@@ -123,9 +124,11 @@ async function processOrganizationChannel({ organizationId, channel, rules }) {
 }
 
 export async function runInactivityScan({ organizationId = null } = {}) {
+  /* A Demo terminou (#209): as automações dessas empresas não correm. */
   const rules = await getActiveAutomationRules({
     triggerType: "user.inactive",
     organizationId,
+    excludeOrganizationIds: await getExpiredOrganizationIds(),
   });
 
   if (!rules.length) {

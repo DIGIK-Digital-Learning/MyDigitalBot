@@ -51,6 +51,7 @@ export async function getOrgAutomationRules(organizationId) {
 export async function getActiveAutomationRules({
   organizationId = null,
   triggerType = null,
+  excludeOrganizationIds = [],
 }) {
   const sb = getRepositoryReadClient();
   let query = sb
@@ -65,6 +66,15 @@ export async function getActiveAutomationRules({
 
   if (triggerType) {
     query = query.eq("trigger_type", triggerType);
+  }
+
+  /* A Demo terminou (#209): as automações destas organizações não correm. */
+  if (excludeOrganizationIds.length) {
+    query = query.not(
+      "organization_id",
+      "in",
+      `(${excludeOrganizationIds.join(",")})`,
+    );
   }
 
   const { data, error } = await query;

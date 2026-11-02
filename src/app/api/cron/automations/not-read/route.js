@@ -9,6 +9,7 @@ import { queueAutomationRunForRule } from "@/lib/services/automations/automation
 import { getAutomationRunById } from "@/lib/repos/automationRuns.repo";
 import { assertAssistantBelongsToOrg } from "@/lib/auth/guards";
 import { getSupabaseAdminClient } from "@/lib/db/admin";
+import { getExpiredOrganizationIds } from "@/lib/services/plans/planLimits";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -316,8 +317,10 @@ async function handler(req) {
       // ignore this error
     }
 
+    /* A Demo terminou (#209): as automações dessas empresas não correm. */
     let rules = await getActiveAutomationRules({
       triggerType: TRIGGER_TYPE,
+      excludeOrganizationIds: await getExpiredOrganizationIds(),
     });
 
     if (limitOrganizations) {

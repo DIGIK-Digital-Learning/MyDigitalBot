@@ -15,6 +15,7 @@ import {
 import { sendReadChainStep } from "@/lib/services/broadcast/readChains/sendReadChainStep";
 import { refundChainSend } from "@/lib/repos/adminDailySends.repo";
 import { dailySendsDayStart } from "@/lib/plans/dailySends";
+import { getExpiredOrganizationIds } from "@/lib/services/plans/planLimits";
 
 function isAuthorized(req) {
   const secret = process.env.CRON_SECRET;
@@ -54,7 +55,11 @@ async function processDueReadChains(req) {
     ? Math.min(Math.max(limitParam, 1), 100)
     : 25;
 
-  const chains = await claimDueScheduledMessageChains({ limit });
+  /* A Demo terminou (#209): as correntes dessas empresas ficam à espera. */
+  const chains = await claimDueScheduledMessageChains({
+    limit,
+    excludeOrganizationIds: await getExpiredOrganizationIds(),
+  });
 
   const chainResults = [];
 

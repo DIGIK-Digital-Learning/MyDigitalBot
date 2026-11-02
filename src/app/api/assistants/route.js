@@ -11,6 +11,7 @@ import {
   hasRoomFor,
   limitKeepingCurrent,
   limitReachedBody,
+  planExpiredBody,
 } from "@/lib/services/plans/planLimits";
 
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
@@ -112,6 +113,11 @@ export async function POST(req) {
 
     /* Limite de assistentes do plano (Demo = 1). */
     const orgLimits = await getOrgLimits(orgAuth.orgId);
+
+    /* A Demo terminou (#209): ver continua, criar e enviar não. */
+    const expired = planExpiredBody(orgLimits);
+    if (expired) return NextResponse.json(expired, { status: 403 });
+
     const assistantCount = await countAssistantsByOrg(orgAuth.orgId);
 
     if (!hasRoomFor(orgLimits.limits.assistants, assistantCount)) {

@@ -13,6 +13,7 @@ import { parseQuestionOptions } from "@/lib/services/broadcast/questionOptions";
 import {
   checkMessageContent,
   claimDailySend,
+  planExpiredBody,
   releaseDailySend,
   saveTrackedLinksWithinPlan,
 } from "@/lib/services/plans/planLimits";
@@ -54,6 +55,10 @@ export async function POST(req) {
       message: body?.message || "",
       files: Array.isArray(body?.files) ? body.files : [],
     });
+    /* A Demo terminou (#209): ver continua, criar e enviar não. */
+    const expired = planExpiredBody(content.orgLimits);
+    if (expired) return NextResponse.json(expired, { status: 403 });
+
     if (content.body) {
       return NextResponse.json(content.body, { status: 400 });
     }

@@ -6,6 +6,7 @@ import styles from "./import.module.css";
 import PillSelect from "@/app/components/PillSelect/PillSelect";
 import mapCsvRow from "./helpers";
 import { Download } from "lucide-react";
+import usePlanLimitPrompt from "@/app/hooks/usePlanLimitPrompt";
 
 const PREVIEW_LIMIT = 10;
 
@@ -37,6 +38,7 @@ export default function ImportUsersModal({
   defaultPhoneCode = "+351",
   onImported,
 }) {
+  const promptPlanLimit = usePlanLimitPrompt();
   const [rows, setRows] = useState([]);
   const [assistantId, setAssistantId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -203,6 +205,9 @@ export default function ImportUsersModal({
       const data = await res.json();
 
       if (!res.ok) {
+        /* A Demo terminou (#209): aviso com "Ativar plano". */
+        if (await promptPlanLimit(data)) return;
+
         setError(data.error || "Import failed.");
         return;
       }

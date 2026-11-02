@@ -4,7 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 
 import { fetchPlanLimits } from "@/lib/plans/plans.api";
 
-const EMPTY = { plan: null, limits: null, usage: null, dailySendsResetAt: null };
+const EMPTY = {
+  plan: null,
+  limits: null,
+  usage: null,
+  dailySendsResetAt: null,
+  expiresAt: null,
+  expired: false,
+};
 
 /**
  * Os limites do plano da organização e quanto já está gasto, para contadores
@@ -35,6 +42,9 @@ export default function usePlanLimits(orgId) {
             limits: data.limits ?? null,
             usage: data.usage ?? null,
             dailySendsResetAt: data.dailySendsResetAt ?? null,
+            /* Fim de um plano com prazo, a Demo (#209); null nos outros. */
+            expiresAt: data.expiresAt ?? null,
+            expired: Boolean(data.expired),
           });
         }
       })

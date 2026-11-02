@@ -97,17 +97,31 @@ export async function deleteScheduledBroadcast(id) {
   return true;
 }
 
-export async function getDueScheduledBroadcasts(limit = 20) {
+/*
+ * `excludeOrganizationIds`: organizações cujo trabalho fica à espera (a Demo
+ * terminou, #209). Ficam de fora da consulta para não ocuparem o lugar das
+ * outras.
+ */
+export async function getDueScheduledBroadcasts(
+  limit = 20,
+  { excludeOrganizationIds = [] } = {},
+) {
   const sb = getRepositoryReadClient();
   const nowIso = new Date().toISOString();
 
-  const { data, error } = await sb
+  let query = sb
     .from("scheduled_broadcast")
     .select("*")
     .eq("status", "queued")
     .lte("scheduled_for", nowIso)
     .order("scheduled_for", { ascending: true })
     .limit(limit);
+
+  if (excludeOrganizationIds.length) {
+    query = query.not("organization_id", "in", `(${excludeOrganizationIds.join(",")})`);
+  }
+
+  const { data, error } = await query;
 
   if (error) throw error;
   return data || [];

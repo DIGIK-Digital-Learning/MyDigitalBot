@@ -1,4 +1,7 @@
-import { getOrganizationPlan } from "@/lib/repos/plans.repo";
+import {
+  getOrganizationPlan,
+  listOrganizationsWithPlanDuration,
+} from "@/lib/repos/plans.repo";
 import {
   claimAdminDailySend,
   releaseAdminDailySend,
@@ -33,6 +36,12 @@ export const LIMIT_COLUMNS = {
   chainMessages: "max_chain_messages",
 };
 
+/* Quando acaba um plano com duração (a Demo); null num plano sem prazo. */
+export function planExpiresAt(startedAt, durationDays) {
+  if (!startedAt || !durationDays) return null;
+  return new Date(new Date(startedAt).getTime() + durationDays * DAY_MS);
+}
+
 /**
  * Os limites de uma organização e o estado do plano dela. Cada limite é um
  * número, ou null quando o plano não tem limite. O limite de utilizadores pode
@@ -65,10 +74,7 @@ export async function getOrgLimits(orgId, { now = new Date(), deps = {} } = {}) 
   limits.users = org.max_users_override ?? limits.users;
 
   const startedAt = org.plan_started_at ? new Date(org.plan_started_at) : null;
-  const expiresAt =
-    startedAt && org.plan.duration_days
-      ? new Date(startedAt.getTime() + org.plan.duration_days * DAY_MS)
-      : null;
+  const expiresAt = planExpiresAt(startedAt, org.plan.duration_days);
 
   return {
     plan: { id: org.plan.id, name: org.plan.name, level: org.plan.level },
@@ -77,6 +83,66 @@ export async function getOrgLimits(orgId, { now = new Date(), deps = {} } = {}) 
     expiresAt,
     expired: Boolean(expiresAt) && now >= expiresAt,
   };
+}
+
+/**
+ * Corpo da resposta 403 quando a Demo já terminou (#209): criar e enviar
+ * fica bloqueado até ativar um plano; ver tudo e as Definições continuam.
+ * null se o plano não acabou (os planos sem prazo nunca acabam).
+ */
+export function planExpiredBody(orgLimits) {
+  if (!orgLimits?.expired) return null;
+
+  return {
+    error: "Plan expired",
+    code: "PLAN_EXPIRED",
+    plan: orgLimits.plan?.name ?? null,
+    expiresAt: orgLimits.expiresAt ? orgLimits.expiresAt.toISOString() : null,
+  };
+}
+
+/**
+ * Para as rotas que criam alguma coisa sem ler os limites: devolve
+ * `{ orgLimits }` se o plano está ativo, ou `{ orgLimits, body }` com a
+ * resposta 403 a dar.
+ */
+export async function checkPlanActive(orgId, { now = new Date(), deps = {} } = {}) {
+  const orgLimits = await getOrgLimits(orgId, { now, deps });
+  const body = planExpiredBody(orgLimits);
+
+  return body ? { orgLimits, body } : { orgLimits };
+}
+
+/**
+ * As organizações cujo plano já terminou (#209). Os crons deixam o trabalho
+ * delas à espera: o que estava agendado não sai, e volta a sair se a Demo
+ * for prolongada.
+ *
+ * Se a leitura falhar, não exclui ninguém: um erro nosso não pode parar os
+ * envios de todas as empresas.
+ */
+export async function getExpiredOrganizationIds({
+  now = new Date(),
+  deps = {},
+} = {}) {
+  const list = deps.listOrganizationsWithPlanDuration || listOrganizationsWithPlanDuration;
+
+  let rows;
+  try {
+    rows = await list();
+  } catch (error) {
+    console.warn("[Plan] Could not read expired plans", {
+      message: error?.message || String(error),
+    });
+    return [];
+  }
+
+  return rows
+    .filter((row) => {
+      const expiresAt = planExpiresAt(row.plan_started_at, row.plan?.duration_days);
+      return Boolean(expiresAt) && now >= expiresAt;
+    })
+    .map((row) => Number(row.id));
 }
 
 /**
@@ -168,6 +234,11 @@ export async function claimDailySend(
   } = {},
 ) {
   const limits = orgLimits || (await getOrgLimits(orgId, { now, deps }));
+
+  /* Rede de segurança: com a Demo terminada não se envia nada (#209). */
+  const expired = planExpiredBody(limits);
+  if (expired) return { body: expired };
+
   const claim = deps.claimAdminDailySend || claimAdminDailySend;
   const claimKey = (deps.randomUUID || (() => crypto.randomUUID()))();
 
@@ -229,6 +300,11 @@ export async function saveTrackedLinksWithinPlan(
   if (!list.length) return {};
 
   const limits = orgLimits || (await getOrgLimits(orgId, { deps }));
+
+  /* Com a Demo terminada não se criam links novos (#209). */
+  const expired = planExpiredBody(limits);
+  if (expired) return { body: expired };
+
   const save = deps.saveTrackedLinks || saveTrackedLinks;
   const result = await save(orgId, list, limits.limits.trackedLinks);
 
