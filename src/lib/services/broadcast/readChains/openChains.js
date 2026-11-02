@@ -2,6 +2,7 @@ import {
   closeMessageChain,
   deleteUnsentChainQuestion,
   getMessageChainById,
+  lastDeliveredChainStep,
   listMessageChainSteps,
   listOpenMessageChains,
   messageChainStepTouched,
@@ -9,8 +10,9 @@ import {
   updateMessageChainStepPayload,
 } from "@/lib/repos/messageChain.repo";
 import {
+  keepChainSends,
   refundChainSend,
-  refundOneChainSend,
+  refundChainStepSends,
 } from "@/lib/repos/adminDailySends.repo";
 import { dailySendsDayStart } from "@/lib/plans/dailySends";
 import { checkMessageContent } from "@/lib/services/plans/planLimits";
@@ -134,6 +136,8 @@ export async function closeChain(
   const getChain = deps.getMessageChainById || getMessageChainById;
   const close = deps.closeMessageChain || closeMessageChain;
   const refund = deps.refundChainSend || refundChainSend;
+  const lastDelivered = deps.lastDeliveredChainStep || lastDeliveredChainStep;
+  const keepSends = deps.keepChainSends || keepChainSends;
 
   const chain = await getChain(chainId);
   if (!chain || Number(chain.organization_id) !== Number(orgId)) {
@@ -167,6 +171,17 @@ export async function closeChain(
     });
     if (!closed) return { code: "CHAIN_NOT_OPEN", status: 409 };
 
+    /*
+     * Se foi contada hoje, fica a contar só as mensagens que chegaram a
+     * alguém: as que ficaram por sair e as que falharam para toda a gente
+     * voltam ao limite do dia.
+     */
+    await keepSends(
+      chainId,
+      dailySendsDayStart(now),
+      await lastDelivered(chainId),
+    );
+
     return { action: "stopped", chain: closed };
   }
 
@@ -176,10 +191,10 @@ export async function closeChain(
 /**
  * Tira uma mensagem de uma corrente (as seguintes sobem um número).
  *
- * - Agendada: qualquer mensagem; se a corrente foi criada hoje, devolve 1
- *   envio do dia (#188).
- * - A decorrer: só uma mensagem a que ninguém chegou nem está marcada para
- *   sair; não devolve envios.
+ * - Agendada: qualquer mensagem. A decorrer: só uma mensagem a que ninguém
+ *   chegou nem está marcada para sair.
+ * - Nos dois casos, se a corrente foi criada hoje, devolve 1 envio do dia
+ *   (#188).
  * - Fica sempre com pelo menos 2 mensagens; para tirar mais, cancela-se.
  * - A pergunta da mensagem, que nunca saiu, sai também das Perguntas.
  *
@@ -197,7 +212,7 @@ export async function removeChainStep(
   const remove = deps.removeMessageChainStep || removeMessageChainStep;
   const deleteQuestion =
     deps.deleteUnsentChainQuestion || deleteUnsentChainQuestion;
-  const refundOne = deps.refundOneChainSend || refundOneChainSend;
+  const refundOne = deps.refundChainStepSends || refundChainStepSends;
 
   const chain = await getChain(chainId);
   if (!chain || Number(chain.organization_id) !== Number(orgId)) {
@@ -232,9 +247,7 @@ export async function removeChainStep(
     });
   }
 
-  if (chain.status === "scheduled") {
-    await refundOne(chainId, dailySendsDayStart(now));
-  }
+  await refundOne(chainId, dailySendsDayStart(now));
 
   return { stepCount: steps.length - 1, chain };
 }

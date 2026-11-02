@@ -16,6 +16,8 @@ import { sendWhatsappBroadcast } from "@/lib/services/broadcast/sendWhatsappBroa
 import { recordSystemAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
 import { summarizeBroadcastPayload } from "@/lib/logging/summarizeBroadcastPayload";
+import { refundScheduledSend } from "@/lib/repos/adminDailySends.repo";
+import { dailySendsDayStart } from "@/lib/plans/dailySends";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -92,6 +94,21 @@ function auditScheduledSend(broadcast, details) {
       ...details,
     },
   });
+}
+
+/*
+ * Uma agendada que falhou para toda a gente não conta como envio (#188): se
+ * foi agendada hoje, volta ao limite do dia. Agendada noutro dia, já não.
+ */
+async function refundFailedSend(broadcast) {
+  try {
+    await refundScheduledSend(broadcast.id, dailySendsDayStart());
+  } catch (error) {
+    console.warn("[Schedule Broadcast] Failed to refund daily send", {
+      broadcastId: broadcast.id,
+      message: error?.message || String(error),
+    });
+  }
 }
 
 function normalizeError(err) {
@@ -240,6 +257,7 @@ async function processOneBroadcast(broadcast) {
     });
 
     if (finalStatus === "failed") {
+      await refundFailedSend(broadcast);
       await syncAutomationRunFailure(
         verifiedAutomationRunId,
         JSON.stringify(result?.results || result || {}),
@@ -276,6 +294,8 @@ async function processOneBroadcast(broadcast) {
         finishErr,
       );
     }
+
+    await refundFailedSend(broadcast);
 
     const normalizedError = normalizeError(err);
 

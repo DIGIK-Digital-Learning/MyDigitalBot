@@ -12,6 +12,8 @@ const mocks = vi.hoisted(() => ({
   releaseAdminDailySend: vi.fn(),
   setAdminDailySendSource: vi.fn(),
   refundScheduledSend: vi.fn(),
+  refundChainStepSends: vi.fn(),
+  sendReadChainStep: vi.fn(),
   sendWhatsappBroadcast: vi.fn(),
   sendTeamsGroupBroadcast: vi.fn(),
   createMessageChain: vi.fn(),
@@ -29,6 +31,7 @@ vi.mock("@/lib/repos/adminDailySends.repo", () => ({
   releaseAdminDailySend: mocks.releaseAdminDailySend,
   setAdminDailySendSource: mocks.setAdminDailySendSource,
   refundScheduledSend: mocks.refundScheduledSend,
+  refundChainStepSends: mocks.refundChainStepSends,
   countAdminDailySends: vi.fn(async () => ({ whatsapp: 0, teams: 0 })),
 }));
 
@@ -73,12 +76,12 @@ vi.mock("@/lib/repos/organizationMessagingFeature.repo", () => ({
 
 vi.mock("@/lib/repos/messageChain.repo", () => ({
   createMessageChain: mocks.createMessageChain,
-  createMessageChainRecipients: vi.fn(async () => []),
-  createMessageChainSteps: vi.fn(async () => []),
+  createMessageChainRecipients: vi.fn(async () => [{ id: "r1", user_id: 5 }]),
+  createMessageChainSteps: vi.fn(async () => [{ id: "s1", step_index: 1 }]),
 }));
 
 vi.mock("@/lib/services/broadcast/readChains/sendReadChainStep", () => ({
-  sendReadChainStep: vi.fn(),
+  sendReadChainStep: mocks.sendReadChainStep,
 }));
 
 vi.mock("@/lib/repos/scheduledBroadcasts.repo", () => ({
@@ -134,6 +137,7 @@ beforeEach(() => {
   mocks.sendWhatsappBroadcast.mockResolvedValue({ ok: 3, failed: 0 });
   mocks.sendTeamsGroupBroadcast.mockResolvedValue({ ok: 1, failed: 0 });
   mocks.createMessageChain.mockResolvedValue({ id: "chain-1" });
+  mocks.sendReadChainStep.mockResolvedValue({ ok: true, sent: true });
   mocks.createScheduledBroadcast.mockResolvedValue({ id: SCHEDULED_ID });
   mocks.updateScheduledBroadcast.mockResolvedValue({ id: SCHEDULED_ID });
 });
@@ -295,6 +299,24 @@ describe("POST /api/broadcast/read-chain", () => {
     expect(response.status).toBe(409);
     expect((await response.json()).remaining).toBe(3);
     expect(mocks.createMessageChain).not.toHaveBeenCalled();
+  });
+
+  it("se a 1.ª mensagem falhar para toda a gente, devolve 1 envio", async () => {
+    mocks.sendReadChainStep.mockResolvedValue({ ok: false, error: "x" });
+
+    await create(5);
+
+    expect(mocks.refundChainStepSends).toHaveBeenCalledWith(
+      "chain-1",
+      expect.any(Date),
+      1,
+    );
+  });
+
+  it("se a 1.ª mensagem chegar a alguém, não devolve nada", async () => {
+    await create(5);
+
+    expect(mocks.refundChainStepSends).not.toHaveBeenCalled();
   });
 });
 

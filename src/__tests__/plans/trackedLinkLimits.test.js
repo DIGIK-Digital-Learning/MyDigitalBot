@@ -34,10 +34,15 @@ vi.mock("@/lib/repos/adminDailySends.repo", () => ({
   setAdminDailySendSource: vi.fn(),
   refundScheduledSend: vi.fn(),
   countAdminDailySends: vi.fn(async () => ({ whatsapp: 0, teams: 0 })),
+  refundChainStepSends: vi.fn(async () => {}),
 }));
 
 vi.mock("@/lib/auth/guards", () => ({
-  requireOwnedOrg: vi.fn(async () => ({ orgId: 1, admin: {}, user: { id: "u" } })),
+  requireOwnedOrg: vi.fn(async () => ({
+    orgId: 1,
+    admin: {},
+    user: { id: "u" },
+  })),
   parsePositiveInt: (value) => {
     const n = Number(value);
     return Number.isInteger(n) && n > 0 ? n : null;
@@ -80,7 +85,11 @@ import { DELETE as deleteLink } from "@/app/api/tracked-links/library/route";
 import TrackedLinksPanel from "@/app/[locale]/(app)/broadcast/components/panels/TrackedLinksPanel";
 
 const json = (body) => ({ json: () => Promise.resolve(body) });
-const GUIA = { key: "guia", label: "Guia", destinationUrl: "https://ex.pt/guia" };
+const GUIA = {
+  key: "guia",
+  label: "Guia",
+  destinationUrl: "https://ex.pt/guia",
+};
 const LINK_ID = "5f0c4a3e-1d2b-4c5d-8e9f-0a1b2c3d4e5f";
 
 beforeEach(() => {
@@ -100,7 +109,12 @@ beforeEach(() => {
       max_chain_messages: 10,
     },
   });
-  mocks.saveTrackedLinks.mockResolvedValue({ ok: true, used: 37, limit: 100, added: 1 });
+  mocks.saveTrackedLinks.mockResolvedValue({
+    ok: true,
+    used: 37,
+    limit: 100,
+    added: 1,
+  });
   mocks.claimAdminDailySend.mockResolvedValue({ ok: true, used: 1, limit: 10 });
   mocks.sendWhatsappBroadcast.mockResolvedValue({ ok: 1, failed: 0 });
   mocks.createMessageChain.mockResolvedValue({ id: "chain-1" });
@@ -113,12 +127,22 @@ describe("saveTrackedLinksWithinPlan", () => {
   });
 
   it("grava os links com o limite do plano", async () => {
-    expect(await saveTrackedLinksWithinPlan(1, [GUIA, { label: "", destinationUrl: "x" }])).toEqual({});
+    expect(
+      await saveTrackedLinksWithinPlan(1, [
+        GUIA,
+        { label: "", destinationUrl: "x" },
+      ]),
+    ).toEqual({});
     expect(mocks.saveTrackedLinks).toHaveBeenCalledWith(1, [GUIA], 100);
   });
 
   it("no limite devolve o 409 para eliminar links", async () => {
-    mocks.saveTrackedLinks.mockResolvedValue({ ok: false, used: 100, limit: 100, added: 1 });
+    mocks.saveTrackedLinks.mockResolvedValue({
+      ok: false,
+      used: 100,
+      limit: 100,
+      added: 1,
+    });
 
     const result = await saveTrackedLinksWithinPlan(1, [GUIA]);
 
@@ -135,10 +159,20 @@ describe("saveTrackedLinksWithinPlan", () => {
 
 describe("rotas de envio", () => {
   it("no WhatsApp, um link novo no 100/100 é recusado antes de gastar um envio do dia", async () => {
-    mocks.saveTrackedLinks.mockResolvedValue({ ok: false, used: 100, limit: 100, added: 1 });
+    mocks.saveTrackedLinks.mockResolvedValue({
+      ok: false,
+      used: 100,
+      limit: 100,
+      added: 1,
+    });
 
     const response = await sendWhatsapp(
-      json({ orgId: 1, recipients: [{ userId: 5 }], message: "Vê {{link.guia}}", trackedLinks: [GUIA] }),
+      json({
+        orgId: 1,
+        recipients: [{ userId: 5 }],
+        message: "Vê {{link.guia}}",
+        trackedLinks: [GUIA],
+      }),
     );
 
     expect(response.status).toBe(409);
@@ -148,7 +182,11 @@ describe("rotas de envio", () => {
   });
 
   it("numa corrente, junta os links de todos os passos", async () => {
-    const OUTRO = { key: "site", label: "Site", destinationUrl: "https://ex.pt" };
+    const OUTRO = {
+      key: "site",
+      label: "Site",
+      destinationUrl: "https://ex.pt",
+    };
 
     await createChain(
       json({
@@ -181,12 +219,18 @@ describe("DELETE /api/tracked-links/library", () => {
     expect(mocks.deleteSavedTrackedLink).toHaveBeenCalledWith(1, LINK_ID);
     expect(mocks.recordAuditEvent).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ action: "tracked_link.deleted", entityId: LINK_ID }),
+      expect.objectContaining({
+        action: "tracked_link.deleted",
+        entityId: LINK_ID,
+      }),
     );
   });
 
   it("não elimina um link que está numa agendada à espera", async () => {
-    mocks.deleteSavedTrackedLink.mockResolvedValue({ ok: false, reason: "scheduled" });
+    mocks.deleteSavedTrackedLink.mockResolvedValue({
+      ok: false,
+      reason: "scheduled",
+    });
 
     const response = await remove(`?orgId=1&id=${LINK_ID}`);
 
@@ -199,7 +243,10 @@ describe("DELETE /api/tracked-links/library", () => {
   });
 
   it("um link que não existe dá 404", async () => {
-    mocks.deleteSavedTrackedLink.mockResolvedValue({ ok: false, reason: "not_found" });
+    mocks.deleteSavedTrackedLink.mockResolvedValue({
+      ok: false,
+      reason: "not_found",
+    });
 
     expect((await remove(`?orgId=1&id=${LINK_ID}`)).status).toBe(404);
   });
@@ -213,7 +260,14 @@ describe("DELETE /api/tracked-links/library", () => {
 describe("painel dos links", () => {
   const t = (key) => key;
   const library = {
-    items: [{ id: LINK_ID, key: "guia", label: "Guia", destinationUrl: GUIA.destinationUrl }],
+    items: [
+      {
+        id: LINK_ID,
+        key: "guia",
+        label: "Guia",
+        destinationUrl: GUIA.destinationUrl,
+      },
+    ],
     loading: false,
     failed: false,
     reload: vi.fn(),
@@ -239,24 +293,34 @@ describe("painel dos links", () => {
     renderPanel({ used: 37, limit: 100 });
 
     expect(screen.getByText("37 / 100")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Broadcast.addLink" })).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: "Broadcast.addLink" }),
+    ).toBeEnabled();
     expect(screen.queryByText("Plans.limits.trackedLinksFull")).toBeNull();
   });
 
   it("no 100/100 não deixa criar e diz para eliminar um", () => {
     renderPanel({ used: 100, limit: 100 });
 
-    expect(screen.getByRole("button", { name: "Broadcast.addLink" })).toBeDisabled();
-    expect(screen.getByText("Plans.limits.trackedLinksFull")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Broadcast.addLink" }),
+    ).toBeDisabled();
+    expect(
+      screen.getByText("Plans.limits.trackedLinksFull"),
+    ).toBeInTheDocument();
     /* Reutilizar um link guardado continua a poder. */
-    expect(screen.getByRole("button", { name: "Broadcast.linkLibrary.use" })).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: "Broadcast.linkLibrary.use" }),
+    ).toBeEnabled();
   });
 
   it("o ✕ de um link pede para o eliminar", () => {
     const onDelete = vi.fn();
     renderPanel({ used: 37, limit: 100 }, onDelete);
 
-    fireEvent.click(screen.getByRole("button", { name: "Broadcast.linkLibrary.delete" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Broadcast.linkLibrary.delete" }),
+    );
 
     expect(onDelete).toHaveBeenCalledWith(library.items[0]);
   });

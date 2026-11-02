@@ -16,7 +16,11 @@ import {
   releaseDailySend,
   saveTrackedLinksWithinPlan,
 } from "@/lib/services/plans/planLimits";
-import { setAdminDailySendSource } from "@/lib/repos/adminDailySends.repo";
+import {
+  refundChainStepSends,
+  setAdminDailySendSource,
+} from "@/lib/repos/adminDailySends.repo";
+import { dailySendsDayStart } from "@/lib/plans/dailySends";
 import {
   attachChainStepQuestions,
   parseChainStepQuestions,
@@ -207,9 +211,13 @@ export async function POST(req) {
      * Links rastreados do plano (#189): os links novos entram na biblioteca
      * da organização, até 100. Reutilizar um link guardado não conta.
      */
-    const links = await saveTrackedLinksWithinPlan(orgAuth.orgId, steps.flatMap((step) => step.trackedLinks), {
-      orgLimits: content.orgLimits,
-    });
+    const links = await saveTrackedLinksWithinPlan(
+      orgAuth.orgId,
+      steps.flatMap((step) => step.trackedLinks),
+      {
+        orgLimits: content.orgLimits,
+      },
+    );
     if (links.body) {
       return NextResponse.json(links.body, { status: 409 });
     }
@@ -359,6 +367,11 @@ export async function POST(req) {
     const failedCount = results.length - okCount;
     const sentCount = results.filter((r) => r.sent).length;
     const waitingCount = results.filter((r) => r.waitingForReply).length;
+
+    /* A 1.ª mensagem falhou para toda a gente: não conta como envio (#188). */
+    if (okCount === 0) {
+      await refundChainStepSends(chain.id, dailySendsDayStart(), 1);
+    }
 
     await auditReadChain({
       ok: okCount,

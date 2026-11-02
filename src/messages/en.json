@@ -3605,7 +3605,7 @@
       "confirmRemove": {
         "title": "Remove message {index}?",
         "scheduled": "The chain keeps {count} messages. If it was created today, 1 send goes back to today's limit.",
-        "running": "Nobody received it yet: the chain goes from the previous message straight to the next one.",
+        "running": "Nobody received it yet: the chain goes from the previous message straight to the next one. If it was created today, 1 send goes back to today's limit.",
         "confirm": "Remove message"
       },
       "stepRemoved": {
@@ -3623,7 +3623,7 @@
       },
       "confirmStop": {
         "title": "Stop this chain?",
-        "message": "The remaining messages won't go out. The ones already sent stay, and today's sends aren't given back.",
+        "message": "The remaining messages won't go out and the ones already sent stay. If it was created today, the messages that didn't reach anyone go back to today's limit.",
         "confirm": "Stop chain"
       },
       "cancelled": {

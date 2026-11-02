@@ -112,12 +112,8 @@ export async function refundChainSend(chainId, since) {
   if (error) throw error;
 }
 
-/*
- * Devolve 1 envio de uma corrente a que se tirou uma mensagem, só se a
- * corrente foi contada hoje (#188). A corrente fica sempre com 2 ou mais.
- */
-export async function refundOneChainSend(chainId, since) {
-  const sb = getSupabaseAdminClient();
+/* A linha de envios de uma corrente, se foi contada desde `since` (#188). */
+async function chainSendRow(sb, chainId, since) {
   const { data, error } = await sb
     .from("admin_daily_send")
     .select("id, units")
@@ -127,12 +123,40 @@ export async function refundOneChainSend(chainId, since) {
     .maybeSingle();
 
   if (error) throw error;
-  if (!data || Number(data.units) <= 1) return;
+  return data;
+}
 
-  const { error: updateError } = await sb
-    .from("admin_daily_send")
-    .update({ units: Number(data.units) - 1 })
-    .eq("id", data.id);
+/* Grava os envios de uma corrente; com 0, a linha sai. */
+async function writeChainSends(sb, row, units) {
+  const { error } = await (units > 0
+    ? sb.from("admin_daily_send").update({ units }).eq("id", row.id)
+    : sb.from("admin_daily_send").delete().eq("id", row.id));
 
-  if (updateError) throw updateError;
+  if (error) throw error;
+}
+
+/*
+ * Devolve envios de uma corrente contada hoje (#188), um por cada mensagem que
+ * já não vai sair: tirada, ou a 1.ª quando falhou para toda a gente.
+ */
+export async function refundChainStepSends(chainId, since, count = 1) {
+  if (count < 1) return;
+
+  const sb = getSupabaseAdminClient();
+  const row = await chainSendRow(sb, chainId, since);
+  if (!row) return;
+
+  await writeChainSends(sb, row, Math.max(Number(row.units) - count, 0));
+}
+
+/*
+ * Ao parar uma corrente contada hoje: fica a contar só as mensagens que
+ * chegaram a alguém (ou estão marcadas para sair). Nunca sobe.
+ */
+export async function keepChainSends(chainId, since, units) {
+  const sb = getSupabaseAdminClient();
+  const row = await chainSendRow(sb, chainId, since);
+  if (!row || units >= Number(row.units)) return;
+
+  await writeChainSends(sb, row, Math.max(units, 0));
 }
