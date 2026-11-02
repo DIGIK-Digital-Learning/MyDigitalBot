@@ -4947,6 +4947,14 @@
     }
   },
   "Plans": {
+    "demo": {
+      "daysLeft": "{plan} · {days, plural, one {falta # dia} other {faltam # dias}}",
+      "endingSoon": "A tua {plan} termina {days, plural, one {daqui a # dia} other {daqui a # dias}}. Ativa um plano para continuares a criar e enviar.",
+      "ended": "A tua Demo terminou. Continuas a ver tudo o que tens, mas para criar e enviar tens de ativar um plano.",
+      "activate": "Ativar plano",
+      "endedTitle": "A tua Demo terminou",
+      "endedMessage": "Para criar e enviar tens de ativar um plano. Continuas a ver tudo o que já tens e as Definições."
+    },
     "limits": {
       "messageTooLongTitle": "Mensagem demasiado longa",
       "messageTooLong": "Cada mensagem pode ter até {limit} caracteres. Encurta o texto para enviares.",
