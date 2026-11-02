@@ -13,6 +13,8 @@ import {
 } from "@/lib/repos/messageChain.repo";
 
 import { sendReadChainStep } from "@/lib/services/broadcast/readChains/sendReadChainStep";
+import { refundChainSend } from "@/lib/repos/adminDailySends.repo";
+import { dailySendsDayStart } from "@/lib/plans/dailySends";
 
 function isAuthorized(req) {
   const secret = process.env.CRON_SECRET;
@@ -23,6 +25,22 @@ function isAuthorized(req) {
   const auth = req.headers.get("authorization") || "";
 
   return cronSecret === secret || auth === `Bearer ${secret}`;
+}
+
+/*
+ * A corrente falhou logo na 1.ª mensagem e já não continua: nenhuma mensagem
+ * dela conta como envio (#188). Se foi criada hoje, os envios voltam ao
+ * limite do dia; criada noutro dia, já não.
+ */
+async function refundFailedChain(chainId) {
+  try {
+    await refundChainSend(chainId, dailySendsDayStart());
+  } catch (error) {
+    console.warn("[cron/read-chains] Failed to refund daily sends", {
+      chainId,
+      message: error?.message || String(error),
+    });
+  }
 }
 
 async function processDueReadChains(req) {
@@ -160,6 +178,7 @@ async function processDueReadChains(req) {
             result.results[0]?.error ||
             "Scheduled read chain failed for all recipients",
         });
+        await refundFailedChain(chain.id);
       }
     } catch (chainError) {
       result.error =
@@ -169,6 +188,7 @@ async function processDueReadChains(req) {
         chainId: chain.id,
         errorMessage: result.error,
       });
+      await refundFailedChain(chain.id);
     }
 
     chainResults.push(result);
@@ -176,9 +196,7 @@ async function processDueReadChains(req) {
 
   const started = chainResults.filter(
     (result) =>
-      result.ok > 0 ||
-      result.waitingForReply > 0 ||
-      result.skipped > 0,
+      result.ok > 0 || result.waitingForReply > 0 || result.skipped > 0,
   ).length;
 
   const failed = chainResults.filter(
