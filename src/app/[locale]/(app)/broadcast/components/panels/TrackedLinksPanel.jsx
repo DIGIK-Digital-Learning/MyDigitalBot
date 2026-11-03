@@ -261,7 +261,7 @@ export default function TrackedLinksPanel({
                 onChange={(e) =>
                   updateTrackedLink(link.id, "key", e.target.value)
                 }
-                placeholder="training"
+                placeholder={translation("Broadcast.trackedLinkForm.keyPlaceholder")}
                 className={styles.input}
               />
             </div>
@@ -275,7 +275,7 @@ export default function TrackedLinksPanel({
                 onChange={(e) =>
                   updateTrackedLink(link.id, "label", e.target.value)
                 }
-                placeholder="Aceder à formação"
+                placeholder={translation("Broadcast.trackedLinkForm.labelPlaceholder")}
                 className={styles.input}
               />
             </div>
@@ -309,7 +309,7 @@ export default function TrackedLinksPanel({
                 onChange={(e) =>
                   updateTrackedLink(link.id, "destinationUrl", e.target.value)
                 }
-                placeholder="https://example.com/course/123"
+                placeholder={translation("Broadcast.trackedLinkForm.urlPlaceholder")}
                 className={styles.input}
               />
               {link.destinationUrl.trim() && !/^https?:\/\//i.test(link.destinationUrl.trim()) && (
@@ -321,7 +321,7 @@ export default function TrackedLinksPanel({
 
             {sanitizeTrackedKey(link.key) && (
               <div className={styles.trackedPlaceholder}>
-                Placeholder:{" "}
+                {translation("Broadcast.trackedLinkForm.placeholder")}{" "}
                 <code>{`{{link.${sanitizeTrackedKey(link.key)}}}`}</code>
               </div>
             )}
@@ -329,12 +329,14 @@ export default function TrackedLinksPanel({
         ))}
 
         {trackedLinks.length === 0 && (
-          <div className={styles.emptyMini}>No tracked links added yet.</div>
+          <div className={styles.emptyMini}>
+            {translation("Broadcast.trackedLinkForm.empty")}
+          </div>
         )}
 
         {!trackedLinksValid && trackedLinks.length > 0 && (
           <div className={styles.helpDanger}>
-            Complete every tracked link and avoid duplicate keys.
+            {translation("Broadcast.trackedLinkForm.invalid")}
           </div>
         )}
       </div>

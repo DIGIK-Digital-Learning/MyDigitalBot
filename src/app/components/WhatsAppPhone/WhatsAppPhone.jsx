@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
+import { useTranslations } from "next-intl";
 
 import styles from "./whatsAppPhone.module.css";
 
@@ -25,6 +26,7 @@ export default function WhatsAppPhone({
   footer = null,
   children,
 }) {
+  const t = useTranslations("WhatsAppPhone");
   const initial = (String(contactName || "").trim()[0] || "U").toUpperCase();
 
   const classes = [
@@ -37,7 +39,8 @@ export default function WhatsAppPhone({
     .filter(Boolean)
     .join(" ");
 
-  const status = subtitle ?? (variant === "teams" ? "Disponível" : "online");
+  const status =
+    subtitle ?? (variant === "teams" ? t("available") : t("online"));
 
   return (
     <VariantContext.Provider value={variant}>
@@ -45,7 +48,7 @@ export default function WhatsAppPhone({
         <div className={styles.header}>
           <div className={styles.avatar}>{initial}</div>
           <div className={styles.headerText}>
-            <div className={styles.title}>{contactName || "Contacto"}</div>
+            <div className={styles.title}>{contactName || t("contact")}</div>
             <div className={styles.subtitle}>{status}</div>
           </div>
         </div>
