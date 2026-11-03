@@ -5,6 +5,8 @@ const mocks = vi.hoisted(() => ({
   countAssistantsByOrg: vi.fn(),
   createAssistant: vi.fn(),
   createUserWithAutomations: vi.fn(),
+  /* A Demo terminada tem testes próprios (demoExpired); aqui, ativa. */
+  checkPlanActive: vi.fn(async () => ({ orgLimits: null })),
 }));
 
 vi.mock("@/lib/db/readAccess", () => ({
@@ -41,6 +43,7 @@ vi.mock("@/lib/repos/trackedLinkSaved.repo", () => ({
 vi.mock("@/lib/services/plans/planLimits", async (importOriginal) => ({
   ...(await importOriginal()),
   getOrgLimits: mocks.getOrgLimits,
+  checkPlanActive: mocks.checkPlanActive,
 }));
 
 /* O gasto (#186) vem das mesmas contagens que as rotas usam para recusar. */

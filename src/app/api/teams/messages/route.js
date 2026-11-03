@@ -26,6 +26,7 @@ import {
 
 import { handleQuestionReply } from "@/lib/services/questions/handleQuestionReply";
 import { claimCollaboratorWeeklyMessage } from "@/lib/services/plans/collaboratorWeeklyLimit";
+import { checkCollaboratorPlanActive } from "@/lib/services/plans/planExpiredNotice";
 
 import {
   linkTeamsUserByEmail,
@@ -886,6 +887,22 @@ async function handleUserInteraction(activity) {
 
   if (!user) {
     await sendReply(activity, NOT_REGISTERED_TEXT);
+
+    return;
+  }
+
+  /*
+   * A Demo da empresa terminou (#209): o assistente
+   * não responde. Só a primeira mensagem recebe o aviso.
+   */
+  const planActive = await checkCollaboratorPlanActive({
+    organization: org,
+    user,
+    channel: "teams",
+  });
+
+  if (!planActive.allowed) {
+    if (planActive.notice) await sendReply(activity, planActive.notice);
 
     return;
   }

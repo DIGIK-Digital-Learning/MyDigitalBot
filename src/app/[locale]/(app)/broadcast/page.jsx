@@ -58,6 +58,7 @@ import { COMPANY_KEYS, MAX_TRACKED_LINKS, NAME_KEYS } from "./lib/constants";
 import useTextSuggestion from "./lib/useTextSuggestion";
 import useImageSuggestion from "./hooks/useImageSuggestion";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
+import usePlanLimitPrompt from "@/app/hooks/usePlanLimitPrompt";
 import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import { DAILY_SENDS_TIME_ZONE } from "@/lib/plans/dailySends";
 import useTrackedLinkLibrary from "./hooks/useTrackedLinkLibrary";
@@ -144,6 +145,7 @@ export default function BroadcastPage() {
     dailySendsResetAt,
     reload: reloadPlanUsage,
   } = usePlanLimits(org?.id);
+  const promptPlanLimit = usePlanLimitPrompt();
 
   const locale = useLocale();
   const translation = useTranslations();
@@ -2152,6 +2154,9 @@ export default function BroadcastPage() {
    * se era esse o erro, para quem chama não mostrar outro aviso.
    */
   async function showContentLimitAlert(data) {
+    /* A Demo terminou (#209): aviso com "Ativar plano". */
+    if (data?.code === "PLAN_EXPIRED") return promptPlanLimit(data);
+
     /*
      * Limite diário de envios (#188): o servidor diz quantos sobram e quando
      * o contador volta a 0. Os números do ecrã acompanham.

@@ -77,6 +77,7 @@ import { processReadChainAfterRead } from "@/lib/services/broadcast/readChains/p
 
 import { handleQuestionReply } from "@/lib/services/questions/handleQuestionReply";
 import { claimCollaboratorWeeklyMessage } from "@/lib/services/plans/collaboratorWeeklyLimit";
+import { checkCollaboratorPlanActive } from "@/lib/services/plans/planExpiredNotice";
 import { handleAssistantSwitch } from "@/lib/services/assistants/handleAssistantSwitch";
 
 import { assertAssistantBelongsToOrg } from "@/lib/auth/guards";
@@ -943,6 +944,43 @@ async function handleEvent(rawJSON) {
     if (!response.ok) {
       console.error("Failed to send unregistered message:", response.data);
     }
+
+    return;
+  }
+
+  /*
+   * A Demo da empresa terminou (#209): o assistente
+   * não responde (nem às perguntas nem às mensagens
+   * pendentes). Só a primeira mensagem recebe o aviso.
+   */
+  const planActive = await checkCollaboratorPlanActive({
+    organization: channelOrganization,
+    user,
+    channel: "whatsapp",
+  });
+
+  if (!planActive.allowed) {
+    if (planActive.notice) {
+      await sendBirdMessage({
+        channelId: sentChannelId,
+
+        contactId,
+
+        phoneNumber: identity.phoneNumber || user.phone_number,
+
+        whatsappBsuid: identity.whatsappBsuid || user.whatsapp_bsuid,
+
+        body: { type: "text", text: { text: planActive.notice } },
+      });
+    }
+
+    console.log("Organization plan has expired", {
+      userId: user.id,
+
+      inboundMsgId,
+
+      notified: Boolean(planActive.notice),
+    });
 
     return;
   }

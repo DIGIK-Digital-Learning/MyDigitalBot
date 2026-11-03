@@ -12,6 +12,7 @@ import { lookupAssistantName } from "@/lib/services/audit/auditLookups";
 import { AUDIT_ACTIONS, providedFields } from "@/lib/audit/auditEvents";
 import { resolveAssistantAssignment } from "@/lib/services/users/assistantAssignment";
 import {
+  checkPlanActive,
   getOrgLimits,
   limitReachedBody,
 } from "@/lib/services/plans/planLimits";
@@ -71,6 +72,10 @@ export async function POST(req) {
 
     const orgAuth = await requireOwnedOrg(organizationId);
     if (orgAuth.error) return orgAuth.error;
+
+    /* A Demo terminou (#209): ver continua, criar e enviar não. */
+    const active = await checkPlanActive(orgAuth.orgId);
+    if (active.body) return NextResponse.json(active.body, { status: 403 });
 
     const safeAssistantId = await assertAssistantBelongsToOrg(
       orgAuth.admin,

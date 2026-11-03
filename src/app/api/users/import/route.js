@@ -8,6 +8,7 @@ import {
   addTagsToUser,
 } from "@/lib/repos/tag.repo.js";
 import { createUserWithAutomations } from "@/lib/services/automations/createUserWithAutomations";
+import { checkPlanActive } from "@/lib/services/plans/planLimits";
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
 import {
@@ -212,6 +213,10 @@ export async function POST(req) {
 
     const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
+
+    /* A Demo terminou (#209): ver continua, criar e enviar não. */
+    const active = await checkPlanActive(orgAuth.orgId);
+    if (active.body) return NextResponse.json(active.body, { status: 403 });
 
     const requestedTagNames = new Set();
 

@@ -26,6 +26,7 @@ import { useAlert } from "@/app/components/Alert/AlertProvider";
 import { RuleModal } from "./RuleModal/RuleModal";
 import { useTranslations } from "next-intl";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
+import usePlanLimitPrompt from "@/app/hooks/usePlanLimitPrompt";
 import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 
 const TRIGGER_OPTIONS = [
@@ -211,6 +212,7 @@ export default function AutomationsPage() {
    */
   const { limits: planLimits, usage: planUsage, reload: reloadPlanUsage } =
     usePlanLimits(orgId);
+  const promptPlanLimit = usePlanLimitPrompt();
   const automationsFull =
     planLimits?.automations != null &&
     planUsage?.automations != null &&
@@ -475,6 +477,9 @@ export default function AutomationsPage() {
        * formulário fica aberto, com os dados, para apagar outra automação
        * e voltar a tentar.
        */
+      /* A Demo terminou (#209): aviso com "Ativar plano". */
+      if (await promptPlanLimit(data)) return;
+
       if (data?.code === "AUTOMATION_LIMIT_REACHED") {
         await showAlert({
           title: planTranslation("automationsTitle"),
@@ -566,6 +571,9 @@ export default function AutomationsPage() {
       });
 
       const data = await res.json().catch(() => ({}));
+
+      /* A Demo terminou (#209): não se ativa, aviso com "Ativar plano". */
+      if (await promptPlanLimit(data)) return;
 
       if (!res.ok) {
         throw new Error(data?.error || "Failed to update automation rule");

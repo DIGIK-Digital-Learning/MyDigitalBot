@@ -13,6 +13,10 @@ vi.mock("@/lib/auth/guards", async (importOriginal) => ({
 vi.mock("@/lib/services/automations/inactivityScan", () => ({
   runInactivityScan: vi.fn(),
 }));
+/* A Demo terminada tem testes próprios (demoExpired); aqui, ativa. */
+vi.mock("@/lib/services/plans/planLimits", () => ({
+  checkPlanActive: async () => ({ orgLimits: null }),
+}));
 
 function sourceFiles(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {

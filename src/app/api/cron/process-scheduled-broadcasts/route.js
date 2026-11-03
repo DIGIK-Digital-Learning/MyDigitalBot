@@ -18,6 +18,7 @@ import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
 import { summarizeBroadcastPayload } from "@/lib/logging/summarizeBroadcastPayload";
 import { refundScheduledSend } from "@/lib/repos/adminDailySends.repo";
 import { dailySendsDayStart } from "@/lib/plans/dailySends";
+import { getExpiredOrganizationIds } from "@/lib/services/plans/planLimits";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -340,7 +341,10 @@ async function handler(req) {
       // keep default
     }
 
-    const due = await getDueScheduledBroadcasts(limit);
+    /* A Demo terminou (#209): as agendadas dessas empresas ficam à espera. */
+    const due = await getDueScheduledBroadcasts(limit, {
+      excludeOrganizationIds: await getExpiredOrganizationIds(),
+    });
 
     if (!due.length) {
       return NextResponse.json({

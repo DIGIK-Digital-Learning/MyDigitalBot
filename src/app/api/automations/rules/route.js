@@ -10,6 +10,7 @@ import {
   getOrgLimits,
   hasRoomFor,
   limitReachedBody,
+  planExpiredBody,
 } from "@/lib/services/plans/planLimits";
 import {
   assertAssistantBelongsToOrg,
@@ -74,6 +75,11 @@ export async function POST(req) {
 
     /* Limite de automações do plano (#186): contam todas, ativas e inativas. */
     const orgLimits = await getOrgLimits(orgAuth.orgId);
+
+    /* A Demo terminou (#209): ver continua, criar e enviar não. */
+    const expired = planExpiredBody(orgLimits);
+    if (expired) return NextResponse.json(expired, { status: 403 });
+
     const automationCount = await countAutomationRulesByOrg(orgAuth.orgId);
 
     if (!hasRoomFor(orgLimits.limits.automations, automationCount)) {

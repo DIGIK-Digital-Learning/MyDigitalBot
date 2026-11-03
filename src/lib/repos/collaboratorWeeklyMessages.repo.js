@@ -40,6 +40,29 @@ export async function claimCollaboratorMessage({
   };
 }
 
+/**
+ * Regista que o colaborador já foi avisado neste canal e neste período.
+ * Devolve true só da primeira vez: as seguintes já existem e não se avisa
+ * de novo.
+ */
+export async function claimLimitNotice({ userId, channel, periodStart }) {
+  const sb = getSupabaseAdminClient();
+  const { data, error } = await sb
+    .from("collaborator_limit_notice")
+    .upsert(
+      {
+        user_id: Number(userId),
+        channel,
+        week_start: new Date(periodStart).toISOString(),
+      },
+      { onConflict: "user_id,channel,week_start", ignoreDuplicates: true },
+    )
+    .select("user_id");
+
+  if (error) throw error;
+  return Array.isArray(data) && data.length > 0;
+}
+
 /* Uso da semana por colaborador: `{ [userId]: { whatsapp, teams } }`. */
 export async function getCollaboratorWeeklyUsage(organizationId, since) {
   const sb = getSupabaseAdminClient();
