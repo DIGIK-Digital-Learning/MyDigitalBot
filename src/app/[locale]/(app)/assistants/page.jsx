@@ -18,7 +18,7 @@ import {
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 import CharCounter from "@/app/components/CharCounter/CharCounter";
 import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
-import FilePickerButton from "./FilePickerButton";
+import FilePickerButton from "@/app/components/FilePickerButton/FilePickerButton";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
 import { limitKeepingCurrent } from "@/lib/plans/limitRules";
 
@@ -733,6 +733,7 @@ export default function AssistantsHub() {
                   </div>
                   <FilePickerButton
                     accept={ASSISTANT_FILE_ACCEPT}
+                    multiple
                     files={vsFiles}
                     onChange={async (e) => {
                       const input = e.target;
@@ -861,6 +862,7 @@ export default function AssistantsHub() {
                       </label>
                       <FilePickerButton
                         id="vector-store-edit-files"
+                        multiple
                         files={vectorStoreEditFiles}
                         onChange={async (e) => {
                           const input = e.target;

@@ -907,6 +907,12 @@
     "analytics": "Métricas"
   },
   "Common": {
+    "filePicker": {
+      "chooseFile": "Escolher ficheiro",
+      "chooseFiles": "Escolher ficheiros",
+      "noFileChosen": "Nenhum ficheiro escolhido",
+      "filesChosen": "{count} ficheiros escolhidos"
+    },
     "search": "Procurar",
     "filter": "Filtrar",
     "clear": "Limpar",
@@ -2552,9 +2558,6 @@
       "addFiles": "Adicionar ficheiros",
       "replaceHelp": "Para substituir um ficheiro, remove o antigo e adiciona o novo.",
       "newFiles": "Novos ficheiros",
-      "pickFiles": "Escolher ficheiros",
-      "noFileChosen": "Nenhum ficheiro escolhido",
-      "filesChosen": "{count} ficheiros escolhidos",
       "noFiles": "Não existem ficheiros associados.",
       "remove": "Remover",
       "keep": "Manter",

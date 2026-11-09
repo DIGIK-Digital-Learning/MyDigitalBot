@@ -907,6 +907,12 @@
     "analytics": "Analytics"
   },
   "Common": {
+    "filePicker": {
+      "chooseFile": "Choose file",
+      "chooseFiles": "Choose files",
+      "noFileChosen": "No file chosen",
+      "filesChosen": "{count} files chosen"
+    },
     "search": "Search",
     "filter": "Filter",
     "clear": "Clear",
@@ -2552,9 +2558,6 @@
       "addFiles": "Add files",
       "replaceHelp": "To replace a file, remove the old one and add the new one.",
       "newFiles": "New files",
-      "pickFiles": "Choose files",
-      "noFileChosen": "No file chosen",
-      "filesChosen": "{count} files chosen",
       "noFiles": "There are no attached files.",
       "remove": "Remove",
       "keep": "Keep",

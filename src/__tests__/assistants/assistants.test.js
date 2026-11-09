@@ -709,7 +709,7 @@ describe("AssistantsHub Page", () => {
        * escolheu.
        */
       const input = document.getElementById("vector-store-edit-files");
-      expect(input).toHaveAccessibleName(/pickFiles/);
+      expect(input).toHaveAccessibleName(/chooseFiles/);
       expect(screen.getByText("noFileChosen")).toBeInTheDocument();
 
       await user.upload(input, [pdf("a.pdf"), pdf("b.pdf")]);
