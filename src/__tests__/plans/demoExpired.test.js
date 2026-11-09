@@ -58,9 +58,12 @@ vi.mock("@/lib/services/plans/planLimits", async (importOriginal) => {
   return {
     ...original,
     getExpiredOrganizationIds: mocks.getExpiredOrganizationIds,
-    /* A rota de automações lê o plano através de checkPlanActive. */
+    /* A rota de automações lê o plano através de checkPlanActive. O `now`
+       fixo evita que o resultado dependa do relógio real: sem ele, a Demo do
+       teste (começada a partir de NOW) parecia terminada depois de 6/11. */
     checkPlanActive: vi.fn(async (orgId) => {
       const orgLimits = await original.getOrgLimits(orgId, {
+        now: NOW,
         deps: { getOrganizationPlan: async () => planRow(currentPlan) },
       });
       const body = original.planExpiredBody(orgLimits);

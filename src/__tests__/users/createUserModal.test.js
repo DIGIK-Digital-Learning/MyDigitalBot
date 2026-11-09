@@ -37,6 +37,12 @@ vi.mock("@/app/components/PillSelect/PillSelect", () => ({
 const mocks = vi.hoisted(() => ({
   onClose: vi.fn(),
   onCreateUser: vi.fn(),
+  alert: vi.fn(() => Promise.resolve()),
+}));
+
+/* O modal mostra avisos com useAlert, que só existe dentro do AlertProvider. */
+vi.mock("@/app/components/Alert/AlertProvider", () => ({
+  useAlert: () => mocks.alert,
 }));
 
 const ASSISTANTS = [
@@ -79,7 +85,8 @@ describe("CreateUserModal", () => {
 
   it("submits and calls onCreateUser with the correct payload, then closes and clears when ok=true", async () => {
     const user = userEvent.setup();
-    mocks.onCreateUser.mockResolvedValueOnce(true);
+    /* A página devolve { ok } ao modal; só com ok: true é que limpa e fecha. */
+    mocks.onCreateUser.mockResolvedValueOnce({ ok: true });
 
     renderModal();
 
@@ -87,10 +94,8 @@ describe("CreateUserModal", () => {
 
     await user.type(screen.getByLabelText("CreateUserModal.email"), "a@a.com");
 
-    await user.selectOptions(
-      screen.getByLabelText("CreateUserModal.chooseAssistant"),
-      "a2",
-    );
+    /* Os assistentes escolhem-se numa lista de caixas (vários por pessoa). */
+    await user.click(screen.getByText("Assistant Two"));
 
     await user.click(screen.getByRole("button", { name: "WhatsApp" }));
     await user.type(screen.getByPlaceholderText("912 345 678"), "912345678");
@@ -113,6 +118,7 @@ describe("CreateUserModal", () => {
         phoneNational: "912345678",
         email: "a@a.com",
         assistantId: "a2",
+        assistantIds: ["a2"],
         teamsAadObjectId: "00000000-0000-0000-0000-000000000000",
         teamsFromId: "29:ABC",
       });
@@ -123,7 +129,7 @@ describe("CreateUserModal", () => {
 
   it("does not close/clear when onCreateUser returns false", async () => {
     const user = userEvent.setup();
-    mocks.onCreateUser.mockResolvedValueOnce(false);
+    mocks.onCreateUser.mockResolvedValueOnce({ ok: false });
 
     renderModal();
 
