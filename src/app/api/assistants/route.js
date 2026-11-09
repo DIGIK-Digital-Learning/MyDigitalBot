@@ -16,6 +16,7 @@ import {
 
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
+import { assistantTextTooLong } from "@/lib/assistants/assistantTextLimits";
 
 import {
   handleApiError,
@@ -108,6 +109,19 @@ export async function POST(req) {
         {
           status: 400,
         },
+      );
+    }
+
+    /* Título até 80 caracteres e descrição até 200. */
+    const textTooLong = assistantTextTooLong({
+      name,
+      description: body?.description,
+    });
+
+    if (textTooLong) {
+      return NextResponse.json(
+        { error: "Assistant text is too long", ...textTooLong },
+        { status: 400 },
       );
     }
 

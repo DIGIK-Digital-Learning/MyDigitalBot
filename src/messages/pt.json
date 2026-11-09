@@ -2524,14 +2524,12 @@
     "myAssistants": "Os meus Assistentes",
     "createAssistant": "Criar Assistente",
     "loadingOrg": "A carregar organização…",
-    "empty": "Sem assistants ainda.",
+    "empty": "Sem assistentes ainda.",
+    "loading": "A carregar assistentes…",
     "details": {
       "descriptionPlaceholder": "Descrição curta",
       "instructionsPlaceholder": "Instruções do assistente",
       "createdAt": "Criado em",
-      "specs": "Especificidades:",
-      "behavior": "Comportamento",
-      "customBehavior": "Personalizado ({temperature})",
       "save": "Guardar",
       "saving": "A guardar...",
       "cancel": "Cancelar",
@@ -2560,7 +2558,7 @@
       "save": "Guardar alterações",
       "saving": "A atualizar..."
     },
-    "placeholder": "Seleciona um assistant na coluna da esquerda.",
+    "placeholder": "Seleciona um assistente na coluna da esquerda.",
     "errors": {
       "save": "Não foi possível guardar o assistente. {detail}",
       "delete": "Não foi possível eliminar o assistente. {detail}",

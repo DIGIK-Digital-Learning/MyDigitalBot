@@ -8,6 +8,10 @@ import usePlanLimitPrompt from "@/app/hooks/usePlanLimitPrompt";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
 import CharCounter from "@/app/components/CharCounter/CharCounter";
 import { limitKeepingCurrent } from "@/lib/plans/limitRules";
+import {
+  ASSISTANT_DESCRIPTION_MAX_CHARS,
+  ASSISTANT_NAME_MAX_CHARS,
+} from "@/lib/assistants/assistantTextLimits";
 import PresetPicker from "./PresetPicker";
 import {
   DEFAULT_ASSISTANT_PRESET,
@@ -163,8 +167,13 @@ export default function CreateAssistantModal({
             </label>
             <input
               value={name}
+              maxLength={ASSISTANT_NAME_MAX_CHARS}
               onChange={(e) => setName(e.target.value)}
               required
+            />
+            <CharCounter
+              length={name.length}
+              limit={ASSISTANT_NAME_MAX_CHARS}
             />
           </div>
           <div className={styles.formGroup}>
@@ -193,7 +202,12 @@ export default function CreateAssistantModal({
             </label>
             <input
               value={description}
+              maxLength={ASSISTANT_DESCRIPTION_MAX_CHARS}
               onChange={(e) => setDescription(e.target.value)}
+            />
+            <CharCounter
+              length={description.length}
+              limit={ASSISTANT_DESCRIPTION_MAX_CHARS}
             />
           </div>
           <div className={styles.formGroup}>

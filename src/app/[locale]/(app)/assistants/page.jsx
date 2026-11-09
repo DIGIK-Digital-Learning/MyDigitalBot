@@ -10,8 +10,7 @@ import { useAuth } from "@/app/AuthContext";
 import useOrganization from "@/app/hooks/useOrganization";
 import { useTranslations } from "next-intl";
 import { useConfirm } from "@/app/components/Confirm/ConfirmProvider";
-import PresetPicker from "./PresetPicker";
-import { findPreset, getAssistantPreset } from "./assistantPresets";
+import { assistantTextLimits } from "@/lib/assistants/assistantTextLimits";
 import {
   ASSISTANT_FILE_ACCEPT,
   resolveAssistantFileType,
@@ -23,6 +22,15 @@ import usePlanLimits from "@/app/hooks/usePlanLimits";
 import { limitKeepingCurrent } from "@/lib/plans/limitRules";
 
 const STORAGE_BUCKET = "assistant-uploads";
+
+/* Spinner pequeno, no sítio onde o conteúdo vai aparecer. */
+function LoadingState({ label }) {
+  return (
+    <div className={styles.loadingState} role="status" aria-label={label}>
+      <span className={styles.inlineSpinner} aria-hidden="true" />
+    </div>
+  );
+}
 
 export default function AssistantsHub() {
   const translation = useTranslations();
@@ -69,6 +77,15 @@ export default function AssistantsHub() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  /*
+   * Carregamentos. Enquanto a lista ou o assistente escolhido não chegam,
+   * mostra-se um spinner em vez de "Sem assistentes ainda." ou "Seleciona um
+   * assistente…", que davam a ideia errada de que não havia nenhum.
+   */
+  const [listLoaded, setListLoaded] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const isListLoading = authLoading || orgLoading || (orgId && !listLoaded);
+
   // 1) fetch assistants when auth/org are ready
   useEffect(() => {
     if (authLoading || orgLoading || !orgId) return;
@@ -86,7 +103,10 @@ export default function AssistantsHub() {
       } catch (e) {
         console.error(e);
       } finally {
-        if (alive) stopLoading();
+        if (alive) {
+          setListLoaded(true);
+          stopLoading();
+        }
       }
     })();
 
@@ -100,7 +120,7 @@ export default function AssistantsHub() {
     async (id) => {
       if (!id) return;
       let alive = true;
-      startLoading();
+      setDetailLoading(true);
       setSelected(null);
       setVectorStore(null);
       setIsEditingVectorStore(false);
@@ -125,10 +145,10 @@ export default function AssistantsHub() {
       } catch (e) {
         console.error(e);
       } finally {
-        if (alive) stopLoading();
+        if (alive) setDetailLoading(false);
       }
     },
-    [startLoading, stopLoading],
+    [],
   );
 
   useEffect(() => {
@@ -482,30 +502,11 @@ export default function AssistantsHub() {
   const read = (key, fallback = "") =>
     (isEditing ? draft?.[key] : selected?.[key]) ?? fallback;
 
-  /**
-   * A predefinição a que os valores atuais correspondem.
-   *
-   * `null` quer dizer que o assistente foi afinado à mão — o caso de
-   * todos os que existiam antes das predefinições. Aí mostramos
-   * "Personalizado" com o valor, em vez de lhe chamar Normal.
+  /*
+   * Título até 80 caracteres e descrição até 200. Um assistente gravado
+   * antes destes limites fica com o tamanho que já tinha, mas não cresce.
    */
-  const currentPreset = findPreset({
-    temperature: read("temperature", null),
-    top_p: read("top_p", null),
-  });
-
-  /**
-   * Escolher uma predefinição escreve os dois parâmetros de uma vez.
-   *
-   * São dois `setDraft` seguidos, mas ambos na forma funcional, por isso
-   * o segundo parte do resultado do primeiro mesmo quando o React os
-   * agrupa no mesmo render.
-   */
-  function applyPreset(id) {
-    const preset = getAssistantPreset(id);
-    handleChange("temperature", preset.temperature);
-    handleChange("top_p", preset.top_p);
-  }
+  const textLimits = assistantTextLimits(selected ?? {});
 
   return (
     <div className={styles.hub}>
@@ -538,11 +539,14 @@ export default function AssistantsHub() {
             </button>
           ))}
 
-          {!assistants.length && (
-            <div className={styles.emptyState}>
-              <p>{translation("Assistants.empty")}</p>
-            </div>
-          )}
+          {!assistants.length &&
+            (isListLoading ? (
+              <LoadingState label={translation("Assistants.loading")} />
+            ) : (
+              <div className={styles.emptyState}>
+                <p>{translation("Assistants.empty")}</p>
+              </div>
+            ))}
         </div>
 
         <div className={styles.listFooter}>
@@ -579,6 +583,7 @@ export default function AssistantsHub() {
                   <input
                     className={styles.inputTitle}
                     value={read("name")}
+                    maxLength={textLimits.name}
                     onChange={(e) => handleChange("name", e.target.value)}
                   />
                 ) : (
@@ -588,16 +593,24 @@ export default function AssistantsHub() {
 
               {isEditing ? (
                 <>
+                  <CharCounter
+                    length={String(read("name")).length}
+                    limit={textLimits.name}
+                  />
                   <input
                     className={styles.inputSub}
                     value={read("description")}
-                    maxLength={80}
+                    maxLength={textLimits.description}
                     onChange={(e) =>
                       handleChange("description", e.target.value)
                     }
                     placeholder={translation(
                       "Assistants.details.descriptionPlaceholder",
                     )}
+                  />
+                  <CharCounter
+                    length={String(read("description")).length}
+                    limit={textLimits.description}
                   />
                   <textarea
                     className={styles.instructionsInput}
@@ -624,63 +637,14 @@ export default function AssistantsHub() {
                 </>
               )}
 
-              <div className={styles.specBadge}>
-                {translation("Assistants.details.specs")}
-              </div>
-
-              <div className={styles.specs}>
-                {/*
-                  Comportamento.
-
-                  Em leitura mostramos o nome da predefinição: "Criativo"
-                  diz ao cliente o que o assistente faz, "1.10" não diz.
-
-                  Em edição escolhe-se entre as três — as mesmas da
-                  criação. Os deslizadores de Criatividade e Variedade
-                  saíram: além de exigirem saber o que é `top_p`, tinham
-                  os rótulos trocados (a "Variedade" mostrava a
-                  `temperature` e vice-versa).
-                */}
-                {isEditing ? (
-                  <div className={styles.specRowStacked}>
-                    <span className={styles.specLabel}>
-                      {translation("Assistants.details.behavior")}
-                    </span>
-
-                    <PresetPicker
-                      name="assistant-behavior"
-                      value={currentPreset?.id ?? null}
-                      onChange={applyPreset}
-                    />
-                  </div>
-                ) : (
-                  <div className={styles.specRowBehavior}>
-                    <span className={styles.specLabel}>
-                      {translation("Assistants.details.behavior")}
-                    </span>
-                    <span className={styles.specValueBold}>
-                      {currentPreset
-                        ? translation(
-                            `AssistantPresets.${currentPreset.id}.name`,
-                          )
-                        : translation("Assistants.details.customBehavior", {
-                            temperature: Number(
-                              selected.temperature ?? 0,
-                            ).toFixed(2),
-                          })}
-                    </span>
-                  </div>
-                )}
-
-              </div>
+              {/*
+                O comportamento (Normal, Criativo…) escolhe-se só ao criar o
+                assistente: o painel deixou de o mostrar e de o editar.
+              */}
 
               {/* Meta + Actions */}
               <div className={styles.metaBar}>
                 <div className={styles.metaGrid}>
-                  <div>
-                    <span className={styles.metaLabel}>ID</span>
-                    <span>{selected.open_ai_id}</span>
-                  </div>
                   <div>
                     <span className={styles.metaLabel}>
                       {translation("Assistants.details.createdAt")}
@@ -1032,6 +996,10 @@ export default function AssistantsHub() {
               )}
             </section>
           </>
+        ) : isListLoading || detailLoading ? (
+          <div className={styles.placeholderCard}>
+            <LoadingState label={translation("Assistants.loading")} />
+          </div>
         ) : (
           <div className={styles.placeholderCard}>
             <p>{translation("Assistants.placeholder")}</p>
