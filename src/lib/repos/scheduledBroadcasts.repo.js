@@ -1,12 +1,7 @@
-import { createClient as createServiceClient } from "@supabase/supabase-js";
-
-const sb = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } },
-);
-
+import { getRepositoryReadClient } from "@/lib/db/readAccess";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 export async function createScheduledBroadcast(row) {
+  const sb = getSupabaseAdminClient();
   const { data, error } = await sb
     .from("scheduled_broadcast")
     .insert(row)
@@ -17,10 +12,48 @@ export async function createScheduledBroadcast(row) {
   return data;
 }
 
+/*
+ * Uma agendada criada por uma automação (e não à mão no composer). Serve à
+ * lista das agendadas (source manual/automation) e ao limite do plano (#186),
+ * que só conta as manuais.
+ */
+export function isAutomationBroadcast(broadcast) {
+  const payload = broadcast?.payload;
+
+  if (!payload || typeof payload !== "object") {
+    return false;
+  }
+
+  return Boolean(
+    payload._automation ||
+      payload.automationRunId ||
+      payload.automationRuleId ||
+      payload.ruleId ||
+      payload.source === "automation",
+  );
+}
+
+/*
+ * Quantas mensagens agendadas à mão estão à espera de envio (estado queued)
+ * na organização. As das automações não contam (#186).
+ */
+export async function countManualQueuedBroadcasts(organizationId) {
+  const sb = getSupabaseAdminClient();
+  const { data, error } = await sb
+    .from("scheduled_broadcast")
+    .select("id, payload")
+    .eq("organization_id", Number(organizationId))
+    .eq("status", "queued");
+
+  if (error) throw error;
+  return (data || []).filter((row) => !isAutomationBroadcast(row)).length;
+}
+
 export async function getOrgScheduledBroadcasts(
   organizationId,
   { source = "all" } = {},
 ) {
+  const sb = getRepositoryReadClient();
   const { data, error } = await sb
     .from("scheduled_broadcast")
     .select("*")
@@ -30,22 +63,6 @@ export async function getOrgScheduledBroadcasts(
   if (error) throw error;
 
   const rows = data || [];
-
-  function isAutomationBroadcast(broadcast) {
-    const payload = broadcast?.payload;
-
-    if (!payload || typeof payload !== "object") {
-      return false;
-    }
-
-    return Boolean(
-      payload._automation ||
-        payload.automationRunId ||
-        payload.automationRuleId ||
-        payload.ruleId ||
-        payload.source === "automation",
-    );
-  }
 
   if (source === "automation") {
     return rows.filter(isAutomationBroadcast);
@@ -59,6 +76,7 @@ export async function getOrgScheduledBroadcasts(
 }
 
 export async function updateScheduledBroadcast(id, patch) {
+  const sb = getSupabaseAdminClient();
   const { data, error } = await sb
     .from("scheduled_broadcast")
     .update({ ...patch, updated_at: new Date().toISOString() })
@@ -72,16 +90,26 @@ export async function updateScheduledBroadcast(id, patch) {
 }
 
 export async function deleteScheduledBroadcast(id) {
+  const sb = getSupabaseAdminClient();
   const { error } = await sb.from("scheduled_broadcast").delete().eq("id", id);
 
   if (error) throw error;
   return true;
 }
 
-export async function getDueScheduledBroadcasts(limit = 20) {
+/*
+ * `excludeOrganizationIds`: organizações cujo trabalho fica à espera (a Demo
+ * terminou, #209). Ficam de fora da consulta para não ocuparem o lugar das
+ * outras.
+ */
+export async function getDueScheduledBroadcasts(
+  limit = 20,
+  { excludeOrganizationIds = [] } = {},
+) {
+  const sb = getRepositoryReadClient();
   const nowIso = new Date().toISOString();
 
-  const { data, error } = await sb
+  let query = sb
     .from("scheduled_broadcast")
     .select("*")
     .eq("status", "queued")
@@ -89,11 +117,18 @@ export async function getDueScheduledBroadcasts(limit = 20) {
     .order("scheduled_for", { ascending: true })
     .limit(limit);
 
+  if (excludeOrganizationIds.length) {
+    query = query.not("organization_id", "in", `(${excludeOrganizationIds.join(",")})`);
+  }
+
+  const { data, error } = await query;
+
   if (error) throw error;
   return data || [];
 }
 
 export async function markScheduledBroadcastProcessing(id) {
+  const sb = getSupabaseAdminClient();
   const { data, error } = await sb
     .from("scheduled_broadcast")
     .update({
@@ -111,6 +146,7 @@ export async function markScheduledBroadcastProcessing(id) {
 }
 
 export async function finishScheduledBroadcast(id, patch) {
+  const sb = getSupabaseAdminClient();
   const { data, error } = await sb
     .from("scheduled_broadcast")
     .update({

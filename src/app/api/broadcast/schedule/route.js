@@ -1,20 +1,23 @@
 import { NextResponse } from "next/server";
-import { createScheduledBroadcast } from "@/lib/repos/scheduledBroadcasts.repo";
+import {
+  countManualQueuedBroadcasts,
+  createScheduledBroadcast,
+} from "@/lib/repos/scheduledBroadcasts.repo";
+import {
+  claimDailySend,
+  getOrgLimits,
+  hasRoomFor,
+  limitReachedBody,
+  planExpiredBody,
+  releaseDailySend,
+  saveTrackedLinksWithinPlan,
+} from "@/lib/services/plans/planLimits";
+import { setAdminDailySendSource } from "@/lib/repos/adminDailySends.repo";
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
-import {
-  assertTeamsGroupsBelongToOrg,
-  assertUsersBelongToOrg,
-  handleApiError,
-  requireAllRecipientsToBeKnownUsers,
-  requireOwnedOrg,
-} from "@/lib/auth/guards";
-import {
-  assertGroupBroadcastContent,
-  parseGroupIds,
-} from "@/lib/services/broadcast/groupBroadcastOptions";
-import { parseOpeningOptions } from "@/lib/services/broadcast/openingOptions";
-import { parseQuestionOptions } from "@/lib/services/broadcast/questionOptions";
+import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
+import { buildScheduledPayload } from "@/lib/services/broadcast/scheduledPayload";
+import { messageContentProblem } from "@/lib/plans/messageLimits";
 
 export async function POST(req) {
   try {
@@ -51,112 +54,101 @@ export async function POST(req) {
       );
     }
 
-    /* Grupos do Teams (#166): só mensagem em branco, sem colaboradores. */
-    if (channel === "teams" && Array.isArray(payload?.groupIds)) {
-      assertGroupBroadcastContent(payload);
+    /*
+     * Limite de mensagens agendadas do plano (#186): contam só as agendadas
+     * à mão que ainda estão à espera (queued). As das automações não contam
+     * e nunca são bloqueadas. Antes de montar o envio, que vai buscar os
+     * destinatários: se a conta está cheia, não vale a pena.
+     */
+    const orgLimits = await getOrgLimits(orgAuth.orgId);
 
-      const groups = await assertTeamsGroupsBelongToOrg(
-        orgAuth.admin,
-        orgAuth.orgId,
-        parseGroupIds(payload.groupIds),
+    /* A Demo terminou (#209): ver continua, criar e enviar não. */
+    const expired = planExpiredBody(orgLimits);
+    if (expired) return NextResponse.json(expired, { status: 403 });
+
+    const queuedCount = await countManualQueuedBroadcasts(orgAuth.orgId);
+
+    if (!hasRoomFor(orgLimits.limits.scheduledMessages, queuedCount)) {
+      return NextResponse.json(
+        limitReachedBody("SCHEDULED_LIMIT_REACHED", "scheduledMessages", orgLimits),
+        { status: 409 },
       );
+    }
 
-      const groupRow = await createScheduledBroadcast({
+    /* Conteúdo da mensagem dentro do plano (#187): caracteres e ficheiros. */
+    const contentProblem = messageContentProblem(
+      {
+        message: payload?.message || "",
+        files: Array.isArray(payload?.files) ? payload.files : [],
+      },
+      orgLimits.limits,
+    );
+    if (contentProblem) {
+      return NextResponse.json(
+        {
+          error: `Plan limit reached: ${contentProblem.code}`,
+          code: contentProblem.code,
+          plan: orgLimits.plan?.name ?? null,
+          limit: contentProblem.limit,
+        },
+        { status: 400 },
+      );
+    }
+
+    const built = await buildScheduledPayload({
+      orgAuth,
+      channel,
+      payload,
+    });
+
+    if (built.error) {
+      return NextResponse.json({ error: built.error }, { status: 400 });
+    }
+
+    /*
+     * Links rastreados do plano (#189): os links novos entram na biblioteca
+     * da organização, até 100. Reutilizar um link guardado não conta.
+     */
+    const links = await saveTrackedLinksWithinPlan(orgAuth.orgId, built.payload.trackedLinks, {
+      orgLimits: orgLimits,
+    });
+    if (links.body) {
+      return NextResponse.json(links.body, { status: 409 });
+    }
+
+    /*
+     * Limite diário de envios do canal (#188): uma agendada conta no dia em
+     * que é agendada, não no dia em que sai. Cancelá-la ou eliminá-la no
+     * mesmo dia devolve o envio.
+     */
+    const daily = await claimDailySend(orgAuth.orgId, channel, {
+      sourceType: "scheduled_broadcast",
+      orgLimits,
+    });
+    if (daily.body) {
+      return NextResponse.json(daily.body, { status: 409 });
+    }
+
+    let row;
+    try {
+      row = await createScheduledBroadcast({
         organization_id: orgAuth.orgId,
         created_by_user_id: orgAuth.user.id,
         channel,
         status: "queued",
         scheduled_for: when.toISOString(),
         timezone: timezone || null,
-        payload: {
-          orgId: orgAuth.orgId,
-          message: payload?.message || "",
-          files: Array.isArray(payload?.files) ? payload.files : [],
-          imageUrls: Array.isArray(payload?.imageUrls) ? payload.imageUrls : [],
-          trackedLinks: [],
-          groupIds: groups.map((group) => group.id),
-          /* Só para mostrar nas agendadas; o envio relê os grupos. */
-          groups: groups.map((group) => ({ id: group.id, name: group.name })),
-        },
-        recipient_count: groups.length,
+        payload: built.payload,
+        recipient_count: built.recipientCount,
       });
-
-      await recordAuditEvent(orgAuth, {
-        action: AUDIT_ACTIONS.BROADCAST_SCHEDULED,
-        entityType: "scheduled_broadcast",
-        entityId: groupRow?.id,
-        details: {
-          channel,
-          groupCount: groups.length,
-          scheduledFor: when.toISOString(),
-          timezone: timezone || null,
-        },
-      });
-
-      return NextResponse.json({ ok: true, item: groupRow });
+    } catch (err) {
+      await releaseDailySend(daily.claimKey);
+      throw err;
     }
 
-    const rawRecipients =
-      channel === "teams"
-        ? (Array.isArray(payload?.userIds) ? payload.userIds : []).map(
-            (userId) => ({ userId }),
-          )
-        : Array.isArray(payload?.recipients)
-          ? payload.recipients
-          : [];
+    await setAdminDailySendSource(daily.claimKey, row.id);
 
-    const recipientUserIds = requireAllRecipientsToBeKnownUsers(rawRecipients);
-    await assertUsersBelongToOrg(
-      orgAuth.admin,
-      orgAuth.orgId,
-      recipientUserIds,
-    );
-
-    let opening = { openingBody: null, openingOnly: false };
-
-    if (channel === "whatsapp") {
-      opening = parseOpeningOptions(payload);
-
-      if (opening.error) {
-        return NextResponse.json({ error: opening.error }, { status: 400 });
-      }
-    }
-
-    /* Perguntas nos dois canais; no Teams desde o #151. */
-    const question = parseQuestionOptions(payload);
-
-    if (question.error) {
-      return NextResponse.json({ error: question.error }, { status: 400 });
-    }
-
-    const cleanPayload = {
-      orgId: orgAuth.orgId,
-      message: payload?.message || "",
-      files: Array.isArray(payload?.files) ? payload.files : [],
-      imageUrls: Array.isArray(payload?.imageUrls) ? payload.imageUrls : [],
-      trackedLinks: Array.isArray(payload?.trackedLinks)
-        ? payload.trackedLinks
-        : [],
-      ...(channel === "teams"
-        ? { userIds: recipientUserIds, question: question.question }
-        : {
-            recipients: recipientUserIds.map((userId) => ({ userId })),
-            openingBody: opening.openingBody,
-            openingOnly: opening.openingOnly,
-            question: question.question,
-          }),
-    };
-
-    const row = await createScheduledBroadcast({
-      organization_id: orgAuth.orgId,
-      created_by_user_id: orgAuth.user.id,
-      channel,
-      status: "queued",
-      scheduled_for: when.toISOString(),
-      timezone: timezone || null,
-      payload: cleanPayload,
-      recipient_count: recipientUserIds.length,
-    });
+    const isGroupBroadcast = Array.isArray(built.payload.groupIds);
 
     await recordAuditEvent(orgAuth, {
       action: AUDIT_ACTIONS.BROADCAST_SCHEDULED,
@@ -164,7 +156,9 @@ export async function POST(req) {
       entityId: row?.id,
       details: {
         channel,
-        recipientCount: recipientUserIds.length,
+        ...(isGroupBroadcast
+          ? { groupCount: built.recipientCount }
+          : { recipientCount: built.recipientCount }),
         scheduledFor: when.toISOString(),
         timezone: timezone || null,
       },

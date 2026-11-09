@@ -4,8 +4,6 @@ import styles from "../../broadcast.module.css";
 import { formatHour, formatMinute } from "../../lib/helpers";
 
 export default function SchedulePanel({
-  deliveryMode,
-  setDeliveryMode,
   scheduledFor,
   setScheduledFor,
   hourDraft,
@@ -17,38 +15,27 @@ export default function SchedulePanel({
   scheduleInvalid,
   browserTimeZone,
   translation,
+  usage = null,
+  limitWarning = null,
 }) {
   return (
     <div className={styles.toolPanelCard}>
-      <div className={styles.panelTitle}>
-        {translation("Broadcast.schedule")}
-      </div>
-
-      <div className={styles.scheduleModeRow}>
-        <button
-          type="button"
-          className={`${styles.kbdBtn} ${
-            deliveryMode === "now" ? styles.modeBtnActive : ""
-          }`}
-          onClick={() => setDeliveryMode("now")}
-        >
-          {translation("Broadcast.sendnow")}
-        </button>
-
-        <button
-          type="button"
-          className={`${styles.kbdBtn} ${
-            deliveryMode === "schedule" ? styles.modeBtnActive : ""
-          }`}
-          onClick={() => setDeliveryMode("schedule")}
-        >
-          {translation("Broadcast.scheduleBtn")}
-        </button>
-      </div>
-
+      {/*
+        Limite de agendadas do plano (#186): o contador ("2 / 100") e, quando
+        está cheio, a explicação de porque o botão Agendar está desativado.
+      */}
       <div className={styles.scheduleHint}>
-        {translation("Broadcast.timezone")}: {browserTimeZone}
+        <span>
+          {translation("Broadcast.timezone")}: {browserTimeZone}
+        </span>
+        {usage}
       </div>
+
+      {limitWarning ? (
+        <div className={styles.composerWarning} role="status">
+          {limitWarning}
+        </div>
+      ) : null}
 
       <div className={styles.scheduleLayout}>
         <div className={styles.scheduleCalendarCol}>
@@ -136,7 +123,7 @@ export default function SchedulePanel({
         </div>
       </div>
 
-      {deliveryMode === "schedule" && scheduleInvalid && !timeError && (
+      {scheduleInvalid && !timeError && (
         <div className={styles.scheduleError}>
           {translation("Broadcast.scheduleError")}
         </div>

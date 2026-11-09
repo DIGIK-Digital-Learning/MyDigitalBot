@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 import {
   createUser,
@@ -10,6 +11,11 @@ import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { lookupAssistantName } from "@/lib/services/audit/auditLookups";
 import { AUDIT_ACTIONS, providedFields } from "@/lib/audit/auditEvents";
 import { resolveAssistantAssignment } from "@/lib/services/users/assistantAssignment";
+import {
+  checkPlanActive,
+  getOrgLimits,
+  limitReachedBody,
+} from "@/lib/services/plans/planLimits";
 import {
   assertAssistantBelongsToOrg,
   assertAssistantsBelongToOrg,
@@ -33,8 +39,10 @@ export async function GET(req) {
     const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
-    const result = await getUsersInOrg(orgAuth.orgId, { page, pageSize });
-    return NextResponse.json(result);
+    return await withSessionReadAccess(orgAuth, async () => {
+      const result = await getUsersInOrg(orgAuth.orgId, { page, pageSize });
+      return NextResponse.json(result);
+    });
   } catch (err) {
     return handleApiError(err, "Failed to load users");
   }
@@ -64,6 +72,10 @@ export async function POST(req) {
 
     const orgAuth = await requireOwnedOrg(organizationId);
     if (orgAuth.error) return orgAuth.error;
+
+    /* A Demo terminou (#209): ver continua, criar e enviar não. */
+    const active = await checkPlanActive(orgAuth.orgId);
+    if (active.body) return NextResponse.json(active.body, { status: 403 });
 
     const safeAssistantId = await assertAssistantBelongsToOrg(
       orgAuth.admin,
@@ -108,18 +120,34 @@ export async function POST(req) {
         ? `${normalizedCode}${normalizedNational.replace(/\D/g, "")}`
         : null);
 
-    const newUser = await createUserWithAutomations({
-      organizationId: orgAuth.orgId,
-      name,
-      email,
-      assistantId: assignment?.activeId ?? null,
-      assistantIds: assignment?.ids,
-      phoneNumber: fullPhone,
-      phoneCountryCode: normalizedCode,
-      phoneNational: normalizedNational,
-      teamsAadObjectId: teamsAadObjectId ?? null,
-      teamsFromId: teamsFromId ?? null,
-    });
+    let newUser;
+    try {
+      newUser = await createUserWithAutomations({
+        organizationId: orgAuth.orgId,
+        name,
+        email,
+        assistantId: assignment?.activeId ?? null,
+        assistantIds: assignment?.ids,
+        phoneNumber: fullPhone,
+        phoneCountryCode: normalizedCode,
+        phoneNational: normalizedNational,
+        teamsAadObjectId: teamsAadObjectId ?? null,
+        teamsFromId: teamsFromId ?? null,
+      });
+    } catch (error) {
+      if (error.code !== "USER_LIMIT_REACHED") throw error;
+
+      /*
+       * Quem recusa é a base de dados (create_user_with_plan_limit). Aqui só
+       * se junta o plano e o máximo para o aviso; se não for possível lê-los,
+       * o código chega na mesma.
+       */
+      const orgLimits = await getOrgLimits(orgAuth.orgId).catch(() => null);
+      return NextResponse.json(
+        limitReachedBody("USER_LIMIT_REACHED", "users", orgLimits),
+        { status: 409 },
+      );
+    }
 
     await recordAuditEvent(orgAuth, {
       action: AUDIT_ACTIONS.USER_CREATED,
@@ -137,12 +165,6 @@ export async function POST(req) {
 
     return NextResponse.json(newUser, { status: 201 });
   } catch (error) {
-    if (error.code === "USER_LIMIT_REACHED") {
-      return NextResponse.json(
-        { error: "This organization has reached its user limit." },
-        { status: 409 },
-      );
-    }
     if (error.code === "23505") {
       return NextResponse.json(
         { error: "User already exists (duplicate key)." },

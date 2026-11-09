@@ -25,6 +25,8 @@ import {
 } from "@/lib/repos/messages.repo";
 
 import { handleQuestionReply } from "@/lib/services/questions/handleQuestionReply";
+import { claimCollaboratorWeeklyMessage } from "@/lib/services/plans/collaboratorWeeklyLimit";
+import { checkCollaboratorPlanActive } from "@/lib/services/plans/planExpiredNotice";
 
 import {
   linkTeamsUserByEmail,
@@ -65,7 +67,7 @@ import {
   deactivateGroupInstallation,
 } from "@/lib/repos/teamsInstallations.repo";
 
-import { getBotToken } from "@/lib/teams/auth";
+import { sendReply } from "@/lib/teams/sendReply";
 import { stripBotMention } from "@/lib/teams/mentions";
 import { getChannelPostContext } from "@/lib/services/teams/channelPostContext";
 import { getTeamName } from "@/lib/teams/members";
@@ -141,81 +143,7 @@ async function assertAssistantMatchesOrganization(assistant, organizationId) {
    SEND TEAMS REPLY
    ========================================================= */
 
-async function sendReply(activity, text, opts = {}) {
-  const {
-    replyToId = activity?.id,
 
-    serviceUrl = activity?.serviceUrl,
-
-    conversationId = activity?.conversation?.id,
-
-    attachments = null,
-  } = opts;
-
-  if (!serviceUrl || !conversationId) {
-    console.error("[TEAMS] sendReply missing serviceUrl/conversationId", {
-      serviceUrl,
-      conversationId,
-    });
-
-    return {
-      ok: false,
-      error: "Missing serviceUrl/conversationId",
-    };
-  }
-
-  const token = await getBotToken();
-
-  const base = serviceUrl.endsWith("/") ? serviceUrl : `${serviceUrl}/`;
-
-  const url = `${base}v3/conversations/${conversationId}/activities`;
-
-  const payload = {
-    type: "message",
-
-    text: String(text ?? ""),
-
-    ...(attachments ? { attachments } : {}),
-
-    ...(replyToId
-      ? {
-          replyToId,
-        }
-      : {}),
-  };
-
-  const res = await fetch(url, {
-    method: "POST",
-
-    headers: {
-      Authorization: `Bearer ${token}`,
-
-      "Content-Type": "application/json",
-    },
-
-    body: JSON.stringify(payload),
-  });
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-
-    console.error("[TEAMS] Failed to send reply", res.status, body);
-
-    return {
-      ok: false,
-      status: res.status,
-      body,
-    };
-  }
-
-  const data = await res.json().catch(() => null);
-
-  return {
-    ok: true,
-
-    id: data?.id ?? null,
-  };
-}
 
 const NOT_REGISTERED_TEXT =
   "Ainda não estás registado na MyDigitalBot.<br>Pede ao administrador da tua empresa para te adicionar com o email da tua conta Microsoft. Assim que o fizer, ficas ligado automaticamente.";
@@ -964,6 +892,22 @@ async function handleUserInteraction(activity) {
   }
 
   /*
+   * A Demo da empresa terminou (#209): o assistente
+   * não responde. Só a primeira mensagem recebe o aviso.
+   */
+  const planActive = await checkCollaboratorPlanActive({
+    organization: org,
+    user,
+    channel: "teams",
+  });
+
+  if (!planActive.allowed) {
+    if (planActive.notice) await sendReply(activity, planActive.notice);
+
+    return;
+  }
+
+  /*
    * Assistant switch (#155): the "assistentes"
    * keyword, the --assistentes command or a tap
    * on the menu card. Personal chats only; a
@@ -1181,6 +1125,20 @@ async function handleUserInteraction(activity) {
   }
 
   /*
+   * Limite semanal do colaborador: 100 mensagens por
+   * semana no Teams, contando também as menções ao bot
+   * nos grupos.
+   */
+  const claimWeeklyMessage = ({ kind }) =>
+    claimCollaboratorWeeklyMessage({
+      organization: org,
+      user,
+      channel: "teams",
+      kind,
+      sourceId: activity?.id ?? null,
+    });
+
+  /*
    * Quiz, survey or open question (#151): the
    * answer is recorded and gets its feedback
    * without going to the assistant.
@@ -1198,9 +1156,24 @@ async function handleUserInteraction(activity) {
       thread,
 
       conversationId: openAiConversationId,
+
+      claimWeeklyMessage,
     });
 
     if (questionResult.handled) return;
+  }
+
+  /*
+   * Acima do limite da semana o assistente não é
+   * chamado: só a primeira vez recebe o aviso, as
+   * seguintes ficam sem resposta até segunda-feira.
+   */
+  const weekly = await claimWeeklyMessage({ kind: "assistant" });
+
+  if (!weekly.allowed) {
+    if (weekly.notice) await sendReply(activity, weekly.notice);
+
+    return;
   }
 
   /*
@@ -1300,6 +1273,7 @@ async function handleTeamsQuestionReply({
   assistant,
   thread,
   conversationId,
+  claimWeeklyMessage,
 }) {
   const reply = extractTeamsReply(activity);
 
@@ -1330,6 +1304,8 @@ async function handleTeamsQuestionReply({
     contactId: activity?.from?.id ?? null,
 
     organization: org,
+
+    claimWeeklyMessage,
 
     sendText: async (text) => {
       const sent = await sendReply(activity, text);

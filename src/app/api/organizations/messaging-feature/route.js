@@ -1,6 +1,7 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 import {
-  getOrCreateOrganizationMessagingFeature,
+  getOrganizationMessagingFeature,
   setReadChainsEnabled,
 } from "@/lib/repos/organizationMessagingFeature.repo";
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
@@ -75,15 +76,21 @@ export async function GET(req) {
     const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
-    const feature =
-      await getOrCreateOrganizationMessagingFeature({
-        organizationId: orgAuth.orgId,
-        channel,
-      });
+    return await withSessionReadAccess(orgAuth, async () => {
+      const feature =
+        await getOrganizationMessagingFeature({
+          organizationId: orgAuth.orgId,
+          channel,
+        });
 
-    return NextResponse.json({
-      ok: true,
-      item: feature,
+      return NextResponse.json({
+        ok: true,
+        item: feature ?? {
+          organization_id: orgAuth.orgId,
+          channel,
+          read_chains_enabled: false,
+        },
+      });
     });
   } catch (error) {
     return handleApiError(

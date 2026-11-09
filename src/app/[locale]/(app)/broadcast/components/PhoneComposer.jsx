@@ -7,6 +7,7 @@ import WhatsAppPhone, {
 import styles from "../broadcast.module.css";
 import { BubbleImages, FileBubbles } from "./ComposerAttachments";
 import { ImageSuggestBubble } from "./ImageSuggestInPhone";
+import MessageLimitsRow from "./MessageLimitsRow";
 import LinkButtonPreview, {
   LinkBubblesPreview,
   LinksInTextNote,
@@ -65,6 +66,12 @@ export default function PhoneComposer({
               ariaLabel={translation("Broadcast.message")}
             />
           </div>
+
+          {/* Ficheiros e caracteres da mensagem dentro do plano (#187). */}
+          <MessageLimitsRow
+            limits={tools.messageLimits}
+            translation={translation}
+          />
         </WhatsAppBubble>
 
         <LinkButtonPreview

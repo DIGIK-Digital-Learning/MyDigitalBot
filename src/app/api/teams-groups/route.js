@@ -1,3 +1,4 @@
+import { withSessionReadAccess, getSessionReadClient } from "@/lib/db/readAccess";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -13,9 +14,11 @@ export async function GET(req) {
     const orgAuth = await requireOwnedOrg(searchParams.get("orgId"));
     if (orgAuth.error) return orgAuth.error;
 
-    const items = await listTeamsGroups(orgAuth.admin, orgAuth.orgId);
+    return await withSessionReadAccess(orgAuth, async () => {
+      const items = await listTeamsGroups(getSessionReadClient(orgAuth), orgAuth.orgId);
 
-    return NextResponse.json({ items });
+      return NextResponse.json({ items });
+    });
   } catch (error) {
     return handleApiError(error, "Failed to load Teams groups");
   }

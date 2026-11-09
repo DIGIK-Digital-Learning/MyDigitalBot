@@ -99,11 +99,17 @@ export default function MediaPickerModal({
     );
   }
 
-  function confirm() {
+  async function confirm() {
     const chosen = available.filter((item) => selected.includes(item.url));
     if (!chosen.length) return;
 
-    onAdd(chosen.map(toComposerFile));
+    /*
+     * Quem junta pode recusar (ex.: limite de ficheiros por mensagem, #187):
+     * nesse caso a janela fica aberta, com a seleção, para se desmarcar.
+     */
+    const accepted = await onAdd(chosen.map(toComposerFile));
+    if (accepted === false) return;
+
     onClose();
   }
 

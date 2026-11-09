@@ -1,0 +1,25 @@
+.counterRow {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.counter {
+  color: #6b7280;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Acima do limite: o mesmo vermelho dos avisos do composer (.composerWarning). */
+.over {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.note {
+  color: #6b7280;
+  font-style: italic;
+}

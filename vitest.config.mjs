@@ -4,6 +4,10 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { transformWithEsbuild } from "vite";
 
 export default defineConfig({
+  resolve: {
+    // No Next, server-only impede imports no browser. Os testes executam no servidor.
+    alias: { "server-only": "next/dist/compiled/server-only/empty.js" },
+  },
   plugins: [
     {
       name: "source-jsx-in-js",

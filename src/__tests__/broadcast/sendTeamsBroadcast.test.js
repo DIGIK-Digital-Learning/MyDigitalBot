@@ -16,7 +16,7 @@ vi.mock("@/lib/repos/organizations.repo", () => ({
 vi.mock("@/lib/repos/teamsInstallations.repo", () => ({
   getTeamsUserInstallation: async () => ({
     tenant_id: "tenant-1",
-    service_url: "https://teams.test/",
+    service_url: "https://smba.trafficmanager.net/emea/",
     conversation_id: "conv-1",
   }),
 }));
@@ -29,8 +29,8 @@ vi.mock("@/lib/repos/trackedLinks.repo", () => ({
   createTrackedLink: vi.fn(),
 }));
 
-vi.mock("@/lib/repos/trackedLinkLibrary.repo", () => ({
-  getTrackedLinkLibraryByOrg: vi.fn(),
+vi.mock("@/lib/repos/trackedLinkSaved.repo", () => ({
+  listSavedTrackedLinks: vi.fn(),
 }));
 
 /*

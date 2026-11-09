@@ -9,6 +9,7 @@ import {
   getValidatedMessageChainContext,
   markMessageChainDeliveryRead,
 } from "@/lib/repos/messageChain.repo";
+import { getOrgLimits } from "@/lib/services/plans/planLimits";
 import { sendReadChainStep } from "./sendReadChainStep";
 
 function getDelayAfterPreviousReadMinutes(stepPayload) {
@@ -141,6 +142,21 @@ export async function processReadChainAfterRead(message) {
       reason: "Next step was already created, scheduled, or sent.",
       nextStepIndex,
       existingStatus: existingNextDelivery.status,
+    };
+  }
+
+  /*
+   * A Demo terminou (#209): a leitura fica registada, mas a corrente não
+   * avança para o passo seguinte.
+   */
+  const { expired } = await getOrgLimits(message.organization_id);
+
+  if (expired) {
+    return {
+      ok: true,
+      skipped: true,
+      reason: "Organization plan has expired.",
+      nextStepIndex,
     };
   }
 

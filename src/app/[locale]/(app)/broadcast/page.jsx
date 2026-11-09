@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import styles from "./broadcast.module.css";
 import { useAuth } from "@/app/AuthContext";
@@ -10,8 +10,13 @@ import {
   BROADCAST_MEDIA_ACCEPT,
   BROADCAST_MEDIA_BUCKET,
   broadcastMediaRejection,
+  isWhatsappImageTooLarge,
   buildBroadcastMediaKey,
 } from "@/lib/uploads/broadcastMedia";
+import {
+  effectiveFileSizeMb,
+  visibleMessageLength,
+} from "@/lib/plans/messageLimits";
 import { createClient } from "@/utils/supabase/client";
 import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
 import { useAlert } from "@/app/components/Alert/AlertProvider";
@@ -52,7 +57,12 @@ import MediaPickerModal from "./components/MediaPickerModal";
 import { COMPANY_KEYS, MAX_TRACKED_LINKS, NAME_KEYS } from "./lib/constants";
 import useTextSuggestion from "./lib/useTextSuggestion";
 import useImageSuggestion from "./hooks/useImageSuggestion";
+import usePlanLimits from "@/app/hooks/usePlanLimits";
+import usePlanLimitPrompt from "@/app/hooks/usePlanLimitPrompt";
+import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
+import { DAILY_SENDS_TIME_ZONE } from "@/lib/plans/dailySends";
 import useTrackedLinkLibrary from "./hooks/useTrackedLinkLibrary";
+import useDeleteTrackedLink from "./hooks/useDeleteTrackedLink";
 import {
   asList,
   buildInitialScheduledDate,
@@ -109,10 +119,35 @@ function getChannelLabel(channel) {
   return channel === "whatsapp" ? "WhatsApp" : "Teams";
 }
 
+/*
+ * Hora a que os envios de hoje voltam a 0 (#188), sempre na hora de Lisboa
+ * ("00:01"). Sem a hora do servidor, mostra a regra.
+ */
+function formatDailyResetTime(resetsAt, locale) {
+  const date = resetsAt ? new Date(resetsAt) : null;
+  if (!date || Number.isNaN(date.getTime())) return "00:01";
+
+  return new Intl.DateTimeFormat(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: DAILY_SENDS_TIME_ZONE,
+  }).format(date);
+}
+
 export default function BroadcastPage() {
   const { user } = useAuth();
   const { org } = useOrganization(user);
 
+  /* Limites do plano e o gasto, para o contador das agendadas (#186). */
+  const {
+    limits: planLimits,
+    usage: planUsage,
+    dailySendsResetAt,
+    reload: reloadPlanUsage,
+  } = usePlanLimits(org?.id);
+  const promptPlanLimit = usePlanLimitPrompt();
+
+  const locale = useLocale();
   const translation = useTranslations();
   const showAlert = useAlert();
   const confirm = useConfirm();
@@ -236,6 +271,44 @@ export default function BroadcastPage() {
 
   const composerMessage = chainMode ? activeChainStep?.message || "" : message;
   const composerFiles = chainMode ? activeChainStepFiles : files;
+
+  /*
+   * Limites do conteúdo da mensagem (#187), calculados uma vez e usados em
+   * todo o composer: caracteres (como a pessoa os vê), ficheiros por
+   * mensagem, MB por ficheiro e passos da corrente. Enquanto os limites não
+   * chegam, nada é bloqueado (a corrente fica nos 10 de antes); o servidor
+   * decide na mesma.
+   */
+  const messageCharLimit = planLimits?.messageChars ?? null;
+  const filesPerMessageLimit = planLimits?.filesPerMessage ?? null;
+  const fileSizeLimitMb = effectiveFileSizeMb(planLimits?.fileSizeMb);
+  const fileSizeLimitBytes = fileSizeLimitMb * 1024 * 1024;
+  const chainStepsLimit = planLimits
+    ? (planLimits.chainMessages ?? Infinity)
+    : 10;
+  const composerMessageLength = visibleMessageLength(composerMessage);
+  const composerFilesFull =
+    filesPerMessageLimit !== null &&
+    composerFiles.length >= filesPerMessageLimit;
+
+  /* Os caracteres só contam na mensagem normal e nos passos da corrente. */
+  const countsMessageChars =
+    chainMode || (!isQuizMode && !isSurveyMode && !isOpenQuestionMode);
+
+  function messageOverLimit(text, fileList) {
+    const tooLong =
+      messageCharLimit !== null &&
+      visibleMessageLength(text || "") > messageCharLimit;
+    const tooManyFiles =
+      filesPerMessageLimit !== null &&
+      (fileList || []).length > filesPerMessageLimit;
+    return tooLong || tooManyFiles;
+  }
+
+  /* Numa corrente vê-se cada passo; fora dela, a mensagem do composer. */
+  const composerContentOverLimit = chainMode
+    ? chainSteps.some((step) => messageOverLimit(step.message, step.files))
+    : messageOverLimit(countsMessageChars ? composerMessage : "", composerFiles);
   const composerTrackedLinks = chainMode
     ? activeChainStepTrackedLinks
     : trackedLinks;
@@ -385,7 +458,7 @@ export default function BroadcastPage() {
 
   function addChainStep() {
     setChainSteps((prev) => {
-      if (prev.length >= 10) return prev;
+      if (prev.length >= chainStepsLimit) return prev;
 
       const next = [...prev, makeChainStep()];
       setActiveChainStepIndex(next.length - 1);
@@ -396,7 +469,7 @@ export default function BroadcastPage() {
 
   function duplicateChainStep() {
     setChainSteps((prev) => {
-      if (prev.length >= 10) return prev;
+      if (prev.length >= chainStepsLimit) return prev;
 
       const current = prev[activeChainStepIndex] || makeChainStep();
 
@@ -970,7 +1043,29 @@ export default function BroadcastPage() {
 
     /* Valida todos antes de subir o primeiro, para não ficar meio envio. */
     for (const file of pickedFiles) {
-      const reason = broadcastMediaRejection(contentTypeOf(file), file.size);
+      /*
+       * Tamanho: o mais baixo entre o máximo técnico e o do plano (#187).
+       * Hoje são os 50 MB do plano; um plano mais baixo passaria a mandar.
+       */
+      const reason =
+        broadcastMediaRejection(contentTypeOf(file), file.size) ||
+        (Number(file.size) > fileSizeLimitBytes ? "size" : null);
+
+      /* No WhatsApp, as imagens acima de 5 MB não chegam ao contacto. */
+      if (
+        !reason &&
+        channel === "whatsapp" &&
+        isWhatsappImageTooLarge({
+          contentType: contentTypeOf(file),
+          size: file.size,
+        })
+      ) {
+        throw new Error(
+          translation("Broadcast.composer.whatsappImageTooLarge", {
+            name: file.name,
+          }),
+        );
+      }
 
       if (reason) {
         throw new Error(
@@ -978,7 +1073,7 @@ export default function BroadcastPage() {
             reason === "size"
               ? "Broadcast.composer.fileTooLarge"
               : "Broadcast.composer.fileTypeNotAllowed",
-            { name: file.name },
+            { name: file.name, limit: fileSizeLimitMb },
           ),
         );
       }
@@ -1004,6 +1099,7 @@ export default function BroadcastPage() {
           url: pub.publicUrl,
           name: file.name || "file",
           contentType: ct,
+          size: file.size,
         });
       }
     }
@@ -1011,9 +1107,34 @@ export default function BroadcastPage() {
     return uploaded;
   };
 
+  /*
+   * Ficheiros por mensagem (#187): quantos ainda cabem. Uma escolha que passe
+   * o limite é recusada inteira, antes de enviar qualquer coisa para o
+   * armazenamento, com o aviso de quantos ainda se podem juntar.
+   */
+  async function acceptComposerFiles(adding) {
+    if (filesPerMessageLimit === null) return true;
+    if (composerFiles.length + adding <= filesPerMessageLimit) return true;
+
+    await showAlert({
+      title: translation("Plans.limits.messageFilesTitle"),
+      message: translation("Plans.limits.messageFilesRemaining", {
+        remaining: Math.max(filesPerMessageLimit - composerFiles.length, 0),
+        limit: filesPerMessageLimit,
+      }),
+      tone: "warning",
+    });
+    return false;
+  }
+
   async function handlePickFiles(e) {
     const picked = Array.from(e.target.files || []);
     if (!picked.length) return;
+
+    if (!(await acceptComposerFiles(picked.length))) {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
 
     try {
       const uploaded = await supabaseUpload(picked);
@@ -1179,8 +1300,24 @@ export default function BroadcastPage() {
     orgId: org?.id,
     resetKey: `${channel}:${composeMode}:${chainMode}:${activeChainStepIndex}`,
     onUse: async (file) => {
+      /* Ficheiros por mensagem (#187): sem lugar, a imagem fica por usar. */
+      if (!(await acceptComposerFiles(1))) {
+        throw new Error("Plan limit reached: filesPerMessage");
+      }
+
       const uploaded = await supabaseUpload([file]);
       setComposerFiles((prev) => [...prev, ...uploaded]);
+    },
+  });
+
+  /*
+   * Eliminar um link da biblioteca (#189): deixa de contar para os links do
+   * plano. Não se elimina se ainda for sair numa agendada ou numa corrente.
+   */
+  const deleteLibraryLink = useDeleteTrackedLink(org?.id, {
+    onDeleted: () => {
+      trackedLinkLibrary.reload();
+      reloadPlanUsage();
     },
   });
 
@@ -1253,6 +1390,23 @@ export default function BroadcastPage() {
     imageSuggest: imageSuggestion,
     linkPreview,
     onRemoveLink: removeTrackedLink,
+    /*
+     * Limites da mensagem (#187), para o balão (contadores) e o "+"
+     * (tipos de ficheiro desativados no limite).
+     */
+    messageLimits: {
+      length: composerMessageLength,
+      charLimit: countsMessageChars ? messageCharLimit : null,
+      files: composerFiles.length,
+      filesLimit: filesPerMessageLimit,
+      filesFull: composerFilesFull,
+      filesFullHint:
+        filesPerMessageLimit !== null
+          ? translation("Plans.limits.messageFiles", {
+              limit: filesPerMessageLimit,
+            })
+          : undefined,
+    },
   };
 
   /* Num grupo não há links rastreados (#166): o "+" deixa de os oferecer. */
@@ -1381,12 +1535,12 @@ export default function BroadcastPage() {
       const rawMinute = String(minuteValue || "").trim();
 
       if (!rawHour || !rawMinute) {
-        setTimeError("Fill in both hour and minute.");
+        setTimeError(translation("Broadcast.feedback.time.bothParts"));
         return false;
       }
 
       if (!/^\d{1,2}$/.test(rawHour) || !/^\d{1,2}$/.test(rawMinute)) {
-        setTimeError("Use only numbers.");
+        setTimeError(translation("Broadcast.feedback.time.numbersOnly"));
         return false;
       }
 
@@ -1394,12 +1548,12 @@ export default function BroadcastPage() {
       const minutes = Number(rawMinute);
 
       if (Number.isNaN(hours) || Number.isNaN(minutes)) {
-        setTimeError("Enter a valid time.");
+        setTimeError(translation("Broadcast.feedback.time.invalid"));
         return false;
       }
 
       if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
-        setTimeError("Enter a valid time.");
+        setTimeError(translation("Broadcast.feedback.time.invalid"));
         return false;
       }
 
@@ -1408,7 +1562,7 @@ export default function BroadcastPage() {
       const maxMinutes = 20 * 60;
 
       if (totalMinutes < minMinutes || totalMinutes > maxMinutes) {
-        setTimeError("Choose a time between 08:00 and 20:00.");
+        setTimeError(translation("Broadcast.feedback.time.range"));
         return false;
       }
 
@@ -1422,7 +1576,7 @@ export default function BroadcastPage() {
 
       return true;
     },
-    [scheduledFor],
+    [scheduledFor, translation],
   );
 
   function handleHourChange(value) {
@@ -1482,8 +1636,57 @@ export default function BroadcastPage() {
       )
     : -1;
 
-  const composerWarning =
-    chainStepNeedingText >= 0
+  /*
+   * Imagem acima de 5 MB numa mensagem de WhatsApp: acontece quando se junta
+   * no Teams e depois se muda de canal. Enviar fica desativado até a tirar.
+   */
+  const whatsappImageTooLarge =
+    channel === "whatsapp"
+      ? (chainMode
+          ? chainSteps.flatMap((step) => step.files || [])
+          : composerFiles
+        ).find(isWhatsappImageTooLarge)
+      : null;
+
+  /*
+   * Envios de hoje no canal (#188): 10 por dia em cada canal, para a conta
+   * toda. Um envio gasta 1, seja para quantos colaboradores for; uma corrente
+   * gasta 1 por mensagem. Sem os números (ainda a carregar ou sem limite no
+   * plano) nada é bloqueado: o servidor decide na mesma.
+   */
+  const dailySendsLimit = planLimits?.dailyMessagesPerChannel ?? null;
+  const dailySendsUsed = planUsage?.dailySends?.[channel] ?? null;
+  const dailySendsNeeded = chainMode ? chainSteps.length : 1;
+  const dailySendsRemaining =
+    dailySendsLimit === null || dailySendsUsed === null
+      ? null
+      : Math.max(dailySendsLimit - dailySendsUsed, 0);
+  const dailySendsFull =
+    dailySendsRemaining !== null && dailySendsNeeded > dailySendsRemaining;
+  const dailySendsResetTime = formatDailyResetTime(dailySendsResetAt, locale);
+
+  const dailySendsWarning = !dailySendsFull
+    ? null
+    : chainMode && dailySendsRemaining > 0
+      ? translation("Plans.limits.dailyChain", {
+          steps: dailySendsNeeded,
+          remaining: dailySendsRemaining,
+          channel: getChannelLabel(channel),
+          time: dailySendsResetTime,
+        })
+      : translation("Plans.limits.daily", {
+          limit: dailySendsLimit,
+          channel: getChannelLabel(channel),
+          time: dailySendsResetTime,
+        });
+
+  const composerWarning = whatsappImageTooLarge
+    ? translation("Broadcast.composer.whatsappImageTooLarge", {
+        name: whatsappImageTooLarge.name,
+      })
+    : dailySendsWarning
+      ? dailySendsWarning
+      : chainStepNeedingText >= 0
       ? translation("Broadcast.composer.chainStepNeedsText", {
           step: chainStepNeedingText + 1,
         })
@@ -1511,7 +1714,26 @@ export default function BroadcastPage() {
     deliveryMode === "schedule" &&
     (!scheduledFor || scheduledFor.getTime() <= Date.now() || !!timeError);
 
-  const canSend = baseCanSend && !scheduleInvalid && !showStartMenu;
+  /*
+   * Limite de agendadas do plano (#186): com a conta cheia, Agendar fica
+   * desativado (enviar já continua possível). As correntes não contam.
+   */
+  const scheduledFull =
+    deliveryMode === "schedule" &&
+    !chainMode &&
+    planLimits?.scheduledMessages != null &&
+    planUsage?.scheduledMessages != null &&
+    planUsage.scheduledMessages >= planLimits.scheduledMessages;
+
+  /* Mensagem acima dos limites (#187): enviar e agendar ficam desativados. */
+  const canSend =
+    baseCanSend &&
+    !scheduleInvalid &&
+    !scheduledFull &&
+    !composerContentOverLimit &&
+    !whatsappImageTooLarge &&
+    !dailySendsFull &&
+    !showStartMenu;
 
   function buildRecipients(chosen) {
     return chosen
@@ -1647,7 +1869,7 @@ export default function BroadcastPage() {
   }
 
   function getResultReason(result) {
-    if (!result) return "Unknown error.";
+    if (!result) return translation("Broadcast.feedback.unknownError");
 
     if (result.error) return String(result.error);
     if (result.reason) return String(result.reason);
@@ -1661,10 +1883,12 @@ export default function BroadcastPage() {
     if (result.data?.detail) return String(result.data.detail);
 
     if (result.status) {
-      return `Request failed with status ${result.status}.`;
+      return translation("Broadcast.feedback.requestFailed", {
+        status: result.status,
+      });
     }
 
-    return "Unknown error.";
+    return translation("Broadcast.feedback.unknownError");
   }
 
   function getFailedRecipients(data, selectedUsers, channel) {
@@ -1709,7 +1933,7 @@ export default function BroadcastPage() {
           r.birdContactId ||
           r.userId ||
           r.email ||
-          "Unknown recipient";
+          translation("Broadcast.feedback.unknownRecipient");
 
         const label =
           matchedUser?.name ||
@@ -1756,10 +1980,12 @@ export default function BroadcastPage() {
     const hiddenCount = failedRecipients.length - visible.length;
 
     if (hiddenCount > 0) {
-      lines.push(`- And ${hiddenCount} more...`);
+      lines.push(
+        translation("Broadcast.feedback.andMore", { count: hiddenCount }),
+      );
     }
 
-    return `Failed recipients:\n${lines.join("\n")}`;
+    return `${translation("Broadcast.feedback.failedRecipients")}\n${lines.join("\n")}`;
   }
 
   function formatBroadcastResultMessage({
@@ -1770,12 +1996,11 @@ export default function BroadcastPage() {
     note,
     failedRecipients = [],
   }) {
-    const channelLabel = channel === "whatsapp" ? "WhatsApp" : "Teams";
-
-    const successLabel = ok === 1 ? "1 success" : `${ok} successes`;
-    const failedLabel = failed === 1 ? "1 fail" : `${failed} fails`;
-
-    const mainMessage = `${channelLabel} broadcast ${action} with ${successLabel} and ${failedLabel}.`;
+    const mainMessage = translation(`Broadcast.feedback.summary.${action}`, {
+      channel: channel === "whatsapp" ? "WhatsApp" : "Teams",
+      ok,
+      failed,
+    });
     const failureDetails = formatFailedRecipients(failedRecipients);
 
     return [mainMessage, note, failureDetails].filter(Boolean).join("\n\n");
@@ -1911,6 +2136,92 @@ export default function BroadcastPage() {
     };
   }
 
+  /*
+   * Limite de mensagens agendadas do plano (#186): aviso simples, só com OK.
+   * Devolve true se era esse o erro, para quem chama não mostrar outro aviso.
+   */
+  async function showScheduledLimitAlert(data) {
+    if (data?.code !== "SCHEDULED_LIMIT_REACHED") return false;
+
+    await showAlert({
+      title: translation("Plans.limits.scheduledTitle"),
+      message: translation("Plans.limits.scheduled", { limit: data.limit }),
+      tone: "warning",
+    });
+    return true;
+  }
+
+  /*
+   * Conteúdo acima dos limites do plano (#187), recusado pelo servidor:
+   * aviso simples, só com OK. Numa corrente diz qual é o passo. Devolve true
+   * se era esse o erro, para quem chama não mostrar outro aviso.
+   */
+  async function showContentLimitAlert(data) {
+    /* A Demo terminou (#209): aviso com "Ativar plano". */
+    if (data?.code === "PLAN_EXPIRED") return promptPlanLimit(data);
+
+    /*
+     * Limite diário de envios (#188): o servidor diz quantos sobram e quando
+     * o contador volta a 0. Os números do ecrã acompanham.
+     */
+    /* Links rastreados do plano (#189): é preciso eliminar para criar. */
+    if (data?.code === "TRACKED_LINKS_LIMIT_REACHED") {
+      reloadPlanUsage();
+      await showAlert({
+        title: translation("Plans.limits.trackedLinksTitle"),
+        message: translation("Plans.limits.trackedLinksFull", {
+          limit: data.limit,
+        }),
+        tone: "warning",
+      });
+      return true;
+    }
+
+    if (data?.code === "DAILY_LIMIT_REACHED") {
+      reloadPlanUsage();
+      const time = formatDailyResetTime(data.resetsAt, locale);
+      const channelName = getChannelLabel(data.channel || channel);
+
+      await showAlert({
+        title: translation("Plans.limits.dailyTitle"),
+        message:
+          chainMode && data.remaining > 0
+            ? translation("Plans.limits.dailyChain", {
+                steps: chainSteps.length,
+                remaining: data.remaining,
+                channel: channelName,
+                time,
+              })
+            : translation("Plans.limits.daily", {
+                limit: data.limit,
+                channel: channelName,
+                time,
+              }),
+        tone: "warning",
+      });
+      return true;
+    }
+
+    const keys = {
+      MESSAGE_TOO_LONG: "messageTooLong",
+      TOO_MANY_FILES: "messageFiles",
+      CHAIN_TOO_LONG: "chainTooLong",
+    };
+    const key = keys[data?.code];
+    if (!key) return false;
+
+    const message = translation(`Plans.limits.${key}`, { limit: data.limit });
+
+    await showAlert({
+      title: translation(`Plans.limits.${key}Title`),
+      message: data.step
+        ? `${translation("Plans.limits.inStep", { step: data.step })} ${message}`
+        : message,
+      tone: "warning",
+    });
+    return true;
+  }
+
   async function sendToGroups() {
     if (!(await validateGroupBroadcast("send"))) return;
 
@@ -1936,6 +2247,7 @@ export default function BroadcastPage() {
 
       const data = await res.json().catch(() => ({}));
 
+      if (await showContentLimitAlert(data)) return;
       if (!res.ok) throw new Error(data?.error || translation("Common.error"));
 
       const summary = groupResultSummary(data);
@@ -1957,6 +2269,7 @@ export default function BroadcastPage() {
       });
     } finally {
       setSending(false);
+      reloadPlanUsage();
     }
   }
 
@@ -1994,6 +2307,8 @@ export default function BroadcastPage() {
 
       const data = await res.json().catch(() => ({}));
 
+      if (await showScheduledLimitAlert(data)) return;
+      if (await showContentLimitAlert(data)) return;
       if (!res.ok) throw new Error(data?.error || translation("Common.error"));
 
       await showAlert({
@@ -2005,6 +2320,7 @@ export default function BroadcastPage() {
         tone: "success",
       });
 
+      reloadPlanUsage();
       setDeliveryMode("now");
     } catch (err) {
       await showAlert({
@@ -2014,6 +2330,7 @@ export default function BroadcastPage() {
       });
     } finally {
       setSending(false);
+      reloadPlanUsage();
     }
   }
 
@@ -2026,7 +2343,7 @@ export default function BroadcastPage() {
     if (!(await validateTrackedDestinationsBeforeAction())) return;
     if (!selectedUsers.length) {
       await showAlert({
-        title: "Choose recipients",
+        title: translation("Broadcast.feedback.chooseRecipients"),
         message: translation("Broadcast.chooseRecipients"),
         tone: "warning",
       });
@@ -2036,8 +2353,8 @@ export default function BroadcastPage() {
     if (chainMode) {
       if (!readChainsFeatureEnabled) {
         await showAlert({
-          title: "Read chains are disabled",
-          message: "Enable read chain messages in Automations first.",
+          title: translation("Broadcast.feedback.chainDisabled.title"),
+          message: translation("Broadcast.feedback.chainDisabled.message"),
           tone: "warning",
         });
         return;
@@ -2045,9 +2362,8 @@ export default function BroadcastPage() {
 
       if (!chainValid) {
         await showAlert({
-          title: "Complete the chain",
-          message:
-            "A read chain needs 2 to 10 freeform messages, and every message must have text or attachments. Tracked links must also be complete.",
+          title: translation("Broadcast.feedback.chainIncomplete.title"),
+          message: translation("Broadcast.feedback.chainIncomplete.message"),
           tone: "warning",
         });
         return;
@@ -2068,8 +2384,9 @@ export default function BroadcastPage() {
 
         const data = await res.json().catch(() => ({}));
 
+        if (await showContentLimitAlert(data)) return;
         if (!res.ok) {
-          throw new Error(data?.error || "Failed to send read chain.");
+          throw new Error(data?.error || translation("Broadcast.feedback.chainSendFailed"));
         }
 
         const counts = getBroadcastCounts(data, selectedUsers.length);
@@ -2082,8 +2399,8 @@ export default function BroadcastPage() {
         await showAlert({
           title:
             counts.failed > 0
-              ? "Read chain started with issues"
-              : "Read chain started",
+              ? translation("Broadcast.feedback.titles.chainStartedIssues")
+              : translation("Broadcast.feedback.titles.chainStarted"),
           message: formatBroadcastResultMessage({
             channel,
             action: "started",
@@ -2092,8 +2409,8 @@ export default function BroadcastPage() {
             note:
               data?.note ||
               (isWhatsapp
-                ? "Message 1 was sent if the 24h window was open. If not, the opening message was sent and the chain waits for a reply."
-                : "Message 1 was sent. Each next message follows once the previous one is read."),
+                ? translation("Broadcast.feedback.notes.chainWhatsapp")
+                : translation("Broadcast.feedback.notes.chainTeams")),
             failedRecipients,
           }),
           tone: counts.failed > 0 ? "warning" : "success",
@@ -2108,6 +2425,7 @@ export default function BroadcastPage() {
         });
       } finally {
         setSending(false);
+        reloadPlanUsage();
       }
 
       return;
@@ -2122,8 +2440,8 @@ export default function BroadcastPage() {
       !trackedLinksValid
     ) {
       await showAlert({
-        title: "Invalid tracked links",
-        message: "Please complete all tracked links and avoid duplicate keys.",
+        title: translation("Broadcast.feedback.invalidLinks.title"),
+        message: translation("Broadcast.feedback.invalidLinks.message"),
         tone: "warning",
       });
       return;
@@ -2160,6 +2478,8 @@ export default function BroadcastPage() {
       if (!res.ok) {
         console.error("Broadcast send error", data);
 
+        if (await showContentLimitAlert(data)) return;
+
         await showAlert({
           title: translation("Common.error"),
           message:
@@ -2182,8 +2502,8 @@ export default function BroadcastPage() {
       await showAlert({
         title:
           counts.failed > 0
-            ? "Broadcast completed with issues"
-            : "Broadcast sent",
+            ? translation("Broadcast.feedback.titles.sentIssues")
+            : translation("Broadcast.feedback.titles.sent"),
         message: formatBroadcastResultMessage({
           channel,
           action: "sent",
@@ -2204,6 +2524,7 @@ export default function BroadcastPage() {
       });
     } finally {
       setSending(false);
+      reloadPlanUsage();
     }
   }
 
@@ -2211,7 +2532,7 @@ export default function BroadcastPage() {
     if (!(await validateTrackedDestinationsBeforeAction())) return;
     if (!isGroupAudience && !selectedUsers.length) {
       await showAlert({
-        title: "Choose recipients",
+        title: translation("Broadcast.feedback.chooseRecipients"),
         message: translation("Broadcast.chooseRecipients"),
         tone: "warning",
       });
@@ -2222,8 +2543,8 @@ export default function BroadcastPage() {
 
     if (!committed) {
       await showAlert({
-        title: "Invalid time",
-        message: "Please enter a valid time between 08:00 and 20:00.",
+        title: translation("Broadcast.feedback.invalidTime.title"),
+        message: translation("Broadcast.feedback.invalidTime.message"),
         tone: "warning",
       });
       return;
@@ -2231,8 +2552,8 @@ export default function BroadcastPage() {
 
     if (!scheduledFor || Number.isNaN(scheduledFor.getTime())) {
       await showAlert({
-        title: "Choose date and time",
-        message: "Choose a date and time.",
+        title: translation("Broadcast.feedback.chooseDateTime.title"),
+        message: translation("Broadcast.feedback.chooseDateTime.message"),
         tone: "warning",
       });
       return;
@@ -2243,8 +2564,8 @@ export default function BroadcastPage() {
 
     if (scheduledDate.getTime() <= Date.now()) {
       await showAlert({
-        title: "Invalid schedule date",
-        message: "The scheduled date must be in the future.",
+        title: translation("Broadcast.feedback.pastDate.title"),
+        message: translation("Broadcast.feedback.pastDate.message"),
         tone: "warning",
       });
       return;
@@ -2258,8 +2579,8 @@ export default function BroadcastPage() {
     if (chainMode) {
       if (!readChainsFeatureEnabled) {
         await showAlert({
-          title: "Read chains are disabled",
-          message: "Enable read chain messages in Automations first.",
+          title: translation("Broadcast.feedback.chainDisabled.title"),
+          message: translation("Broadcast.feedback.chainDisabled.message"),
           tone: "warning",
         });
         return;
@@ -2267,9 +2588,8 @@ export default function BroadcastPage() {
 
       if (!chainValid) {
         await showAlert({
-          title: "Complete the chain",
-          message:
-            "A scheduled read chain needs 2 to 10 freeform messages, and every message must have text or attachments. Tracked links must also be complete.",
+          title: translation("Broadcast.feedback.chainIncomplete.title"),
+          message: translation("Broadcast.feedback.chainIncomplete.scheduledMessage"),
           tone: "warning",
         });
         return;
@@ -2297,8 +2617,9 @@ export default function BroadcastPage() {
 
         const data = await res.json().catch(() => ({}));
 
+        if (await showContentLimitAlert(data)) return;
         if (!res.ok) {
-          throw new Error(data?.error || "Failed to schedule read chain.");
+          throw new Error(data?.error || translation("Broadcast.feedback.chainScheduleFailed"));
         }
 
         const counts = getBroadcastCounts(data, selectedUsers.length);
@@ -2311,16 +2632,15 @@ export default function BroadcastPage() {
         await showAlert({
           title:
             counts.failed > 0
-              ? "Read chain scheduled with issues"
-              : "Read chain scheduled",
+              ? translation("Broadcast.feedback.titles.chainScheduledIssues")
+              : translation("Broadcast.feedback.titles.chainScheduled"),
           message: formatBroadcastResultMessage({
             channel,
             action: "scheduled",
             ok: counts.ok,
             failed: counts.failed,
             note:
-              data?.note ||
-              "Message 1 will be sent at the scheduled time. The next messages will continue after read receipts.",
+              data?.note || translation("Broadcast.feedback.notes.chainScheduled"),
             failedRecipients,
           }),
           tone: counts.failed > 0 ? "warning" : "success",
@@ -2337,6 +2657,7 @@ export default function BroadcastPage() {
         });
       } finally {
         setSending(false);
+        reloadPlanUsage();
       }
 
       return;
@@ -2351,8 +2672,8 @@ export default function BroadcastPage() {
       !trackedLinksValid
     ) {
       await showAlert({
-        title: "Invalid tracked links",
-        message: "Please complete all tracked links and avoid duplicate keys.",
+        title: translation("Broadcast.feedback.invalidLinks.title"),
+        message: translation("Broadcast.feedback.invalidLinks.message"),
         tone: "warning",
       });
       return;
@@ -2388,6 +2709,9 @@ export default function BroadcastPage() {
       if (!res.ok) {
         console.error("Schedule broadcast error", data);
 
+        if (await showScheduledLimitAlert(data)) return;
+        if (await showContentLimitAlert(data)) return;
+
         await showAlert({
           title: translation("Common.error"),
           message: data?.error || translation("Common.error"),
@@ -2407,19 +2731,20 @@ export default function BroadcastPage() {
       await showAlert({
         title:
           counts.failed > 0
-            ? "Broadcast scheduled with issues"
-            : "Broadcast scheduled",
+            ? translation("Broadcast.feedback.titles.scheduledIssues")
+            : translation("Broadcast.feedback.titles.scheduled"),
         message: formatBroadcastResultMessage({
           channel,
           action: "scheduled",
           ok: counts.ok,
           failed: counts.failed,
-          note: "These counts mean the broadcast was scheduled for those recipients. Delivery success will only be known when the scheduled broadcast is actually sent.",
+          note: translation("Broadcast.feedback.notes.scheduled"),
           failedRecipients,
         }),
         tone: counts.failed > 0 ? "warning" : "success",
       });
 
+      reloadPlanUsage();
       setDeliveryMode("now");
     } catch (err) {
       console.error(err);
@@ -2431,6 +2756,7 @@ export default function BroadcastPage() {
       });
     } finally {
       setSending(false);
+      reloadPlanUsage();
     }
   }
 
@@ -2446,12 +2772,28 @@ export default function BroadcastPage() {
     [],
   );
 
-  const scheduleButtonLabel =
-    deliveryMode === "schedule"
-      ? `${scheduledFor.toLocaleDateString()} ${formatHour(
-          scheduledFor,
-        )}:${formatMinute(scheduledFor)}`
-      : translation("Broadcast.sendnow");
+  const scheduleDateLabel = scheduledFor.toLocaleDateString(locale, {
+    day: "2-digit",
+    month: "2-digit",
+  });
+  const draftHourNumber = Number(hourDraft);
+  const draftMinuteNumber = Number(minuteDraft);
+  const hasValidTimeDraft =
+    /^\d{1,2}$/.test(hourDraft) &&
+    /^\d{1,2}$/.test(minuteDraft) &&
+    draftHourNumber >= 0 &&
+    draftHourNumber <= 23 &&
+    draftMinuteNumber >= 0 &&
+    draftMinuteNumber <= 59;
+  const scheduleTimeLabel = hasValidTimeDraft
+    ? `${String(draftHourNumber).padStart(2, "0")}:${String(
+        draftMinuteNumber,
+      ).padStart(2, "0")}`
+    : `${formatHour(scheduledFor)}:${formatMinute(scheduledFor)}`;
+  const scheduleActionLabel = translation("Broadcast.scheduleFor", {
+    date: scheduleDateLabel,
+    time: scheduleTimeLabel,
+  });
 
   const activeDelay = Number(
     activeChainStep?.delayAfterPreviousReadMinutes || 0,
@@ -2517,10 +2859,8 @@ export default function BroadcastPage() {
       </div>
     ) : null;
 
-  const schedulePanel = activeToolPanel === "schedule" && (
+  const schedulePanel = (
     <SchedulePanel
-      deliveryMode={deliveryMode}
-      setDeliveryMode={setDeliveryMode}
       scheduledFor={scheduledFor}
       setScheduledFor={setScheduledFor}
       hourDraft={hourDraft}
@@ -2532,6 +2872,23 @@ export default function BroadcastPage() {
       scheduleInvalid={scheduleInvalid}
       browserTimeZone={browserTimeZone}
       translation={translation}
+      usage={
+        chainMode ? null : (
+          <UsageCounter
+            used={planUsage?.scheduledMessages}
+            limit={planLimits?.scheduledMessages}
+            label={translation("Plans.usage.scheduledLabel")}
+            hint={translation("Plans.usage.scheduledHint")}
+          />
+        )
+      }
+      limitWarning={
+        scheduledFull
+          ? translation("Plans.limits.scheduled", {
+              limit: planLimits.scheduledMessages,
+            })
+          : null
+      }
     />
   );
 
@@ -2546,6 +2903,15 @@ export default function BroadcastPage() {
         removeTrackedLink={removeTrackedLink}
         library={trackedLinkLibrary}
         onUseLibraryLink={addTrackedLinkFromLibrary}
+        onDeleteLibraryLink={deleteLibraryLink}
+        savedLinks={
+          planLimits
+            ? {
+                used: planUsage?.trackedLinks ?? null,
+                limit: planLimits.trackedLinks ?? null,
+              }
+            : null
+        }
         bubbleLinkIds={linkPreview.bubbles.map((bubble) => bubble.id)}
         translation={translation}
       />
@@ -2555,13 +2921,18 @@ export default function BroadcastPage() {
 
   if (showStartMenu) {
     composer = (
-      <StartMenu
-        channel={channel}
-        onChoose={setComposeMode}
-        sampleName={sampleName}
-        previewTime={previewTime}
-        translation={translation}
-      />
+      <>
+        <StartMenu
+          channel={channel}
+          onChoose={setComposeMode}
+          sampleName={sampleName}
+          previewTime={previewTime}
+          translation={translation}
+        />
+        {deliveryMode === "schedule" ? (
+          <div className={styles.inlineToolPanel}>{schedulePanel}</div>
+        ) : null}
+      </>
     );
   } else if (isSurveyMode) {
     composer = (
@@ -2570,7 +2941,10 @@ export default function BroadcastPage() {
         onBack={() => setComposeMode(null)}
         activeToolPanel={activeToolPanel}
         toggleToolPanel={toggleToolPanel}
-        scheduleButtonLabel={scheduleButtonLabel}
+        deliveryMode={deliveryMode}
+        setDeliveryMode={setDeliveryMode}
+        sending={sending}
+        schedulePanel={schedulePanel}
         trackedLinksCount={trackedLinksCount}
         translation={translation}
         phone={
@@ -2585,7 +2959,6 @@ export default function BroadcastPage() {
           />
         }
       >
-        {schedulePanel}
         {linksPanel}
       </MessageComposer>
     );
@@ -2596,7 +2969,10 @@ export default function BroadcastPage() {
         onBack={() => setComposeMode(null)}
         activeToolPanel={activeToolPanel}
         toggleToolPanel={toggleToolPanel}
-        scheduleButtonLabel={scheduleButtonLabel}
+        deliveryMode={deliveryMode}
+        setDeliveryMode={setDeliveryMode}
+        sending={sending}
+        schedulePanel={schedulePanel}
         trackedLinksCount={trackedLinksCount}
         translation={translation}
         phone={
@@ -2611,7 +2987,6 @@ export default function BroadcastPage() {
           />
         }
       >
-        {schedulePanel}
         {linksPanel}
       </MessageComposer>
     );
@@ -2622,7 +2997,10 @@ export default function BroadcastPage() {
         onBack={() => setComposeMode(null)}
         activeToolPanel={activeToolPanel}
         toggleToolPanel={toggleToolPanel}
-        scheduleButtonLabel={scheduleButtonLabel}
+        deliveryMode={deliveryMode}
+        setDeliveryMode={setDeliveryMode}
+        sending={sending}
+        schedulePanel={schedulePanel}
         trackedLinksCount={trackedLinksCount}
         translation={translation}
         phone={
@@ -2637,7 +3015,6 @@ export default function BroadcastPage() {
           />
         }
       >
-        {schedulePanel}
         {linksPanel}
       </MessageComposer>
     );
@@ -2650,7 +3027,10 @@ export default function BroadcastPage() {
         warning={composerWarning}
         activeToolPanel={activeToolPanel}
         toggleToolPanel={toggleToolPanel}
-        scheduleButtonLabel={scheduleButtonLabel}
+        deliveryMode={deliveryMode}
+        setDeliveryMode={setDeliveryMode}
+        sending={sending}
+        schedulePanel={schedulePanel}
         trackedLinksCount={trackedLinksCount}
         translation={translation}
         leftToolsContent={chainDelayTools}
@@ -2671,6 +3051,7 @@ export default function BroadcastPage() {
               onChangeStepKind={(kind) =>
                 updateChainStepKind(activeChainStepIndex, kind)
               }
+              maxSteps={chainStepsLimit}
               translation={translation}
             />
           )
@@ -2719,7 +3100,6 @@ export default function BroadcastPage() {
           )
         }
       >
-        {schedulePanel}
         {linksPanel}
       </MessageComposer>
     );
@@ -2733,7 +3113,23 @@ export default function BroadcastPage() {
         selectedCount={isGroupAudience ? selectedGroups.size : selected.size}
         sending={sending}
         canSend={canSend}
+        dailyCounter={
+          <UsageCounter
+            used={dailySendsUsed}
+            limit={dailySendsLimit}
+            label={translation("Plans.usage.dailyLabel")}
+            hint={translation("Plans.usage.dailyHint", {
+              time: dailySendsResetTime,
+            })}
+          />
+        }
+        dailyCounterLabel={
+          dailySendsLimit !== null && dailySendsUsed !== null
+            ? translation("Plans.usage.dailyShort")
+            : null
+        }
         deliveryMode={deliveryMode}
+        scheduleActionLabel={scheduleActionLabel}
         onPrimaryClick={
           deliveryMode === "schedule" ? handleSchedule : handleSend
         }
@@ -2755,7 +3151,30 @@ export default function BroadcastPage() {
           kind={mediaPickerKind}
           orgId={org?.id}
           attachedUrls={composerFiles.map((f) => f.url)}
-          onAdd={(picked) => setComposerFiles((prev) => [...prev, ...picked])}
+          onAdd={async (picked) => {
+            /* Ficheiros por mensagem (#187): a escolha a mais fica por juntar. */
+            if (!(await acceptComposerFiles(picked.length))) return false;
+
+            /* No WhatsApp, as imagens acima de 5 MB não chegam ao contacto. */
+            const tooLarge =
+              channel === "whatsapp"
+                ? picked.find(isWhatsappImageTooLarge)
+                : null;
+            if (tooLarge) {
+              await showAlert({
+                title: translation("Common.error"),
+                message: translation(
+                  "Broadcast.composer.whatsappImageTooLarge",
+                  { name: tooLarge.name },
+                ),
+                tone: "warning",
+              });
+              return false;
+            }
+
+            setComposerFiles((prev) => [...prev, ...picked]);
+            return true;
+          }}
           onClose={() => setMediaPickerKind(null)}
           translation={translation}
         />

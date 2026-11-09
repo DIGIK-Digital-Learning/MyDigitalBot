@@ -10,6 +10,10 @@ import {
   handleApiError,
   requireOrgForScheduledBroadcast,
 } from "@/lib/auth/guards";
+import { buildScheduledPayload } from "@/lib/services/broadcast/scheduledPayload";
+import { refundScheduledSend } from "@/lib/repos/adminDailySends.repo";
+import { dailySendsDayStart } from "@/lib/plans/dailySends";
+import { saveTrackedLinksWithinPlan } from "@/lib/services/plans/planLimits";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -164,6 +168,48 @@ export async function PATCH(req, { params }) {
       );
     }
 
+    /*
+     * O canal fixa o formato do payload (userIds vs recipients, abertura),
+     * por isso não se muda numa agenda existente.
+     */
+    if (
+      body.channel !== undefined &&
+      body.channel !== orgAuth.broadcast.channel
+    ) {
+      return NextResponse.json(
+        { error: "The channel of a scheduled broadcast cannot be changed." },
+        { status: 400 },
+      );
+    }
+
+    /*
+     * O payload nunca é gravado como vem do cliente: passa pelas mesmas
+     * validações do agendamento e o número de destinatários é recalculado.
+     */
+    if (body.payload !== undefined) {
+      const built = await buildScheduledPayload({
+        orgAuth,
+        channel: orgAuth.broadcast.channel,
+        payload: body.payload,
+      });
+
+      if (built.error) {
+        return NextResponse.json({ error: built.error }, { status: 400 });
+      }
+
+      /* Links rastreados do plano (#189): um link novo na edição conta. */
+      const links = await saveTrackedLinksWithinPlan(
+        orgAuth.orgId,
+        built.payload.trackedLinks,
+      );
+      if (links.body) {
+        return NextResponse.json(links.body, { status: 409 });
+      }
+
+      patch.payload = built.payload;
+      patch.recipient_count = built.recipientCount;
+    }
+
     if (Object.keys(patch).length === 0) {
       return NextResponse.json(
         {
@@ -178,6 +224,14 @@ export async function PATCH(req, { params }) {
       orgAuth.broadcastId,
       patch,
     );
+
+    /*
+     * Limite diário de envios (#188): cancelar uma agendada no dia em que
+     * foi agendada devolve o envio ao canal dela. Noutro dia não muda nada.
+     */
+    if (patch.status === "cancelled") {
+      await refundScheduledSend(orgAuth.broadcastId, dailySendsDayStart());
+    }
 
     await recordAuditEvent(orgAuth, {
       action: AUDIT_ACTIONS.BROADCAST_SCHEDULE_UPDATED,
@@ -228,6 +282,9 @@ export async function DELETE(_req, { params }) {
     await deleteScheduledBroadcast(
       orgAuth.broadcastId,
     );
+
+    /* Eliminar no mesmo dia também devolve o envio (#188). */
+    await refundScheduledSend(orgAuth.broadcastId, dailySendsDayStart());
 
     await recordAuditEvent(orgAuth, {
       action: AUDIT_ACTIONS.BROADCAST_SCHEDULE_DELETED,

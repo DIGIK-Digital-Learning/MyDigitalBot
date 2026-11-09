@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl";
 import styles from "./pillSelect.module.css";
 
 const MIN_MENU_WIDTH = 240;
@@ -9,7 +10,7 @@ export default function PillSelect({
   options = [],
   value,
   onChange,
-  placeholder = "Select...",
+  placeholder,
   disabled = false,
   menuWidth,
   portalToBody = true,
@@ -17,6 +18,7 @@ export default function PillSelect({
   className = "",
   style,
 }) {
+  const t = useTranslations("PillSelect");
   const triggerRef = useRef(null);
   const menuRef = useRef(null);
   const [open, setOpen] = useState(false);
@@ -24,7 +26,7 @@ export default function PillSelect({
   const [direction, setDirection] = useState("down");
 
   const selected = options.find((o) => String(o.value) === String(value));
-  const label = selected?.label ?? placeholder;
+  const label = selected?.label ?? placeholder ?? t("placeholder");
 
   useEffect(() => {
     if (!open) return;
@@ -132,7 +134,7 @@ export default function PillSelect({
             </button>
           );
         })}
-        {!options.length && <div className={styles.empty}>Sem opções.</div>}
+        {!options.length && <div className={styles.empty}>{t("empty")}</div>}
       </div>
     </div>
   );

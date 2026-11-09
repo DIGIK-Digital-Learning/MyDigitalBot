@@ -186,8 +186,9 @@ export default function RecipientPicker({
       safeArray(initialRecipients),
       candidateEntries,
       channel,
+      { unknownLabel: translation("EditModal.unknownRecipient") },
     );
-  }, [initialRecipients, candidateEntries, channel]);
+  }, [initialRecipients, candidateEntries, channel, translation]);
 
   const entriesByKey = useMemo(() => {
     const map = new Map();

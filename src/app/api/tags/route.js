@@ -1,3 +1,4 @@
+import { withSessionReadAccess, getSessionReadClient } from "@/lib/db/readAccess";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -103,14 +104,16 @@ export async function GET(req) {
     const orgAuth = await requireOwnedOrg(rawOrgId);
     if (orgAuth.error) return orgAuth.error;
 
-    const data = await getTagsInOrg(
-      orgAuth.admin,
-      orgAuth.orgId,
-    );
+    return await withSessionReadAccess(orgAuth, async () => {
+      const data = await getTagsInOrg(
+        getSessionReadClient(orgAuth),
+        orgAuth.orgId,
+      );
 
-    return NextResponse.json(
-      Array.isArray(data) ? data : [],
-    );
+      return NextResponse.json(
+        Array.isArray(data) ? data : [],
+      );
+    });
   } catch (error) {
     return handleApiError(
       error,

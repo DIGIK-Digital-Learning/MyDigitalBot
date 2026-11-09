@@ -1,0 +1,205 @@
+/* Área de administração dos planos (#208), no estilo das Definições. */
+.page {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 28px 24px 48px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
+}
+
+.pageTitle {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(28px, 4vw, 36px);
+  font-weight: 850;
+}
+
+.pageDescription,
+.sectionHeading p {
+  margin: 6px 0 0;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.section {
+  padding: 22px;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.sectionHeading h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 20px;
+}
+
+.tryRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef2f7;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.table thead th {
+  color: #64748b;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.table tbody th {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.muted {
+  display: block;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.danger {
+  color: #b42318;
+  font-weight: 700;
+}
+
+/* Linhas que pedem atenção: Demo terminada ou algum limite ultrapassado. */
+.rowAttention td {
+  background: #fff8f6;
+}
+
+.badge {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fee4e2;
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.search {
+  width: min(360px, 100%);
+  border: 1px solid #d0d7e2;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font: inherit;
+}
+
+.deadline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dateInput {
+  border: 1px solid #d0d7e2;
+  border-radius: 10px;
+  padding: 3px 8px;
+  font: inherit;
+  font-size: 13px;
+  color: #0f172a;
+  background: #fff;
+}
+
+.applyButton {
+  border: 0;
+  background: #30a9e0;
+  color: #fff;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.applyButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.linkButton {
+  border: 1px solid #30a9e0;
+  background: #fff;
+  color: #1d7fae;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.linkButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.input:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+}
+
+.sends {
+  display: grid;
+  gap: 2px;
+}
+
+.select,
+.input {
+  border: 1px solid #d0d7e2;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font: inherit;
+  background: #fff;
+  color: #0f172a;
+}
+
+.input {
+  width: 90px;
+}
+
+.button {
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 14px;
+  background: #30a9e0;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

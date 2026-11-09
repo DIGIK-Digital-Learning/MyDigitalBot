@@ -15,10 +15,10 @@ const NAV = [
 
   { href: "/pricing", key: "pricing" },
 
-//{ href: "/company", key: "company" },
-//{ href: "/support", key: "support" },
-//{ href: "/learn", key: "learn" },
-// { href: "/blog", key: "blog" },
+  //{ href: "/company", key: "company" },
+  //{ href: "/support", key: "support" },
+  //{ href: "/learn", key: "learn" },
+  // { href: "/blog", key: "blog" },
 ];
 
 export default function MarketingNavbar() {
@@ -108,7 +108,7 @@ export default function MarketingNavbar() {
               <div className={styles.actionsPlaceholder} />
             ) : isAuthed ? (
               <LoaderLink
-                href="/users"
+                href="/dashboard"
                 className={styles.userPill}
                 onClick={closeMenu}
               >

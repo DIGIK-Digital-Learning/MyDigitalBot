@@ -9,6 +9,7 @@ import {
   requireOrgForAutomationRule,
 } from "@/lib/auth/guards";
 import { sanitizeAutomationPayload } from "@/lib/services/automations/automationEngine";
+import { checkPlanActive } from "@/lib/services/plans/planLimits";
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
 
@@ -27,6 +28,16 @@ export async function PATCH(req, { params }) {
     if (orgAuth.error) return orgAuth.error;
 
     const existing = orgAuth.rule;
+
+    /*
+     * A Demo terminou (#209): editar e desativar continuam, ativar uma
+     * automação não.
+     */
+    if (body.is_active === true && !existing.is_active) {
+      const active = await checkPlanActive(orgAuth.orgId);
+      if (active.body) return NextResponse.json(active.body, { status: 403 });
+    }
+
     const patch = {};
 
     if (body.name !== undefined) patch.name = body.name;

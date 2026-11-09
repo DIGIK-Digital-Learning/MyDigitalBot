@@ -1,11 +1,11 @@
-import { CalendarDays, Link2 } from "lucide-react";
+import { Link2 } from "lucide-react";
 
 import styles from "../broadcast.module.css";
 import ToolToggleButton from "./ToolToggleButton";
 
 /**
  * Painel de composição. Recebe o telemóvel (ou a mensagem de abertura) já
- * montado e junta-lhe as ferramentas: corrente, links rastreados e agendar.
+ * montado e junta-lhe ferramentas como correntes e links rastreados.
  */
 export default function MessageComposer({
   title,
@@ -17,7 +17,10 @@ export default function MessageComposer({
   showLinks = true,
   activeToolPanel,
   toggleToolPanel,
-  scheduleButtonLabel,
+  deliveryMode,
+  setDeliveryMode,
+  sending,
+  schedulePanel,
   trackedLinksCount,
   translation,
   phone,
@@ -64,17 +67,43 @@ export default function MessageComposer({
             />
           )}
 
-          <ToolToggleButton
-            active={activeToolPanel === "schedule"}
-            icon={<CalendarDays size={16} />}
-            label={translation("Broadcast.schedule")}
-            badge={scheduleButtonLabel}
-            onClick={() => toggleToolPanel("schedule")}
-          />
+          <div
+            className={styles.deliveryModeSwitch}
+            role="group"
+            aria-label={translation("Broadcast.deliveryMode")}
+          >
+            <button
+              type="button"
+              className={`${styles.deliveryModeBtn} ${
+                deliveryMode === "now" ? styles.deliveryModeBtnActive : ""
+              }`}
+              aria-pressed={deliveryMode === "now"}
+              disabled={sending}
+              onClick={() => setDeliveryMode("now")}
+            >
+              {translation("Broadcast.sendnow")}
+            </button>
+
+            <button
+              type="button"
+              className={`${styles.deliveryModeBtn} ${
+                deliveryMode === "schedule" ? styles.deliveryModeBtnActive : ""
+              }`}
+              aria-pressed={deliveryMode === "schedule"}
+              disabled={sending}
+              onClick={() => setDeliveryMode("schedule")}
+            >
+              {translation("Broadcast.scheduleBtn")}
+            </button>
+          </div>
         </div>
       </div>
 
-      {activeToolPanel && (
+      {deliveryMode === "schedule" && schedulePanel ? (
+        <div className={styles.inlineToolPanel}>{schedulePanel}</div>
+      ) : null}
+
+      {activeToolPanel === "links" && (
         <div className={styles.inlineToolPanel}>{children}</div>
       )}
     </div>

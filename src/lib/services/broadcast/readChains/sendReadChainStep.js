@@ -250,17 +250,17 @@ export async function sendReadChainStep({
     };
   }
 
-  if (recipientResult.kind === "template") {
+  if (["template", "queued"].includes(recipientResult.kind)) {
     return {
       ok: true,
       sent: false,
       waitingForReply: true,
-      kind: "template",
+      kind: recipientResult.kind,
       stepIndex,
       providerMessageId: recipientResult.providerMessageId || null,
       result: recipientResult,
       warning:
-        "Window was closed. Fallback template was sent and the chain step is waiting for user reply.",
+        "The chain step is waiting for the opening template's Quick Reply.",
     };
   }
 

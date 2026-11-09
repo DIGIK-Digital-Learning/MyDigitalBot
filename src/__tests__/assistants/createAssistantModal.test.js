@@ -24,6 +24,22 @@ vi.mock("@/app/components/PillSelect/PillSelect", () => ({
     ),
 }));
 
+const alertMock = vi.hoisted(() => vi.fn(() => Promise.resolve()));
+const confirmMock = vi.hoisted(() => vi.fn(() => Promise.resolve(false)));
+const pushMock = vi.hoisted(() => vi.fn());
+
+vi.mock("@/app/components/Alert/AlertProvider", () => ({
+  useAlert: () => alertMock,
+}));
+
+vi.mock("@/app/components/Confirm/ConfirmProvider", () => ({
+  useConfirm: () => confirmMock,
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushMock }),
+}));
+
 vi.mock("@/app/components/Slider/Slider", () => ({
   default: ({ value, onChange, min = 0, max = 1, step = 0.01 }) =>
     React.createElement("input", {
@@ -36,6 +52,17 @@ vi.mock("@/app/components/Slider/Slider", () => ({
       onChange,
     }),
 }));
+
+/*
+ * Os pedidos de criar assistente. Ao abrir, o formulário também pede os
+ * limites do plano (#185), por isso não se pode assumir que o primeiro pedido
+ * é o de criar.
+ */
+function createCalls() {
+  return globalThis.fetch.mock.calls.filter(
+    ([url, init]) => url === "/api/assistants" && init?.method === "POST",
+  );
+}
 
 function makeResponse(data, ok = true) {
   return Promise.resolve({
@@ -135,7 +162,7 @@ describe("CreateAssistantModal", () => {
       );
     });
 
-    const body = JSON.parse(mocks.fetch.mock.calls[0][1].body);
+    const body = JSON.parse(createCalls()[0][1].body);
     expect(body).toMatchObject({
       organizationId: "org_1",
       name: "My Assistant",
@@ -145,6 +172,145 @@ describe("CreateAssistantModal", () => {
     });
 
     expect(mocks.onCreated).toHaveBeenCalled();
+  });
+
+  it("no limite do plano, \"Atualizar plano\" leva à página de preços", async () => {
+    confirmMock.mockResolvedValueOnce(true);
+    mocks.fetch.mockImplementation(() =>
+      Promise.resolve({
+        ok: false,
+        status: 409,
+        json: () =>
+          Promise.resolve({
+            error: "Plan limit reached: assistants",
+            code: "ASSISTANT_LIMIT_REACHED",
+            plan: "Demo",
+            limit: 1,
+          }),
+      }),
+    );
+    const user = userEvent.setup();
+    renderModal();
+
+    const [nameInput] = screen.getAllByRole("textbox");
+    await user.type(nameInput, "Segundo");
+    await user.click(
+      screen.getByRole("button", { name: "CreateAssistant.create" }),
+    );
+
+    await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/pt/pricing"));
+
+    expect(confirmMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "assistantsTitle",
+        message: "assistants",
+        confirmText: "upgrade",
+        cancelText: "later",
+      }),
+    );
+    expect(alertMock).not.toHaveBeenCalled();
+    expect(mocks.onCreated).not.toHaveBeenCalled();
+  });
+
+  it("no limite do plano, \"Agora não\" fecha sem sair da página", async () => {
+    confirmMock.mockResolvedValueOnce(false);
+    mocks.fetch.mockImplementation(() =>
+      Promise.resolve({
+        ok: false,
+        status: 409,
+        json: () =>
+          Promise.resolve({ code: "ASSISTANT_LIMIT_REACHED", plan: "Demo", limit: 1 }),
+      }),
+    );
+    const user = userEvent.setup();
+    renderModal();
+
+    const [nameInput] = screen.getAllByRole("textbox");
+    await user.type(nameInput, "Segundo");
+    await user.click(
+      screen.getByRole("button", { name: "CreateAssistant.create" }),
+    );
+
+    await waitFor(() => expect(confirmMock).toHaveBeenCalled());
+    expect(pushMock).not.toHaveBeenCalled();
+  });
+
+  it("outro erro mostra a mensagem do servidor, sem falar em limite", async () => {
+    mocks.fetch.mockImplementation(() =>
+      Promise.resolve({
+        ok: false,
+        status: 400,
+        json: () => Promise.resolve({ error: "Assistant name is required" }),
+      }),
+    );
+    const user = userEvent.setup();
+    renderModal();
+
+    const [nameInput] = screen.getAllByRole("textbox");
+    await user.type(nameInput, "x");
+    await user.click(
+      screen.getByRole("button", { name: "CreateAssistant.create" }),
+    );
+
+    await waitFor(() => expect(alertMock).toHaveBeenCalled());
+
+    expect(alertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "CreateAssistant.createFailed",
+        message: "Assistant name is required",
+      }),
+    );
+  });
+
+  it("mostra o contador e não deixa criar acima do limite das instruções (#185)", async () => {
+    mocks.fetch.mockImplementation((url) =>
+      url === "/api/plans/limits?orgId=org_1"
+        ? makeResponse({
+            plan: { name: "Demo" },
+            limits: { assistantInstructionChars: 10 },
+          })
+        : makeResponse({ id: "asst_new" }),
+    );
+    renderModal();
+
+    const create = screen.getByRole("button", { name: "CreateAssistant.create" });
+    const [, , instructionsInput] = screen.getAllByRole("textbox");
+
+    fireEvent.change(instructionsInput, { target: { value: "a".repeat(10) } });
+    expect(await screen.findByText("10 / 10")).toBeInTheDocument();
+    expect(create).not.toBeDisabled();
+
+    fireEvent.change(instructionsInput, { target: { value: "a".repeat(11) } });
+    expect(screen.getByText("11 / 10")).toBeInTheDocument();
+    expect(create).toBeDisabled();
+  });
+
+  it("se o servidor recusar as instruções, mostra um aviso simples", async () => {
+    mocks.fetch.mockImplementation((url) =>
+      url === "/api/assistants"
+        ? Promise.resolve({
+            ok: false,
+            status: 400,
+            json: () =>
+              Promise.resolve({ code: "INSTRUCTIONS_TOO_LONG", limit: 5000 }),
+          })
+        : makeResponse({}),
+    );
+    const user = userEvent.setup();
+    renderModal();
+
+    const [nameInput] = screen.getAllByRole("textbox");
+    await user.type(nameInput, "x");
+    await user.click(
+      screen.getByRole("button", { name: "CreateAssistant.create" }),
+    );
+
+    await waitFor(() =>
+      expect(alertMock).toHaveBeenCalledWith(
+        expect.objectContaining({ title: "Plans.limits.instructionsTitle" }),
+      ),
+    );
+    expect(confirmMock).not.toHaveBeenCalled();
   });
 
   it("cria com a predefinicao Normal quando nenhuma e escolhida", async () => {
@@ -160,7 +326,7 @@ describe("CreateAssistantModal", () => {
 
     await waitFor(() => expect(mocks.fetch).toHaveBeenCalled());
 
-    const body = JSON.parse(mocks.fetch.mock.calls[0][1].body);
+    const body = JSON.parse(createCalls()[0][1].body);
 
     expect(body.temperature).toBe(0.7);
     expect(body.top_p).toBe(1);
@@ -182,7 +348,7 @@ describe("CreateAssistantModal", () => {
 
     await waitFor(() => expect(mocks.fetch).toHaveBeenCalled());
 
-    const body = JSON.parse(mocks.fetch.mock.calls[0][1].body);
+    const body = JSON.parse(createCalls()[0][1].body);
 
     expect(body.temperature).toBe(0.2);
 
@@ -266,10 +432,13 @@ describe("CreateAssistantModal", () => {
   it("cria um so assistente quando se carrega varias vezes em criar", async () => {
     const user = userEvent.setup();
 
-    // O pedido fica pendente, como numa rede lenta.
+    // O pedido de criar fica pendente, como numa rede lenta. Os outros
+    // (os limites do plano, ao abrir) respondem normalmente.
     let finish;
-    mocks.fetch.mockImplementationOnce(
-      () => new Promise((resolve) => (finish = resolve)),
+    mocks.fetch.mockImplementation((url) =>
+      url === "/api/assistants"
+        ? new Promise((resolve) => (finish = resolve))
+        : makeResponse({}),
     );
     renderModal();
 
@@ -284,7 +453,7 @@ describe("CreateAssistantModal", () => {
     fireEvent.submit(form);
 
     await waitFor(() => expect(create).toBeDisabled());
-    expect(mocks.fetch).toHaveBeenCalledTimes(1);
+    expect(createCalls()).toHaveLength(1);
 
     finish({ ok: true, json: async () => ({ id: "asst_new" }) });
     await waitFor(() => expect(mocks.onCreated).toHaveBeenCalledTimes(1));

@@ -5,7 +5,7 @@
   --dash-faint: #94a3b8;
 
   width: 100%;
-  padding: 32px clamp(18px, 2.5vw, 36px) 40px;
+  padding: 13px clamp(18px, 2.5vw, 36px) 13px;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -73,7 +73,9 @@
   font-weight: 650;
   cursor: pointer;
   box-shadow: 0 1px 2px rgba(var(--brand-1-rgb), 0.3);
-  transition: filter 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    filter 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .refreshButton:hover {

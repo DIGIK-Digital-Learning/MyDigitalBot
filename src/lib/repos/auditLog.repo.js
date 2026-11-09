@@ -1,5 +1,5 @@
+import { getRepositoryReadClient } from "@/lib/db/readAccess";
 import { getSupabaseAdminClient } from "@/lib/db/admin";
-
 const TABLE = "audit_log";
 
 /**
@@ -37,7 +37,7 @@ export async function getOrgAuditLog(
     pageSize = 25,
   } = {},
 ) {
-  const sb = getSupabaseAdminClient();
+  const sb = getRepositoryReadClient();
 
   const offset = (page - 1) * pageSize;
 

@@ -16,6 +16,7 @@ import styles from "../scheduled.module.css";
 import {
   formatDateTime,
   getScheduledGroups,
+  getPayloadQuestion,
 } from "../helpers/scheduled.helpers";
 import {
   cleanText,
@@ -394,6 +395,7 @@ export default function ScheduledViewModal({
     : [];
 
   const template = payload.template || null;
+  const question = getPayloadQuestion(payload);
 
   const okCount =
     Number(result.ok) ||
@@ -527,6 +529,43 @@ export default function ScheduledViewModal({
             <p className={styles.fullMessage}>{selectedItem.message || "-"}</p>
           </div>
         </div>
+
+        {question ? (
+          <div className={styles.viewSection}>
+            <div className={styles.viewSectionTitle}>
+              <FileText aria-hidden />
+              <span>
+                {safeTranslate(
+                  translation,
+                  `ViewModal.question.${question.kind}`,
+                  "Pergunta",
+                )}
+              </span>
+            </div>
+
+            <div className={styles.messageBox}>
+              {Array.isArray(question.options)
+                ? question.options.map((option, index) => (
+                    <p key={`${option.label}-${index}`} className={styles.fullMessage}>
+                      {index + 1}. {option.label}
+                      {option.correct ? " ✓" : ""}
+                    </p>
+                  ))
+                : null}
+
+              {question.kind === "open" && question.expectedAnswer ? (
+                <p className={styles.fullMessage}>
+                  {safeTranslate(
+                    translation,
+                    "ViewModal.question.expectedAnswer",
+                    "Resposta esperada",
+                  )}
+                  : {question.expectedAnswer}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
 
         {template ? (
           <div className={styles.viewSection}>

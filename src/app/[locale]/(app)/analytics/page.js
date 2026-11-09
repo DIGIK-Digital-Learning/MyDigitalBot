@@ -618,13 +618,10 @@ function LinksTable({ rows, maxClicks, offset = 0, format, t }) {
   );
 }
 
-function PageHeader({ t, children }) {
+/* Sem título nem descrição: só as ações da página. */
+function PageHeader({ children }) {
   return (
     <header className={styles.header} data-pdf-section>
-      <div className={styles.headerCopy}>
-        <h1>{t("title")}</h1>
-        <p>{t("description")}</p>
-      </div>
       {children}
     </header>
   );
@@ -928,7 +925,7 @@ export default function AnalyticsPage() {
   if (authLoading || orgLoading || (orgId && !metrics && !error)) {
     return (
       <main className={styles.page}>
-        <PageHeader t={t} />
+        <PageHeader />
         <LoadingState />
       </main>
     );
@@ -937,7 +934,7 @@ export default function AnalyticsPage() {
   if (!orgId) {
     return (
       <main className={styles.page}>
-        <PageHeader t={t} />
+        <PageHeader />
         <div className={styles.errorBox}>
           <p>{t("errors.noOrg")}</p>
         </div>
@@ -947,7 +944,7 @@ export default function AnalyticsPage() {
 
   return (
     <main ref={exportRef} data-analytics-pdf-root="true" className={styles.page}>
-      <PageHeader t={t}>
+      <PageHeader>
         <div className={styles.headerActions} data-html2canvas-ignore="true">
           {updatedLabel ? <span className={styles.updatedAt}>{updatedLabel}</span> : null}
           <div className={styles.periodTabs} role="group" aria-label={t("periods.label")}>

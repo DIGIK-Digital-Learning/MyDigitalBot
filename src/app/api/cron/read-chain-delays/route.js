@@ -11,6 +11,7 @@ import {
   getMessageChainStep,
 } from "@/lib/repos/messageChain.repo";
 import { sendReadChainStep } from "@/lib/services/broadcast/readChains/sendReadChainStep";
+import { getExpiredOrganizationIds } from "@/lib/services/plans/planLimits";
 
 function isAuthorized(req) {
   const secret = process.env.CRON_SECRET;
@@ -70,7 +71,11 @@ async function processDueDelayedSteps(req) {
     ? Math.min(Math.max(limitParam, 1), 100)
     : 50;
 
-  const deliveries = await claimDueScheduledMessageChainDeliveries({ limit });
+  /* A Demo terminou (#209): os passos dessas empresas ficam à espera. */
+  const deliveries = await claimDueScheduledMessageChainDeliveries({
+    limit,
+    excludeOrganizationIds: await getExpiredOrganizationIds(),
+  });
 
   const results = [];
 

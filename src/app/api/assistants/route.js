@@ -1,9 +1,18 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 
 import {
+  countAssistantsByOrg,
   createAssistant,
   getAssistantsInOrg,
 } from "@/lib/repos/assistants.repo";
+import {
+  getOrgLimits,
+  hasRoomFor,
+  limitKeepingCurrent,
+  limitReachedBody,
+  planExpiredBody,
+} from "@/lib/services/plans/planLimits";
 
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
@@ -41,10 +50,12 @@ export async function GET(req) {
       return orgAuth.error;
     }
 
-    const assistants = await getAssistantsInOrg(orgAuth.orgId);
+    return await withSessionReadAccess(orgAuth, async () => {
+      const assistants = await getAssistantsInOrg(orgAuth.orgId);
 
-    return NextResponse.json(assistants, {
-      status: 200,
+      return NextResponse.json(assistants, {
+        status: 200,
+      });
     });
   } catch (err) {
     return handleApiError(err, "Failed to load assistants");
@@ -97,6 +108,44 @@ export async function POST(req) {
         {
           status: 400,
         },
+      );
+    }
+
+    /* Limite de assistentes do plano (Demo = 1). */
+    const orgLimits = await getOrgLimits(orgAuth.orgId);
+
+    /* A Demo terminou (#209): ver continua, criar e enviar não. */
+    const expired = planExpiredBody(orgLimits);
+    if (expired) return NextResponse.json(expired, { status: 403 });
+
+    const assistantCount = await countAssistantsByOrg(orgAuth.orgId);
+
+    if (!hasRoomFor(orgLimits.limits.assistants, assistantCount)) {
+      return NextResponse.json(
+        limitReachedBody("ASSISTANT_LIMIT_REACHED", "assistants", orgLimits),
+        { status: 409 },
+      );
+    }
+
+    /* Tamanho das instruções (#185): um assistente novo tem o limite do plano. */
+    const instructionsLimit = limitKeepingCurrent(
+      orgLimits.limits.assistantInstructionChars,
+    );
+
+    if (
+      instructionsLimit !== null &&
+      String(body.instructions ?? "").length > instructionsLimit
+    ) {
+      return NextResponse.json(
+        {
+          ...limitReachedBody(
+            "INSTRUCTIONS_TOO_LONG",
+            "assistantInstructionChars",
+            orgLimits,
+          ),
+          limit: instructionsLimit,
+        },
+        { status: 400 },
       );
     }
 

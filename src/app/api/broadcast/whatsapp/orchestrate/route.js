@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 import { isSessionOpen } from "@/lib/whatsapp/whatsapp-session";
 import { toE164 } from "@/lib/whatsapp/E164";
 import { getUserByNumber } from "@/lib/repos/user.repo";
@@ -13,11 +13,7 @@ import {
   requireOwnedOrg,
 } from "@/lib/auth/guards";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } },
-);
+const supabase = getSupabaseAdminClient();
 
 export async function POST(req) {
   try {

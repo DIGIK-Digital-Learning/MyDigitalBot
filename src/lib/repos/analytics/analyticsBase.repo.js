@@ -1,4 +1,4 @@
-import { getSupabaseAdminClient } from "@/lib/db/admin";
+import { getScopedReadClient } from "@/lib/db/readAccess";
 
 /**
  * Conta linhas de uma tabela da Supabase.
@@ -11,12 +11,11 @@ import { getSupabaseAdminClient } from "@/lib/db/admin";
  */
 export async function countRows(table, applyFilters) {
   /**
-   * Vai buscar o cliente admin da Supabase.
+   * Vai buscar o cliente da sessão da Supabase.
    *
-   * Este cliente usa a service role key,
-   * por isso só deve ser usado no servidor.
+   * Este cliente usa a sessão autenticada e respeita o RLS.
    */
-  const supabaseAdmin = getSupabaseAdminClient();
+  const supabaseAdmin = getScopedReadClient();
 
   /**
    * Cria a query base para contar linhas.
@@ -81,9 +80,9 @@ export async function countRows(table, applyFilters) {
  */
 export async function fetchRows(table, columns, applyFilters) {
   /**
-   * Vai buscar o cliente admin da Supabase.
+   * Vai buscar o cliente da sessão da Supabase.
    */
-  const supabaseAdmin = getSupabaseAdminClient();
+  const supabaseAdmin = getScopedReadClient();
 
   /**
    * Cria a query base.
@@ -142,7 +141,7 @@ export async function fetchAllRows(
   applyFilters,
   pageSize = 1000,
 ) {
-  const supabaseAdmin = getSupabaseAdminClient();
+  const supabaseAdmin = getScopedReadClient();
   const rows = [];
   let from = 0;
 
@@ -174,8 +173,8 @@ export async function fetchAllRows(
 const PAGE_SIZE = 1000;
 const MAX_PAGES = 200;
 
-export async function fetchExportRows(table, columns, applyFilters, options = {}) {
-  const supabaseAdmin = getSupabaseAdminClient();
+export async function fetchExportRows(table, columns, applyFilters, options = {}, client = getScopedReadClient()) {
+  const supabaseAdmin = client;
 
   // Sem ORDER BY, o Postgres não garante a mesma ordem entre queries.
   // A paginar sem ordem estável, receberíamos linhas repetidas numas

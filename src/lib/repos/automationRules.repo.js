@@ -1,12 +1,7 @@
-import { createClient as createServiceClient } from "@supabase/supabase-js";
-
-const sb = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } },
-);
-
+import { getRepositoryReadClient } from "@/lib/db/readAccess";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 export async function createAutomationRule(row) {
+  const sb = getSupabaseAdminClient();
   const { data, error } = await sb
     .from("automation_rule")
     .insert(row)
@@ -17,7 +12,20 @@ export async function createAutomationRule(row) {
   return data;
 }
 
+/* Quantas automações tem a organização, ativas e inativas (limite do plano, #186). */
+export async function countAutomationRulesByOrg(organizationId) {
+  const sb = getSupabaseAdminClient();
+  const { count, error } = await sb
+    .from("automation_rule")
+    .select("id", { count: "exact", head: true })
+    .eq("organization_id", Number(organizationId));
+
+  if (error) throw error;
+  return count ?? 0;
+}
+
 export async function getAutomationRuleById(id) {
+  const sb = getRepositoryReadClient();
   const { data, error } = await sb
     .from("automation_rule")
     .select("*")
@@ -29,6 +37,7 @@ export async function getAutomationRuleById(id) {
 }
 
 export async function getOrgAutomationRules(organizationId) {
+  const sb = getRepositoryReadClient();
   const { data, error } = await sb
     .from("automation_rule")
     .select("*")
@@ -42,7 +51,9 @@ export async function getOrgAutomationRules(organizationId) {
 export async function getActiveAutomationRules({
   organizationId = null,
   triggerType = null,
+  excludeOrganizationIds = [],
 }) {
+  const sb = getRepositoryReadClient();
   let query = sb
     .from("automation_rule")
     .select("*")
@@ -57,6 +68,15 @@ export async function getActiveAutomationRules({
     query = query.eq("trigger_type", triggerType);
   }
 
+  /* A Demo terminou (#209): as automações destas organizações não correm. */
+  if (excludeOrganizationIds.length) {
+    query = query.not(
+      "organization_id",
+      "in",
+      `(${excludeOrganizationIds.join(",")})`,
+    );
+  }
+
   const { data, error } = await query;
 
   if (error) throw error;
@@ -69,6 +89,7 @@ export async function findActiveInactivityRuleConflict({
   assistantId = null,
   excludeRuleId = null,
 }) {
+  const sb = getSupabaseAdminClient();
   let query = sb
     .from("automation_rule")
     .select("*")
@@ -121,6 +142,7 @@ export async function assertNoActiveInactivityRuleConflict({
 }
 
 export async function updateAutomationRule(id, patch) {
+  const sb = getSupabaseAdminClient();
   const { data, error } = await sb
     .from("automation_rule")
     .update({
@@ -136,6 +158,7 @@ export async function updateAutomationRule(id, patch) {
 }
 
 export async function deleteAutomationRule(id) {
+  const sb = getSupabaseAdminClient();
   const { error } = await sb.from("automation_rule").delete().eq("id", id);
   if (error) throw error;
   return true;

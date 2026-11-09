@@ -1,11 +1,6 @@
+import { getRepositoryReadClient } from "@/lib/db/readAccess";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 // src/lib/repos/store.repo.js
-import { createClient as createServiceClient } from "@supabase/supabase-js";
-
-const sb = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } }
-);
 
 /**
  * Table: vector_store
@@ -16,6 +11,7 @@ const sb = createServiceClient(
  */
 
 export async function createDBStore(store, fileRows = []) {
+  const sb = getSupabaseAdminClient();
   // 1) Create vector_store (persist OpenAI id too)
   const { data: vs, error: vsErr } = await sb
     .from("vector_store")
@@ -48,6 +44,7 @@ export async function createDBStore(store, fileRows = []) {
 }
 
 export async function getStoreById(storeId) {
+  const sb = getRepositoryReadClient();
   const { data, error } = await sb
     .from("vector_store")
     .select("id, store_name, open_ai_id, file:file(id, name, size, open_ai_id)")
@@ -58,6 +55,7 @@ export async function getStoreById(storeId) {
 }
 
 export async function updateStoreName(storeId, storeName) {
+  const sb = getSupabaseAdminClient();
   const cleanStoreName = typeof storeName === "string" ? storeName.trim() : "";
 
   if (!cleanStoreName) {
@@ -77,6 +75,7 @@ export async function updateStoreName(storeId, storeName) {
 }
 
 export async function deleteStoreById(storeId) {
+  const sb = getSupabaseAdminClient();
   const { error } = await sb.from("vector_store").delete().eq("id", storeId);
   if (error) throw error;
   return true;

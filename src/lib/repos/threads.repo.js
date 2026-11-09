@@ -1,16 +1,6 @@
+import { getRepositoryReadClient } from "@/lib/db/readAccess";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 // /lib/repos/threads.repo.js
-
-import { createClient as createServiceClient } from "@supabase/supabase-js";
-
-const supabase = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  {
-    auth: {
-      persistSession: false,
-    },
-  },
-);
 
 const SELECT_COLS = `
   id,
@@ -65,6 +55,7 @@ export async function createThread({
   scope,
   externalConversationId = null,
 }) {
+  const supabase = getSupabaseAdminClient();
   const parsedAssistantId = parsePositiveInt(assistantId, "assistantId");
 
   let parsedUserId = null;
@@ -137,6 +128,7 @@ export async function createThread({
  * is received or sent.
  */
 export async function touchThread(threadId) {
+  const supabase = getSupabaseAdminClient();
   const parsedThreadId = parsePositiveInt(threadId, "threadId");
 
   const { data, error } = await supabase
@@ -175,6 +167,7 @@ export async function touchThread(threadId) {
  * We leave the old ID untouched during migration.
  */
 export async function setThreadConversationId(threadId, openAiConversationId) {
+  const supabase = getSupabaseAdminClient();
   const parsedThreadId = parsePositiveInt(threadId, "threadId");
 
   if (
@@ -216,6 +209,7 @@ export async function getUserThreadForChannel({
   assistantId,
   channel,
 }) {
+  const supabase = getRepositoryReadClient();
   const parsedUserId = parsePositiveInt(userId, "userId");
 
   const parsedAssistantId = parsePositiveInt(assistantId, "assistantId");
@@ -255,6 +249,7 @@ export async function getGroupThreadForConversation({
   channel,
   externalConversationId,
 }) {
+  const supabase = getRepositoryReadClient();
   const parsedAssistantId = parsePositiveInt(assistantId, "assistantId");
 
   if (!channel) {
@@ -291,6 +286,7 @@ export async function getGroupThreadForConversation({
  * Get all DB threads belonging to a user.
  */
 export async function getThreadsForUser(userId) {
+  const supabase = getRepositoryReadClient();
   const parsedUserId = parsePositiveInt(userId, "userId");
 
   const { data, error } = await supabase
@@ -312,6 +308,7 @@ export async function getThreadsForUser(userId) {
  * Get DB thread by our own integer ID.
  */
 export async function getThreadById(threadId) {
+  const supabase = getRepositoryReadClient();
   const parsedThreadId = parsePositiveInt(threadId, "threadId");
 
   const { data, error } = await supabase
@@ -337,6 +334,7 @@ export async function getThreadById(threadId) {
  * conv_abc123
  */
 export async function getThreadByConversationId(openAiConversationId) {
+  const supabase = getRepositoryReadClient();
   if (
     typeof openAiConversationId !== "string" ||
     !openAiConversationId.trim()
@@ -371,6 +369,7 @@ export async function getThreadByConversationId(openAiConversationId) {
  * been migrated.
  */
 export async function getThreadByAiId(aiThreadId) {
+  const supabase = getRepositoryReadClient();
   if (typeof aiThreadId !== "string" || !aiThreadId.trim()) {
     return null;
   }
@@ -456,6 +455,7 @@ export async function getOrCreateThread({
  * enviadas fora do webhook (perguntas, mensagens em espera).
  */
 export async function getLatestUserThreadForChannel(userId, channel) {
+  const supabase = getRepositoryReadClient();
   const parsedUserId = Number(userId);
 
   if (!Number.isInteger(parsedUserId) || parsedUserId <= 0 || !channel) {

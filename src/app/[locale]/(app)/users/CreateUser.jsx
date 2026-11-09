@@ -83,14 +83,12 @@ export default function CreateUserModal({
         teamsFromId: teamsFromId || null,
       });
 
-      if (!result?.ok) {
-        await alert({
-          title: translation("Alert.fullOrg.title"),
-          message: translation("Alert.fullOrg.message"),
-          buttonText: translation("Alert.fullOrg.ok"),
-        });
-        return;
-      }
+      /*
+       * Quem cria (a página) já mostrou o aviso do erro: o do limite do plano
+       * só quando é o limite, os outros com a mensagem deles. O formulário
+       * fica aberto com os dados para se corrigir.
+       */
+      if (!result?.ok) return;
 
       if (result.ok) {
         // only clear if the API call succeeded

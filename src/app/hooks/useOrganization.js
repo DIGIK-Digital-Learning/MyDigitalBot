@@ -2,20 +2,24 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { applyThemeVariables } from "@/lib/helpers/theme.helpers";
+import { useAuth } from "@/app/AuthContext";
 
 export default function useOrganization(user) {
+  const { loading: authLoading } = useAuth();
   const [org, setOrg] = useState(null);
-  const [loading, setLoading] = useState(Boolean(user)); // load only if we have a user
+  const [fetching, setFetching] = useState(false);
+  /* O utilizador para quem a organização já foi lida. */
+  const [loadedFor, setLoadedFor] = useState(null);
   const supabase = useMemo(() => createClient(), []);
 
   const loadOrganization = useCallback(async () => {
     if (!user) {
       setOrg(null);
-      setLoading(false);
+      setLoadedFor(null);
       return;
     }
 
-    setLoading(true);
+    setFetching(true);
     const { data, error } = await supabase
       .from("organization")
       .select(
@@ -26,7 +30,8 @@ export default function useOrganization(user) {
 
     if (error) console.error("[useOrganization]", error.message);
     setOrg(data ?? null);
-    setLoading(false);
+    setLoadedFor(user.id);
+    setFetching(false);
   }, [supabase, user]);
 
   useEffect(() => {
@@ -51,6 +56,15 @@ export default function useOrganization(user) {
   useEffect(() => {
     applyThemeVariables(org?.theme);
   }, [org]);
+
+  /*
+   * Ainda a carregar enquanto a sessão não chegou, ou enquanto a organização
+   * deste utilizador não foi lida. Antes, havia um instante (o utilizador
+   * ainda por chegar, ou acabado de chegar) com loading false e org null, e
+   * as páginas avisavam "Organização em falta" sem razão.
+   */
+  const loading =
+    authLoading || fetching || Boolean(user && loadedFor !== user.id);
 
   return { org, loading, refresh: loadOrganization };
 }

@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 
 import { getMessagesInThread } from "@/lib/repos/messages.repo";
@@ -26,16 +27,18 @@ export async function GET(_req, { params }) {
       return orgAuth.error;
     }
 
-    const messages = await getMessagesInThread(orgAuth.threadId);
+    return await withSessionReadAccess(orgAuth, async () => {
+      const messages = await getMessagesInThread(orgAuth.threadId);
 
-    return NextResponse.json(
-      {
-        messages,
-      },
-      {
-        status: 200,
-      },
-    );
+      return NextResponse.json(
+        {
+          messages,
+        },
+        {
+          status: 200,
+        },
+      );
+    });
   } catch (err) {
     return handleApiError(err, "Failed to load thread messages");
   }

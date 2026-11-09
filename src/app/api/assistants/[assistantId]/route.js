@@ -1,9 +1,15 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 
 import { updateAssistant, deleteAssistant } from "@/lib/repos/assistants.repo";
 
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
+import {
+  getOrgLimits,
+  limitKeepingCurrent,
+  limitReachedBody,
+} from "@/lib/services/plans/planLimits";
 
 import {
   cleanPatch,
@@ -30,15 +36,17 @@ export async function GET(_req, { params }) {
       return orgAuth.error;
     }
 
-    return NextResponse.json(
-      {
-        ...orgAuth.assistant,
-        vectorStoreId: orgAuth.assistant.vector_store_id ?? null,
-      },
-      {
-        status: 200,
-      },
-    );
+    return await withSessionReadAccess(orgAuth, async () => {
+      return NextResponse.json(
+        {
+          ...orgAuth.assistant,
+          vectorStoreId: orgAuth.assistant.vector_store_id ?? null,
+        },
+        {
+          status: 200,
+        },
+      );
+    });
   } catch (err) {
     return handleApiError(err, "Failed to load assistant");
   }
@@ -67,6 +75,36 @@ export async function PATCH(req, { params }) {
           status: 400,
         },
       );
+    }
+
+    /*
+     * Tamanho das instruções (#185), só quando o pedido as muda. Quem já
+     * estava acima do limite pode guardar até ao tamanho que já tinha.
+     */
+    if (patch.instructions !== undefined) {
+      const orgLimits = await getOrgLimits(orgAuth.orgId);
+      const currentLength = String(orgAuth.assistant?.instructions ?? "").length;
+      const instructionsLimit = limitKeepingCurrent(
+        orgLimits.limits.assistantInstructionChars,
+        currentLength,
+      );
+
+      if (
+        instructionsLimit !== null &&
+        String(patch.instructions ?? "").length > instructionsLimit
+      ) {
+        return NextResponse.json(
+          {
+            ...limitReachedBody(
+              "INSTRUCTIONS_TOO_LONG",
+              "assistantInstructionChars",
+              orgLimits,
+            ),
+            limit: instructionsLimit,
+          },
+          { status: 400 },
+        );
+      }
     }
 
     /*

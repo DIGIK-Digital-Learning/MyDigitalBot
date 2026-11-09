@@ -40,7 +40,7 @@ describe("GET /api/dashboard/overview", () => {
   });
 
   it("queries metrics with the guarded organization id", async () => {
-    mocks.requireOwnedOrg.mockResolvedValue({ orgId: 7 });
+    mocks.requireOwnedOrg.mockResolvedValue({ orgId: 7, user: { id: "owner-test" }, supabase: { from: vi.fn() } });
     mocks.getDashboardOverview.mockResolvedValue({ users: { total: 0 } });
 
     const response = await GET(request(99));

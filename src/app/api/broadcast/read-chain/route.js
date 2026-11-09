@@ -11,6 +11,18 @@ import { sendReadChainStep } from "@/lib/services/broadcast/readChains/sendReadC
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
 import {
+  checkMessageContent,
+  claimDailySend,
+  planExpiredBody,
+  releaseDailySend,
+  saveTrackedLinksWithinPlan,
+} from "@/lib/services/plans/planLimits";
+import {
+  refundChainStepSends,
+  setAdminDailySendSource,
+} from "@/lib/repos/adminDailySends.repo";
+import { dailySendsDayStart } from "@/lib/plans/dailySends";
+import {
   attachChainStepQuestions,
   parseChainStepQuestions,
 } from "@/lib/services/broadcast/readChains/chainStepQuestions";
@@ -149,11 +161,34 @@ export async function POST(req) {
 
     const steps = normalizeSteps(rawSteps);
 
-    if (steps.length < 2 || steps.length > 10) {
+    /*
+     * Limites do plano (#187): o máximo de passos (antes fixo em 10) e o
+     * conteúdo de cada passo (caracteres e ficheiros), lidos de uma vez.
+     */
+    const content = await checkMessageContent(
+      orgAuth.orgId,
+      steps.map((step) => ({ message: step.message, files: step.files })),
+    );
+
+    /* A Demo terminou (#209): ver continua, criar e enviar não. */
+    const expired = planExpiredBody(content.orgLimits);
+    if (expired) return NextResponse.json(expired, { status: 403 });
+
+    const maxSteps = content.orgLimits.limits.chainMessages ?? Infinity;
+
+    if (steps.length < 2 || steps.length > maxSteps) {
       return NextResponse.json(
-        { error: "A read chain must have between 2 and 10 messages." },
+        {
+          error: `A read chain must have between 2 and ${maxSteps} messages.`,
+          code: steps.length > maxSteps ? "CHAIN_TOO_LONG" : undefined,
+          limit: Number.isFinite(maxSteps) ? maxSteps : null,
+        },
         { status: 400 },
       );
+    }
+
+    if (content.body) {
+      return NextResponse.json(content.body, { status: 400 });
     }
 
     const emptyStepIndex = steps.findIndex(
@@ -178,15 +213,52 @@ export async function POST(req) {
       );
     }
 
-    const chain = await createMessageChain({
-      organizationId: orgAuth.orgId,
-      createdByUserId: orgAuth.user.id,
-      channel,
-      status: isScheduled ? "scheduled" : "active",
-      scheduledFor: scheduledForIso,
-      timezone: timezone || null,
-      recipientCount: dedupedRecipients.length,
+    /*
+     * Links rastreados do plano (#189): os links novos entram na biblioteca
+     * da organização, até 100. Reutilizar um link guardado não conta.
+     */
+    const links = await saveTrackedLinksWithinPlan(
+      orgAuth.orgId,
+      steps.flatMap((step) => step.trackedLinks),
+      {
+        orgLimits: content.orgLimits,
+      },
+    );
+    if (links.body) {
+      return NextResponse.json(links.body, { status: 409 });
+    }
+
+    /*
+     * Limite diário de envios do canal (#188): uma corrente de N passos
+     * conta N, todos no dia em que é criada (agendada ou não). Assim nunca
+     * fica parada a meio por falta de envios num dia seguinte.
+     */
+    const daily = await claimDailySend(orgAuth.orgId, channel, {
+      units: steps.length,
+      sourceType: "message_chain",
+      orgLimits: content.orgLimits,
     });
+    if (daily.body) {
+      return NextResponse.json(daily.body, { status: 409 });
+    }
+
+    let chain;
+    try {
+      chain = await createMessageChain({
+        organizationId: orgAuth.orgId,
+        createdByUserId: orgAuth.user.id,
+        channel,
+        status: isScheduled ? "scheduled" : "active",
+        scheduledFor: scheduledForIso,
+        timezone: timezone || null,
+        recipientCount: dedupedRecipients.length,
+      });
+    } catch (err) {
+      await releaseDailySend(daily.claimKey);
+      throw err;
+    }
+
+    await setAdminDailySendSource(daily.claimKey, chain.id);
 
     /*
      * Os passos com pergunta ganham a sua linha em `question`, partilhada
@@ -301,6 +373,11 @@ export async function POST(req) {
     const failedCount = results.length - okCount;
     const sentCount = results.filter((r) => r.sent).length;
     const waitingCount = results.filter((r) => r.waitingForReply).length;
+
+    /* A 1.ª mensagem falhou para toda a gente: não conta como envio (#188). */
+    if (okCount === 0) {
+      await refundChainStepSends(chain.id, dailySendsDayStart(), 1);
+    }
 
     await auditReadChain({
       ok: okCount,

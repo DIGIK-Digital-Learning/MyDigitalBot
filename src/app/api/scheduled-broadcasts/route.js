@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 import { getOrgScheduledBroadcasts } from "@/lib/repos/scheduledBroadcasts.repo";
 import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
@@ -53,13 +54,15 @@ export async function GET(req) {
     const orgAuth = await requireOwnedOrg(rawOrgId);
     if (orgAuth.error) return orgAuth.error;
 
-    const data = await getOrgScheduledBroadcasts(
-      orgAuth.orgId,
-      { source },
-    );
+    return await withSessionReadAccess(orgAuth, async () => {
+      const data = await getOrgScheduledBroadcasts(
+        orgAuth.orgId,
+        { source },
+      );
 
-    return NextResponse.json({
-      items: data,
+      return NextResponse.json({
+        items: data,
+      });
     });
   } catch (err) {
     return handleApiError(

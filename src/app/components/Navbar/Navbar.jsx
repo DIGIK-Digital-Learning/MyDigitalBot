@@ -4,6 +4,7 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useAuth } from "@/app/AuthContext";
 import useOrganization from "@/app/hooks/useOrganization";
+import usePlatformAdmin from "@/app/hooks/usePlatformAdmin";
 import styles from "./navbar.module.css";
 import {
   Home,
@@ -22,6 +23,7 @@ import {
   Images,
   Zap,
   BarChart3,
+  ShieldCheck,
 } from "lucide-react";
 import { useState, useCallback, useEffect } from "react";
 import { useMobileNav } from "@/app/components/MobileNav/MobileNavContext";
@@ -38,7 +40,13 @@ export default function Navbar() {
 
   const pathNoLocale = pathName.replace(/^\/(en|pt)(?=\/|$)/, "") || "/";
   const [pendingHref, setPendingHref] = useState(null);
-  const isAdmin = !!org && org.id === 1;
+  /*
+   * A Administração (#208) só aparece à equipa DIGIK no plano Interno. A
+   * experimentar outro plano, o separador desaparece: volta-se pela faixa
+   * "Voltar ao Interno". Quem decide o acesso é sempre o servidor.
+   */
+  const platformAdmin = usePlatformAdmin();
+  const isAdmin = platformAdmin.isAdmin && !platformAdmin.trying;
 
   const isActive = useCallback(
     (href) => {
@@ -57,7 +65,9 @@ export default function Navbar() {
     [pendingHref, pathNoLocale],
   );
 
+  const usersSectionActive = isActive("/users");
   const broadcastSectionActive = isActive("/broadcast");
+  const [usersOpen, setUsersOpen] = useState(usersSectionActive);
   const [broadcastOpen, setBroadcastOpen] = useState(broadcastSectionActive);
 
   useEffect(() => setPendingHref(null), [pathName]);
@@ -67,7 +77,11 @@ export default function Navbar() {
     if (broadcastSectionActive) {
       setBroadcastOpen(true);
     }
-  }, [broadcastSectionActive]);
+
+    if (usersSectionActive) {
+      setUsersOpen(true);
+    }
+  }, [broadcastSectionActive, usersSectionActive]);
 
   const onNavClick = (href) => (e) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1)
@@ -115,7 +129,7 @@ export default function Navbar() {
         id="primary-nav"
         className={`${styles.sidebar} ${open ? styles.open : ""}`}
         aria-hidden={open ? "false" : "true"}
-        aria-label="Main navigation"
+        aria-label={translation("Navbar.mainNavigation")}
       >
         {!authLoading && user ? (
           <>
@@ -138,27 +152,55 @@ export default function Navbar() {
                 <span>{translation("Nav.home")}</span>
               </Link>
 
-              <Link
-                href="/users"
-                onClick={onNavClick("/users")}
-                className={`${styles.navItem} ${
-                  isActive("/users") ? styles.active : ""
-                }`}
-              >
-                <Users aria-hidden className={styles.icon} />
-                <span>{translation("Nav.users")}</span>
-              </Link>
+              <div className={styles.group}>
+                <button
+                  type="button"
+                  className={`${styles.navItem} ${styles.navToggle} ${
+                    usersSectionActive ? styles.active : ""
+                  }`}
+                  onClick={() => setUsersOpen((prev) => !prev)}
+                  aria-expanded={usersOpen}
+                  aria-controls="users-subnav"
+                >
+                  <span className={styles.navItemMain}>
+                    <Users aria-hidden className={styles.icon} />
+                    <span>{translation("Nav.usersGroup")}</span>
+                  </span>
 
-              <Link
-                href="/teams-groups"
-                onClick={onNavClick("/teams-groups")}
-                className={`${styles.navItem} ${
-                  isActive("/teams-groups") ? styles.active : ""
-                }`}
-              >
-                <UsersRound aria-hidden className={styles.icon} />
-                <span>{translation("Nav.teamsGroups")}</span>
-              </Link>
+                  <ChevronDown
+                    aria-hidden
+                    className={`${styles.chevron} ${
+                      usersOpen ? styles.chevronOpen : ""
+                    }`}
+                  />
+                </button>
+
+                {usersOpen && (
+                  <div id="broadcast-subnav" className={styles.subnav}>
+                    <Link
+                      href="/users"
+                      onClick={onNavClick("/users")}
+                      className={`${styles.navItem} ${
+                        isActive("/users") ? styles.active : ""
+                      }`}
+                    >
+                      <Users aria-hidden className={styles.icon} />
+                      <span>{translation("Nav.users")}</span>
+                    </Link>
+
+                    <Link
+                      href="/teams-groups"
+                      onClick={onNavClick("/teams-groups")}
+                      className={`${styles.navItem} ${
+                        isActive("/teams-groups") ? styles.active : ""
+                      }`}
+                    >
+                      <UsersRound aria-hidden className={styles.icon} />
+                      <span>{translation("Nav.teamsGroups")}</span>
+                    </Link>
+                  </div>
+                )}
+              </div>
 
               <Link
                 href="/assistants"
@@ -182,7 +224,6 @@ export default function Navbar() {
                 <span>{translation("Nav.automations")}</span>
               </Link>
 
-              
               <Link
                 href="/analytics"
                 onClick={onNavClick("/analytics")}
@@ -193,7 +234,6 @@ export default function Navbar() {
                 <BarChart3 aria-hidden className={styles.icon} />
                 <span>{translation("Nav.analytics")}</span>
               </Link>
-
 
               <div className={styles.group}>
                 <button
@@ -285,15 +325,27 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
-
             </nav>
+
+            {isAdmin && (
+              <Link
+                href="/platform-admin"
+                onClick={onNavClick("/platform-admin")}
+                className={`${styles.navItem} ${styles.options} ${
+                  isActive("/platform-admin") ? styles.active : ""
+                }`}
+              >
+                <ShieldCheck aria-hidden className={styles.icon} />
+                <span>{translation("Nav.admin")}</span>
+              </Link>
+            )}
 
             <Link
               href="/settings"
               onClick={onNavClick("/settings")}
               className={`${styles.navItem} ${styles.options} ${
-                isActive("/settings") ? styles.active : ""
-              }`}
+                isAdmin ? styles.afterAdmin : ""
+              } ${isActive("/settings") ? styles.active : ""}`}
             >
               <Settings aria-hidden className={styles.icon} />
               <span>{translation("Nav.options")}</span>

@@ -1,5 +1,6 @@
+import { getRepositoryReadClient } from "@/lib/db/readAccess";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 // /src/lib/repos/files.repo.js
-import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 /**
  * Table: file
@@ -10,18 +11,13 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
  *  - size (int4)
  *
  * IMPORTANT:
- *  • Use SUPABASE_SERVICE_ROLE_KEY (bypasses RLS for server-side ops)
+ *  • Leituras da interface usam a sessão; escritas usam service role no servidor.
  *  • Prefer DB-level cleanup via ON DELETE CASCADE on file.vector_store_id
  */
 
-const sb = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } }
-);
-
 /** Create a single file row */
 export async function createDBFile(openAiId, file, vectorStoreId = null) {
+  const sb = getSupabaseAdminClient();
   const payload = {
     open_ai_id: openAiId ?? null,
     name: file?.name ?? null,
@@ -40,6 +36,7 @@ export async function createDBFile(openAiId, file, vectorStoreId = null) {
 
 /** Bulk create file rows; accepts [{ open_ai_id, name, size }] */
 export async function createDBFiles(fileRows = [], vectorStoreId = null) {
+  const sb = getSupabaseAdminClient();
   if (!Array.isArray(fileRows) || fileRows.length === 0) return [];
 
   const toInsert = fileRows.map((f) => ({
@@ -56,6 +53,7 @@ export async function createDBFiles(fileRows = [], vectorStoreId = null) {
 
 /** Get one file by id */
 export async function getFileById(id) {
+  const sb = getRepositoryReadClient();
   const { data, error } = await sb
     .from("file")
     .select("*")
@@ -67,6 +65,7 @@ export async function getFileById(id) {
 
 /** List files for a vector store */
 export async function getFilesByVectorStoreId(vectorStoreId) {
+  const sb = getRepositoryReadClient();
   const { data, error } = await sb
     .from("file")
     .select("*")
@@ -77,6 +76,7 @@ export async function getFilesByVectorStoreId(vectorStoreId) {
 
 /** Delete a single file row */
 export async function deleteFileById(id) {
+  const sb = getSupabaseAdminClient();
   const { error } = await sb.from("file").delete().eq("id", id);
   if (error) throw error;
   return true;
@@ -87,6 +87,7 @@ export async function deleteFileById(id) {
  * If you have ON DELETE CASCADE, you can skip calling this and just delete the store.
  */
 export async function deleteFilesByVectorStoreId(vectorStoreId) {
+  const sb = getSupabaseAdminClient();
   const { error } = await sb
     .from("file")
     .delete()
@@ -97,6 +98,7 @@ export async function deleteFilesByVectorStoreId(vectorStoreId) {
 
 /** Optional: detach files from a vector store without deleting them */
 export async function detachFilesFromVectorStore(vectorStoreId) {
+  const sb = getSupabaseAdminClient();
   const { error } = await sb
     .from("file")
     .update({ vector_store_id: null })

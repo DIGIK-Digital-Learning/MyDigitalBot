@@ -1,11 +1,5 @@
-import { createClient as createServiceClient } from "@supabase/supabase-js";
-
-const supabase = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } },
-);
-
+import { getRepositoryReadClient } from "@/lib/db/readAccess";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 const OUTBOUND_ROLES = ["assistant", "system"];
 
 function toIsoDate(value = new Date()) {
@@ -61,6 +55,7 @@ export async function createMessage({
 
   questionId = null,
 }) {
+  const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
     .from("message")
     .insert([
@@ -97,6 +92,7 @@ export async function createMessage({
 }
 
 export async function getMessagesInThread(threadId) {
+  const supabase = getRepositoryReadClient();
   const { data, error } = await supabase
     .from("message")
     .select(MESSAGE_SELECT)
@@ -108,6 +104,7 @@ export async function getMessagesInThread(threadId) {
 }
 
 export async function getMessageById(id) {
+  const supabase = getRepositoryReadClient();
   const { data, error } = await supabase
     .from("message")
     .select(MESSAGE_SELECT)
@@ -122,6 +119,7 @@ export async function getMessageByProviderId(
   messageId,
   organizationId,
 ) {
+  const supabase = getRepositoryReadClient();
   if (!messageId || !organizationId) {
     return null;
   }
@@ -139,6 +137,7 @@ export async function getMessageByProviderId(
 }
 
 export async function getLastInboundForUser(userId) {
+  const supabase = getRepositoryReadClient();
   const { data, error } = await supabase
     .from("message")
     .select("id, created_at")
@@ -157,6 +156,7 @@ export async function getLastInboundForUserAssistant(
   assistantId,
   channel = null,
 ) {
+  const supabase = getRepositoryReadClient();
   let query = supabase
     .from("message")
     .select("id, created_at, assistant_id, channel")
@@ -177,6 +177,7 @@ export async function getLastInboundForUserAssistant(
 }
 
 export async function markMessageDelivered(messageRowId, at = new Date()) {
+  const supabase = getSupabaseAdminClient();
   const iso = toIsoDate(at);
 
   const current = await getMessageById(messageRowId);
@@ -203,6 +204,7 @@ export async function markMessageDelivered(messageRowId, at = new Date()) {
 }
 
 export async function markMessageRead(messageRowId, at = new Date()) {
+  const supabase = getSupabaseAdminClient();
   const iso = toIsoDate(at);
 
   const current = await getMessageById(messageRowId);
@@ -234,6 +236,7 @@ export async function markMessageRead(messageRowId, at = new Date()) {
 }
 
 export async function markMessageFailed(messageRowId, at = new Date()) {
+  const supabase = getSupabaseAdminClient();
   const iso = toIsoDate(at);
 
   const current = await getMessageById(messageRowId);
@@ -302,6 +305,7 @@ export async function getPendingWhatsappMessagesForReadReceiptSync({
   limit = 50,
   maxAgeHours = 168,
 } = {}) {
+  const supabase = getRepositoryReadClient();
   const safeLimit = Math.min(Number(limit || 50), 100);
   const since = new Date(
     Date.now() - Number(maxAgeHours || 168) * 60 * 60 * 1000,
@@ -347,6 +351,7 @@ export async function markTeamsMessagesReadUpTo({
   lastReadMessageId = null,
   at = new Date(),
 }) {
+  const supabase = getSupabaseAdminClient();
   const iso = toIsoDate(at);
   let cutoff = iso;
 
@@ -383,6 +388,7 @@ export async function getLastOutboundForUserAssistant(
   assistantId,
   channel = null,
 ) {
+  const supabase = getRepositoryReadClient();
   let query = supabase
     .from("message")
     .select(MESSAGE_SELECT)
@@ -411,6 +417,7 @@ export async function getInboundAfterForUserAssistant(
   channel,
   afterDate,
 ) {
+  const supabase = getRepositoryReadClient();
   let query = supabase
     .from("message")
     .select("id, created_at")
@@ -452,6 +459,7 @@ export async function getRecentQuestionMessagesForUser(
   limit = 5,
   channel = null,
 ) {
+  const supabase = getRepositoryReadClient();
   if (!userId) return [];
 
   let query = supabase

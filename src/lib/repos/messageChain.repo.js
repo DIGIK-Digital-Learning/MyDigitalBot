@@ -1,10 +1,7 @@
-import { createClient as createServiceClient } from "@supabase/supabase-js";
+// Acesso interno privilegiado: processamento de eventos/tarefas, sem sessão de administrador.
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 
-const sb = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } },
-);
+const sb = getSupabaseAdminClient();
 
 function nowIso() {
   return new Date().toISOString();
@@ -212,14 +209,32 @@ export async function getMessageChainRecipientsByChainId(chainId) {
   return data || [];
 }
 
-export async function claimDueScheduledMessageChains({ limit = 25 } = {}) {
-  const { data: dueChains, error: selectError } = await sb
+/*
+ * `excludeOrganizationIds`: organizações cujas correntes ficam à espera (a
+ * Demo terminou, #209). Ficam de fora da consulta para não ocuparem o lugar
+ * das outras.
+ */
+export async function claimDueScheduledMessageChains({
+  limit = 25,
+  excludeOrganizationIds = [],
+} = {}) {
+  let query = sb
     .from("message_chain")
     .select("*")
     .eq("status", "scheduled")
     .lte("scheduled_for", nowIso())
     .order("scheduled_for", { ascending: true })
     .limit(limit);
+
+  if (excludeOrganizationIds.length) {
+    query = query.not(
+      "organization_id",
+      "in",
+      `(${excludeOrganizationIds.join(",")})`,
+    );
+  }
+
+  const { data: dueChains, error: selectError } = await query;
 
   if (selectError) throw selectError;
 
@@ -350,14 +365,32 @@ export async function getMessageChainDelivery({ chainRecipientId, stepIndex }) {
   return data ?? null;
 }
 
-export async function claimDueScheduledMessageChainDeliveries({ limit = 50 }) {
-  const { data: dueDeliveries, error: selectError } = await sb
+/* A organização vem da corrente: a entrega não a guarda. */
+export async function claimDueScheduledMessageChainDeliveries({
+  limit = 50,
+  excludeOrganizationIds = [],
+}) {
+  let query = sb
     .from("message_chain_delivery")
-    .select("*")
+    .select(
+      excludeOrganizationIds.length
+        ? "*, chain:message_chain!inner (organization_id)"
+        : "*",
+    )
     .eq("status", "scheduled")
     .lte("due_at", nowIso())
     .order("due_at", { ascending: true })
     .limit(limit);
+
+  if (excludeOrganizationIds.length) {
+    query = query.not(
+      "chain.organization_id",
+      "in",
+      `(${excludeOrganizationIds.join(",")})`,
+    );
+  }
+
+  const { data: dueDeliveries, error: selectError } = await query;
 
   if (selectError) throw selectError;
 
@@ -508,4 +541,221 @@ export async function stopMessageChainRecipient({ chainRecipientId, reason }) {
   if (error) throw error;
 
   return data;
+}
+
+/*
+ * Correntes abertas da organização, para as Mensagens agendadas: as que
+ * esperam pela hora, as que estão a sair e as que estão a decorrer. Vêm com
+ * os passos e o ponto em que está cada destinatário.
+ */
+export async function listOpenMessageChains(organizationId) {
+  const { data, error } = await sb
+    .from("message_chain")
+    .select(
+      "id, organization_id, created_by_user_id, channel, status, scheduled_for, timezone, recipient_count, started_at, created_at, message_chain_step (step_index, payload), message_chain_recipient (status, current_step_index), message_chain_delivery (step_index)",
+    )
+    .eq("organization_id", Number(organizationId))
+    .in("status", ["scheduled", "processing", "active"])
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return data || [];
+}
+
+/*
+ * Muda o estado de uma corrente só se ainda estiver no estado esperado:
+ * se o cron a apanhou entretanto, não muda nada e devolve null.
+ */
+export async function closeMessageChain({
+  chainId,
+  fromStatus,
+  toStatus,
+  reason,
+}) {
+  const { data, error } = await sb
+    .from("message_chain")
+    .update({
+      status: toStatus,
+      error_message: reason || null,
+      updated_at: nowIso(),
+    })
+    .eq("id", chainId)
+    .eq("status", fromStatus)
+    .select("*")
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+
+  /* Os destinatários que ainda esperavam mensagens deixam de as receber. */
+  const { error: recipientsError } = await sb
+    .from("message_chain_recipient")
+    .update({
+      status: toStatus === "cancelled" ? "cancelled" : "stopped",
+      stopped_reason: reason || null,
+      updated_at: nowIso(),
+    })
+    .eq("chain_id", chainId)
+    .eq("status", "active");
+
+  if (recipientsError) throw recipientsError;
+
+  return data;
+}
+
+export async function listMessageChainSteps(chainId) {
+  const { data, error } = await sb
+    .from("message_chain_step")
+    .select("id, step_index, payload")
+    .eq("chain_id", chainId)
+    .order("step_index", { ascending: true });
+
+  if (error) throw error;
+
+  return data || [];
+}
+
+/*
+ * Se alguém já chegou a este passo ou a um seguinte: já recebeu, ou tem o
+ * envio marcado (à espera do tempo depois da leitura ou da abertura do
+ * WhatsApp).
+ */
+export async function messageChainStepTouched({ chainId, stepId, stepIndex }) {
+  const [recipients, deliveries, outreach] = await Promise.all([
+    sb
+      .from("message_chain_recipient")
+      .select("id", { count: "exact", head: true })
+      .eq("chain_id", chainId)
+      .gte("current_step_index", stepIndex),
+    sb
+      .from("message_chain_delivery")
+      .select("id", { count: "exact", head: true })
+      .eq("chain_id", chainId)
+      .gte("step_index", stepIndex),
+    sb
+      .from("pending_outreach")
+      .select("id", { count: "exact", head: true })
+      .eq("message_chain_step_id", stepId),
+  ]);
+
+  for (const result of [recipients, deliveries, outreach]) {
+    if (result.error) throw result.error;
+  }
+
+  return (
+    (recipients.count || 0) + (deliveries.count || 0) + (outreach.count || 0) >
+    0
+  );
+}
+
+/*
+ * Tira um passo e renumera os seguintes (o 3 passa a 2, o 4 a 3...), por
+ * ordem, para não chocar com a numeração única de cada corrente.
+ */
+export async function removeMessageChainStep({
+  chainId,
+  stepId,
+  stepIndex,
+  steps,
+}) {
+  const { error } = await sb
+    .from("message_chain_step")
+    .delete()
+    .eq("id", stepId)
+    .eq("chain_id", chainId);
+
+  if (error) throw error;
+
+  const later = steps
+    .filter((step) => step.step_index > stepIndex)
+    .sort((a, b) => a.step_index - b.step_index);
+
+  for (const step of later) {
+    const { error: moveError } = await sb
+      .from("message_chain_step")
+      .update({ step_index: step.step_index - 1 })
+      .eq("id", step.id);
+
+    if (moveError) throw moveError;
+  }
+
+  await sb
+    .from("message_chain")
+    .update({ updated_at: nowIso() })
+    .eq("id", chainId);
+}
+
+/* A pergunta de um passo que nunca chegou a sair (sai das Perguntas). */
+export async function deleteUnsentChainQuestion({
+  questionId,
+  organizationId,
+}) {
+  const { error } = await sb
+    .from("question")
+    .delete()
+    .eq("id", questionId)
+    .eq("organization_id", Number(organizationId));
+
+  if (error) throw error;
+}
+
+/* Grava o payload de um passo (hoje só muda o texto da mensagem). */
+export async function updateMessageChainStepPayload({
+  chainId,
+  stepId,
+  payload,
+}) {
+  const { error } = await sb
+    .from("message_chain_step")
+    .update({ payload })
+    .eq("id", stepId)
+    .eq("chain_id", chainId);
+
+  if (error) throw error;
+
+  await sb
+    .from("message_chain")
+    .update({ updated_at: nowIso() })
+    .eq("id", chainId);
+}
+
+/*
+ * A última mensagem da corrente que chegou a alguém: algum destinatário já
+ * passou por ela, foi entregue (um envio falhado não conta) ou está marcada
+ * para sair. 0 quando nenhuma chegou a ninguém.
+ */
+export async function lastDeliveredChainStep(chainId) {
+  const [recipients, deliveries, outreach] = await Promise.all([
+    sb
+      .from("message_chain_recipient")
+      .select("current_step_index")
+      .eq("chain_id", chainId)
+      .order("current_step_index", { ascending: false })
+      .limit(1),
+    sb
+      .from("message_chain_delivery")
+      .select("step_index")
+      .eq("chain_id", chainId)
+      .neq("status", "failed")
+      .order("step_index", { ascending: false })
+      .limit(1),
+    sb
+      .from("pending_outreach")
+      .select("message_chain_step_index")
+      .eq("message_chain_id", chainId)
+      .order("message_chain_step_index", { ascending: false })
+      .limit(1),
+  ]);
+
+  for (const result of [recipients, deliveries, outreach]) {
+    if (result.error) throw result.error;
+  }
+
+  return Math.max(
+    0,
+    Number(recipients.data?.[0]?.current_step_index) || 0,
+    Number(deliveries.data?.[0]?.step_index) || 0,
+    Number(outreach.data?.[0]?.message_chain_step_index) || 0,
+  );
 }

@@ -25,6 +25,15 @@ vi.mock("@/lib/auth/guards", () => ({
   },
 }));
 
+/* Os limites do plano têm testes próprios (assistantContentLimits); aqui, sem limites. */
+vi.mock("@/lib/services/plans/planLimits", async (importOriginal) => ({
+  ...(await importOriginal()),
+  getOrgLimits: vi.fn(async () => ({
+    plan: { id: 4, name: "Enterprise", level: 4 },
+    limits: { filesPerAssistant: null },
+  })),
+}));
+
 vi.mock("@/lib/repos/store.repo", () => ({
   getStoreById: mocks.getStoreById,
   updateStoreName: mocks.updateStoreName,

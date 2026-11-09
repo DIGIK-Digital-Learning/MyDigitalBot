@@ -1,15 +1,10 @@
-import { createClient as createServiceClient } from "@supabase/supabase-js";
-
-const sb = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } },
-);
-
+import { getRepositoryReadClient } from "@/lib/db/readAccess";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 export async function getOrganizationMessagingFeature({
   organizationId,
   channel = "whatsapp",
 }) {
+  const sb = getRepositoryReadClient();
   if (!organizationId) {
     throw new Error("organizationId is required");
   }
@@ -30,6 +25,7 @@ export async function getOrCreateOrganizationMessagingFeature({
   organizationId,
   channel = "whatsapp",
 }) {
+  const sb = getSupabaseAdminClient();
   if (!organizationId) {
     throw new Error("organizationId is required");
   }
@@ -61,6 +57,7 @@ export async function setReadChainsEnabled({
   channel = "whatsapp",
   enabled,
 }) {
+  const sb = getSupabaseAdminClient();
   if (!organizationId) {
     throw new Error("organizationId is required");
   }

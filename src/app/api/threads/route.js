@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 import { getThreadsForUser } from "@/lib/repos/threads.repo";
 import { handleApiError, requireOrgForUser } from "@/lib/auth/guards";
@@ -10,8 +11,10 @@ export async function GET(req) {
     const orgAuth = await requireOrgForUser(userId);
     if (orgAuth.error) return orgAuth.error;
 
-    const userThreads = await getThreadsForUser(orgAuth.userId);
-    return NextResponse.json({ threads: userThreads });
+    return await withSessionReadAccess(orgAuth, async () => {
+      const userThreads = await getThreadsForUser(orgAuth.userId);
+      return NextResponse.json({ threads: userThreads });
+    });
   } catch (err) {
     return handleApiError(err, "Failed to load threads");
   }

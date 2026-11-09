@@ -35,7 +35,7 @@ function putRequest(body) {
 describe("opening-message route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.requireOwnedOrg.mockResolvedValue({ orgId: 7, admin: {} });
+    mocks.requireOwnedOrg.mockResolvedValue({ orgId: 7, admin: {} , user: { id: "owner-test" }, supabase: { from: vi.fn() } });
   });
 
   it("GET returns the default body when the organization has none", async () => {

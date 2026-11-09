@@ -1,10 +1,7 @@
-import { createClient as createServiceClient } from "@supabase/supabase-js";
+// Acesso interno privilegiado: processamento de eventos/tarefas, sem sessão de administrador.
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 
-const sb = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } },
-);
+const sb = getSupabaseAdminClient();
 
 export async function createAutomationRun(row) {
   const { data, error } = await sb
@@ -58,7 +55,10 @@ export async function getAutomationRunForScheduledBroadcast({
   return data ?? null;
 }
 
-export async function getDueAutomationRuns(limit = 100, { organizationId = null } = {}) {
+export async function getDueAutomationRuns(
+  limit = 100,
+  { organizationId = null, excludeOrganizationIds = [] } = {},
+) {
   const nowIso = new Date().toISOString();
 
   let query = sb
@@ -71,6 +71,11 @@ export async function getDueAutomationRuns(limit = 100, { organizationId = null 
 
   if (organizationId != null) {
     query = query.eq("organization_id", organizationId);
+  }
+
+  /* A Demo terminou (#209): as automações destas organizações ficam à espera. */
+  if (excludeOrganizationIds.length) {
+    query = query.not("organization_id", "in", `(${excludeOrganizationIds.join(",")})`);
   }
 
   const { data, error } = await query;

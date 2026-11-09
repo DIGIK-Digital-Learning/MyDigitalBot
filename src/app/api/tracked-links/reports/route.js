@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 import { getTrackedLinkReportsByOrg } from "@/lib/repos/trackedLinks.repo";
 import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
@@ -10,8 +11,10 @@ export async function GET(req) {
     const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
-    const items = await getTrackedLinkReportsByOrg(orgAuth.orgId);
-    return NextResponse.json({ items });
+    return await withSessionReadAccess(orgAuth, async () => {
+      const items = await getTrackedLinkReportsByOrg(orgAuth.orgId);
+      return NextResponse.json({ items });
+    });
   } catch (err) {
     return handleApiError(err, "Failed to load tracked-link reports");
   }

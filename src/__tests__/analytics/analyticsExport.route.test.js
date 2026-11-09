@@ -17,7 +17,7 @@ const request = (query = "orgId=99") => new Request("http://localhost/api/analyt
 
 beforeEach(() => {
   vi.resetAllMocks();
-  mocks.authorize.mockResolvedValue({ orgId: 7 });
+  mocks.authorize.mockResolvedValue({ orgId: 7 , user: { id: "owner-test" }, supabase: { from: vi.fn() } });
   mocks.dataset.mockResolvedValue({ ok: true, messages: [] });
 });
 

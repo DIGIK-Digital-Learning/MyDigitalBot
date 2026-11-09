@@ -8,6 +8,7 @@ import {
   addTagsToUser,
 } from "@/lib/repos/tag.repo.js";
 import { createUserWithAutomations } from "@/lib/services/automations/createUserWithAutomations";
+import { checkPlanActive } from "@/lib/services/plans/planLimits";
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
 import {
@@ -213,6 +214,10 @@ export async function POST(req) {
     const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
+    /* A Demo terminou (#209): ver continua, criar e enviar não. */
+    const active = await checkPlanActive(orgAuth.orgId);
+    if (active.body) return NextResponse.json(active.body, { status: 403 });
+
     const requestedTagNames = new Set();
 
     users.forEach((rawUser) => {
@@ -285,6 +290,7 @@ export async function POST(req) {
         skippedRows.push({
           row: rowNumber,
           name,
+          code: "noIdentifier",
           reason: "No email, Teams AAD Object ID, or phone number found",
         });
         return;
@@ -301,6 +307,7 @@ export async function POST(req) {
         skippedRows.push({
           row: rowNumber,
           name,
+          code: "conflict",
           reason:
             "Multiple matching users found. Email, phone, or Teams AAD Object ID belong to different users.",
         });
@@ -315,6 +322,7 @@ export async function POST(req) {
         skippedRows.push({
           row: rowNumber,
           name: "",
+          code: "missingName",
           reason: "Missing name",
         });
         return;
@@ -324,7 +332,9 @@ export async function POST(req) {
         skippedRows.push({
           row: rowNumber,
           name: displayName,
+          code: "unknownTags",
           reason: `Unknown tag(s): ${missingTagNames.join(", ")}`,
+          tags: missingTagNames.join(", "),
         });
         return;
       }
@@ -333,6 +343,7 @@ export async function POST(req) {
         skippedRows.push({
           row: rowNumber,
           name: displayName,
+          code: "duplicateUser",
           reason: "Duplicate row for the same existing user",
         });
         return;
@@ -342,6 +353,7 @@ export async function POST(req) {
         skippedRows.push({
           row: rowNumber,
           name: displayName,
+          code: "duplicateEmail",
           reason: "Duplicate email in import file",
         });
         return;
@@ -351,6 +363,7 @@ export async function POST(req) {
         skippedRows.push({
           row: rowNumber,
           name: displayName,
+          code: "duplicateTeams",
           reason: "Duplicate Teams AAD Object ID in import file",
         });
         return;
@@ -360,6 +373,7 @@ export async function POST(req) {
         skippedRows.push({
           row: rowNumber,
           name: displayName,
+          code: "duplicatePhone",
           reason: "Duplicate phone number in import file",
         });
         return;

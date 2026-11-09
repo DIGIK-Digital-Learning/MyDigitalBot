@@ -1,6 +1,7 @@
 // app/not-found.jsx
 import Link from "next/link";
 import { headers, cookies } from "next/headers";
+import { getTranslations } from "next-intl/server";
 import styles from "./[locale]/(auth)/login/login.module.css";
 
 export default async function NotFound() {
@@ -17,16 +18,17 @@ export default async function NotFound() {
   const c = await cookies();
   const isAuthed = !!(c.get("sb-access-token") || c.get("sb:token"));
 
-  const targetHref = `/${locale}${isAuthed ? "/users" : "/login"}`;
-  const targetLabel = isAuthed ? "Ir para Utilizadores" : "Ir para Login";
+  const targetHref = `/${locale}${isAuthed ? "/dashboard" : "/login"}`;
+  const t = await getTranslations({ locale, namespace: "NotFound" });
+  const targetLabel = isAuthed ? t("buttonUsers") : t("buttonLogin");
 
   return (
     <main className={styles.page}>
       <h1 className={styles.brand}>MyDigitalBot</h1>
       <section className={styles.card}>
-        <h2 className={styles.title}>Página não encontrada</h2>
+        <h2 className={styles.title}>{t("title")}</h2>
         <p className={styles.message} style={{ marginBottom: "0.75rem" }}>
-          Ups! A página que procura não existe ou foi movida.
+          {t("message")}
         </p>
         <div
           style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}

@@ -888,7 +888,8 @@
     }
   },
   "Nav": {
-    "home": "Início",
+    "home": "Portal",
+    "usersGroup": "Utilizadores",
     "users": "Colaboradores",
     "teamsGroups": "Grupos Teams",
     "assistants": "Assistentes",
@@ -950,7 +951,8 @@
     "cancel": "Cancelar"
   },
   "Navbar": {
-    "orgUnknown": "-"
+    "orgUnknown": "-",
+    "mainNavigation": "Navegação principal"
   },
   "Users": {
     "title": "Utilizadores",
@@ -966,6 +968,7 @@
     "list": {
       "name": "Nome",
       "phone": "Nº. Telemóvel",
+      "thisWeek": "Esta semana",
       "tags": "Tags",
       "assistant": "Assistente"
     },
@@ -1122,7 +1125,22 @@
     "read": "Lida",
     "delivered": "Entregue",
     "sent": "Enviada",
-    "failed": "Falhou"
+    "failed": "Falhou",
+    "edit": "Editar",
+    "close": "Fechar",
+    "reload": "Recarregar",
+    "loading": "A carregar…",
+    "noThreads": "Este utilizador não tem threads.",
+    "messages": "Mensagens",
+    "noMessages": "Sem mensagens.",
+    "noText": "(sem texto)",
+    "threadsFailed": "Erro ao carregar threads.",
+    "messagesFailed": "Erro ao carregar mensagens.",
+    "roles": {
+      "assistant": "Assistente",
+      "system": "Sistema",
+      "user": "Utilizador"
+    }
   },
   "FilterMenu": {
     "title": "Filtros",
@@ -1435,6 +1453,8 @@
     "attachments": "Anexos",
     "sendnow": "Enviar agora",
     "scheduleBtn": "Agendar",
+    "deliveryMode": "Modo de envio",
+    "scheduleFor": "Agendar para {date}, {time}",
     "timezone": "Fuso Horário",
     "hour": "Hora",
     "scheduleError": "Por favor escolha uma data e hora no futuro.",
@@ -1481,6 +1501,15 @@
     "linkBubbleTag": "Balão à parte",
     "linkBubbleText": "Texto do balão (opcional)",
     "linkLibrary": {
+      "delete": "Eliminar o link {label}",
+      "deleteConfirm": {
+        "title": "Eliminar link",
+        "message": "O link \"{label}\" sai da lista e deixa de contar para os links do teu plano. Os envios em que já foi usado continuam a funcionar e os cliques ficam nas Métricas.",
+        "confirm": "Eliminar"
+      },
+      "inUseTitle": "Link em uso",
+      "inUseScheduled": "Este link está numa mensagem agendada. Cancela-a primeiro para o poderes eliminar.",
+      "inUseChain": "Este link está numa corrente que ainda está a decorrer. Só o podes eliminar quando a corrente terminar.",
       "title": "Links já usados",
       "search": "Procurar por nome ou URL",
       "use": "Usar",
@@ -1650,7 +1679,8 @@
         "addImage": "Imagem",
         "addVideo": "Vídeo",
         "addDocument": "Documento",
-        "fileTooLarge": "O ficheiro {name} tem mais de 20 MB.",
+        "fileTooLarge": "O ficheiro {name} tem mais de {limit} MB.",
+        "whatsappImageTooLarge": "A imagem {name} tem mais de 5 MB. No WhatsApp as imagens podem ter até 5 MB.",
         "fileTypeNotAllowed": "O ficheiro {name} não é suportado. Usa imagens (PNG, JPG, WebP, GIF), PDF ou MP4.",
         "addLink": "Link rastreado",
         "linkButtonHint": "No WhatsApp, o link vai neste botão.",
@@ -1752,1446 +1782,6 @@
         "chainDelayMinutesHours": "Espera {hours, plural, one {# hora} other {# horas}} e {minutes, plural, one {# minuto} other {# minutos}} depois de ler."
       }
     },
-    "BroadcastScheduled": {
-      "Title": "Mensagens agendadas",
-      "Subtitle": "Mensagens agendadas da organização {organization}",
-      "NewMessage": "Nova mensagem",
-      "Refresh": "Atualizar",
-      "Loading": "A carregar mensagens agendadas...",
-      "Timezone": "Fuso horário",
-      "ConfirmDelete": "Tens a certeza que queres eliminar esta mensagem agendada?",
-      "Stats": {
-        "total": "Total",
-        "scheduled": "Agendadas",
-        "sending": "A enviar",
-        "failed": "Falhadas"
-      },
-      "Filters": {
-        "searchPlaceholder": "Pesquisar por mensagem, estado, canal ou criador...",
-        "datePlaceholder": "Data",
-        "clearDate": "Limpar data"
-      },
-      "Channels": {
-        "all": "Todos os canais",
-        "teams": "Teams",
-        "whatsapp": "WhatsApp"
-      },
-      "Statuses": {
-        "all": "Todos os estados",
-        "scheduled": "Agendada",
-        "sending": "A enviar",
-        "sent": "Enviada",
-        "failed": "Falhada",
-        "cancelled": "Cancelada",
-        "queued": "Em fila"
-      },
-      "Table": {
-        "message": "Mensagem",
-        "channel": "Canal",
-        "recipients": "Destinatários",
-        "scheduledFor": "Agendada para",
-        "status": "Estado",
-        "createdBy": "Criada por",
-        "actions": "Ações",
-        "people": "pessoas"
-      },
-      "Actions": {
-        "view": "Ver",
-        "edit": "Editar",
-        "delete": "Eliminar"
-      },
-      "ViewModal": {
-        "groups": "Grupos Teams",
-        "title": "Detalhes da mensagem",
-        "createdAt": "Criada em"
-      },
-      "EditModal": {
-        "groups": "Grupos Teams",
-        "unnamedGroup": "Grupo sem nome",
-        "title": "Editar mensagem agendada",
-        "message": "Mensagem",
-        "recipients": "Destinatários",
-        "manageRecipients": "Gerir Destinatários",
-        "channel": "Canal",
-        "status": "Estado",
-        "date": "Data",
-        "timezone": "Fuso horário",
-        "hour": "Hora",
-        "minute": "Minuto",
-        "cancel": "Cancelar",
-        "save": "Guardar alterações",
-        "saving": "A guardar...",
-        "remove": "Remover",
-        "noRecipients": "Sem destinatários selecionados.",
-        "files": "Ficheiros",
-        "noFiles": "Sem ficheiros adicionados."
-      },
-      "RecipientPicker": {
-        "title": "Gerir destinatários",
-        "searchPlaceholder": "Pesquisar utilizadores...",
-        "countSelected": "selecionado(s)",
-        "selected": "Selecionados",
-        "remove": "Remover",
-        "noRecipient": "Nenhum destinatário selecionado",
-        "available": "Disponíveis",
-        "loading": "A carregar utilizadores…",
-        "add": "Adicionar",
-        "emptyRecipient": "Não existem utilizadores disponíveis para este canal",
-        "cancel": "Cancelar",
-        "apply": "Aplicar destinatários"
-      },
-      "Empty": {
-        "title": "Ainda não tens mensagens agendadas",
-        "text": "Quando agendares uma mensagem, ela vai aparecer aqui para poderes ver, editar ou eliminar."
-      },
-      "Delete": {
-        "title": "Tem a certeza que quer apagar esta mensagem?",
-        "deleteMessage": "Esta ação não pode ser desfeita.",
-        "delete": "Apagar",
-        "cancel": "Cancelar"
-      },
-      "Errors": {
-        "load": "Não foi possível carregar as mensagens agendadas.",
-        "save": "Não foi possível guardar as alterações.",
-        "delete": "Não foi possível eliminar a mensagem agendada.",
-        "invalidForm": "Preenche a mensagem e uma data/hora válida."
-      },
-      "Alerts": {
-        "noOrg": {
-          "title": "Organização em falta",
-          "message": "Ainda não foi possível identificar a organização. Tenta novamente dentro de alguns segundos."
-        },
-        "loadError": {
-          "title": "Erro ao carregar mensagens",
-          "message": "Não foi possível carregar as mensagens agendadas. Tenta novamente dentro de alguns segundos."
-        },
-        "usersLoadError": {
-          "title": "Erro ao carregar destinatários",
-          "message": "Não foi possível carregar a lista de utilizadores para edição de destinatários."
-        },
-        "invalidForm": {
-          "title": "Dados em falta",
-          "message": "Preenche a mensagem e escolhe uma data e hora válidas antes de guardar."
-        },
-        "saveSuccess": {
-          "title": "Mensagem atualizada",
-          "message": "As alterações à mensagem agendada foram guardadas com sucesso."
-        },
-        "saveError": {
-          "title": "Erro ao guardar alterações",
-          "message": "Não foi possível guardar as alterações à mensagem agendada."
-        },
-        "deleteSuccess": {
-          "title": "Mensagem eliminada",
-          "message": "A mensagem agendada foi eliminada com sucesso."
-        },
-        "deleteError": {
-          "title": "Erro ao eliminar mensagem",
-          "message": "Não foi possível eliminar a mensagem agendada."
-        }
-      }
-    },
-    "TrackedLinks": {
-      "title": "Links Rastreados",
-      "subtitle": "Vê as estatísticas do links rastreados da tua organização.",
-      "totalLinks": "Total de Links",
-      "search": "Procura por nome, chave, destino ou canal",
-      "loading": "A carregar links",
-      "noLinks": "Não foram encontrados links nesta organização.",
-      "table": {
-        "label": "Nome",
-        "key": "Chave",
-        "channel": "Canal",
-        "destination": "Destino",
-        "recipients": "Recipientes",
-        "clicked": "Clicado",
-        "totalClicks": "Total de cliques",
-        "clickRate": "Percentagem de cliques",
-        "created": "Criado"
-      },
-      "view": "Ver",
-      "detail": {
-        "alerts": {
-          "noOrg": {
-            "title": "Organização em falta",
-            "message": "Ainda não foi possível identificar a organização. Tenta novamente dentro de alguns segundos."
-          },
-          "missingSendGroup": {
-            "title": "Link inválido",
-            "message": "Não foi possível identificar o grupo de envio deste link rastreado."
-          },
-          "loadFailed": {
-            "title": "Erro ao carregar detalhe",
-            "message": "Não foi possível carregar os detalhes deste link rastreado. Tenta novamente dentro de alguns segundos."
-          }
-        },
-        "back": "Voltar",
-        "loading": "A carregar os detalhes do link...",
-        "trackedLink": "Link Rastreado",
-        "key": "chave",
-        "destinationUrl": "URL Destino",
-        "recipients": "Recipientes",
-        "clicked": "Clicado",
-        "notClicked": "Não clicado",
-        "totalClicks": "Total de cliques",
-        "clickRate": "Percentagem de cliques",
-        "created": "Criado",
-        "noClickedUsers": "Ninguém clicou no link ainda...",
-        "allClickedUsers": "Toda a gente clicou neste link.",
-        "recipient": "Recipiente",
-        "email": "E-mail",
-        "phone": "Nº. Telemóvel",
-        "clicks": "Cliques",
-        "firstClick": "Primeiro Clique",
-        "lastClick": "Último Clique",
-        "sentAt": "Enviado"
-      },
-      "alerts": {
-        "noOrg": {
-          "title": "Organização em falta",
-          "message": "Ainda não foi possível identificar a organização. Tenta novamente dentro de alguns segundos."
-        },
-        "loadFailed": {
-          "title": "Erro ao carregar links rastreados",
-          "message": "Não foi possível carregar os links rastreados. Tenta novamente dentro de alguns segundos."
-        }
-      }
-    },
-    "Questions": {
-      "title": "Perguntas",
-      "subtitle": "Resultados dos quizzes e das perguntas abertas enviadas por WhatsApp e Teams.",
-      "totalQuestions": "Perguntas",
-      "toReview": "Para rever",
-      "search": "Procura pelo texto da pergunta",
-      "filters": {
-        "allKinds": "Todos os tipos",
-        "sentBetween": "Enviada entre",
-        "and": "e",
-        "from": "Enviada desde",
-        "to": "Enviada até",
-        "clear": "Limpar filtros"
-      },
-      "loading": "A carregar perguntas...",
-      "noQuestions": "Ainda não foi enviada nenhuma pergunta nesta organização.",
-      "noMatches": "Nenhuma pergunta corresponde aos filtros.",
-      "kind": {
-        "quiz": "Quiz",
-        "survey": "Sondagem",
-        "open": "Pergunta aberta"
-      },
-      "table": {
-        "question": "Pergunta",
-        "answered": "Respostas",
-        "responseRate": "Taxa de resposta",
-        "result": "Resultado"
-      },
-      "sentOn": "Enviada a {date}",
-      "answersOf": "{answered} de {recipients}",
-      "correctRate": "{rate}% de acertos",
-      "verdictSummary": "{completa} completa · {parcial} parcial · {incompleta} incompleta",
-      "reviewCount": "{count} para rever",
-      "export": {
-        "button": "Exportar Excel",
-        "exporting": "A exportar...",
-        "fileName": "perguntas",
-        "failed": {
-          "title": "Erro ao exportar",
-          "message": "Não foi possível gerar o ficheiro Excel. Tenta novamente dentro de alguns segundos."
-        },
-        "columns": {
-          "questionsSheet": "Perguntas",
-          "answersSheet": "Respostas",
-          "sentAt": "Enviada em",
-          "kindColumn": "Tipo",
-          "question": "Pergunta",
-          "channels": "Canais",
-          "recipients": "Destinatários",
-          "answered": "Responderam",
-          "responseRate": "Taxa de resposta",
-          "correctRate": "Taxa de acertos",
-          "correctOption": "Opção certa",
-          "topOption": "Mais escolhida",
-          "expectedAnswer": "Resposta esperada",
-          "reviewNeeded": "Para rever",
-          "expiresAt": "Aceita respostas até",
-          "questionId": "ID pergunta",
-          "answeredAt": "Respondida em",
-          "name": "Nome",
-          "email": "Email",
-          "phone": "Telemóvel",
-          "tags": "Etiquetas",
-          "assistant": "Assistente",
-          "channel": "Canal",
-          "answer": "Resposta",
-          "isCorrect": "Certa",
-          "verdict": "Veredicto",
-          "feedback": "Feedback enviado",
-          "userId": "ID colaborador",
-          "yes": "Sim",
-          "no": "Não"
-        }
-      },
-      "alerts": {
-        "noOrg": {
-          "title": "Organização em falta",
-          "message": "Ainda não foi possível identificar a organização. Tenta novamente dentro de alguns segundos."
-        },
-        "loadFailed": {
-          "title": "Erro ao carregar perguntas",
-          "message": "Não foi possível carregar as perguntas. Tenta novamente dentro de alguns segundos."
-        }
-      },
-      "detail": {
-        "back": "Voltar",
-        "loading": "A carregar a pergunta...",
-        "options": "Opções",
-        "correctOption": "certa",
-        "expectedAnswer": "Resposta esperada",
-        "aiEvaluation": "Avaliação pela IA",
-        "aiOn": "ligada",
-        "aiOff": "desligada",
-        "sentAt": "Enviada",
-        "expiresAt": "Aceita respostas até",
-        "recipients": "Destinatários",
-        "answered": "Responderam",
-        "notAnswered": "Não responderam",
-        "responseRate": "Taxa de resposta",
-        "correct": "Acertos",
-        "correctRate": "Taxa de acertos",
-        "correctOf": "{correct} de {answered}",
-        "toReview": "Para rever",
-        "verdictsTitle": "Veredictos",
-        "answeredCount": "Responderam ({count})",
-        "notAnsweredCount": "Não responderam ({count})",
-        "filters": {
-          "search": "Procurar por nome, email ou telemóvel",
-          "allAnswers": "Todas as respostas",
-          "noMatches": "Nenhum contacto corresponde aos filtros."
-        },
-        "verdicts": {
-          "completa": "Completa",
-          "parcial": "Parcial",
-          "incompleta": "Incompleta",
-          "none": "Sem veredicto"
-        },
-        "table": {
-          "contact": "Contacto",
-          "phone": "Telemóvel",
-          "answer": "Resposta",
-          "result": "Resultado",
-          "verdict": "Veredicto",
-          "choice": "Escolha",
-          "aiVerdict": "IA: {verdict}",
-          "feedback": "Feedback enviado",
-          "answeredAt": "Respondida",
-          "sentAt": "Enviada"
-        },
-        "right": "Certo",
-        "wrong": "Errado",
-        "reviewNeeded": "Para rever",
-        "useAiVerdict": "Manter o veredicto da IA",
-        "noAnswers": "Ainda ninguém respondeu.",
-        "allAnswered": "Toda a gente respondeu.",
-        "alerts": {
-          "noOrg": {
-            "title": "Organização em falta",
-            "message": "Ainda não foi possível identificar a organização. Tenta novamente dentro de alguns segundos."
-          },
-          "missingQuestion": {
-            "title": "Pergunta inválida",
-            "message": "Não foi possível identificar a pergunta."
-          },
-          "loadFailed": {
-            "title": "Erro ao carregar a pergunta",
-            "message": "Não foi possível carregar os resultados desta pergunta. Tenta novamente dentro de alguns segundos."
-          },
-          "updateFailed": {
-            "title": "Erro ao guardar o veredicto",
-            "message": "Não foi possível guardar a correção. Tenta novamente."
-          }
-        }
-      }
-    },
-    "Media": {
-      "title": "Multimédia",
-      "subtitle": "Imagens, PDF e vídeos carregados nas mensagens da organização.",
-      "totalSize": "Espaço usado",
-      "totalFiles": "Ficheiros",
-      "search": "Pesquisar por nome",
-      "loading": "A carregar ficheiros...",
-      "noFiles": "Ainda não foram carregados ficheiros nas mensagens.",
-      "noMatches": "Nenhum ficheiro corresponde à pesquisa.",
-      "inUseHint": "Este ficheiro vai ser enviado numa mensagem agendada ou numa cadeia ativa. Se fosse eliminado agora, a mensagem sairia sem ele. Pode ser eliminado depois de a mensagem ser enviada ou cancelada.",
-      "openScheduled": "Ver a mensagem agendada que usa este ficheiro",
-      "download": "Transferir {name}",
-      "table": {
-        "file": "Ficheiro",
-        "size": "Tamanho",
-        "uploaded": "Carregado em",
-        "status": "Estado"
-      },
-      "type": {
-        "image": "Imagem",
-        "pdf": "PDF",
-        "video": "Vídeo",
-        "other": "Ficheiro"
-      },
-      "status": {
-        "inUse": "Em uso",
-        "free": "Livre"
-      },
-      "confirm": {
-        "title": "Eliminar {name}?",
-        "message": "O ficheiro deixa de abrir nas mensagens já enviadas que o usam. Esta ação não pode ser desfeita."
-      },
-      "alerts": {
-        "loadFailed": {
-          "title": "Erro ao carregar",
-          "message": "Não foi possível carregar os ficheiros."
-        },
-        "deleteFailed": {
-          "title": "Erro ao eliminar",
-          "message": "Não foi possível eliminar o ficheiro."
-        },
-        "inUse": {
-          "title": "Ficheiro em uso"
-        }
-      }
-    },
-    "Assistants": {
-      "myAssistants": "Os meus Assistentes",
-      "createAssistant": "Criar Assistente",
-      "loadingOrg": "A carregar organização…",
-      "empty": "Sem assistants ainda.",
-      "details": {
-        "descriptionPlaceholder": "Descrição curta",
-        "instructionsPlaceholder": "Instruções do assistente",
-        "createdAt": "Criado em",
-        "specs": "Especificidades:",
-        "behavior": "Comportamento",
-        "customBehavior": "Personalizado ({temperature})",
-        "save": "Guardar",
-        "saving": "A guardar...",
-        "cancel": "Cancelar",
-        "edit": "Editar",
-        "delete": "Eliminar"
-      },
-      "vector": {
-        "create": "Criar coleção de ficheiros",
-        "collectionName": "Nome da coleção",
-        "collectionNamePlaceholder": "Ex.: Coleção para",
-        "chooseFiles": "Escolher Ficheiros (pode escolher vários):",
-        "createAndAttach": "Criar e Associar",
-        "docCollection": "Coleção de Documentos",
-        "collectionTitle": "Nome da Coleção",
-        "quantity": "Quantidade",
-        "filenames": "Nome dos Ficheiros",
-        "edit": "Editar ficheiros",
-        "editTitle": "Editar coleção de ficheiros",
-        "storeNamePlaceholder": "Nome da coleção",
-        "addFiles": "Adicionar ficheiros",
-        "replaceHelp": "Para substituir um ficheiro, remove o antigo e adiciona o novo.",
-        "newFiles": "Novos ficheiros",
-        "noFiles": "Não existem ficheiros associados.",
-        "remove": "Remover",
-        "keep": "Manter",
-        "save": "Guardar alterações",
-        "saving": "A atualizar..."
-      },
-      "placeholder": "Seleciona um assistant na coluna da esquerda."
-    },
-    "AssistantPresets": {
-      "formal": {
-        "name": "Formal",
-        "description": "Respostas previsíveis e agarradas às instruções. Para procedimentos e informação factual."
-      },
-      "normal": {
-        "name": "Normal",
-        "description": "Equilíbrio entre consistência e naturalidade. Serve para a maioria dos casos."
-      },
-      "creative": {
-        "name": "Criativo",
-        "description": "Respostas mais variadas e com mais iniciativa. Para conversa e sugestões."
-      }
-    },
-    "CreateAssistant": {
-      "title": "Criar novo Assistente",
-      "presetLabel": "Comportamento",
-      "presetHelp": "Define quão previsível ou variado o Assistant é a responder. Podes mudar depois na edição.",
-      "name": "Nome",
-      "nameHelp": "Nome que vai ficar associado ao Assistant.",
-      "description": "Descrição",
-      "descriptionHelp": "Uma breve descrição sobre o Assistant.",
-      "instructions": "Instruções",
-      "instructionsHelp": "Instruções que o Assistant vai seguir.",
-      "create": "Criar",
-      "cancel": "Cancelar"
-    },
-    "Chatbox": {
-      "try": "Experimentar Assistente",
-      "threadId": "Thread ID:",
-      "placeholder": "Escreva a sua mensagem...",
-      "send": "Enviar",
-      "errorReply": "Erro na resposta",
-      "errorApi": "Erro ao comunicar com a API.",
-      "alerts": {
-        "emptyMessage": {
-          "title": "Mensagem vazia",
-          "message": "Escreve uma mensagem antes de enviar."
-        },
-        "missingAssistant": {
-          "title": "Assistente em falta",
-          "message": "Não foi possível identificar o assistente selecionado."
-        },
-        "missingOpenAiId": {
-          "title": "Configuração incompleta",
-          "message": "Este assistente não está disponível neste momento. Tenta novamente mais tarde ou recria o assistente para corrigir a configuração."
-        },
-        "apiError": {
-          "title": "Erro ao obter resposta",
-          "message": "Não foi possível obter resposta do assistente. Tenta novamente."
-        },
-        "emptyReply": {
-          "title": "Resposta vazia",
-          "message": "O assistente respondeu sem conteúdo."
-        },
-        "networkError": {
-          "title": "Erro de ligação",
-          "message": "Verifica a ligação e tenta novamente."
-        }
-      }
-    },
-    "Reports": {
-      "eyebrow": "Métricas e relatórios",
-      "title": "Vê adoção, atividade e uso dos assistentes num só sítio",
-      "subtitle": "Esta primeira versão usa apenas dados que a app já guarda hoje: utilizadores, assistentes, threads, canais e mensagens.",
-      "trailing30": "Últimos 30 dias",
-      "updated": "Atualizado",
-      "loading": "A carregar relatório…",
-      "noOrg": "Ainda não foi encontrada uma organização para esta conta.",
-      "sections": {
-        "snapshot": "Resumo",
-        "activity": "Atividade diária",
-        "activitySubtitle": "Os últimos 14 dias ajudam a perceber mudanças de ritmo sem abrir threads individuais.",
-        "channels": "Distribuição por canal",
-        "channelsSubtitle": "Serve para perceber se a adoção está a acontecer mais por WhatsApp ou por Teams.",
-        "assistants": "Uso dos assistentes",
-        "assistantsSubtitle": "Uma leitura rápida de que assistentes estão mesmo atribuídos, ativos e a suportar volume de conversas.",
-        "watchouts": "Sinais para agir",
-        "ideas": "Próximos relatórios que fazem sentido",
-        "ideasSubtitle": "Estes encaixam bem na direção do produto, mas alguns precisam de eventos extra para que os números sejam fiáveis."
-      },
-      "cards": {
-        "users": {
-          "title": "Utilizadores",
-          "hint": "Novos em 30d"
-        },
-        "activeUsers": {
-          "title": "Utilizadores ativos",
-          "hint": "Base ativa em 30d"
-        },
-        "messages": {
-          "title": "Mensagens",
-          "hint": "Entrada / assistente em 30d"
-        },
-        "threads": {
-          "title": "Threads ativas",
-          "hint": "Ativas em 30d / total"
-        },
-        "coverage": {
-          "title": "Cobertura de assistente",
-          "hint": "Utilizadores atribuídos a um assistente"
-        },
-        "whatsapp": {
-          "title": "Cobertura WhatsApp",
-          "hint": "Utilizadores com nº de telemóvel"
-        },
-        "teams": {
-          "title": "Cobertura Teams",
-          "hint": "Utilizadores ligados ao Teams"
-        },
-        "quiet": {
-          "title": "Utilizadores sem atividade",
-          "hint": "Sem thread ainda"
-        }
-      },
-      "charts": {
-        "messages": {
-          "title": "Mensagens por dia",
-          "subtitle": "Últimos 14 dias",
-          "footer": "Total de mensagens no gráfico",
-          "empty": "Ainda não há atividade de mensagens."
-        },
-        "users": {
-          "title": "Novos utilizadores por dia",
-          "subtitle": "Últimos 14 dias",
-          "footer": "Novos utilizadores no gráfico",
-          "empty": "Sem novos utilizadores neste período."
-        }
-      },
-      "channels": {
-        "whatsapp": "WhatsApp",
-        "teams": "Teams",
-        "unknown": "Outro / desconhecido",
-        "reachable": "Utilizadores contactáveis",
-        "activeThreads": "Threads ativas (30d)",
-        "messages": "Mensagens (30d)",
-        "split": "Entrada / assistente",
-        "lastActivity": "Última atividade"
-      },
-      "assistants": {
-        "empty": "Ainda não há assistentes.",
-        "columns": {
-          "assistant": "Assistente",
-          "users": "Utilizadores",
-          "coverage": "Cobertura",
-          "threads": "Threads",
-          "messages30d": "Msgs 30d",
-          "messagesAll": "Msgs total",
-          "lastActivity": "Última atividade"
-        }
-      },
-      "watchouts": {
-        "noIssues": {
-          "title": "Sem bloqueios óbvios neste resumo",
-          "text": "Nada urgente salta à vista nestas métricas base neste momento."
-        },
-        "unassigned": {
-          "title": "Utilizadores sem assistente",
-          "text": "Existem utilizadores sem assistente associado, o que pode partir a experiência de onboarding ou a consistência da automação."
-        },
-        "quiet": {
-          "title": "Utilizadores sem atividade",
-          "text": "Estes utilizadores ainda não têm histórico de threads, por isso ainda não interagiram realmente com o produto."
-        },
-        "idleAssistants": {
-          "title": "Assistentes sem uso",
-          "text": "Alguns assistentes existem mas ainda não têm tráfego de mensagens. Normalmente isto significa rollout incompleto ou pouca descoberta."
-        }
-      },
-      "roadmap": [
-        {
-          "title": "Performance de broadcasts",
-          "label": "Precisa de eventos de campanha",
-          "text": "Entrega, uso de template, taxa de resposta e opt-out por mensagem ou campanha."
-        },
-        {
-          "title": "Resultados de aprendizagem",
-          "label": "Precisa de eventos de lição",
-          "text": "Conclusão, resultados de quizzes e progressão por assistente, equipa ou segmento."
-        },
-        {
-          "title": "Coortes de retenção",
-          "label": "Precisa de lógica de retorno",
-          "text": "Quantos utilizadores que começam na semana 1 continuam ativos nas semanas 2, 4 e 8."
-        },
-        {
-          "title": "Sinais de qualidade da IA",
-          "label": "Precisa de tracking de outcomes",
-          "text": "Taxa de fallback, intenções sem resposta, momentos de handoff e qualidade de resposta ao longo do tempo."
-        }
-      ],
-      "misc": {
-        "last30Users": "utilizadores",
-        "messagesPerActiveUser": "msgs por utilizador ativo",
-        "avgMessagesPerThread": "média msgs / thread",
-        "noData": "Sem dados ainda.",
-        "percentSuffix": "%",
-        "todayRange": "Últimos 14 dias",
-        "multiChannel": "Utilizadores multi-canal",
-        "assistantsCount": "Assistentes"
-      }
-    },
-    "AdminPage": {
-      "title": "Admin",
-      "newOrganization": {
-        "title": "Nova organização",
-        "placeholder": "Nome da organização…",
-        "create": "Criar",
-        "creating": "A criar…",
-        "required": "Preencha o nome da organização."
-      },
-      "themes": {
-        "title": "Temas",
-        "loading": "A carregar…",
-        "empty": "Sem organizações.",
-        "primary": "Primária",
-        "secondary": "Secundária",
-        "save": "Guardar",
-        "saving": "A guardar…"
-      },
-      "messages": {
-        "loadOrganizationsError": "❌ Falha a carregar as organizações",
-        "themeSaved": "✓ Tema guardado para «{name}».",
-        "themeSaveError": "❌ Não foi possível guardar o tema.",
-        "organizationCreated": "✓ Criada organização #{id}: «{name}»",
-        "organizationCreateError": "❌ Erro ao criar organização."
-      },
-      "alerts": {
-        "loadOrganizationsError": {
-          "title": "Erro ao carregar organizações",
-          "message": "Não foi possível carregar as organizações. Tenta novamente dentro de alguns segundos."
-        },
-        "organizationNameRequired": {
-          "title": "Nome em falta",
-          "message": "Preenche o nome da organização antes de criar."
-        },
-        "organizationCreated": {
-          "title": "Organização criada",
-          "message": "A organização \"{name}\" foi criada com sucesso."
-        },
-        "organizationCreateError": {
-          "title": "Erro ao criar organização",
-          "message": "Não foi possível criar a organização. Verifica os dados e tenta novamente."
-        },
-        "themeSaved": {
-          "title": "Tema guardado",
-          "message": "O tema da organização \"{name}\" foi guardado com sucesso."
-        },
-        "themeSaveError": {
-          "title": "Erro ao guardar tema",
-          "message": "Não foi possível guardar o tema. Tenta novamente dentro de alguns segundos."
-        },
-        "invalidColor": {
-          "title": "Cor inválida",
-          "message": "As cores devem estar no formato hexadecimal, por exemplo #4f46e5."
-        },
-        "notAuthenticated": {
-          "title": "Sessão inválida",
-          "message": "Não foi possível identificar o utilizador autenticado. Inicia sessão novamente."
-        }
-      }
-    },
-    "Auth": {
-      "brand": "MyDigitalBot",
-      "example": "exemplo@exemplo.pt",
-      "login": {
-        "title": "Entrar",
-        "email": "E-mail",
-        "password": "Palavra-Passe",
-        "login": "Iniciar sessão",
-        "forgot": "Esqueceu a palavra-passe?",
-        "working": "A trabalhar…",
-        "success": "Sucesso! A redirecionar…",
-        "genericError": "Não foi possível iniciar sessão. Verifica os dados e tenta novamente."
-      },
-      "reset": {
-        "title": "Recuperar palavra-passe",
-        "email": "E-mail",
-        "send": "Enviar link",
-        "back": "Voltar ao login",
-        "sending": "A enviar…",
-        "sent": "Se existir uma conta com esse e-mail, receberás um link de recuperação."
-      },
-      "resetConfirm": {
-        "title": "Definir nova palavra-passe",
-        "newPassword": "Nova palavra-passe",
-        "confirm": "Confirmar",
-        "back": "Voltar ao login",
-        "preparing": "A preparar sessão…",
-        "invalid": "Link inválido ou expirado",
-        "updating": "A atualizar…",
-        "updated": "Palavra-passe atualizada! A redirecionar…",
-        "passwordPolicy": "A palavra-passe tem de ter pelo menos 8 caracteres e incluir uma letra maiúscula, uma letra minúscula e um caráter especial.",
-        "genericError": "Não foi possível atualizar a palavra-passe. Tenta novamente."
-      }
-    },
-    "Alert": {
-      "noContact": {
-        "title": "Falta de Contacto",
-        "message": "Adiciona pelo menos um método de contacto: telemóvel, Teams ou email",
-        "ok": "OK"
-      },
-      "fullOrg": {
-        "title": "Limite de Utilizadores",
-        "message": "Chegou ao limite de utilizadores para esta organização.",
-        "ok": "OK"
-      }
-    },
-    "PillSelect": {
-      "placeholder": "Selecionar…",
-      "empty": "Sem opções."
-    },
-    "ThemePreview": {
-      "sampleCard": "Sample card",
-      "sampleBody": "Body text using your theme. Tweak colors to see it change.",
-      "primaryAction": "Primary action"
-    },
-    "NotFound": {
-      "title": "Página não encontrada",
-      "message": "A página que procura não existe ou foi movida.",
-      "buttonUsers": "Ir para Colaboradores",
-      "buttonLogin": "Ir para Login",
-      "buttonUser": "Ir para Colaboradores"
-    },
-    "Delete": {
-      "title": "Tem a certeza?",
-      "namedTitle": "Tem a certeza que quer eliminar {name}?",
-      "deleteMessage": "Esta ação não pode ser desfeita."
-    },
-    "QuickActions": {
-      "selected": "selecionados",
-      "clear": "Limpar",
-      "bulkLabel": "Definir Assistente",
-      "apply": "Substituir",
-      "addAssistantHint": "Junta este assistente aos que os utilizadores já têm",
-      "replaceAssistantHint": "Os utilizadores ficam só com este assistente",
-      "tag": "Adicionar/Remover Tags",
-      "add": "Adicionar",
-      "addTags": "Adiciona as tags selecionadas aos users",
-      "remove": "Remover",
-      "removeTags": "Remover Tags selecionadas aos users",
-      "delete": "Eliminar Utilizadores",
-      "deleteUsers": "Eliminar users selecionados",
-      "confirmUserDeletion": {
-        "title": "Apagar {number}  user(s)?",
-        "message": "Esta ação não pode ser desfeita",
-        "confirm": "Apagar",
-        "cancel": "Cancelar"
-      }
-    },
-    "Analytics": {
-      "title": "Métricas",
-      "description": "Atividade, entrega, automações e links da organização no período selecionado.",
-      "refresh": "Atualizar",
-      "updatedAt": "Atualizado às {time}",
-      "retry": "Tentar novamente",
-      "loading": "A carregar métricas...",
-      "actions": {
-        "viewUsers": "Ver utilizadores",
-        "viewAutomations": "Ver automações"
-      },
-      "errors": {
-        "load": "Não foi possível carregar as métricas. Tenta novamente dentro de alguns segundos.",
-        "noOrg": "Não foi possível identificar a organização atual.",
-        "export": "Não foi possível gerar o ficheiro Excel. Tenta novamente.",
-        "exportPartial": "O Excel foi descarregado apenas com o Resumo e o Painel: não foi possível obter os dados de detalhe.",
-        "exportPdf": "Não foi possível gerar o PDF. Tenta novamente."
-      },
-      "health": {
-        "ok": "Tudo OK",
-        "noErrors": "Não foram encontrados problemas nos dados carregados.",
-        "needsAttention": "Atenção",
-        "errorsFound": "{count} problema(s) encontrado(s) nos dados atuais."
-      },
-      "cards": {
-        "users": "Utilizadores",
-        "usersHelper": "{withAssistant} com assistente, {withoutAssistant} sem assistente.",
-        "assistants": "Assistentes",
-        "assistantsHelper": "{withoutOpenAiId} sem OpenAI ID configurado.",
-        "messages": "Mensagens",
-        "messagesHelper": "{whatsapp} WhatsApp, {teams} Teams.",
-        "delivery": "Entrega",
-        "deliveryHelper": "{read} lidas, {failed} falhadas.",
-        "templates": "Templates WhatsApp",
-        "templatesHelper": "{active} ativos, {pending} pendentes, {rejected} rejeitados.",
-        "automations": "Automações",
-        "automationsHelper": "{active} ativas, {paused} pausadas.",
-        "automationRuns": "Execuções de automação",
-        "automationRunsHelper": "{processed} processadas, {failed} falhadas.",
-        "scheduledBroadcasts": "Mensagens agendadas",
-        "scheduledBroadcastsHelper": "{queued} em fila, {completed} concluídas, {failed} falhadas, {recipients} destinatários.",
-        "trackedLinks": "Cliques rastreados",
-        "trackedLinksHelper": "{links} links rastreados.",
-        "pendingOutreach": "Mensagens pendentes",
-        "pendingOutreachHelper": "{active} ainda ativas.",
-        "health": "Estado geral",
-        "assistantCoverage": "Assistentes atribuídos",
-        "assistantCoverageHelper": "{withAssistant}/{total} utilizadores com assistente.",
-        "readRate": "Taxa de leitura",
-        "readRateHelper": "{read}/{total} mensagens lidas.",
-        "failureRate": "Taxa de falha",
-        "failureRateHelper": "{failed}/{total} mensagens falhadas.",
-        "clickDensity": "Cliques por link",
-        "clickDensityHelper": "{clicks} cliques em {links} links."
-      },
-      "sections": {
-        "breakdownTitle": "Resumo operacional",
-        "users": {
-          "title": "Cobertura",
-          "value": "{withAssistant}/{total} com assistente",
-          "text": "{email} com email, {phone} com telefone, {teams} com Teams e {whatsapp} com WhatsApp/Bird."
-        },
-        "messages": {
-          "title": "Atividade",
-          "value": "{total} mensagens registadas",
-          "text": "{userMessages} mensagens de utilizadores, {assistantMessages} respostas de assistentes, {read} lidas e {failed} falhadas."
-        },
-        "attention": {
-          "title": "Pontos de atenção",
-          "value": "{total} problemas ativos",
-          "text": "{automationFailures} falhas em automações, {scheduledFailures} mensagens agendadas falhadas e {rejectedTemplates} templates rejeitados."
-        },
-        "next": {
-          "title": "Próxima melhoria",
-          "value": "Adicionar gráficos",
-          "text": "O próximo passo é mostrar evolução por período: mensagens por dia, cliques por dia, falhas por dia e automações processadas."
-        },
-        "breakdownDescription": "Leitura rápida da cobertura, da atividade e dos pontos a rever."
-      },
-      "charts": {
-        "email": "Email",
-        "phone": "Telefone",
-        "teams": "Teams",
-        "whatsapp": "WhatsApp",
-        "active": "Ativos",
-        "pending": "Pendentes",
-        "rejected": "Rejeitados",
-        "assistants": "Assistentes",
-        "templates": "Templates",
-        "messages": "Mensagens",
-        "automations": "Automações",
-        "scheduled": "Agendadas",
-        "messagesTitle": "Mensagens por canal",
-        "messagesDescription": "Comparação entre mensagens de WhatsApp e Teams.",
-        "templatesTitle": "Estado dos templates",
-        "templatesDescription": "Distribuição dos templates por estado.",
-        "problemsTitle": "Problemas encontrados",
-        "problemsDescription": "Resumo dos pontos que precisam de atenção.",
-        "sectionTitle": "Distribuição atual",
-        "sectionDescription": "Repartição das mensagens por canal e dos templates por estado.",
-        "empty": "Sem dados para mostrar."
-      },
-      "periods": {
-        "label": "Filtrar por período",
-        "all": "Tudo",
-        "last7Days": "7 dias",
-        "last30Days": "30 dias",
-        "last90Days": "90 dias"
-      },
-      "trends": {
-        "title": "Evolução diária",
-        "description": "Valores por dia no período selecionado. Com Tudo selecionado, mostra os últimos 90 dias.",
-        "messagesTitle": "Mensagens por dia",
-        "messagesDescription": "Total de mensagens registadas em cada dia.",
-        "clicksTitle": "Cliques por dia",
-        "clicksDescription": "Cliques em links rastreados registados em cada dia.",
-        "failuresTitle": "Falhas por dia",
-        "failuresDescription": "Mensagens que falharam em cada dia.",
-        "automationsTitle": "Automações processadas por dia",
-        "automationsDescription": "Execuções de automação processadas em cada dia.",
-        "empty": "Não há dados para mostrar neste período.",
-        "peak": "Pico de {count} a {date}",
-        "expand": "Expandir gráfico",
-        "close": "Fechar",
-        "detail": {
-          "total": "Total no período",
-          "totalMeta": "{active} de {days} dias com atividade",
-          "average": "Média por dia",
-          "averageMeta": "{value} nos dias com atividade",
-          "peak": "Pico",
-          "peakMeta": "a {date}",
-          "lastWeek": "Últimos 7 dias",
-          "lastWeekMeta": "{delta} face aos 7 dias anteriores",
-          "lastWeekNoBase": "Sem dados nos 7 dias anteriores",
-          "topDays": "Dias com mais atividade",
-          "columns": {
-            "day": "Dia",
-            "value": "Valor",
-            "share": "Peso"
-          }
-        }
-      },
-      "groups": {
-        "overview": {
-          "title": "Resumo geral",
-          "description": "Estado atual da configuração e organização."
-        },
-        "activity": {
-          "title": "Atividade",
-          "description": "Mensagens e entrega no período: {period}."
-        },
-        "automations": {
-          "title": "Automações",
-          "description": "Regras de automação, execuções e mensagens agendadas."
-        },
-        "engagement": {
-          "title": "Links Rastreados",
-          "description": "Cliques em links rastreados no período selecionado."
-        }
-      },
-      "customization": {
-        "title": "Personalização da dashboard",
-        "description": "Mostra ou oculta grupos de métricas. A tua escolha fica guardada neste browser.",
-        "show": "Mostrar",
-        "hide": "Ocultar",
-        "reset": "Repor grupos",
-        "resetCharts": "Repor gráficos",
-        "exports": "Exportar",
-        "resetDashboard": "Repor dashboard",
-        "hiddenNotice": "Tens secções ocultas nesta página.",
-        "exportPdf": "Exportar PDF",
-        "exportExcel": "Exportar Excel",
-        "exporting": "A exportar..."
-      },
-      "rankings": {
-        "title": "Rankings",
-        "description": "Os elementos mais relevantes no período selecionado.",
-        "topLinksTitle": "Links mais clicados",
-        "topLinksDescription": "Links rastreados com maior número de cliques.",
-        "automationFailuresTitle": "Falhas em automações",
-        "automationFailuresDescription": "Regras de automação com maior número de execuções falhadas.",
-        "empty": "Não há dados de ranking neste período.",
-        "columns": {
-          "link": "Link",
-          "clicks": "Cliques",
-          "automation": "Automação",
-          "failures": "Falhas"
-        },
-        "viewAllLinks": "Ver lista completa ({count})",
-        "allLinksTitle": "Lista completa de links",
-        "allLinksDescription": "Todos os links rastreados ordenados por número de cliques.",
-        "close": "Fechar"
-      },
-      "excel": {
-        "title": "Analytics",
-        "summarySheet": "Resumo",
-        "detail": {
-          "messagesSheet": "Mensagens",
-          "templatesSheet": "Templates",
-          "dailySheet": "Evolucao diaria",
-          "language": "Idioma",
-          "scope": "Ambito",
-          "providerTemplateId": "ID no fornecedor",
-          "date": "Data",
-          "failures": "Falhas",
-          "usersSheet": "Utilizadores",
-          "runsSheet": "Execucoes",
-          "scheduledSheet": "Agendamentos",
-          "linksSheet": "Links",
-          "id": "ID",
-          "name": "Nome",
-          "email": "Email",
-          "phone": "Telefone",
-          "channel": "Canal",
-          "role": "Origem",
-          "status": "Estado",
-          "deliveryStatus": "Estado de entrega",
-          "rule": "Regra",
-          "createdAt": "Criado em",
-          "deliveredAt": "Entregue em",
-          "readAt": "Lido em",
-          "failedAt": "Falhou em",
-          "scheduledFor": "Agendado para",
-          "processedAt": "Processado em",
-          "startedAt": "Iniciado em",
-          "completedAt": "Concluido em",
-          "lastError": "Ultimo erro",
-          "userId": "ID utilizador",
-          "assistantId": "ID assistente",
-          "threadId": "ID conversa",
-          "scheduledBroadcastId": "ID agendamento",
-          "automationRunId": "ID execucao",
-          "sendGroupId": "ID envio",
-          "whatsappId": "ID WhatsApp",
-          "teamsId": "ID Teams",
-          "assistant": "Assistente",
-          "tags": "Etiquetas",
-          "recipients": "Destinatarios",
-          "clicked": "Clicaram",
-          "clicksTotal": "Cliques",
-          "clickRate": "Taxa",
-          "linkLabel": "Link",
-          "destinationUrl": "Destino"
-        },
-        "dashboardSheet": "Painel",
-        "panels": {
-          "messages": "MENSAGENS",
-          "operations": "OPERAÇÃO",
-          "templates": "TEMPLATES"
-        },
-        "organization": "Organização",
-        "period": "Período",
-        "exportedAt": "Exportado em",
-        "columnGroup": "Grupo",
-        "columnMetric": "Métrica",
-        "columnValue": "Valor",
-        "columnRate": "Taxa",
-        "groups": {
-          "users": "Utilizadores",
-          "assistants": "Assistentes",
-          "messages": "Mensagens",
-          "automations": "Automações",
-          "scheduled": "Mensagens agendadas",
-          "templates": "Templates",
-          "trackedLinks": "Links rastreados",
-          "pendingOutreach": "Outreach pendente"
-        },
-        "metrics": {
-          "total": "Total",
-          "withAssistant": "Com assistente",
-          "withoutAssistant": "Sem assistente",
-          "withEmail": "Com email",
-          "withPhone": "Com telefone",
-          "withTeams": "Com Teams",
-          "withWhatsapp": "Com WhatsApp",
-          "withoutOpenAiId": "Sem OpenAI ID",
-          "whatsapp": "WhatsApp",
-          "teams": "Teams",
-          "fromUser": "Do utilizador",
-          "fromAssistant": "Do assistente",
-          "delivered": "Entregues",
-          "read": "Lidas",
-          "failed": "Falhadas",
-          "rulesTotal": "Regras",
-          "rulesActive": "Regras ativas",
-          "rulesPaused": "Regras pausadas",
-          "runsTotal": "Execuções",
-          "runsProcessed": "Processadas",
-          "runsFailed": "Falhadas",
-          "queued": "Em fila",
-          "completed": "Concluídas",
-          "recipients": "Destinatários",
-          "active": "Ativos",
-          "pending": "Pendentes",
-          "rejected": "Rejeitados",
-          "linksTotal": "Links",
-          "clicksTotal": "Cliques"
-        }
-      }
-    },
-    "ActivityLog": {
-      "Title": "Histórico de atividade",
-      "Subtitle": "Cronologia das ações feitas na organização, da mais recente para a mais antiga.",
-      "Loading": "A carregar histórico...",
-      "Refresh": "Atualizar",
-      "Filters": {
-        "from": "De",
-        "to": "Até",
-        "clear": "Limpar filtros"
-      },
-      "Areas": {
-        "all": "Todas as áreas",
-        "teams_group": "Grupos Teams",
-        "user": "Colaboradores",
-        "tag": "Tags",
-        "assistant": "Assistentes",
-        "automation": "Automações",
-        "broadcast": "Mensagens",
-        "message": "Mensagens individuais",
-        "template": "Templates",
-        "media": "Multimédia",
-        "organization": "Organização"
-      },
-      "Channels": {
-        "whatsapp": "WhatsApp",
-        "teams": "Teams"
-      },
-      "Actions": {
-        "user_created": "Colaborador criado",
-        "user_updated": "Colaborador editado",
-        "user_deleted": "Colaborador eliminado",
-        "user_bulk_updated": "Assistente alterado em massa",
-        "user_bulk_deleted": "Colaboradores eliminados em massa",
-        "user_tags_updated": "Tags de colaboradores alteradas",
-        "user_imported": "Colaboradores importados",
-        "tag_created": "Tag criada",
-        "tag_updated": "Tag editada",
-        "tag_deleted": "Tag eliminada",
-        "assistant_created": "Assistente criado",
-        "assistant_updated": "Assistente editado",
-        "assistant_deleted": "Assistente eliminado",
-        "assistant_files_added": "Ficheiros adicionados ao assistente",
-        "assistant_files_removed": "Ficheiros removidos do assistente",
-        "automation_created": "Automação criada",
-        "automation_updated": "Automação editada",
-        "automation_deleted": "Automação eliminada",
-        "broadcast_sent": "Mensagem enviada",
-        "broadcast_scheduled": "Mensagem agendada",
-        "broadcast_schedule_updated": "Agendamento editado",
-        "broadcast_schedule_deleted": "Agendamento eliminado",
-        "broadcast_read_chain_created": "Sequência de leitura criada",
-        "message_template_sent": "Template enviado a um colaborador",
-        "template_created": "Template WhatsApp criado",
-        "media_deleted": "Ficheiro de multimédia eliminado",
-        "organization_created": "Organização criada",
-        "organization_settings_updated": "Definições da organização alteradas",
-        "automation_triggered": "Automação disparada",
-        "broadcast_scheduled_sent": "Mensagem agendada enviada",
-        "message_received": "Mensagem recebida",
-        "teams_group_updated": "Grupo Teams editado",
-        "unknown": "Ação desconhecida"
-      },
-      "Table": {
-        "when": "Quando",
-        "action": "Ação",
-        "entity": "Elemento",
-        "details": "Detalhes",
-        "actor": "Autor"
-      },
-      "Actor": {
-        "system": "Sistema",
-        "unknown": "Desconhecido"
-      },
-      "Details": {
-        "yes": "Sim",
-        "no": "Não",
-        "delivered": "Entregue",
-        "notDelivered": "Não entregue",
-        "enabled": "Ativadas",
-        "disabled": "Desativadas",
-        "sourceAutomation": "Automação",
-        "importSummary": "{created} criados, {updated} atualizados, {failed} falhados",
-        "sendSummary": "{ok} com sucesso, {failed} falhados",
-        "labels": {
-          "channel": "Canal",
-          "scope": "Âmbito",
-          "trigger": "Gatilho",
-          "user": "Colaborador",
-          "email": "Email",
-          "phone": "Telemóvel",
-          "assistant": "Assistente",
-          "fields": "Campos alterados",
-          "recipients": "Destinatários",
-          "groups": "Grupos Teams",
-          "result": "Resultado",
-          "count": "Colaboradores",
-          "failedCount": "Falhados",
-          "operation": "Operação",
-          "files": "Ficheiros",
-          "store": "Base de conhecimento",
-          "scheduledFor": "Agendado para",
-          "timezone": "Fuso horário",
-          "status": "Estado",
-          "enabled": "Sequências de leitura",
-          "withTemplate": "Com template",
-          "scheduled": "Agendado",
-          "source": "Origem",
-          "model": "Modelo",
-          "language": "Idioma",
-          "category": "Categoria",
-          "color": "Cor",
-          "active": "Ativa",
-          "steps": "Mensagens na sequência",
-          "sent": "Enviadas",
-          "waitingForReply": "À espera de resposta",
-          "error": "Erro"
-        },
-        "fieldNames": {
-          "name": "Nome",
-          "email": "Email",
-          "phoneNumber": "Telemóvel",
-          "phoneCountryCode": "Telemóvel",
-          "phoneNational": "Telemóvel",
-          "teamsAadObjectId": "Identificação Teams",
-          "teamsFromId": "Identificação Teams",
-          "assistantId": "Assistente",
-          "tagIds": "Tags",
-          "color": "Cor",
-          "is_archived": "Arquivada",
-          "description": "Descrição",
-          "instructions": "Instruções",
-          "model": "Modelo",
-          "top_p": "Top P",
-          "temperature": "Temperatura",
-          "vector_store_id": "Base de conhecimento",
-          "trigger_type": "Gatilho",
-          "assistant_id": "Assistente",
-          "channel": "Canal",
-          "delay_minutes": "Atraso",
-          "payload": "Conteúdo",
-          "is_active": "Ativa",
-          "whatsapp_template_id": "Template",
-          "scheduled_for": "Data de envio",
-          "timezone": "Fuso horário",
-          "status": "Estado"
-        },
-        "tagOps": {
-          "add": "Tags adicionadas",
-          "remove": "Tags removidas",
-          "set": "Tags substituídas"
-        },
-        "triggers": {
-          "user_created": "Colaborador criado",
-          "user_inactive": "Colaborador inativo",
-          "message_read": "Mensagem lida",
-          "message_unread": "Mensagem não lida"
-        },
-        "scopes": {
-          "user": "Conversa individual",
-          "group": "Grupo"
-        },
-        "statuses": {
-          "queued": "Em fila",
-          "scheduled": "Agendada",
-          "processing": "A enviar",
-          "sent": "Enviada",
-          "partial": "Enviada parcialmente",
-          "failed": "Falhou",
-          "cancelled": "Cancelada",
-          "new": "Nova",
-          "pending": "Pendente",
-          "approved": "Aprovado",
-          "rejected": "Rejeitado"
-        }
-      },
-      "Empty": {
-        "title": "Ainda não há atividade",
-        "text": "As ações feitas na plataforma vão aparecer aqui.",
-        "filteredTitle": "Sem resultados",
-        "filteredText": "Nenhuma ação corresponde aos filtros escolhidos."
-      },
-      "Errors": {
-        "load": "Não foi possível carregar o histórico."
-      },
-      "Pagination": {
-        "total": "{count, plural, =1 {1 registo} other {# registos}}",
-        "pageOf": "Página {page} de {pages}",
-        "prev": "Página anterior",
-        "next": "Página seguinte"
-      }
-    },
-    "Settings": {
-      "title": "Definições",
-      "description": "Gere a organização, a aparência e as integrações num só lugar.",
-      "loadError": "Não foi possível carregar as definições.",
-      "organizationMissing": "Não foi encontrada uma organização para esta conta.",
-      "retry": "Tentar novamente",
-      "save": "Guardar alterações",
-      "saving": "A guardar…",
-      "saveSuccessTitle": "Definições guardadas",
-      "saveSuccess": "As definições da organização foram atualizadas.",
-      "saveErrorTitle": "Erro ao guardar",
-      "saveError": "Não foi possível guardar as definições.",
-      "organization": {
-        "title": "Organização",
-        "description": "Dados gerais utilizados em toda a aplicação.",
-        "name": "Nome",
-        "defaultCountryCode": "Indicativo telefónico",
-        "defaultCountryCodeHelp": "Usado como predefinição ao criar novos colaboradores."
-      },
-      "appearance": {
-        "title": "Aparência",
-        "description": "Personaliza as cores e o logótipo da organização.",
-        "primary": "Cor primária",
-        "secondary": "Cor secundária",
-        "primaryPicker": "Selecionar cor primária",
-        "secondaryPicker": "Selecionar cor secundária"
-      },
-      "preview": {
-        "organization": "Organização",
-        "cardTitle": "Pré-visualização",
-        "cardText": "Exemplo da aparência da aplicação.",
-        "action": "Ação principal"
-      },
-      "logo": {
-        "title": "Logótipo",
-        "choose": "Escolher ficheiro",
-        "help": "PNG, JPEG ou WebP. Tamanho máximo: 2 MB.",
-        "upload": "Carregar logótipo",
-        "working": "A processar…",
-        "reset": "Repor",
-        "invalidType": "Escolhe uma imagem PNG, JPEG ou WebP.",
-        "tooLarge": "O ficheiro não pode exceder 2 MB.",
-        "uploadSuccessTitle": "Logótipo atualizado",
-        "uploadSuccess": "O novo logótipo foi guardado.",
-        "uploadErrorTitle": "Erro no logótipo",
-        "uploadError": "Não foi possível carregar o logótipo.",
-        "resetSuccess": "O logótipo por omissão foi reposto.",
-        "resetError": "Não foi possível repor o logótipo."
-      },
-      "favicon": {
-        "title": "Favicon",
-        "choose": "Escolher ficheiro",
-        "help": "Prefere uma imagem quadrada de 64 × 64 px ou superior, em PNG com fundo transparente. PNG, JPEG ou WebP, até 2 MB.",
-        "nonSquareWarning": "Esta imagem não é quadrada. Vamos manter as proporções e acrescentar espaço transparente; o símbolo pode ficar mais pequeno no separador.",
-        "upload": "Carregar favicon",
-        "working": "A processar…",
-        "reset": "Remover favicon",
-        "invalidType": "Escolhe uma imagem PNG, JPEG ou WebP.",
-        "tooLarge": "O ficheiro não pode exceder 2 MB.",
-        "uploadSuccessTitle": "Favicon atualizado",
-        "uploadSuccess": "O novo favicon foi guardado.",
-        "uploadErrorTitle": "Erro no favicon",
-        "uploadError": "Não foi possível carregar o favicon.",
-        "resetSuccess": "O favicon MyDigitalBot foi reposto.",
-        "resetError": "Não foi possível repor o favicon."
-      },
-      "integrations": {
-        "title": "Integrações",
-        "description": "Configura os identificadores das plataformas de mensagens.",
-        "teamsTitle": "Microsoft Teams",
-        "tenantId": "Tenant ID",
-        "tenantIdHelp": "Identificador do tenant Microsoft associado a esta organização.",
-        "whatsappTitle": "WhatsApp Business",
-        "wabaId": "Whatsapp Business Account ID",
-        "namespace": "Namespace",
-        "namespaceOptional": "opcional"
-      },
-      "validation": {
-        "nameRequired": "O nome da organização é obrigatório.",
-        "nameTooLong": "O nome não pode exceder 150 caracteres.",
-        "invalidColor": "Usa cores hexadecimais com 3 ou 6 dígitos, por exemplo #0af ou #00aaff.",
-        "teamsConflict": "Este Tenant ID do Microsoft Teams já está associado a outra organização."
-      }
-    },
-    "Dashboard": {
-      "title": "Início",
-      "description": "Visão geral da utilização e configuração da organização.",
-      "organizationMissing": "Não foi encontrada uma organização para esta conta.",
-      "loadError": "Não foi possível carregar a dashboard.",
-      "refresh": "Atualizar",
-      "retry": "Tentar novamente",
-      "updatedAt": "Atualizado às {time}",
-      "groups": {
-        "users": "Utilizadores",
-        "content": "Conteúdo",
-        "automations": "Automações"
-      },
-      "sections": {
-        "usersDescription": "Configuração e utilização dos canais.",
-        "contentDescription": "Elementos criados e disponíveis para a organização.",
-        "automationsDescription": "Regras configuradas e mensagens em fila."
-      },
-      "actions": {
-        "viewUsers": "Ver utilizadores",
-        "viewAssistants": "Ver assistentes",
-        "viewAutomations": "Ver automações",
-        "viewScheduled": "Ver agendamentos",
-        "viewAnalytics": "Ver métricas"
-      },
-      "metrics": {
-        "totalUsers": "Total de utilizadores",
-        "teamsConfigured": "Com Teams configurado",
-        "whatsappConfigured": "Com WhatsApp configurado",
-        "teamsUsed": "Já utilizaram o Teams",
-        "whatsappUsed": "Já utilizaram o WhatsApp",
-        "tags": "Tags criadas",
-        "assistants": "Assistentes criados",
-        "automationsTotal": "Automações criadas",
-        "automationsActive": "Automações ativas",
-        "scheduledMessages": "Mensagens agendadas"
-      },
-      "meta": {
-        "inOrganization": "na organização",
-        "shareOfUsers": "{percent}% dos utilizadores",
-        "tags": "para segmentar utilizadores",
-        "assistants": "disponíveis na organização",
-        "automationsTotal": "regras configuradas",
-        "automationsActive": "de {total} criadas",
-        "scheduledMessages": "em fila de envio"
-      },
-      "activity": {
-        "title": "Atividade recente",
-        "description": "Mensagens trocadas nos últimos {days} dias.",
-        "total": "{count, plural, one {# mensagem} other {# mensagens}}",
-        "teams": "Teams",
-        "whatsapp": "WhatsApp",
-        "empty": "Sem mensagens neste período.",
-        "dayTooltip": "{date}: {teams} Teams, {whatsapp} WhatsApp"
-      },
-      "upcoming": {
-        "title": "Próximos envios",
-        "description": "Mensagens agendadas que ainda estão em fila.",
-        "empty": "Não há envios agendados.",
-        "recipients": "{count, plural, one {# destinatário} other {# destinatários}}",
-        "noPreview": "Sem texto"
-      },
-      "channels": {
-        "teams": "Teams",
-        "whatsapp": "WhatsApp"
-      }
-    },
     "composer": {
       "openQuestionHint": "Escreve a pergunta no balão e define a resposta esperada abaixo. Usa o + para imagens, links e variáveis.",
       "openQuestionBody": "Pergunta aberta",
@@ -3208,7 +1798,8 @@
       "addImage": "Imagem",
       "addVideo": "Vídeo",
       "addDocument": "Documento",
-      "fileTooLarge": "O ficheiro {name} tem mais de 20 MB.",
+      "fileTooLarge": "O ficheiro {name} tem mais de {limit} MB.",
+      "whatsappImageTooLarge": "A imagem {name} tem mais de 5 MB. No WhatsApp as imagens podem ter até 5 MB.",
       "fileTypeNotAllowed": "O ficheiro {name} não é suportado. Usa imagens (PNG, JPG, WebP, GIF), PDF ou MP4.",
       "addLink": "Link rastreado",
       "linkButtonHint": "No WhatsApp, o link vai neste botão.",
@@ -3323,9 +1914,162 @@
       "discard": "Descartar",
       "failed": "Não foi possível criar a imagem. Tenta outra vez ou muda o pedido.",
       "saveFailed": "Não foi possível juntar a imagem à mensagem. Tenta outra vez."
+    },
+    "feedback": {
+      "chooseRecipients": "Escolhe os destinatários",
+      "chainDisabled": {
+        "title": "Correntes de leitura desligadas",
+        "message": "Liga primeiro as mensagens em corrente de leitura nas Automações."
+      },
+      "chainIncomplete": {
+        "title": "Completa a corrente",
+        "message": "Uma corrente de leitura precisa de 2 a 10 mensagens livres, e cada mensagem tem de ter texto ou anexos. Os links rastreados também têm de estar completos.",
+        "scheduledMessage": "Uma corrente de leitura agendada precisa de 2 a 10 mensagens livres, e cada mensagem tem de ter texto ou anexos. Os links rastreados também têm de estar completos."
+      },
+      "invalidLinks": {
+        "title": "Links rastreados inválidos",
+        "message": "Completa todos os links rastreados e não repitas chaves."
+      },
+      "invalidTime": {
+        "title": "Hora inválida",
+        "message": "Escolhe uma hora válida entre as 08:00 e as 20:00."
+      },
+      "chooseDateTime": {
+        "title": "Escolhe a data e a hora",
+        "message": "Escolhe uma data e uma hora."
+      },
+      "pastDate": {
+        "title": "Data de agendamento inválida",
+        "message": "A data agendada tem de ser no futuro."
+      },
+      "time": {
+        "bothParts": "Preenche a hora e os minutos.",
+        "numbersOnly": "Usa só números.",
+        "invalid": "Escreve uma hora válida.",
+        "range": "Escolhe uma hora entre as 08:00 e as 20:00."
+      },
+      "chainSendFailed": "Não foi possível enviar a corrente de leitura.",
+      "chainScheduleFailed": "Não foi possível agendar a corrente de leitura.",
+      "unknownError": "Erro desconhecido.",
+      "requestFailed": "O pedido falhou com o estado {status}.",
+      "unknownRecipient": "Destinatário desconhecido",
+      "failedRecipients": "Destinatários com falha:",
+      "andMore": "- E mais {count}...",
+      "titles": {
+        "chainStarted": "Corrente de leitura iniciada",
+        "chainStartedIssues": "Corrente de leitura iniciada com problemas",
+        "sent": "Mensagem enviada",
+        "sentIssues": "Envio concluído com problemas",
+        "chainScheduled": "Corrente de leitura agendada",
+        "chainScheduledIssues": "Corrente de leitura agendada com problemas",
+        "scheduled": "Envio agendado",
+        "scheduledIssues": "Envio agendado com problemas"
+      },
+      "summary": {
+        "started": "Envio por {channel} iniciado: {ok, plural, one {# com sucesso} other {# com sucesso}} e {failed, plural, one {# falhou} other {# falharam}}.",
+        "sent": "Envio por {channel} feito: {ok, plural, one {# com sucesso} other {# com sucesso}} e {failed, plural, one {# falhou} other {# falharam}}.",
+        "scheduled": "Envio por {channel} agendado: {ok, plural, one {# com sucesso} other {# com sucesso}} e {failed, plural, one {# falhou} other {# falharam}}."
+      },
+      "notes": {
+        "chainWhatsapp": "A mensagem 1 foi enviada se a janela de 24h estava aberta. Se não, foi enviada a mensagem de abertura e a corrente espera por uma resposta.",
+        "chainTeams": "A mensagem 1 foi enviada. Cada mensagem seguinte segue quando a anterior for lida.",
+        "chainScheduled": "A mensagem 1 vai ser enviada à hora agendada. As seguintes continuam depois de cada leitura.",
+        "scheduled": "Estes números dizem para quantos destinatários o envio ficou agendado. Só se sabe se foi entregue quando o envio agendado sair."
+      }
+    },
+    "trackedLinkForm": {
+      "keyPlaceholder": "formacao",
+      "labelPlaceholder": "Aceder à formação",
+      "urlPlaceholder": "https://exemplo.pt/curso/123",
+      "placeholder": "Variável:",
+      "empty": "Ainda não adicionaste links rastreados.",
+      "invalid": "Completa todos os links rastreados e não repitas chaves."
     }
   },
   "BroadcastScheduled": {
+    "Chain": {
+      "tag": "Corrente · {count, plural, one {# mensagem} other {# mensagens}}",
+      "progress": "{done} de {total} pessoas terminaram",
+      "step": "Mensagem {index}",
+      "noText": "Sem texto",
+      "files": "{count, plural, one {# ficheiro} other {# ficheiros}}",
+      "question": "Com pergunta",
+      "afterRead": "Sai quando a anterior é lida",
+      "delay": "Sai {minutes} min depois de a anterior ser lida",
+      "reached": "Recebida por {count} de {total}",
+      "showSteps": "Ver as mensagens da corrente",
+      "hideSteps": "Esconder as mensagens da corrente",
+      "noEdit": "As correntes não se editam: cancela esta e cria outra.",
+      "cancel": "Cancelar corrente",
+      "stop": "Parar corrente",
+      "editStep": "Editar esta mensagem",
+      "stepLockedEdit": "Já foi recebida ou está à espera de sair: não se pode editar.",
+      "questionNoEdit": "As perguntas não se editam aqui: só o texto das mensagens.",
+      "editModal": {
+        "title": "Editar a mensagem {index}",
+        "hint": "Só muda o texto. Ficheiros, imagens, links e o tempo entre mensagens ficam como estão.",
+        "linksHint": "Os links aparecem entre chavetas duplas: deixa-os como estão para continuarem a ser rastreados.",
+        "label": "Texto",
+        "chars": "{count} / {limit} caracteres",
+        "tooLong": "Passa do limite de caracteres do teu plano.",
+        "empty": "A mensagem não pode ficar vazia.",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "saving": "A guardar…"
+      },
+      "stepSaved": {
+        "title": "Mensagem atualizada",
+        "message": "A corrente vai enviar o texto novo."
+      },
+      "stepEditGone": {
+        "title": "Já não dá para a editar",
+        "message": "Entretanto alguém recebeu esta mensagem ou a seguinte. A lista foi atualizada."
+      },
+      "keep": "Manter",
+      "removeStep": "Tirar esta mensagem",
+      "stepLocked": "Já foi recebida ou está à espera de sair: não se pode tirar.",
+      "minSteps": "Uma corrente precisa de pelo menos 2 mensagens. Para tirar mais, cancela a corrente.",
+      "confirmRemove": {
+        "title": "Tirar a mensagem {index}?",
+        "scheduled": "A corrente fica com {count} mensagens. Se foi criada hoje, 1 envio volta ao teu limite de hoje.",
+        "running": "Ninguém a recebeu ainda: a corrente passa da mensagem anterior para a seguinte. Se foi criada hoje, 1 envio volta ao teu limite de hoje.",
+        "confirm": "Tirar mensagem"
+      },
+      "stepRemoved": {
+        "title": "Mensagem tirada",
+        "message": "A corrente segue sem esta mensagem."
+      },
+      "stepGone": {
+        "title": "Já não dá para a tirar",
+        "message": "Entretanto alguém recebeu esta mensagem ou a seguinte. A lista foi atualizada."
+      },
+      "confirmCancel": {
+        "title": "Cancelar esta corrente?",
+        "message": "Nenhuma mensagem chega a sair. Se a corrente foi criada hoje, os envios voltam ao teu limite de hoje.",
+        "confirm": "Cancelar corrente"
+      },
+      "confirmStop": {
+        "title": "Parar esta corrente?",
+        "message": "As mensagens que faltam já não saem e as que já saíram ficam. Se foi criada hoje, as mensagens que não chegaram a ninguém voltam ao teu limite de hoje.",
+        "confirm": "Parar corrente"
+      },
+      "cancelled": {
+        "title": "Corrente cancelada",
+        "message": "A corrente foi cancelada e não vai sair."
+      },
+      "stopped": {
+        "title": "Corrente parada",
+        "message": "As mensagens que faltavam já não vão sair."
+      },
+      "sending": {
+        "title": "A corrente está a sair agora",
+        "message": "Tenta daqui a um minuto: já não dá para a cancelar, mas vais poder pará-la."
+      },
+      "error": {
+        "title": "Não foi possível",
+        "message": "Não conseguimos cancelar a corrente. Atualiza a página e tenta outra vez."
+      }
+    },
     "Title": "Mensagens agendadas",
     "Subtitle": "Mensagens agendadas da organização {organization}",
     "NewMessage": "Nova mensagem",
@@ -3353,6 +2097,7 @@
       "all": "Todos os estados",
       "scheduled": "Agendada",
       "sending": "A enviar",
+      "running": "A decorrer",
       "sent": "Enviada",
       "failed": "Falhada",
       "cancelled": "Cancelada",
@@ -3374,9 +2119,17 @@
       "delete": "Eliminar"
     },
     "ViewModal": {
+      "question": {
+        "quiz": "Quiz",
+        "survey": "Sondagem",
+        "open": "Pergunta aberta",
+        "expectedAnswer": "Resposta esperada"
+      },
       "groups": "Grupos Teams",
       "title": "Detalhes da mensagem",
-      "createdAt": "Criada em"
+      "createdAt": "Criada em",
+      "subtitle": "Toda a informação do envio agendado",
+      "noRecipients": "Este envio agendado não guardou os destinatários."
     },
     "EditModal": {
       "groups": "Grupos Teams",
@@ -3397,7 +2150,19 @@
       "remove": "Remover",
       "noRecipients": "Sem destinatários selecionados.",
       "files": "Ficheiros",
-      "noFiles": "Sem ficheiros adicionados."
+      "noFiles": "Sem ficheiros adicionados.",
+      "unknownRecipient": "Utilizador removido",
+      "question": {
+        "body": "Pergunta",
+        "options": "Opções",
+        "correct": "Opção certa",
+        "addOption": "Adicionar opção",
+        "feedbackCorrect": "Feedback se acertar",
+        "feedbackIncorrect": "Feedback se errar",
+        "thanksText": "Agradecimento depois da escolha",
+        "expectedAnswer": "Resposta esperada",
+        "aiEvaluation": "Avaliar a resposta com IA"
+      }
     },
     "RecipientPicker": {
       "title": "Gerir destinatários",
@@ -3444,7 +2209,8 @@
       },
       "invalidForm": {
         "title": "Dados em falta",
-        "message": "Preenche a mensagem e escolhe uma data e hora válidas antes de guardar."
+        "message": "Preenche a mensagem e escolhe uma data e hora válidas antes de guardar.",
+        "noRecipients": "Escolhe pelo menos um destinatário."
       },
       "saveSuccess": {
         "title": "Mensagem atualizada",
@@ -3454,6 +2220,10 @@
         "title": "Erro ao guardar alterações",
         "message": "Não foi possível guardar as alterações à mensagem agendada."
       },
+      "saveConflict": {
+        "title": "Mensagem já em envio",
+        "message": "Esta mensagem já não está agendada (já foi enviada ou está a ser enviada), por isso não pode ser alterada."
+      },
       "deleteSuccess": {
         "title": "Mensagem eliminada",
         "message": "A mensagem agendada foi eliminada com sucesso."
@@ -3462,11 +2232,12 @@
         "title": "Erro ao eliminar mensagem",
         "message": "Não foi possível eliminar a mensagem agendada."
       }
-    }
+    },
+    "pagination": "Página {page} de {pages} · {total, plural, one {# mensagem} other {# mensagens}}"
   },
   "TrackedLinks": {
     "title": "Links Rastreados",
-    "subtitle": "Vê as estatísticas do links rastreados da tua organização.",
+    "subtitle": "Os links que criaste e as estatísticas dos que já foram enviados.",
     "totalLinks": "Total de Links",
     "search": "Procura por nome, chave, destino ou canal",
     "loading": "A carregar links",
@@ -3480,7 +2251,9 @@
       "clicked": "Clicado",
       "totalClicks": "Total de cliques",
       "clickRate": "Percentagem de cliques",
-      "created": "Criado"
+      "created": "Criado",
+      "sends": "Envios",
+      "lastSent": "Último envio"
     },
     "view": "Ver",
     "detail": {
@@ -3528,6 +2301,22 @@
         "title": "Erro ao carregar links rastreados",
         "message": "Não foi possível carregar os links rastreados. Tenta novamente dentro de alguns segundos."
       }
+    },
+    "saved": {
+      "title": "Links criados",
+      "description": "Os links que contam para o teu plano. Eliminar um link não apaga as estatísticas dos envios em que foi usado.",
+      "empty": "Ainda não tens links criados. Os links entram aqui quando os usas numa mensagem."
+    },
+    "showDeleted": "Mostrar eliminados",
+    "deleted": "Eliminado",
+    "showSends": "Ver os envios de {label}",
+    "hideSends": "Esconder os envios de {label}",
+    "pagination": "Página {page} de {pages} · {total, plural, one {# link} other {# links}}",
+    "createdCard": "Links criados",
+    "sentCard": "Links enviados",
+    "sent": {
+      "title": "Links enviados",
+      "description": "Um grupo por link, com os totais de todos os envios. Abre um grupo para veres cada envio. Os links eliminados aparecem noutra cor."
     }
   },
   "Questions": {
@@ -3771,7 +2560,17 @@
       "save": "Guardar alterações",
       "saving": "A atualizar..."
     },
-    "placeholder": "Seleciona um assistant na coluna da esquerda."
+    "placeholder": "Seleciona um assistant na coluna da esquerda.",
+    "errors": {
+      "save": "Não foi possível guardar o assistente. {detail}",
+      "delete": "Não foi possível eliminar o assistente. {detail}",
+      "fileType": "Este tipo de ficheiro não é aceite.",
+      "upload": "Não foi possível carregar o ficheiro. {detail}",
+      "createCollection": "Não foi possível criar a coleção. {detail}",
+      "loadFiles": "Não foi possível carregar os ficheiros. {detail}",
+      "updateCollection": "Não foi possível atualizar a coleção. {detail}",
+      "deleteCollection": "Não foi possível eliminar a coleção. {detail}"
+    }
   },
   "AssistantPresets": {
     "formal": {
@@ -3788,6 +2587,7 @@
     }
   },
   "CreateAssistant": {
+    "createFailed": "Não foi possível criar o assistente",
     "title": "Criar novo Assistente",
     "presetLabel": "Comportamento",
     "presetHelp": "Define quão previsível ou variado o Assistant é a responder. Podes mudar depois na edição.",
@@ -4074,11 +2874,6 @@
       "title": "Falta de Contacto",
       "message": "Adiciona pelo menos um método de contacto: telemóvel, Teams ou email",
       "ok": "OK"
-    },
-    "fullOrg": {
-      "title": "Limite de Utilizadores",
-      "message": "Chegou ao limite de utilizadores para esta organização.",
-      "ok": "OK"
     }
   },
   "PillSelect": {
@@ -4086,9 +2881,9 @@
     "empty": "Sem opções."
   },
   "ThemePreview": {
-    "sampleCard": "Sample card",
-    "sampleBody": "Body text using your theme. Tweak colors to see it change.",
-    "primaryAction": "Primary action"
+    "sampleCard": "Cartão de exemplo",
+    "sampleBody": "Texto com o teu tema. Muda as cores para veres a diferença.",
+    "primaryAction": "Ação principal"
   },
   "NotFound": {
     "title": "Página não encontrada",
@@ -4121,7 +2916,8 @@
       "message": "Esta ação não pode ser desfeita",
       "confirm": "Apagar",
       "cancel": "Cancelar"
-    }
+    },
+    "noTags": "Ainda não há tags"
   },
   "Analytics": {
     "title": "Métricas",
@@ -4444,6 +3240,7 @@
       "message": "Mensagens individuais",
       "template": "Templates",
       "media": "Multimédia",
+      "tracked_link": "Links rastreados",
       "organization": "Organização"
     },
     "Channels": {
@@ -4474,16 +3271,24 @@
       "broadcast_schedule_updated": "Agendamento editado",
       "broadcast_schedule_deleted": "Agendamento eliminado",
       "broadcast_read_chain_created": "Sequência de leitura criada",
+      "broadcast_read_chain_cancelled": "Corrente cancelada",
+      "broadcast_read_chain_stopped": "Corrente parada",
+      "broadcast_read_chain_step_removed": "Mensagem tirada de uma corrente",
+      "broadcast_read_chain_step_edited": "Mensagem de uma corrente editada",
       "message_template_sent": "Template enviado a um colaborador",
       "template_created": "Template WhatsApp criado",
       "media_deleted": "Ficheiro de multimédia eliminado",
+      "tracked_link_deleted": "Link rastreado eliminado",
       "organization_created": "Organização criada",
       "organization_settings_updated": "Definições da organização alteradas",
+      "organization_plan_changed": "Plano alterado",
       "automation_triggered": "Automação disparada",
       "broadcast_scheduled_sent": "Mensagem agendada enviada",
       "message_received": "Mensagem recebida",
       "teams_group_updated": "Grupo Teams editado",
-      "unknown": "Ação desconhecida"
+      "unknown": "Ação desconhecida",
+      "organization_plan_extended": "Plano prolongado",
+      "organization_plan_end_changed": "Fim do plano alterado"
     },
     "Table": {
       "when": "Quando",
@@ -4764,5 +3569,222 @@
       "teams": "Teams",
       "whatsapp": "WhatsApp"
     }
+  },
+  "Plans": {
+    "demo": {
+      "daysLeft": "{plan} · {days, plural, one {falta # dia} other {faltam # dias}}",
+      "endingSoon": "A tua {plan} termina {days, plural, one {daqui a # dia} other {daqui a # dias}}. Ativa um plano para continuares a criar e enviar.",
+      "ended": "A tua Demo terminou. Continuas a ver tudo o que tens, mas para criar e enviar tens de ativar um plano.",
+      "activate": "Ativar plano",
+      "endedTitle": "A tua Demo terminou",
+      "endedMessage": "Para criar e enviar tens de ativar um plano. Continuas a ver tudo o que já tens e as Definições."
+    },
+    "limits": {
+      "messageTooLongTitle": "Mensagem demasiado longa",
+      "messageTooLong": "Cada mensagem pode ter até {limit} caracteres. Encurta o texto para enviares.",
+      "messageFilesTitle": "Limite de ficheiros atingido",
+      "messageFiles": "Cada mensagem pode ter até {limit, plural, one {# ficheiro} other {# ficheiros}}. Tira algum para juntares outro.",
+      "messageFilesRemaining": "Podes juntar só mais {remaining, plural, =0 {nenhum ficheiro} one {# ficheiro} other {# ficheiros}} a esta mensagem (máximo de {limit}). Escolhe menos ou tira algum.",
+      "chainTooLongTitle": "Corrente demasiado longa",
+      "chainTooLong": "Uma corrente pode ter até {limit} mensagens.",
+      "inStep": "Na mensagem {step} da corrente:",
+      "assistantsTitle": "Limite de assistentes atingido",
+      "assistants": "O plano {plan} permite criar {limit, plural, one {# assistente} other {# assistentes}}. Atualiza o teu plano para criares mais.",
+      "assistantsNoDetail": "Chegaste ao limite de assistentes do teu plano. Atualiza o teu plano para criares mais.",
+      "usersTitle": "Limite de utilizadores atingido",
+      "users": "O plano {plan} permite criar {limit, plural, one {# utilizador} other {# utilizadores}}. Atualiza o teu plano para criares mais.",
+      "usersNoDetail": "Chegaste ao limite de utilizadores do teu plano. Atualiza o teu plano para criares mais.",
+      "upgrade": "Atualizar plano",
+      "later": "Agora não",
+      "instructionsTitle": "Instruções demasiado longas",
+      "instructions": "As instruções podem ter até {limit} caracteres. Encurta o texto para guardares.",
+      "filesTitle": "Limite de ficheiros atingido",
+      "files": "Cada assistente pode ter até {limit, plural, one {# ficheiro} other {# ficheiros}}. Tira algum antes de juntares outro.",
+      "filesRemaining": "Podes juntar só mais {remaining, plural, =0 {nenhum ficheiro} one {# ficheiro} other {# ficheiros}} (máximo de {limit} por assistente). Escolhe menos ficheiros ou tira algum da coleção.",
+      "automationsTitle": "Limite de automações atingido",
+      "automations": "Cada conta pode ter até {limit, plural, one {# automação} other {# automações}}. Apaga uma para criares outra.",
+      "trackedLinksTitle": "Limite de links atingido",
+      "trackedLinksFull": "Chegaste aos {limit} links do teu plano. Elimina um link em \"Links já usados\" para poderes criar um novo.",
+      "scheduledTitle": "Limite de mensagens agendadas atingido",
+      "dailyTitle": "Limite de envios de hoje atingido",
+      "daily": "Já usaste os {limit} envios de hoje no {channel}. O contador volta a 0 às {time}.",
+      "dailyChain": "Esta corrente precisa de {steps} envios, mas hoje só te {remaining, plural, one {resta # envio} other {restam # envios}} no {channel}. Encurta a corrente ou espera pelas {time}.",
+      "scheduled": "Podes ter até {limit, plural, one {# mensagem agendada} other {# mensagens agendadas}} à espera de envio. Cancela ou apaga uma nas mensagens agendadas para agendares outra."
+    },
+    "counter": {
+      "olderThanLimit": "Criado antes do limite de {limit} caracteres: pode ficar com o tamanho que tem, mas não aumentar."
+    },
+    "usage": {
+      "messageFilesLabel": "Ficheiros da mensagem",
+      "messageFilesHint": "Cada mensagem pode levar até este número de ficheiros.",
+      "usersLabel": "Utilizadores",
+      "usersHint": "Conta todos os utilizadores da conta.",
+      "filesLabel": "Ficheiros do assistente",
+      "filesHint": "Cada assistente pode ter até este número de ficheiros na coleção.",
+      "assistantsLabel": "Assistentes",
+      "assistantsHint": "Conta todos os assistentes da conta.",
+      "automationsLabel": "Automações",
+      "automationsHint": "Contam todas as automações da conta, ativas e inativas.",
+      "trackedLinksLabel": "Links guardados",
+      "trackedLinksHint": "Cada link (nome e destino) conta uma vez, mesmo que seja usado em vários envios. Elimina os que já não usas para libertares espaço.",
+      "scheduledLabel": "Mensagens agendadas",
+      "dailyShort": "Envios hoje",
+      "dailyLabel": "Envios de hoje neste canal",
+      "dailyHint": "Cada envio conta 1, seja para quantos colaboradores for. Uma corrente conta 1 por mensagem e uma agendada conta no dia em que é agendada. As automações não contam. Volta a 0 às {time}.",
+      "weeklyLabel": "Mensagens desta semana no {channel}",
+      "weeklyHint": "Mensagens que cada colaborador enviou esta semana em cada canal: ao assistente e respostas a quizzes, sondagens e perguntas abertas. Acima do limite o assistente deixa de responder até segunda-feira às 00:00.",
+      "scheduledHint": "Conta as mensagens agendadas por ti que ainda estão à espera de envio. As das automações e as correntes não contam."
+    }
+  },
+  "Admin": {
+    "title": "Administração",
+    "loading": "A carregar…",
+    "forbidden": "Esta página é só para a equipa DIGIK.",
+    "failed": "Não foi possível carregar a administração.",
+    "retry": "Tentar novamente",
+    "cancel": "Cancelar",
+    "banner": {
+      "trying": "Estás a experimentar o plano {plan}.",
+      "back": "Voltar ao Interno",
+      "noInternal": "O plano Interno ainda não existe nesta base de dados: falta correr a migração 20261023160000_internal_plan.sql."
+    },
+    "try": {
+      "title": "Experimentar como",
+      "description": "Muda o plano da {org} para veres a app com os limites de outro plano. A Demo começa a contar os 7 dias quando a escolhes.",
+      "label": "Plano"
+    },
+    "organizations": {
+      "title": "Organizações",
+      "description": "O plano de cada organização e o que já gastou de cada limite.",
+      "name": "Organização",
+      "plan": "Plano",
+      "demo": "Prazo",
+      "sendsToday": "Envios hoje",
+      "daysLeft": "{days, plural, one {Falta # dia} other {Faltam # dias}}",
+      "ended": "Terminou",
+      "planFor": "Plano da {org}",
+      "confirmTitle": "Mudar de plano",
+      "confirmMessage": "A {org} passa para o plano {plan}. Os limites mudam já e a mudança fica no histórico da organização.",
+      "confirmOwn": "A tua organização passa para o plano {plan}, para experimentares os limites dele. Voltas ao Interno quando quiseres.",
+      "confirm": "Mudar",
+      "search": "Procurar por nome ou email do dono",
+      "overLimit": "{count, plural, one {Acima de # limite} other {Acima de # limites}}",
+      "extendShort": "+7 dias",
+      "extendTitle": "Prolongar a Demo",
+      "extendMessage": "A {org} fica com mais 7 dias no plano {plan}, a contar do fim atual (ou de hoje, se já terminou). Fica no histórico da organização.",
+      "extend": "Prolongar",
+      "endsOn": "Dia em que a Demo da {org} termina",
+      "endTitle": "Mudar o fim da Demo",
+      "endMessage": "A {org} fica no plano {plan} até {date}, às 23:59. Fica no histórico da organização.",
+      "endConfirm": "Mudar",
+      "apply": "Aplicar",
+      "undo": "Desfazer",
+      "undoHint": "Volta ao prazo anterior ({date})"
+    },
+    "plans": {
+      "title": "Planos",
+      "description": "Os limites de cada plano. Vazio quer dizer sem limite.",
+      "limit": "Limite",
+      "orgCount": "{count, plural, =0 {sem organizações} one {# organização} other {# organizações}}",
+      "unlimited": "sem limite",
+      "save": "Guardar",
+      "confirmTitle": "Guardar o plano {plan}",
+      "confirmMessage": "{count, plural, =0 {Nenhuma organização está neste plano.} one {Isto muda os limites de # organização, já.} other {Isto muda os limites de # organizações, já.}} Continuar?",
+      "hint": "Máximos técnicos: 10 mensagens por corrente e 50 MB por ficheiro.",
+      "locked": "Plano da DIGIK, não se edita"
+    },
+    "limits": {
+      "durationDays": "Duração (dias)",
+      "users": "Utilizadores",
+      "assistants": "Assistentes",
+      "assistantInstructionChars": "Caracteres das instruções",
+      "filesPerAssistant": "Ficheiros por assistente",
+      "automations": "Automações",
+      "scheduledMessages": "Agendadas à espera",
+      "trackedLinks": "Links rastreados",
+      "dailyMessagesPerChannel": "Envios por dia (cada canal)",
+      "collaboratorWeeklyMessages": "Mensagens do colaborador por semana (cada canal)",
+      "messageChars": "Caracteres por mensagem",
+      "filesPerMessage": "Ficheiros por mensagem",
+      "fileSizeMb": "MB por ficheiro",
+      "chainMessages": "Mensagens por corrente"
+    }
+  },
+  "Pagination": {
+    "label": "Páginas",
+    "perPageLabel": "Quantos por página",
+    "perPage": "{count} / página",
+    "previous": "Anterior",
+    "next": "Seguinte"
+  },
+  "ImportUsers": {
+    "title": "Importar utilizadores",
+    "template": "Modelo",
+    "file": "Ficheiro a importar",
+    "selectedFile": "Ficheiro escolhido: {name}",
+    "fileHelp": "Carrega um ficheiro Excel feito a partir do modelo, ou um CSV com as mesmas colunas.",
+    "assistant": "Assistente por omissão",
+    "chooseAssistant": "Escolher assistente",
+    "assistantHelp": "Se escolheres um aqui, fica atribuído a todos os utilizadores importados.",
+    "previewSection": "Pré-visualização",
+    "empty": "Carrega um ficheiro para veres os utilizadores antes de importar.",
+    "preview": "Pré-visualização",
+    "ready": "{count, plural, one {# linha pronta a importar} other {# linhas prontas a importar}}",
+    "showing": "A mostrar {shown} / {total}",
+    "columns": {
+      "name": "Nome",
+      "email": "Email",
+      "teams": "Teams AAD Object ID",
+      "phone": "Telemóvel",
+      "assistant": "Assistente",
+      "tags": "Tags"
+    },
+    "resultSection": "Resultado da importação",
+    "result": {
+      "created": "Criados",
+      "updated": "Atualizados",
+      "skipped": "Ignorados",
+      "failed": "Falharam",
+      "received": "Recebidos"
+    },
+    "skippedRows": "Linhas ignoradas",
+    "failedRows": "Linhas que falharam",
+    "row": "Linha {row}: {reason}",
+    "close": "Fechar",
+    "importing": "A importar...",
+    "submit": "Importar utilizadores",
+    "errors": {
+      "noSheets": "O ficheiro Excel não tem folhas.",
+      "fileType": "Carrega um ficheiro .xlsx ou .csv.",
+      "noRows": "Não há linhas válidas nesse ficheiro.",
+      "readFailed": "Houve um problema a ler esse ficheiro.",
+      "importFailed": "A importação falhou."
+    },
+    "reasons": {
+      "noIdentifier": "Sem email, Teams AAD Object ID nem telemóvel",
+      "conflict": "Há vários utilizadores que correspondem: o email, o telemóvel ou o Teams AAD Object ID são de utilizadores diferentes.",
+      "missingName": "Falta o nome",
+      "unknownTags": "Tags que não existem: {tags}",
+      "duplicateUser": "Linha repetida para o mesmo utilizador",
+      "duplicateEmail": "Email repetido no ficheiro",
+      "duplicateTeams": "Teams AAD Object ID repetido no ficheiro",
+      "duplicatePhone": "Telemóvel repetido no ficheiro"
+    }
+  },
+  "WhatsAppPhone": {
+    "available": "Disponível",
+    "online": "online",
+    "contact": "Contacto"
+  },
+  "Redirect": {
+    "unavailable": "Ligação indisponível",
+    "opening": "A abrir ligação...",
+    "preparing": "Estamos a preparar o redirecionamento. Se nada acontecer, podes usar o botão abaixo.",
+    "openFailed": "Não foi possível abrir esta ligação.",
+    "noDestination": "Esta ligação não tem destino.",
+    "destination": "Destino",
+    "continue": "Continuar",
+    "retry": "Tentar novamente",
+    "footnote": "Esta página pode fechar automaticamente ao concluir o redirecionamento."
   }
 }

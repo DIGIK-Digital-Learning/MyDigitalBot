@@ -1,15 +1,12 @@
+import { withSessionReadAccess, getSessionReadClient } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
+
 import {
   handleApiError,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
 
-const sb = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } },
-);
+
 
 export async function GET(req) {
   try {
@@ -28,24 +25,26 @@ export async function GET(req) {
     const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
-    const { data, error } = await sb
-      .from("automation_run")
-      .select(
-        `
-        *,
-        user_row:user_id (
-          id,
-          name
+    return await withSessionReadAccess(orgAuth, async () => {
+      const { data, error } = await getSessionReadClient(orgAuth)
+        .from("automation_run")
+        .select(
+          `
+          *,
+          user_row:user_id (
+            id,
+            name
+          )
+        `,
         )
-      `,
-      )
-      .eq("organization_id", orgAuth.orgId)
-      .order("created_at", { ascending: false })
-      .limit(limit);
+        .eq("organization_id", orgAuth.orgId)
+        .order("created_at", { ascending: false })
+        .limit(limit);
 
-    if (error) throw error;
+      if (error) throw error;
 
-    return NextResponse.json({ items: data || [] });
+      return NextResponse.json({ items: data || [] });
+    });
   } catch (error) {
     return handleApiError(error, "Failed to load automation runs");
   }

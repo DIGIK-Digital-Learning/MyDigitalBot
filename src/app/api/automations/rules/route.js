@@ -1,9 +1,17 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 import {
   assertNoActiveInactivityRuleConflict,
+  countAutomationRulesByOrg,
   createAutomationRule,
   getOrgAutomationRules,
 } from "@/lib/repos/automationRules.repo";
+import {
+  getOrgLimits,
+  hasRoomFor,
+  limitReachedBody,
+  planExpiredBody,
+} from "@/lib/services/plans/planLimits";
 import {
   assertAssistantBelongsToOrg,
   requireOwnedOrg,
@@ -29,9 +37,11 @@ export async function GET(req) {
     const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
-    const items = await getOrgAutomationRules(orgAuth.orgId);
+    return await withSessionReadAccess(orgAuth, async () => {
+      const items = await getOrgAutomationRules(orgAuth.orgId);
 
-    return NextResponse.json({ items });
+      return NextResponse.json({ items });
+    });
   } catch (error) {
     return NextResponse.json(
       { error: error?.message || String(error) },
@@ -62,6 +72,22 @@ export async function POST(req) {
 
     const orgAuth = await requireOwnedOrg(organizationId);
     if (orgAuth.error) return orgAuth.error;
+
+    /* Limite de automações do plano (#186): contam todas, ativas e inativas. */
+    const orgLimits = await getOrgLimits(orgAuth.orgId);
+
+    /* A Demo terminou (#209): ver continua, criar e enviar não. */
+    const expired = planExpiredBody(orgLimits);
+    if (expired) return NextResponse.json(expired, { status: 403 });
+
+    const automationCount = await countAutomationRulesByOrg(orgAuth.orgId);
+
+    if (!hasRoomFor(orgLimits.limits.automations, automationCount)) {
+      return NextResponse.json(
+        limitReachedBody("AUTOMATION_LIMIT_REACHED", "automations", orgLimits),
+        { status: 409 },
+      );
+    }
 
     const safeAssistantId = await assertAssistantBelongsToOrg(
       orgAuth.admin,

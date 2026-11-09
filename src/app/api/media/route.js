@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -18,9 +19,13 @@ export async function GET(req) {
     const orgAuth = await requireOwnedOrg(searchParams.get("orgId"));
     if (orgAuth.error) return orgAuth.error;
 
-    const result = await listBroadcastMedia(orgAuth.admin, orgAuth.orgId);
+    return await withSessionReadAccess(orgAuth, async () => {
+      // O Storage mantém acesso privilegiado: as policies atuais não permitem
+      // listar todas estas pastas com a sessão. O serviço valida o prefixo da org.
+      const result = await listBroadcastMedia(orgAuth.admin, orgAuth.orgId);
 
-    return NextResponse.json(result);
+      return NextResponse.json(result);
+    });
   } catch (error) {
     return handleApiError(error, "Failed to load media");
   }

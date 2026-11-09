@@ -12,6 +12,8 @@ export default function ChainMessagesBar({
   duplicateChainStep,
   removeChainStep,
   activeStepKind = "message",
+  /* Máximo de passos do plano (#187); sem ele, os 10 de antes. */
+  maxSteps = 10,
   onChangeStepKind,
   translation,
 }) {
@@ -90,9 +92,9 @@ export default function ChainMessagesBar({
               type="button"
               className={styles.chainStepAdd}
               onClick={addChainStep}
-              disabled={chainSteps.length >= 10}
+              disabled={chainSteps.length >= maxSteps}
               title={
-                chainSteps.length >= 10
+                chainSteps.length >= maxSteps
                   ? translation("Broadcast.broadcastChain.chainLengthMax")
                   : translation("Broadcast.broadcastChain.chainLengthAdd")
               }
@@ -104,7 +106,7 @@ export default function ChainMessagesBar({
               type="button"
               className={styles.chainStepAdd}
               onClick={duplicateChainStep}
-              disabled={chainSteps.length >= 10}
+              disabled={chainSteps.length >= maxSteps}
               title={translation("Broadcast.broadcastChain.chainDuplicate")}
             >
               <Copy size={15} />
@@ -130,7 +132,7 @@ export default function ChainMessagesBar({
               type="button"
               className={styles.kbdBtn}
               onClick={duplicateChainStep}
-              disabled={chainSteps.length >= 10}
+              disabled={chainSteps.length >= maxSteps}
             >
               <Copy size={14} />
               <span>
@@ -149,7 +151,8 @@ export default function ChainMessagesBar({
             </button> */}
 
             <span className={styles.chainCounter}>
-              {chainSteps.length}/10{" "}
+              {chainSteps.length}
+              {Number.isFinite(maxSteps) ? `/${maxSteps}` : ""}{" "}
               {translation("Broadcast.broadcastChain.chainMessages")}
             </span>
           </div>

@@ -1,3 +1,4 @@
+import { getRepositoryReadClient } from "@/lib/db/readAccess";
 import { getSupabaseAdminClient } from "@/lib/db/admin";
 import { getOrganizationLogoUrl } from "@/lib/helpers/organizationLogo.helpers";
 
@@ -14,7 +15,7 @@ export const ORGANIZATION_SETTINGS_COLUMNS = [
 ].join(", ");
 
 export async function getOrganizationSettings(orgId) {
-  const admin = getSupabaseAdminClient();
+  const admin = getRepositoryReadClient();
   const { data, error } = await admin
     .from("organization")
     .select(ORGANIZATION_SETTINGS_COLUMNS)

@@ -32,16 +32,14 @@ export default function TrackedRedirectPage({ params }) {
             token,
           });
 
-          throw new Error(
-            data?.error ||
-              `Could not resolve tracked link (status ${res.status}).`,
-          );
+          /* O erro da API fica no registo acima; ao visitante mostra-se o texto traduzido. */
+          throw new Error(translation("openFailed"));
         }
 
         const url = String(data?.destinationUrl || "").trim();
 
         if (!url) {
-          throw new Error("Tracked link has no destination URL.");
+          throw new Error(translation("noDestination"));
         }
 
         if (cancelled) return;
@@ -52,7 +50,7 @@ export default function TrackedRedirectPage({ params }) {
         window.location.replace(url);
       } catch (err) {
         if (cancelled) return;
-        setError(err.message || "Could not open link.");
+        setError(err.message || translation("openFailed"));
         setStatus("error");
       }
     }
@@ -62,7 +60,7 @@ export default function TrackedRedirectPage({ params }) {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [token, translation]);
 
   return (
     <main className={styles.page}>
@@ -72,15 +70,14 @@ export default function TrackedRedirectPage({ params }) {
         </div>
 
         <h1 className={styles.title}>
-          {status === "error" ? "Link unavailable" : "A abrir ligação..."}
+          {status === "error"
+            ? translation("unavailable")
+            : translation("opening")}
         </h1>
 
         {status !== "error" && (
           <>
-            <p className={styles.text}>
-              Estamos a preparar o redirecionamento. Se nada acontecer, podes
-              usar o botão abaixo.
-            </p>
+            <p className={styles.text}>{translation("preparing")}</p>
 
             <div className={styles.spinnerWrap}>
               <div className={styles.spinner} />
@@ -90,13 +87,15 @@ export default function TrackedRedirectPage({ params }) {
 
         {status === "error" && (
           <p className={styles.errorText}>
-            {error || "Não foi possível abrir esta ligação."}
+            {error || translation("openFailed")}
           </p>
         )}
 
         {destinationUrl && (
           <div className={styles.statusBox}>
-            <div className={styles.statusLabel}>Destino</div>
+            <div className={styles.statusLabel}>
+              {translation("destination")}
+            </div>
             <div className={styles.statusValue}>{destinationUrl}</div>
           </div>
         )}
@@ -104,7 +103,7 @@ export default function TrackedRedirectPage({ params }) {
         <div className={styles.actions}>
           {destinationUrl && (
             <a href={destinationUrl} className={styles.primaryBtn}>
-              Continuar
+              {translation("continue")}
             </a>
           )}
 
@@ -114,15 +113,12 @@ export default function TrackedRedirectPage({ params }) {
               onClick={() => window.location.assign(destinationUrl)}
               className={styles.secondaryBtn}
             >
-              Tentar novamente
+              {translation("retry")}
             </button>
           )}
         </div>
 
-        <p className={styles.footnote}>
-          Esta página pode fechar automaticamente ao concluir o
-          redirecionamento.
-        </p>
+        <p className={styles.footnote}>{translation("footnote")}</p>
       </div>
     </main>
   );

@@ -125,6 +125,12 @@ export async function findQuestionForReply({
  *
  * Só a primeira resposta conta: toques seguintes à mesma pergunta ficam
  * guardados na conversa mas não recebem feedback nem vão à IA.
+ *
+ * `claimWeeklyMessage({ kind })` conta a resposta no limite semanal do
+ * colaborador e devolve `{ allowed, notice }`. Acima do limite a resposta
+ * fica registada na mesma: o quiz e a sondagem recebem o feedback (texto
+ * fixo), a pergunta aberta só a resposta esperada (sem avaliação da IA), e
+ * na primeira vez da semana segue o aviso.
  */
 export async function handleQuestionReply({
   user,
@@ -136,6 +142,7 @@ export async function handleQuestionReply({
   organization = null,
   sendText,
   resolveThread,
+  claimWeeklyMessage = null,
   deps,
 }) {
   const d = { ...defaultDeps, ...deps };
@@ -240,10 +247,16 @@ export async function handleQuestionReply({
     };
   }
 
+  /* Limite semanal do colaborador: a resposta conta 1. */
+  const weekly = (await claimWeeklyMessage?.({ kind: question.kind })) || {
+    allowed: true,
+    notice: null,
+  };
+
   if (isOpen) {
     let evaluation = null;
     let reviewNeeded = false;
-    if (question.ai_evaluation !== false) {
+    if (question.ai_evaluation !== false && weekly.allowed) {
       try {
         evaluation = await d.evaluateOpenQuestion({
           assistant: thread.assistant,
@@ -298,6 +311,7 @@ export async function handleQuestionReply({
       aiFeedback: evaluation?.feedback ?? null,
       reviewNeeded,
     });
+    if (weekly.notice) await reply_(weekly.notice);
     return {
       handled: true,
       outcome: "answered",
@@ -305,6 +319,7 @@ export async function handleQuestionReply({
       answerId: answer.id,
       verdict: evaluation?.verdict ?? null,
       reviewNeeded,
+      weeklyLimitReached: !weekly.allowed,
     };
   }
 
@@ -315,6 +330,7 @@ export async function handleQuestionReply({
   );
 
   await reply_(feedback);
+  if (weekly.notice) await reply_(weekly.notice);
 
   return {
     handled: true,
@@ -325,5 +341,6 @@ export async function handleQuestionReply({
     matchedBy: option.matchedBy,
     isCorrect,
     feedback,
+    weeklyLimitReached: !weekly.allowed,
   };
 }

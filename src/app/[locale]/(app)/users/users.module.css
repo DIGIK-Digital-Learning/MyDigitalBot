@@ -11,6 +11,7 @@
   --col-checkbox: 52px;
   --col-name: minmax(220px, 1fr);
   --col-phone: 160px;
+  --col-week: 150px;
   --col-tags: minmax(110px, 1.4fr);
   --col-assistant: minmax(240px, 0.9fr);
   /* make this wide enough to hold "Ver • Editar • Apagar" */
@@ -131,12 +132,12 @@
   isolation: isolate;
 }
 
-/* columns: [checkbox, name, phone, tags, assistant, kebab] */
+/* columns: [checkbox, name, phone, week, tags, assistant, kebab] */
 .row {
   display: grid;
   grid-template-columns: var(--col-checkbox) var(--col-name) var(
       --col-phone
-    ) var(--col-tags) var(--col-assistant) var(--col-actions);
+    ) var(--col-week) var(--col-tags) var(--col-assistant) var(--col-actions);
   /* was 52px */
   align-items: center;
   min-height: var(--row-h);
@@ -159,6 +160,16 @@
 .cellHead {
   font-weight: 600;
   color: #0f1c3f;
+}
+
+/*
+ * Última célula do cabeçalho (coluna das ações): o contador do limite de
+ * utilizadores ("3 / 100"), encostado à direita, à altura dos títulos.
+ */
+.cellHeadRight {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 /* checkbox (custom look) */
@@ -237,6 +248,26 @@
 /* phone */
 .cellPhone {
   color: #0f1c3f;
+}
+
+/* Mensagens da semana: uma linha por canal ("WhatsApp 37 / 100"). */
+.cellWeek {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.weekLine {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.weekChannel {
+  color: #5b6680;
 }
 
 /* tags chips */
@@ -749,6 +780,7 @@
   .usersScreen {
     --col-name: minmax(150px, 1fr);
     --col-phone: 120px;
+    --col-week: 130px;
     --col-tags: minmax(110px, 1fr);
     --col-assistant: minmax(180px, 1fr);
     --col-actions: 92px;
@@ -1483,6 +1515,41 @@
   background: #f7fbff;
 }
 
+/* No limite de utilizadores do plano: "Novo utilizador" fica por usar. */
+.createMenuItem:disabled {
+  color: #9ca3af;
+  background: transparent;
+  cursor: not-allowed;
+}
+
+/*
+ * Contador do limite de utilizadores ("3 / 100"), por cima da lista e
+ * encostado à direita, como nas automações e nas agendadas.
+ */
+.usageRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 6px;
+}
+
+.usageRow:empty {
+  display: none;
+}
+
+/*
+ * Na vista de lista o contador está no cabeçalho da tabela: esta linha só
+ * aparece quando o cabeçalho se esconde (ecrãs até 900px).
+ */
+.usageRowNoHeader {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .usageRowNoHeader:not(:empty) {
+    display: flex;
+  }
+}
+
 @media (max-width: 900px) {
   .table {
     overflow: visible;
@@ -1504,6 +1571,7 @@
     grid-template-areas:
       "chk   name   more"
       "chk   phone  more"
+      "chk   week   more"
       "chk   tags   more"
       "chk   asst   more";
     row-gap: 6px;
@@ -1526,6 +1594,11 @@
 
   .cellPhone {
     grid-area: phone;
+  }
+
+  .cellWeek {
+    grid-area: week;
+    max-width: 200px;
   }
 
   .cellTags {

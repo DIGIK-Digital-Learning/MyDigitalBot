@@ -34,7 +34,10 @@ export async function getPendingOutreachMetrics(orgId, periodStart) {
      */
     countRows("pending_outreach", (q) =>
       applyPeriod(
-        q.eq("org_id", orgId).in("status", ["pending", "queued", "active"]),
+        q
+          .eq("org_id", orgId)
+          .in("status", ["pending", "queued", "active"])
+          .gt("expires_at", new Date().toISOString()),
         periodStart
       )
     ),

@@ -8,7 +8,10 @@ export default function BroadcastHeader({
   selectedCount,
   sending,
   canSend,
+  dailyCounter = null,
+  dailyCounterLabel = null,
   deliveryMode,
+  scheduleActionLabel,
   onPrimaryClick,
   translation,
 }) {
@@ -37,6 +40,13 @@ export default function BroadcastHeader({
       </div>
 
       <div className={styles.actionsRight}>
+        {/* Envios de hoje no canal escolhido (#188). */}
+        {dailyCounterLabel ? (
+          <div className={styles.selectedLabel} data-testid="daily-sends">
+            {dailyCounterLabel} {dailyCounter}
+          </div>
+        ) : null}
+
         <div className={styles.selectedLabel}>
           {translation("Broadcast.selected")} <strong>{selectedCount}</strong>
         </div>
@@ -59,7 +69,7 @@ export default function BroadcastHeader({
               {translation("Broadcast.sending")}
             </>
           ) : deliveryMode === "schedule" ? (
-            translation("Broadcast.schedule")
+            scheduleActionLabel || translation("Broadcast.schedule")
           ) : (
             translation("Broadcast.send")
           )}

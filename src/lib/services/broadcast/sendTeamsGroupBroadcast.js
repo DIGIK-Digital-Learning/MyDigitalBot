@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { openai } from "@/lib/openai/client";
 import { getBotToken } from "@/lib/teams/auth";
-import { isTrustedTeamsServiceUrl } from "@/lib/teams/members";
+import { isTrustedTeamsServiceUrl } from "@/lib/teams/serviceUrl";
 import { getOrganization } from "@/lib/repos/organizations.repo";
 import { getGroupInstallationsByIds } from "@/lib/repos/teamsInstallations.repo";
 import { createMessage } from "@/lib/repos/messages.repo";
@@ -172,6 +172,7 @@ export async function sendTeamsGroupBroadcast(input = {}) {
 
       const res = await fetch(endpoint, {
         method: "POST",
+        redirect: "error",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

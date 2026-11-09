@@ -1,12 +1,9 @@
+// Acesso interno privilegiado: processamento de eventos/tarefas, sem sessão de administrador.
 // /lib/repos/pendingOutreach.repo.js
 require("dotenv").config();
-import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { getSupabaseAdminClient } from "@/lib/db/admin";
 
-const supabase = createServiceClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } },
-);
+const supabase = getSupabaseAdminClient();
 
 export async function createPendingOutreach({
   orgId,
@@ -93,6 +90,26 @@ export async function releasePendingOutreach(id) {
     .update({ reply_message_id: null })
     .eq("id", id)
     .eq("status", "pending");
+  if (error) throw error;
+}
+
+export async function updatePendingOutreachTemplateMessageId(id, templateMessageId) {
+  const { error } = await supabase
+    .from("pending_outreach")
+    .update({ template_message_id: templateMessageId || null })
+    .eq("id", id)
+    .eq("status", "pending");
+
+  if (error) throw error;
+}
+
+export async function deletePendingOutreach(id) {
+  const { error } = await supabase
+    .from("pending_outreach")
+    .delete()
+    .eq("id", id)
+    .eq("status", "pending");
+
   if (error) throw error;
 }
 

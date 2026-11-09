@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 import { getOrgAuditLog } from "@/lib/repos/auditLog.repo";
 import { parseAuditLogQuery } from "@/lib/audit/auditLogQuery";
@@ -31,16 +32,18 @@ export async function GET(req) {
     const orgAuth = await requireOwnedOrg(rawOrgId);
     if (orgAuth.error) return orgAuth.error;
 
-    const { items, total } = await getOrgAuditLog(
-      orgAuth.orgId,
-      parsed.filters,
-    );
+    return await withSessionReadAccess(orgAuth, async () => {
+      const { items, total } = await getOrgAuditLog(
+        orgAuth.orgId,
+        parsed.filters,
+      );
 
-    return NextResponse.json({
-      items,
-      total,
-      page: parsed.filters.page,
-      pageSize: parsed.filters.pageSize,
+      return NextResponse.json({
+        items,
+        total,
+        page: parsed.filters.page,
+        pageSize: parsed.filters.pageSize,
+      });
     });
   } catch (err) {
     return handleApiError(err, "Failed to load activity log");

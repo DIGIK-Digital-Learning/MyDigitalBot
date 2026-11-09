@@ -16,6 +16,11 @@ import {
   ASSISTANT_FILE_ACCEPT,
   resolveAssistantFileType,
 } from "@/lib/uploads/assistantFiles";
+import { useAlert } from "@/app/components/Alert/AlertProvider";
+import CharCounter from "@/app/components/CharCounter/CharCounter";
+import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
+import usePlanLimits from "@/app/hooks/usePlanLimits";
+import { limitKeepingCurrent } from "@/lib/plans/limitRules";
 
 const STORAGE_BUCKET = "assistant-uploads";
 
@@ -25,6 +30,22 @@ export default function AssistantsHub() {
   const { user, loading: authLoading, supabase } = useAuth();
   const { org, loading: orgLoading } = useOrganization(user);
   const orgId = org?.id || null;
+  const showAlert = useAlert();
+  const {
+    plan,
+    limits,
+    usage,
+    reload: reloadPlanUsage,
+  } = usePlanLimits(orgId);
+
+  /*
+   * Limite de assistentes do plano: contador "1 / 20" no cabeçalho da lista
+   * e o botão de criar desativado quando a conta está cheia.
+   */
+  const assistantsFull =
+    limits?.assistants != null &&
+    usage?.assistants != null &&
+    usage.assistants >= limits.assistants;
 
   const { startLoading, stopLoading } = useGlobalLoader();
   const [assistants, setAssistants] = useState([]);
@@ -132,6 +153,7 @@ export default function AssistantsHub() {
     const newest = list[list.length - 1];
     setSelectedId(newest ? newest.id : null);
     setIsModalOpen(false);
+    reloadPlanUsage();
   }
 
   // unified field changer — writes to draft while editing
@@ -141,6 +163,83 @@ export default function AssistantsHub() {
     } else {
       setSelected((prev) => ({ ...(prev || {}), [field]: value }));
     }
+  }
+
+  /*
+   * Limites do plano (#185). As instruções podem ir até ao maior entre o
+   * limite e o tamanho guardado: um assistente criado antes do limite (ex.:
+   * 7.405 caracteres) fica como está, mas não cresce. Sem limites carregados,
+   * nada é bloqueado aqui; o servidor decide na mesma.
+   */
+  const instructionsPlanLimit = limits?.assistantInstructionChars ?? null;
+  const instructionsLimit = limitKeepingCurrent(
+    instructionsPlanLimit,
+    String(selected?.instructions ?? "").length,
+  );
+  const draftInstructionsLength = String(draft?.instructions ?? "").length;
+  const instructionsTooLong =
+    instructionsLimit !== null && draftInstructionsLength > instructionsLimit;
+
+  /*
+   * Contador de ficheiros do assistente ("3 / 5"). O limite segue a regra do
+   * servidor: uma coleção antiga acima do limite fica com o tamanho que tem.
+   * Na edição conta os que ficam (existentes − marcados para tirar) mais os
+   * novos escolhidos, para se ver o resultado antes de guardar.
+   */
+  const existingFileCount = vectorStore?.files?.length ?? 0;
+  const filesLimit = limitKeepingCurrent(
+    limits?.filesPerAssistant ?? null,
+    existingFileCount,
+  );
+  const filesAfterEdit =
+    existingFileCount - removedVectorFileIds.length + vectorStoreEditFiles.length;
+
+  /* Avisos simples (só OK) dos limites de instruções e ficheiros. */
+  async function showLimitAlert(error) {
+    if (error?.code === "INSTRUCTIONS_TOO_LONG") {
+      await showAlert({
+        title: translation("Plans.limits.instructionsTitle"),
+        message: translation("Plans.limits.instructions", { limit: error.limit }),
+        tone: "warning",
+      });
+      return true;
+    }
+
+    if (error?.code === "ASSISTANT_FILE_LIMIT_REACHED") {
+      await showAlert({
+        title: translation("Plans.limits.filesTitle"),
+        message: translation("Plans.limits.files", { limit: error.limit }),
+        tone: "warning",
+      });
+      return true;
+    }
+
+    return false;
+  }
+
+  /*
+   * Ficheiros (#185): a escolha é verificada logo ao escolher, antes de
+   * qualquer envio, porque guardar envia primeiro os ficheiros para o
+   * armazenamento e só depois pergunta ao servidor. Se passar do limite, é
+   * recusada inteira e o campo fica limpo.
+   */
+  async function acceptFilesWithinLimit(picked, existing, kept) {
+    const filesLimit = limitKeepingCurrent(
+      limits?.filesPerAssistant ?? null,
+      existing,
+    );
+
+    if (filesLimit === null || kept + picked.length <= filesLimit) return true;
+
+    await showAlert({
+      title: translation("Plans.limits.filesTitle"),
+      message: translation("Plans.limits.filesRemaining", {
+        remaining: Math.max(filesLimit - kept, 0),
+        limit: filesLimit,
+      }),
+      tone: "warning",
+    });
+    return false;
   }
 
   // save applies the draft
@@ -162,7 +261,8 @@ export default function AssistantsHub() {
       });
       if (!res.ok) {
         const payload = await res.json().catch(() => ({}));
-        alert("Erro ao guardar: " + (payload.error || res.statusText));
+        if (await showLimitAlert(payload)) return;
+        await showError("save", payload.error || res.statusText);
         return;
       }
       setIsEditing(false);
@@ -190,16 +290,31 @@ export default function AssistantsHub() {
       });
       if (!res.ok) {
         const payload = await res.json().catch(() => ({}));
-        alert("Erro: " + (payload.error || res.statusText));
+        await showError("delete", payload.error || res.statusText);
         return;
       }
       const remaining = assistants.filter((a) => a.id !== selected.id);
       setAssistants(remaining);
       setSelected(null);
       setSelectedId(remaining[0] ? remaining[0].id : null);
+      reloadPlanUsage();
     } finally {
       stopLoading();
     }
+  }
+
+  /*
+   * Erros da página num aviso da app, traduzido. `detail` é o motivo que o
+   * servidor deu (quando deu algum).
+   */
+  async function showError(key, detail = "") {
+    await showAlert({
+      title: translation("Common.error"),
+      message: translation(`Assistants.errors.${key}`, {
+        detail: detail || "",
+      }).trim(),
+      tone: "danger",
+    });
   }
 
   async function stageFiles(files) {
@@ -210,7 +325,7 @@ export default function AssistantsHub() {
       const contentType = resolveAssistantFileType(f);
 
       if (!contentType) {
-        throw new Error("Este tipo de ficheiro não é aceite.");
+        throw new Error(translation("Assistants.errors.fileType"));
       }
 
       const path = `${basePath}-${f.name}`;
@@ -223,7 +338,9 @@ export default function AssistantsHub() {
         });
 
       if (error) {
-        throw new Error("Erro no upload: " + error.message);
+        throw new Error(
+          translation("Assistants.errors.upload", { detail: error.message }),
+        );
       }
 
       uploaded.push({
@@ -253,14 +370,15 @@ export default function AssistantsHub() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        alert("Erro: " + (data.error || "Falha ao criar a store"));
+        if (await showLimitAlert(data)) return;
+        await showError("createCollection", data.error);
         return;
       }
       setVsName("");
       setVsFiles([]);
       await fetchOne(selected.id);
     } catch (error) {
-      alert(error?.message || "Erro ao carregar os ficheiros");
+      await showError("loadFiles", error?.message);
     } finally {
       stopLoading();
     }
@@ -317,14 +435,15 @@ export default function AssistantsHub() {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        alert("Erro: " + (data.error || "Falha ao atualizar a coleção"));
+        if (await showLimitAlert(data)) return;
+        await showError("updateCollection", data.error);
         return;
       }
 
       cancelVectorStoreEdit();
       await fetchOne(selected.id);
     } catch (error) {
-      alert(error?.message || "Erro ao atualizar a coleção");
+      await showError("updateCollection", error?.message);
     } finally {
       setIsSavingVectorStore(false);
       stopLoading();
@@ -350,7 +469,7 @@ export default function AssistantsHub() {
       );
       if (!res.ok) {
         const payload = await res.json().catch(() => ({}));
-        alert("Erro: " + (payload.message || res.statusText));
+        await showError("deleteCollection", payload.message || res.statusText);
         return;
       }
       await fetchOne(selected.id);
@@ -394,6 +513,12 @@ export default function AssistantsHub() {
       <aside className={styles.listCol}>
         <div className={styles.listHeader}>
           <span>{translation("Assistants.myAssistants")}</span>
+          <UsageCounter
+            used={usage?.assistants}
+            limit={limits?.assistants}
+            label={translation("Plans.usage.assistantsLabel")}
+            hint={translation("Plans.usage.assistantsHint")}
+          />
         </div>
 
         <div className={styles.list}>
@@ -424,8 +549,15 @@ export default function AssistantsHub() {
           <button
             className={styles.ctaPrimary}
             onClick={openCreate}
-            disabled={!orgId}
-            title={translation("Assistants.createAssistant")}
+            disabled={!orgId || assistantsFull}
+            title={
+              assistantsFull
+                ? translation("Plans.limits.assistants", {
+                    plan: plan?.name ?? "",
+                    limit: limits.assistants,
+                  })
+                : translation("Assistants.createAssistant")
+            }
           >
             {translation("Assistants.createAssistant")}
           </button>
@@ -476,6 +608,11 @@ export default function AssistantsHub() {
                     placeholder={translation(
                       "Assistants.details.instructionsPlaceholder",
                     )}
+                  />
+                  <CharCounter
+                    length={draftInstructionsLength}
+                    limit={instructionsLimit}
+                    planLimit={instructionsPlanLimit}
                   />
                 </>
               ) : (
@@ -559,7 +696,7 @@ export default function AssistantsHub() {
                     <>
                       <button
                         className={styles.ctaPrimary}
-                        disabled={isSaving}
+                        disabled={isSaving || instructionsTooLong}
                         onClick={handleSave}
                       >
                         {isSaving
@@ -617,17 +754,36 @@ export default function AssistantsHub() {
                       "Assistants.vector.collectionNamePlaceholder",
                     )} ${selected.name}`}
                   />
-                  <label className={styles.label}>
-                    {translation("Assistants.vector.chooseFiles")}
-                  </label>
+                  <div className={styles.filesLabelRow}>
+                    <label className={styles.label}>
+                      {translation("Assistants.vector.chooseFiles")}
+                    </label>
+                    {/* Coleção nova: os escolhidos sobre o limite ("2 / 5"). */}
+                    <UsageCounter
+                      used={vsFiles.length}
+                      limit={limitKeepingCurrent(limits?.filesPerAssistant ?? null, 0)}
+                      label={translation("Plans.usage.filesLabel")}
+                      hint={translation("Plans.usage.filesHint")}
+                    />
+                  </div>
                   <input
                     className={styles.input}
                     type="file"
                     accept={ASSISTANT_FILE_ACCEPT}
                     multiple
-                    onChange={(e) =>
-                      setVsFiles(Array.from(e.target.files || []))
-                    }
+                    onChange={async (e) => {
+                      const input = e.target;
+                      const picked = Array.from(input.files || []);
+
+                      /* Coleção nova: ainda não tem ficheiros. */
+                      if (!(await acceptFilesWithinLimit(picked, 0, 0))) {
+                        input.value = "";
+                        setVsFiles([]);
+                        return;
+                      }
+
+                      setVsFiles(picked);
+                    }}
                   />
                   <div className={styles.rowEnd}>
                     <button
@@ -683,9 +839,17 @@ export default function AssistantsHub() {
                       </p>
 
                       <div>
-                        <span className={styles.metaLabel}>
-                          {translation("Assistants.vector.filenames")}
-                        </span>
+                        <div className={styles.filesLabelRow}>
+                          <span className={styles.metaLabel}>
+                            {translation("Assistants.vector.filenames")}
+                          </span>
+                          <UsageCounter
+                            used={filesAfterEdit}
+                            limit={filesLimit}
+                            label={translation("Plans.usage.filesLabel")}
+                            hint={translation("Plans.usage.filesHint")}
+                          />
+                        </div>
                         {vectorStore?.files?.length ? (
                           <ul className={styles.vectorFileList}>
                             {vectorStore.files.map((file) => {
@@ -737,11 +901,28 @@ export default function AssistantsHub() {
                         className={styles.input}
                         type="file"
                         multiple
-                        onChange={(e) =>
-                          setVectorStoreEditFiles(
-                            Array.from(e.target.files || []),
-                          )
-                        }
+                        onChange={async (e) => {
+                          const input = e.target;
+                          const picked = Array.from(input.files || []);
+                          const existing = vectorStore?.files?.length ?? 0;
+
+                          /* Ficam os existentes menos os marcados para tirar. */
+                          const kept = existing - removedVectorFileIds.length;
+
+                          if (
+                            !(await acceptFilesWithinLimit(
+                              picked,
+                              existing,
+                              kept,
+                            ))
+                          ) {
+                            input.value = "";
+                            setVectorStoreEditFiles([]);
+                            return;
+                          }
+
+                          setVectorStoreEditFiles(picked);
+                        }}
                       />
 
                       {vectorStoreEditFiles.length > 0 && (
@@ -802,7 +983,17 @@ export default function AssistantsHub() {
                               <span className={styles.metaLabel}>
                                 {translation("Assistants.vector.quantity")}
                               </span>
-                              <span>{vectorStore.files?.length || 0}</span>
+                              {/* "3 / 5" com limite no plano; sem limite, só o número. */}
+                              {filesLimit !== null ? (
+                                <UsageCounter
+                                  used={existingFileCount}
+                                  limit={filesLimit}
+                                  label={translation("Plans.usage.filesLabel")}
+                                  hint={translation("Plans.usage.filesHint")}
+                                />
+                              ) : (
+                                <span>{existingFileCount}</span>
+                              )}
                             </div>
                           </>
                         )}

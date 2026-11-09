@@ -1,3 +1,4 @@
+import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 import {
   getOrganizationOpeningBody,
@@ -45,9 +46,11 @@ export async function GET(req) {
     const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
-    const stored = await getOrganizationOpeningBody(orgAuth.orgId);
+    return await withSessionReadAccess(orgAuth, async () => {
+      const stored = await getOrganizationOpeningBody(orgAuth.orgId);
 
-    return NextResponse.json({ item: buildResponse(stored) });
+      return NextResponse.json({ item: buildResponse(stored) });
+    });
   } catch (err) {
     return handleApiError(err, "Failed to load opening message");
   }
