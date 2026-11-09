@@ -597,6 +597,59 @@ body.modalOpen {
   background: #eef5fb;
 }
 
+/*
+ * Escolher ficheiros com texto da app (FilePickerButton). O input nativo
+ * fica escondido mas acessível: o label com o nosso texto abre a janela.
+ */
+.filePicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #f1f5f9;
+}
+
+.filePickerButton {
+  position: relative;
+  flex: 0 0 auto;
+  border: 1px solid #d6e2ee;
+  border-radius: 8px;
+  padding: 6px 12px;
+  color: var(--text-dark);
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.filePickerButton:hover {
+  background: #eef5fb;
+}
+
+.filePickerButton:focus-within {
+  outline: 2px solid #0070f3;
+  outline-offset: 2px;
+}
+
+.filePickerInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.filePickerStatus {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-dark);
+  font-size: 0.85rem;
+}
+
 .formGroup input,
 .formGroup select,
 .formGroup textarea,

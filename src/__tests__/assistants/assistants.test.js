@@ -692,5 +692,30 @@ describe("AssistantsHub Page", () => {
       expect(await screen.findByText("a.pdf")).toBeInTheDocument();
       expect(appMocks.alert).not.toHaveBeenCalled();
     });
+
+    it("o botão de escolher ficheiros usa o texto da app, não o do browser", async () => {
+      const user = userEvent.setup({ applyAccept: false });
+      mockWith({ ...DETAILS_1, vectorStoreId: 42 });
+      renderPage();
+
+      await screen.findByText("old.pdf");
+      await user.click(
+        screen.getByRole("button", { name: "Assistants.vector.edit" }),
+      );
+
+      /*
+       * O texto do <input type="file"> nativo vem do browser e fica na
+       * língua dele. O nosso label dá-lhe o nome, e o estado diz o que se
+       * escolheu.
+       */
+      const input = document.getElementById("vector-store-edit-files");
+      expect(input).toHaveAccessibleName(/pickFiles/);
+      expect(screen.getByText("noFileChosen")).toBeInTheDocument();
+
+      await user.upload(input, [pdf("a.pdf"), pdf("b.pdf")]);
+
+      expect(await screen.findByText("filesChosen")).toBeInTheDocument();
+      expect(screen.queryByText("noFileChosen")).toBeNull();
+    });
   });
 });
