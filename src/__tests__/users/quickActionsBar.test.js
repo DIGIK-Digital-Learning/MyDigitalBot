@@ -29,7 +29,7 @@ function makeResponse(data, ok = true) {
     status: ok ? 200 : 500,
     json: () => Promise.resolve(data),
     text: () =>
-      Promise.resolve(typeof data === "string") ? data : JSON.stringify(data),
+      Promise.resolve(typeof data === "string" ? data : JSON.stringify(data)),
   });
 }
 
@@ -154,6 +154,11 @@ describe("QuickActionsBar", () => {
 
   it("bulk deletes after confirm (DELETE /api/users/bulk) then clears selection", async () => {
     const user = userEvent.setup();
+    /* O DELETE responde com o resumo (a barra lê failedCount). Sem corpo, a
+       barra rebentava a ler `undefined.failedCount` (Unhandled Rejection). */
+    mocks.fetch.mockResolvedValueOnce(
+      makeResponse({ ok: true, deleted: 2, failedCount: 0, failed: [] }),
+    );
     renderBar();
 
     await user.click(

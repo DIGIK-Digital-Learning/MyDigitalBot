@@ -13,8 +13,24 @@ const mocks = vi.hoisted(() => ({
   useOrganization: vi.fn(),
 
   confirm: vi.fn(),
+  alert: vi.fn(() => Promise.resolve()),
+  router: { push: vi.fn(), replace: vi.fn(), refresh: vi.fn() },
 
   fetch: vi.fn(),
+}));
+
+/* A página usa usePlanLimitPrompt, que precisa do router do Next, e mostra
+   avisos com useAlert, que só existe dentro do AlertProvider. O router é
+   sempre o mesmo objeto, como no Next, para não mudar as dependências dos
+   efeitos a cada render. */
+vi.mock("next/navigation", () => ({
+  useRouter: () => mocks.router,
+  usePathname: () => "/pt/users",
+  useSearchParams: () => new URLSearchParams(),
+}));
+
+vi.mock("@/app/components/Alert/AlertProvider", () => ({
+  useAlert: () => mocks.alert,
 }));
 
 vi.mock("@/app/LoadingScreen/GlobalLoaderContext", () => ({
@@ -125,6 +141,7 @@ vi.mock("@/app/components/PillSelect/PillSelect", () => ({
 }));
 
 const ORG_ID = "org_1";
+const USERS_LIST_URL = `/api/users?orgId=${ORG_ID}&page=1&pageSize=100`;
 
 const ASSISTANTS = [
   { id: "a1", name: "Assistant One" },
@@ -179,6 +196,18 @@ beforeEach(() => {
   localStorage.clear();
   localStorage.setItem("usersView", "list");
 
+  /* O jsdom não tem matchMedia; a página usa-o para encurtar as tags. */
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: vi.fn((query) => ({
+      matches: false,
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })),
+  });
+
   mocks.useAuth.mockReturnValue({
     user: { id: "auth_user_1 " },
     loading: false,
@@ -197,8 +226,9 @@ beforeEach(() => {
     const url = typeof input === "string" ? input : input.url;
     const method = (init?.method || "GET").toUpperCase();
 
-    if (url === `/api/users?orgId=${ORG_ID}` && method === "GET") {
-      return makeResponse(usersDb);
+    /* A lista é paginada: devolve { items, total }. */
+    if (url === USERS_LIST_URL && method === "GET") {
+      return makeResponse({ items: usersDb, total: usersDb.length });
     }
 
     if (url === `/api/assistants?orgId=${ORG_ID}` && method === "GET") {
@@ -235,7 +265,7 @@ describe("UsersPage", () => {
     expect(screen.getByText("Bob")).toBeInTheDocument();
     expect(screen.getByText("bob@example.com")).toBeInTheDocument();
 
-    expect(mocks.fetch).toHaveBeenCalledWith(`/api/users?orgId=${ORG_ID}`);
+    expect(mocks.fetch).toHaveBeenCalledWith(USERS_LIST_URL);
     expect(mocks.fetch).toHaveBeenCalledWith(`/api/assistants?orgId=${ORG_ID}`);
     expect(mocks.fetch).toHaveBeenCalledWith(`/api/tags?orgId=${ORG_ID}`);
 
@@ -310,8 +340,14 @@ describe("UsersPage", () => {
 
     await screen.findByText("Alice");
 
+    /* "Novo utilizador" abre um menu (criar um ou importar CSV). */
     fireEvent.click(
       screen.getByRole("button", {
+        name: "Users.newUser",
+      }),
+    );
+    fireEvent.click(
+      screen.getByRole("menuitem", {
         name: "Users.newUser",
       }),
     );
