@@ -965,6 +965,7 @@
     "searchPlaceholder": "Procurar",
     "manageTags": "Gerir Tags",
     "newUser": "Novo Utilizador",
+    "importCsv": "Importar CSV",
     "pagination": {
       "summary": "Página {page} de {totalPages} · {totalUsers} utilizadores",
       "perPage": "{count} / página",
