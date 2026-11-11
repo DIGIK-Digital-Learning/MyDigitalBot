@@ -196,6 +196,73 @@ describe("instruções ao editar um assistente", () => {
   });
 });
 
+describe("título até 80 e descrição até 200", () => {
+  const create = (fields) =>
+    createAssistant(json({ organizationId: 1, name: "Novo", model: "m", ...fields }));
+
+  const edit = (patch) =>
+    editAssistant(json(patch), { params: Promise.resolve({ assistantId: "73" }) });
+
+  function assistantWith(current) {
+    mocks.requireOrgForAssistant.mockResolvedValue({
+      orgId: 1,
+      assistantId: 73,
+      assistant: { id: 73, name: "Antigo", description: "", ...current },
+    });
+  }
+
+  it("criar com 80 e 200 passa", async () => {
+    const response = await create({ name: text(80), description: text(200) });
+    expect(response.status).toBe(201);
+    expect(mocks.createAssistant).toHaveBeenCalled();
+  });
+
+  it("criar com título de 81 é recusado e não cria", async () => {
+    const response = await create({ name: text(81) });
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({
+      code: "ASSISTANT_NAME_TOO_LONG",
+      limit: 80,
+    });
+    expect(mocks.createAssistant).not.toHaveBeenCalled();
+  });
+
+  it("criar com descrição de 201 é recusado e não cria", async () => {
+    const response = await create({ description: text(201) });
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({
+      code: "ASSISTANT_DESCRIPTION_TOO_LONG",
+      limit: 200,
+    });
+    expect(mocks.createAssistant).not.toHaveBeenCalled();
+  });
+
+  it("editar com título de 81 é recusado e não grava", async () => {
+    assistantWith({ name: "Curto" });
+
+    const response = await edit({ name: text(81) });
+
+    expect(response.status).toBe(400);
+    expect((await response.json()).code).toBe("ASSISTANT_NAME_TOO_LONG");
+    expect(mocks.updateAssistant).not.toHaveBeenCalled();
+  });
+
+  it("um assistente antigo com descrição de 250 pode guardar 250, mas não 251", async () => {
+    assistantWith({ description: text(250) });
+
+    expect((await edit({ description: text(250) })).status).toBe(200);
+
+    const response = await edit({ description: text(251) });
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({
+      code: "ASSISTANT_DESCRIPTION_TOO_LONG",
+      limit: 250,
+    });
+  });
+});
+
 describe("ficheiros por assistente", () => {
   beforeEach(() => {
     mocks.requireOrgForAssistant.mockResolvedValue({

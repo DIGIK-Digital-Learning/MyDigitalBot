@@ -5,6 +5,7 @@ import NavCursor from "../components/NavCursor/NavCursor";
 import TopLoader from "./(marketing)/components/TopLoader/TopLoader";
 import SiteUnavailable from "../components/SiteUnavailable/SiteUnavailable";
 import { AlertProvider } from "../components/Alert/AlertProvider";
+import HtmlLang from "../components/HtmlLang/HtmlLang";
 
 export function generateStaticParams() {
   return [{ locale: "en" }, { locale: "pt" }];
@@ -16,6 +17,7 @@ export default async function LocaleLayout({ children }) {
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
+      <HtmlLang />
       <TopLoader />
       <NavCursor />
       <AlertProvider>

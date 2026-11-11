@@ -687,7 +687,7 @@ async function openCreateUserModal() {
                   }}
                 >
                   <Upload size={16} />
-                  <span>Import CSV</span>
+                  <span>{translation("Users.importCsv")}</span>
                 </button>
               </div>
             )}
