@@ -1,14 +1,5 @@
 import { Fragment } from "react";
-import {
-  CalendarClock,
-  ChevronDown,
-  ChevronRight,
-  CircleStop,
-  Eye,
-  Pencil,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import { CalendarClock, CircleStop, Plus } from "lucide-react";
 import styles from "../scheduled.module.css";
 import { Link } from "@/i18n/navigation";
 import {
@@ -18,6 +9,8 @@ import {
   previewText,
 } from "../helpers/scheduled.helpers";
 import NewBadge from "@/app/components/NewBadge/NewBadge";
+import RowAction, { RowActions } from "@/app/components/RowAction/RowAction";
+import { rowClickHandler } from "@/app/components/RowAction/rowClick";
 
 export default function ScheduledTable({
   loading,
@@ -110,15 +103,26 @@ export default function ScheduledTable({
 
                 return (
                   <Fragment key={item.id}>
-                    <tr>
+                    {/* #238: a linha faz o mesmo que "Ver" (numa sequência,
+                        abre as mensagens na própria tabela). */}
+                    <tr
+                      className={styles.rowClickable}
+                      onClick={rowClickHandler(() =>
+                        chain ? onToggleChain(item.id) : openViewModal(item),
+                      )}
+                    >
                       <td>
                         <div className={styles.messageCell}>
                           <strong className={styles.messagePreview}>
-                            {/* Abre o mesmo que o botão do olho. */}
+                            {/* Abre o mesmo que "Ver" (e é o alvo do teclado). */}
                             <button
                               type="button"
                               className={styles.messageLink}
-                              onClick={() => openViewModal(item)}
+                              onClick={() =>
+                                chain
+                                  ? onToggleChain(item.id)
+                                  : openViewModal(item)
+                              }
                             >
                               {previewText(item.message)}
                             </button>
@@ -170,11 +174,14 @@ export default function ScheduledTable({
 
                       <td>
                         {chain ? (
-                          <div className={styles.actions}>
-                            {/* Uma corrente abre-se na própria tabela, mensagem a mensagem. */}
-                            <button
-                              type="button"
-                              className={styles.iconButton}
+                          <RowActions
+                            label={translation("Table.actions")}
+                            className={styles.actions}
+                          >
+                            {/* Uma sequência abre-se na própria tabela, mensagem a mensagem. */}
+                            <RowAction
+                              kind="view"
+                              label={translation("Actions.view")}
                               onClick={() => onToggleChain(item.id)}
                               aria-expanded={expanded}
                               title={translation(
@@ -182,73 +189,54 @@ export default function ScheduledTable({
                                   ? "Chain.hideSteps"
                                   : "Chain.showSteps",
                               )}
-                            >
-                              {expanded ? (
-                                <ChevronDown aria-hidden />
-                              ) : (
-                                <ChevronRight aria-hidden />
-                              )}
-                            </button>
-
-                            <button
-                              type="button"
-                              className={styles.iconButton}
+                            />
+                            <RowAction
+                              kind="edit"
+                              label={translation("Actions.edit")}
                               disabled
                               title={translation("Chain.noEdit")}
-                            >
-                              <Pencil aria-hidden />
-                            </button>
-
-                            <button
-                              type="button"
-                              className={`${styles.iconButton} ${styles.dangerButton}`}
+                            />
+                            <RowAction
+                              kind="stop"
+                              icon={CircleStop}
+                              danger
+                              label={translation(
+                                item.status === "running"
+                                  ? "Chain.stop"
+                                  : "Chain.cancel",
+                              )}
                               onClick={() => onCloseChain(item)}
                               disabled={
                                 !canCloseChain(item) ||
                                 closingChainId === item.id
                               }
-                              title={translation(
-                                item.status === "running"
-                                  ? "Chain.stop"
-                                  : "Chain.cancel",
-                              )}
-                            >
-                              <CircleStop aria-hidden />
-                            </button>
-                          </div>
+                            />
+                          </RowActions>
                         ) : (
-                          <div className={styles.actions}>
-                            <button
-                              type="button"
-                              className={styles.iconButton}
+                          <RowActions
+                            label={translation("Table.actions")}
+                            className={styles.actions}
+                          >
+                            <RowAction
+                              kind="view"
+                              label={translation("Actions.view")}
                               onClick={() => openViewModal(item)}
-                              title={translation("Actions.view")}
-                            >
-                              <Eye aria-hidden />
-                            </button>
-
-                            <button
-                              type="button"
-                              className={styles.iconButton}
+                            />
+                            <RowAction
+                              kind="edit"
+                              label={translation("Actions.edit")}
                               onClick={() => openEditModal(item)}
                               disabled={!canEditItem(item)}
-                              title={translation("Actions.edit")}
-                            >
-                              <Pencil aria-hidden />
-                            </button>
-
-                            <button
-                              type="button"
-                              className={`${styles.iconButton} ${styles.dangerButton}`}
+                            />
+                            <RowAction
+                              kind="delete"
+                              label={translation("Actions.delete")}
                               onClick={() => handleDelete(item)}
                               disabled={
                                 !canDeleteItem(item) || deletingId === item.id
                               }
-                              title={translation("Actions.delete")}
-                            >
-                              <Trash2 aria-hidden />
-                            </button>
-                          </div>
+                            />
+                          </RowActions>
                         )}
                       </td>
                     </tr>
@@ -293,11 +281,14 @@ export default function ScheduledTable({
                                     total: chain.recipientCount,
                                   })}
                                 </span>
-                                <div className={styles.chainStepActions}>
+                                <RowActions
+                                  label={translation("Table.actions")}
+                                  className={styles.chainStepActions}
+                                >
                                   {/* Mudar só o texto desta mensagem. */}
-                                  <button
-                                    type="button"
-                                    className={`${styles.iconButton} ${styles.chainStepButton}`}
+                                  <RowAction
+                                    kind="edit"
+                                    label={translation("Actions.edit")}
                                     onClick={() => onEditStep(item, step)}
                                     disabled={Boolean(
                                       stepEditBlockedReason(item, step),
@@ -307,13 +298,12 @@ export default function ScheduledTable({
                                       translation("Chain.editStep")
                                     }
                                     aria-label={translation("Chain.editStep")}
-                                  >
-                                    <Pencil aria-hidden />
-                                  </button>
-                                  {/* Tirar só esta mensagem da corrente. */}
-                                  <button
-                                    type="button"
-                                    className={`${styles.iconButton} ${styles.dangerButton} ${styles.chainStepButton}`}
+                                  />
+                                  {/* Tirar só esta mensagem da sequência. */}
+                                  <RowAction
+                                    kind="remove"
+                                    danger
+                                    label={translation("Actions.remove")}
                                     onClick={() => onRemoveStep(item, step)}
                                     disabled={
                                       Boolean(stepBlockedReason(item, step)) ||
@@ -325,10 +315,8 @@ export default function ScheduledTable({
                                       translation("Chain.removeStep")
                                     }
                                     aria-label={translation("Chain.removeStep")}
-                                  >
-                                    <Trash2 aria-hidden />
-                                  </button>
-                                </div>
+                                  />
+                                </RowActions>
                               </div>
                             </td>
                           </tr>

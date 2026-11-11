@@ -22,7 +22,7 @@ export async function POST(req, { params }) {
     const result = await closeChain(orgAuth.orgId, id);
     if (result.code) {
       return NextResponse.json(
-        { error: "Could not close message chain", code: result.code },
+        { error: "Could not close the message sequence", code: result.code },
         { status: result.status },
       );
     }

@@ -24,6 +24,7 @@ import {
 
 import ScheduledHeader from "./components/ScheduledHeader";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
+import useRefreshOnReturn from "@/app/hooks/useRefreshOnReturn";
 import useSeenSince from "@/app/hooks/useSeenSince";
 import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import ScheduledStats from "./components/ScheduledStats";
@@ -95,25 +96,21 @@ export default function ScheduledPage() {
 
   const closeTimersRef = useRef({ view: null, edit: null, step: null });
 
+  /*
+   * `silent`: ao voltar à página (#236) a tabela troca sem mostrar o
+   * carregamento (as sequências abertas ficam abertas) e sem aviso se falhar.
+   */
   const loadItems = useCallback(
-    async (showSuccessAlert = false) => {
+    async ({ silent = false } = {}) => {
       /* O contador do limite acompanha a lista (cancelar, apagar, editar). */
       reloadPlanUsage();
 
-      if (!org?.id) {
-        if (showSuccessAlert) {
-          await showAlertRef.current({
-            title: t("Alerts.noOrg.title"),
-            message: t("Alerts.noOrg.message"),
-            tone: "warning",
-          });
-        }
+      if (!org?.id) return;
 
-        return;
+      if (!silent) {
+        setLoading(true);
+        setError("");
       }
-
-      setLoading(true);
-      setError("");
 
       try {
         /* As agendadas e as correntes (agendadas ou a decorrer), juntas. */
@@ -147,8 +144,10 @@ export default function ScheduledPage() {
           ),
         );
         setItems(normalizedItems);
+        setError("");
       } catch (err) {
         console.warn("[Scheduled] load items error:", err);
+        if (silent) return;
 
         setError(t("Errors.load"));
 
@@ -158,10 +157,14 @@ export default function ScheduledPage() {
           tone: "danger",
         });
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
       }
     },
     [org?.id, t, reloadPlanUsage],
+  );
+
+  useRefreshOnReturn(
+    useCallback(() => loadItems({ silent: true }), [loadItems]),
   );
 
   useEffect(() => {
@@ -835,7 +838,6 @@ export default function ScheduledPage() {
         dateFilter={dateFilter}
         onDateChange={setDateFilter}
         onClearDate={() => setDateFilter("")}
-        onRefresh={() => loadItems(true)}
         usage={
           <UsageCounter
             used={planUsage?.scheduledMessages}

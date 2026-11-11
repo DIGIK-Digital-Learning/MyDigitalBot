@@ -87,7 +87,6 @@
   opacity: 0.6;
 }
 
-.refreshButton,
 .secondaryButton {
   display: inline-flex;
   align-items: center;
@@ -102,18 +101,6 @@
     border-color 0.15s ease;
 }
 
-.refreshButton {
-  border: 0;
-  background: var(--color-primary);
-  color: #fff;
-  box-shadow: 0 1px 2px rgba(var(--brand-1-rgb), 0.3);
-}
-
-.refreshButton:hover {
-  filter: brightness(0.94);
-  box-shadow: 0 4px 12px rgba(var(--brand-1-rgb), 0.28);
-}
-
 .secondaryButton {
   border: 1px solid var(--an-border);
   background: #fff;
@@ -126,7 +113,6 @@
   color: var(--color-primary);
 }
 
-.refreshButton:disabled,
 .secondaryButton:disabled {
   opacity: 0.55;
   cursor: not-allowed;
@@ -1125,25 +1111,14 @@ tr[data-medal="gold"] .rankingLabel {
   gap: 18px;
 }
 
-.spin {
-  animation: spin 0.8s linear infinite;
-}
-
 @keyframes shimmer {
   to {
     background-position: -200% 0;
   }
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .skeleton,
-  .spin {
+  .skeleton {
     animation: none;
   }
 }

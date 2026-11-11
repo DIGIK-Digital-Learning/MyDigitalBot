@@ -113,7 +113,7 @@ export async function POST(req) {
 
     if (!["whatsapp", "teams"].includes(channel)) {
       return NextResponse.json(
-        { error: "Read chains only support WhatsApp and Teams." },
+        { error: "Message sequences only support WhatsApp and Teams." },
         { status: 400 },
       );
     }
@@ -135,7 +135,7 @@ export async function POST(req) {
 
     if (!enabled) {
       return NextResponse.json(
-        { error: "Read chains are disabled for this organization." },
+        { error: "Message sequences are turned off for this organization." },
         { status: 403 },
       );
     }
@@ -179,7 +179,7 @@ export async function POST(req) {
     if (steps.length < 2 || steps.length > maxSteps) {
       return NextResponse.json(
         {
-          error: `A read chain must have between 2 and ${maxSteps} messages.`,
+          error: `A message sequence must have between 2 and ${maxSteps} messages.`,
           code: steps.length > maxSteps ? "CHAIN_TOO_LONG" : undefined,
           limit: Number.isFinite(maxSteps) ? maxSteps : null,
         },
@@ -286,7 +286,7 @@ export async function POST(req) {
 
     if (!firstStep) {
       return NextResponse.json(
-        { error: "Could not create first chain step." },
+        { error: "Could not create the first message of the sequence." },
         { status: 500 },
       );
     }

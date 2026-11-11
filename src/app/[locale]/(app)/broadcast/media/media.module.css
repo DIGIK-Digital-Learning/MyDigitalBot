@@ -304,9 +304,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  margin-right: 8px;
+  /* Da altura das ações das linhas (#238). */
+  width: 30px;
+  height: 30px;
+  margin-right: 6px;
   vertical-align: middle;
   border: 1px solid var(--ui-border);
   border-radius: 9999px;
@@ -318,29 +319,6 @@
 .downloadButton:hover,
 .downloadButton:focus-visible {
   background: #f7fbff;
-}
-
-.deleteButton {
-  height: 34px;
-  padding: 0 14px;
-  border: 1px solid var(--ui-border);
-  border-radius: 9999px;
-  background: #fff;
-  color: #b42318;
-  font: inherit;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.deleteButton:hover:not(:disabled) {
-  background: #fff5f5;
-  border-color: #ffd0d0;
-}
-
-.deleteButton:disabled {
-  color: var(--ui-muted);
-  cursor: not-allowed;
 }
 
 .emptyBox,

@@ -176,7 +176,6 @@
 
 .primaryButton,
 .secondaryButton,
-.refreshButton,
 .deleteButton {
   display: inline-flex;
   align-items: center;
@@ -215,15 +214,7 @@
   background: #e5e7eb;
 }
 
-.refreshButton {
-  background: #ffffff;
-  color: #111827;
-  border: 1px solid var(--ui-border, #d1d5db);
-}
 
-.refreshButton:hover {
-  background: #f9fafb;
-}
 
 .deleteButton {
   background: #fff5f5;
@@ -237,7 +228,6 @@
 
 .primaryButton:disabled,
 .secondaryButton:disabled,
-.refreshButton:disabled,
 .deleteButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -400,9 +390,12 @@
 }
 
 .actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+/* #238: clicar na linha faz o mesmo que "Ver". */
+.rowClickable {
+  cursor: pointer;
 }
 
 .iconButton {
@@ -425,10 +418,6 @@
 .iconButton:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-}
-
-.dangerButton {
-  color: #b91c1c;
 }
 
 .stateBox {
@@ -1586,8 +1575,6 @@
     width: 100%;
     min-width: 100%;
   }
-
-  .refreshButton,
   .primaryButton {
     width: 100%;
   }
@@ -1755,22 +1742,9 @@
   color: var(--ui-muted, #6b7280);
 }
 
-/* O ✏ e o 🗑 de cada mensagem da corrente, encostados à direita. */
+/* Editar e Remover de cada mensagem da sequência, encostados à direita. */
 .chainStepActions {
-  display: flex;
-  gap: 6px;
   margin-left: auto;
-}
-
-.chainStepButton {
-  width: 30px;
-  height: 30px;
-  border-radius: 10px;
-}
-
-.chainStepButton svg {
-  width: 16px;
-  height: 16px;
 }
 
 /* Aviso no modal de editar (texto vazio ou acima do limite). */

@@ -224,7 +224,7 @@
   display: grid;
   grid-template-columns:
     minmax(240px, 2fr) 1.15fr 0.9fr 0.85fr 1fr minmax(220px, 1.7fr)
-    110px;
+    auto;
   align-items: center;
   gap: 16px;
   padding: 14px 16px;
@@ -368,30 +368,6 @@
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-}
-
-.rowActBtn {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  border: 1px solid var(--ui-border, #dfe7f1);
-  background: #fff;
-  color: #475569;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition:
-    transform 0.16s ease,
-    box-shadow 0.16s ease,
-    border-color 0.16s ease,
-    background 0.16s ease;
-}
-
-.rowActBtn:hover {
-  transform: translateY(-1px);
-  border-color: #cdd8e6;
-  box-shadow: 0 8px 18px rgba(15, 28, 63, 0.08);
 }
 
 .rowActBtnDanger {
@@ -653,7 +629,7 @@
   .row {
     grid-template-columns:
       minmax(240px, 2fr) 1fr 0.9fr 0.85fr 1fr minmax(180px, 1.5fr)
-      110px;
+      auto;
   }
 }
 
