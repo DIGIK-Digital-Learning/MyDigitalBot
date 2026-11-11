@@ -1419,20 +1419,20 @@
       }
     },
     "readChains": {
-      "title": "Mensagens em cadeia",
+      "title": "Sequências de mensagens",
       "text": "Envia a mensagem seguinte depois de a anterior ser lida, no WhatsApp e no Teams.",
       "active": "Funcionalidade ativa",
       "inactive": "Funcionalidade inativa",
       "on": "Ligado",
       "off": "Desligado",
       "saving": "A guardar...",
-      "enable": "Ligar mensagens em cadeia",
-      "disable": "Desligar mensagens em cadeia",
-      "enabledTitle": "Mensagens em cadeia ligadas",
-      "enabledMessage": "Os envios podem criar cadeias de mensagens no WhatsApp e no Teams, que avançam quando cada mensagem é lida.",
-      "disabledTitle": "Mensagens em cadeia desligadas",
-      "disabledMessage": "Os envios deixam de poder criar novas cadeias de mensagens.",
-      "errorTitle": "Não foi possível alterar as mensagens em cadeia",
+      "enable": "Ligar sequências de mensagens",
+      "disable": "Desligar sequências de mensagens",
+      "enabledTitle": "Sequências de mensagens ligadas",
+      "enabledMessage": "Os envios podem criar sequências de mensagens no WhatsApp e no Teams, que avançam quando cada mensagem é lida.",
+      "disabledTitle": "Sequências de mensagens desligadas",
+      "disabledMessage": "Os envios deixam de poder criar novas sequências de mensagens.",
+      "errorTitle": "Não foi possível alterar as sequências de mensagens",
       "errorMessage": "Não foi possível atualizar a funcionalidade."
     },
     "unknown": "Outro / desconhecido"
@@ -1516,7 +1516,7 @@
       },
       "inUseTitle": "Link em uso",
       "inUseScheduled": "Este link está numa mensagem agendada. Cancela-a primeiro para o poderes eliminar.",
-      "inUseChain": "Este link está numa corrente que ainda está a decorrer. Só o podes eliminar quando a corrente terminar.",
+      "inUseChain": "Este link está numa sequência de mensagens que ainda está a decorrer. Só o podes eliminar quando a sequência terminar.",
       "title": "Links já usados",
       "search": "Procurar por nome ou URL",
       "use": "Usar",
@@ -1591,8 +1591,8 @@
     },
     "confirmSchedule": {
       "isChain": {
-        "title": "Agendar Corrente de Mensagens?",
-        "message": "Estás a agendar uma corrente de mensagens para {recipientLabel}. A primeira mensagem vai ser mandada a {formattedDate}. As próximas vão ser mandadas depois de lidas e só depois do atraso. ",
+        "title": "Agendar Sequência de Mensagens?",
+        "message": "Estás a agendar uma sequência de mensagens para {recipientLabel}. A primeira mensagem vai ser mandada a {formattedDate}. As próximas vão ser mandadas depois de lidas e só depois do atraso.",
         "confirm": "Confirmar",
         "cancel": "Cancelar"
       },
@@ -1607,8 +1607,8 @@
     },
     "confirmSend": {
       "isChain": {
-        "title": "Começar Corrente de Mensagens?",
-        "message": "Estás prestes a começar um corrente de mensagem para {recipientLabel}. A primeira mensagem vai ser mandada agora. As próximas vão ser mandadas depois de lidas e só depois do atraso.",
+        "title": "Começar Sequência de Mensagens?",
+        "message": "Estás prestes a começar uma sequência de mensagens para {recipientLabel}. A primeira mensagem vai ser mandada agora. As próximas vão ser mandadas depois de lidas e só depois do atraso.",
         "confirm": "Confirmar",
         "cancel": "Cancelar"
       },
@@ -1624,7 +1624,7 @@
     "groups": {
       "tabUsers": "Colaboradores",
       "tabGroups": "Grupos Teams",
-      "onlyBlank": "Os grupos só recebem mensagens em branco, sem cadeia.",
+      "onlyBlank": "Os grupos só recebem mensagens em branco, sem sequência.",
       "search": "Procurar grupo...",
       "empty": "Ainda não há grupos ativos. Adiciona o MyDigitalBot a um chat de grupo ou a uma equipa no Teams.",
       "unnamed": "Grupo sem nome",
@@ -1763,11 +1763,11 @@
       "recipient": "recipiente",
       "smallRecipients": "recipientes",
       "broadcastChain": {
-        "title": "Corrente de Mensagens",
-        "chainHelp": "Cria uma corrente de mensagens, quando o destinatário vê a mensagem recebe outra mensagem logo ou algum tempo depois.",
-        "createChain": "Cria Corrente",
-        "exitChain": "Sai da Corrente",
-        "chainOff": "Correntes de mensagens estão desativadas nas Automações. Ativa a opção antes de mandar.",
+        "title": "Sequência de Mensagens",
+        "chainHelp": "Cria uma sequência de mensagens: quando o destinatário vê uma mensagem, recebe a seguinte logo ou algum tempo depois.",
+        "createChain": "Cria Sequência",
+        "exitChain": "Sai da Sequência",
+        "chainOff": "As sequências de mensagens estão desligadas nas Automações. Liga a opção antes de enviar.",
         "chainMessage": "Mensagem",
         "chainLengthMax": "Máximo de 10 Mensagens",
         "chainLengthAdd": "Adiciona Mensagem",
@@ -1782,7 +1782,7 @@
         "chainDelayBefore": "Atraso antes da Mensagem ",
         "chainHour": "Horas",
         "chainMinute": "Minutos",
-        "chainFirstMessage": "A primeira mensagem não tem delay. É mandada quando a corrente começa.",
+        "chainFirstMessage": "A primeira mensagem não tem atraso. É mandada quando a sequência começa.",
         "chainNoDelay": "Sem atraso. Manda depois da mensagem anterior ser lida.",
         "chainDelayMinutes": "Espera {minutes, plural, one {# minuto} other {# minutos}} depois de ler.",
         "chainDelayHours": "Espera {hours, plural, one {# hora} other {# horas}} depois de ler.",
@@ -1882,11 +1882,11 @@
     "recipient": "recipiente",
     "smallRecipients": "recipientes",
     "broadcastChain": {
-      "title": "Corrente de Mensagens",
-      "chainHelp": "Cria uma corrente de mensagens, quando o destinatário vê a mensagem recebe outra mensagem logo ou algum tempo depois.",
-      "createChain": "Cria Corrente",
-      "exitChain": "Sai da Corrente",
-      "chainOff": "Correntes de mensagens estão desativadas nas Automações. Ativa a opção antes de mandar.",
+      "title": "Sequência de Mensagens",
+      "chainHelp": "Cria uma sequência de mensagens: quando o destinatário vê uma mensagem, recebe a seguinte logo ou algum tempo depois.",
+      "createChain": "Cria Sequência",
+      "exitChain": "Sai da Sequência",
+      "chainOff": "As sequências de mensagens estão desligadas nas Automações. Liga a opção antes de enviar.",
       "chainMessage": "Mensagem",
       "chainLengthMax": "Máximo de 10 Mensagens",
       "chainLengthAdd": "Adiciona Mensagem",
@@ -1901,7 +1901,7 @@
       "chainDelayBefore": "Atraso antes da Mensagem ",
       "chainHour": "Horas",
       "chainMinute": "Minutos",
-      "chainFirstMessage": "A primeira mensagem não tem delay. É mandada quando a corrente começa.",
+      "chainFirstMessage": "A primeira mensagem não tem atraso. É mandada quando a sequência começa.",
       "chainNoDelay": "Sem atraso. Manda depois da mensagem anterior ser lida.",
       "chainDelayMinutes": "Espera {minutes, plural, one {# minuto} other {# minutos}} depois de ler.",
       "chainDelayHours": "Espera {hours, plural, one {# hora} other {# horas}} depois de ler.",
@@ -1925,13 +1925,13 @@
     "feedback": {
       "chooseRecipients": "Escolhe os destinatários",
       "chainDisabled": {
-        "title": "Correntes de leitura desligadas",
-        "message": "Liga primeiro as mensagens em corrente de leitura nas Automações."
+        "title": "Sequências de mensagens desligadas",
+        "message": "Liga primeiro as sequências de mensagens nas Automações."
       },
       "chainIncomplete": {
-        "title": "Completa a corrente",
-        "message": "Uma corrente de leitura precisa de 2 a 10 mensagens livres, e cada mensagem tem de ter texto ou anexos. Os links rastreados também têm de estar completos.",
-        "scheduledMessage": "Uma corrente de leitura agendada precisa de 2 a 10 mensagens livres, e cada mensagem tem de ter texto ou anexos. Os links rastreados também têm de estar completos."
+        "title": "Completa a sequência",
+        "message": "Uma sequência de mensagens precisa de 2 a 10 mensagens livres, e cada mensagem tem de ter texto ou anexos. Os links rastreados também têm de estar completos.",
+        "scheduledMessage": "Uma sequência de mensagens agendada precisa de 2 a 10 mensagens livres, e cada mensagem tem de ter texto ou anexos. Os links rastreados também têm de estar completos."
       },
       "invalidLinks": {
         "title": "Links rastreados inválidos",
@@ -1955,20 +1955,20 @@
         "invalid": "Escreve uma hora válida.",
         "range": "Escolhe uma hora entre as 08:00 e as 20:00."
       },
-      "chainSendFailed": "Não foi possível enviar a corrente de leitura.",
-      "chainScheduleFailed": "Não foi possível agendar a corrente de leitura.",
+      "chainSendFailed": "Não foi possível enviar a sequência de mensagens.",
+      "chainScheduleFailed": "Não foi possível agendar a sequência de mensagens.",
       "unknownError": "Erro desconhecido.",
       "requestFailed": "O pedido falhou com o estado {status}.",
       "unknownRecipient": "Destinatário desconhecido",
       "failedRecipients": "Destinatários com falha:",
       "andMore": "- E mais {count}...",
       "titles": {
-        "chainStarted": "Corrente de leitura iniciada",
-        "chainStartedIssues": "Corrente de leitura iniciada com problemas",
+        "chainStarted": "Sequência de mensagens iniciada",
+        "chainStartedIssues": "Sequência de mensagens iniciada com problemas",
         "sent": "Mensagem enviada",
         "sentIssues": "Envio concluído com problemas",
-        "chainScheduled": "Corrente de leitura agendada",
-        "chainScheduledIssues": "Corrente de leitura agendada com problemas",
+        "chainScheduled": "Sequência de mensagens agendada",
+        "chainScheduledIssues": "Sequência de mensagens agendada com problemas",
         "scheduled": "Envio agendado",
         "scheduledIssues": "Envio agendado com problemas"
       },
@@ -1978,7 +1978,7 @@
         "scheduled": "Envio por {channel} agendado: {ok, plural, one {# com sucesso} other {# com sucesso}} e {failed, plural, one {# falhou} other {# falharam}}."
       },
       "notes": {
-        "chainWhatsapp": "A mensagem 1 foi enviada se a janela de 24h estava aberta. Se não, foi enviada a mensagem de abertura e a corrente espera por uma resposta.",
+        "chainWhatsapp": "A mensagem 1 foi enviada se a janela de 24h estava aberta. Se não, foi enviada a mensagem de abertura e a sequência espera por uma resposta.",
         "chainTeams": "A mensagem 1 foi enviada. Cada mensagem seguinte segue quando a anterior for lida.",
         "chainScheduled": "A mensagem 1 vai ser enviada à hora agendada. As seguintes continuam depois de cada leitura.",
         "scheduled": "Estes números dizem para quantos destinatários o envio ficou agendado. Só se sabe se foi entregue quando o envio agendado sair."
@@ -1995,7 +1995,7 @@
   },
   "BroadcastScheduled": {
     "Chain": {
-      "tag": "Corrente · {count, plural, one {# mensagem} other {# mensagens}}",
+      "tag": "Sequência · {count, plural, one {# mensagem} other {# mensagens}}",
       "progress": "{done} de {total} pessoas terminaram",
       "step": "Mensagem {index}",
       "noText": "Sem texto",
@@ -2004,11 +2004,11 @@
       "afterRead": "Sai quando a anterior é lida",
       "delay": "Sai {minutes} min depois de a anterior ser lida",
       "reached": "Recebida por {count} de {total}",
-      "showSteps": "Ver as mensagens da corrente",
-      "hideSteps": "Esconder as mensagens da corrente",
-      "noEdit": "As correntes não se editam: cancela esta e cria outra.",
-      "cancel": "Cancelar corrente",
-      "stop": "Parar corrente",
+      "showSteps": "Ver as mensagens da sequência",
+      "hideSteps": "Esconder as mensagens da sequência",
+      "noEdit": "As sequências não se editam: cancela esta e cria outra.",
+      "cancel": "Cancelar sequência",
+      "stop": "Parar sequência",
       "editStep": "Editar esta mensagem",
       "stepLockedEdit": "Já foi recebida ou está à espera de sair: não se pode editar.",
       "questionNoEdit": "As perguntas não se editam aqui: só o texto das mensagens.",
@@ -2026,7 +2026,7 @@
       },
       "stepSaved": {
         "title": "Mensagem atualizada",
-        "message": "A corrente vai enviar o texto novo."
+        "message": "A sequência vai enviar o texto novo."
       },
       "stepEditGone": {
         "title": "Já não dá para a editar",
@@ -2035,46 +2035,46 @@
       "keep": "Manter",
       "removeStep": "Tirar esta mensagem",
       "stepLocked": "Já foi recebida ou está à espera de sair: não se pode tirar.",
-      "minSteps": "Uma corrente precisa de pelo menos 2 mensagens. Para tirar mais, cancela a corrente.",
+      "minSteps": "Uma sequência precisa de pelo menos 2 mensagens. Para tirar mais, cancela a sequência.",
       "confirmRemove": {
         "title": "Tirar a mensagem {index}?",
-        "scheduled": "A corrente fica com {count} mensagens. Se foi criada hoje, 1 envio volta ao teu limite de hoje.",
-        "running": "Ninguém a recebeu ainda: a corrente passa da mensagem anterior para a seguinte. Se foi criada hoje, 1 envio volta ao teu limite de hoje.",
+        "scheduled": "A sequência fica com {count} mensagens. Se foi criada hoje, 1 envio volta ao teu limite de hoje.",
+        "running": "Ninguém a recebeu ainda: a sequência passa da mensagem anterior para a seguinte. Se foi criada hoje, 1 envio volta ao teu limite de hoje.",
         "confirm": "Tirar mensagem"
       },
       "stepRemoved": {
         "title": "Mensagem tirada",
-        "message": "A corrente segue sem esta mensagem."
+        "message": "A sequência segue sem esta mensagem."
       },
       "stepGone": {
         "title": "Já não dá para a tirar",
         "message": "Entretanto alguém recebeu esta mensagem ou a seguinte. A lista foi atualizada."
       },
       "confirmCancel": {
-        "title": "Cancelar esta corrente?",
-        "message": "Nenhuma mensagem chega a sair. Se a corrente foi criada hoje, os envios voltam ao teu limite de hoje.",
-        "confirm": "Cancelar corrente"
+        "title": "Cancelar esta sequência?",
+        "message": "Nenhuma mensagem chega a sair. Se a sequência foi criada hoje, os envios voltam ao teu limite de hoje.",
+        "confirm": "Cancelar sequência"
       },
       "confirmStop": {
-        "title": "Parar esta corrente?",
+        "title": "Parar esta sequência?",
         "message": "As mensagens que faltam já não saem e as que já saíram ficam. Se foi criada hoje, as mensagens que não chegaram a ninguém voltam ao teu limite de hoje.",
-        "confirm": "Parar corrente"
+        "confirm": "Parar sequência"
       },
       "cancelled": {
-        "title": "Corrente cancelada",
-        "message": "A corrente foi cancelada e não vai sair."
+        "title": "Sequência cancelada",
+        "message": "A sequência foi cancelada e não vai sair."
       },
       "stopped": {
-        "title": "Corrente parada",
+        "title": "Sequência parada",
         "message": "As mensagens que faltavam já não vão sair."
       },
       "sending": {
-        "title": "A corrente está a sair agora",
+        "title": "A sequência está a sair agora",
         "message": "Tenta daqui a um minuto: já não dá para a cancelar, mas vais poder pará-la."
       },
       "error": {
         "title": "Não foi possível",
-        "message": "Não conseguimos cancelar a corrente. Atualiza a página e tenta outra vez."
+        "message": "Não conseguimos cancelar a sequência. Atualiza a página e tenta outra vez."
       }
     },
     "Title": "Mensagens agendadas",
@@ -2490,7 +2490,7 @@
     "loading": "A carregar ficheiros...",
     "noFiles": "Ainda não foram carregados ficheiros nas mensagens.",
     "noMatches": "Nenhum ficheiro corresponde à pesquisa.",
-    "inUseHint": "Este ficheiro vai ser enviado numa mensagem agendada ou numa cadeia ativa. Se fosse eliminado agora, a mensagem sairia sem ele. Pode ser eliminado depois de a mensagem ser enviada ou cancelada.",
+    "inUseHint": "Este ficheiro vai ser enviado numa mensagem agendada ou numa sequência de mensagens ativa. Se fosse eliminado agora, a mensagem sairia sem ele. Pode ser eliminado depois de a mensagem ser enviada ou cancelada.",
     "openScheduled": "Ver a mensagem agendada que usa este ficheiro",
     "download": "Transferir {name}",
     "table": {
@@ -3275,11 +3275,11 @@
       "broadcast_scheduled": "Mensagem agendada",
       "broadcast_schedule_updated": "Agendamento editado",
       "broadcast_schedule_deleted": "Agendamento eliminado",
-      "broadcast_read_chain_created": "Sequência de leitura criada",
-      "broadcast_read_chain_cancelled": "Corrente cancelada",
-      "broadcast_read_chain_stopped": "Corrente parada",
-      "broadcast_read_chain_step_removed": "Mensagem tirada de uma corrente",
-      "broadcast_read_chain_step_edited": "Mensagem de uma corrente editada",
+      "broadcast_read_chain_created": "Sequência de mensagens criada",
+      "broadcast_read_chain_cancelled": "Sequência de mensagens cancelada",
+      "broadcast_read_chain_stopped": "Sequência de mensagens parada",
+      "broadcast_read_chain_step_removed": "Mensagem tirada de uma sequência",
+      "broadcast_read_chain_step_edited": "Mensagem de uma sequência editada",
       "message_template_sent": "Template enviado a um colaborador",
       "template_created": "Template WhatsApp criado",
       "media_deleted": "Ficheiro de multimédia eliminado",
@@ -3336,7 +3336,7 @@
         "scheduledFor": "Agendado para",
         "timezone": "Fuso horário",
         "status": "Estado",
-        "enabled": "Sequências de leitura",
+        "enabled": "Sequências de mensagens",
         "withTemplate": "Com template",
         "scheduled": "Agendado",
         "source": "Origem",
@@ -3590,9 +3590,9 @@
       "messageFilesTitle": "Limite de ficheiros atingido",
       "messageFiles": "Cada mensagem pode ter até {limit, plural, one {# ficheiro} other {# ficheiros}}. Tira algum para juntares outro.",
       "messageFilesRemaining": "Podes juntar só mais {remaining, plural, =0 {nenhum ficheiro} one {# ficheiro} other {# ficheiros}} a esta mensagem (máximo de {limit}). Escolhe menos ou tira algum.",
-      "chainTooLongTitle": "Corrente demasiado longa",
-      "chainTooLong": "Uma corrente pode ter até {limit} mensagens.",
-      "inStep": "Na mensagem {step} da corrente:",
+      "chainTooLongTitle": "Sequência demasiado longa",
+      "chainTooLong": "Uma sequência pode ter até {limit} mensagens.",
+      "inStep": "Na mensagem {step} da sequência:",
       "assistantsTitle": "Limite de assistentes atingido",
       "assistants": "O plano {plan} permite criar {limit, plural, one {# assistente} other {# assistentes}}. Atualiza o teu plano para criares mais.",
       "assistantsNoDetail": "Chegaste ao limite de assistentes do teu plano. Atualiza o teu plano para criares mais.",
@@ -3613,7 +3613,7 @@
       "scheduledTitle": "Limite de mensagens agendadas atingido",
       "dailyTitle": "Limite de envios de hoje atingido",
       "daily": "Já usaste os {limit} envios de hoje no {channel}. O contador volta a 0 às {time}.",
-      "dailyChain": "Esta corrente precisa de {steps} envios, mas hoje só te {remaining, plural, one {resta # envio} other {restam # envios}} no {channel}. Encurta a corrente ou espera pelas {time}.",
+      "dailyChain": "Esta sequência precisa de {steps} envios, mas hoje só te {remaining, plural, one {resta # envio} other {restam # envios}} no {channel}. Encurta a sequência ou espera pelas {time}.",
       "scheduled": "Podes ter até {limit, plural, one {# mensagem agendada} other {# mensagens agendadas}} à espera de envio. Cancela ou apaga uma nas mensagens agendadas para agendares outra."
     },
     "counter": {
@@ -3635,10 +3635,10 @@
       "scheduledLabel": "Mensagens agendadas",
       "dailyShort": "Envios hoje",
       "dailyLabel": "Envios de hoje neste canal",
-      "dailyHint": "Cada envio conta 1, seja para quantos colaboradores for. Uma corrente conta 1 por mensagem e uma agendada conta no dia em que é agendada. As automações não contam. Volta a 0 às {time}.",
+      "dailyHint": "Cada envio conta 1, seja para quantos colaboradores for. Uma sequência de mensagens conta 1 por mensagem e uma agendada conta no dia em que é agendada. As automações não contam. Volta a 0 às {time}.",
       "weeklyLabel": "Mensagens desta semana no {channel}",
       "weeklyHint": "Mensagens que cada colaborador enviou esta semana em cada canal: ao assistente e respostas a quizzes, sondagens e perguntas abertas. Acima do limite o assistente deixa de responder até segunda-feira às 00:00.",
-      "scheduledHint": "Conta as mensagens agendadas por ti que ainda estão à espera de envio. As das automações e as correntes não contam."
+      "scheduledHint": "Conta as mensagens agendadas por ti que ainda estão à espera de envio. As das automações e as sequências de mensagens não contam."
     }
   },
   "Admin": {
@@ -3695,7 +3695,7 @@
       "save": "Guardar",
       "confirmTitle": "Guardar o plano {plan}",
       "confirmMessage": "{count, plural, =0 {Nenhuma organização está neste plano.} one {Isto muda os limites de # organização, já.} other {Isto muda os limites de # organizações, já.}} Continuar?",
-      "hint": "Máximos técnicos: 10 mensagens por corrente e 50 MB por ficheiro.",
+      "hint": "Máximos técnicos: 10 mensagens por sequência e 50 MB por ficheiro.",
       "locked": "Plano da DIGIK, não se edita"
     },
     "limits": {
@@ -3712,7 +3712,7 @@
       "messageChars": "Caracteres por mensagem",
       "filesPerMessage": "Ficheiros por mensagem",
       "fileSizeMb": "MB por ficheiro",
-      "chainMessages": "Mensagens por corrente"
+      "chainMessages": "Mensagens por sequência"
     }
   },
   "Pagination": {

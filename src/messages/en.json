@@ -1419,20 +1419,20 @@
       }
     },
     "readChains": {
-      "title": "Chain messages",
+      "title": "Message sequences",
       "text": "Sends the next message after the previous one is read, on WhatsApp and Teams.",
       "active": "Feature active",
       "inactive": "Feature inactive",
       "on": "On",
       "off": "Off",
       "saving": "Saving...",
-      "enable": "Turn on chain messages",
-      "disable": "Turn off chain messages",
-      "enabledTitle": "Chain messages on",
-      "enabledMessage": "Sends can create message chains on WhatsApp and Teams, which move forward as each message is read.",
-      "disabledTitle": "Chain messages off",
-      "disabledMessage": "Sends can no longer create new message chains.",
-      "errorTitle": "Couldn't change chain messages",
+      "enable": "Turn on message sequences",
+      "disable": "Turn off message sequences",
+      "enabledTitle": "Message sequences on",
+      "enabledMessage": "Sends can create message sequences on WhatsApp and Teams, which move forward as each message is read.",
+      "disabledTitle": "Message sequences off",
+      "disabledMessage": "Sends can no longer create new message sequences.",
+      "errorTitle": "Couldn't change message sequences",
       "errorMessage": "Couldn't update the feature."
     },
     "unknown": "Other / unknown"
@@ -1516,7 +1516,7 @@
       },
       "inUseTitle": "Link in use",
       "inUseScheduled": "This link is in a scheduled message. Cancel it first so you can delete the link.",
-      "inUseChain": "This link is in a chain that is still running. You can only delete it once the chain ends.",
+      "inUseChain": "This link is in a message sequence that is still running. You can only delete it once the sequence ends.",
       "title": "Links already used",
       "search": "Search by name or URL",
       "use": "Use",
@@ -1591,8 +1591,8 @@
     },
     "confirmSchedule": {
       "isChain": {
-        "title": "Schedule Message Chain?",
-        "message": "You're scheduling a message chain for {recipientLabel}. The first message will be sent on {formattedDate}. The next ones will be sent after they're read and only after the delay. ",
+        "title": "Schedule Message Sequence?",
+        "message": "You're scheduling a message sequence for {recipientLabel}. The first message will be sent on {formattedDate}. The next ones will be sent after they're read and only after the delay.",
         "confirm": "Confirm",
         "cancel": "Cancel"
       },
@@ -1607,8 +1607,8 @@
     },
     "confirmSend": {
       "isChain": {
-        "title": "Start Message Chain?",
-        "message": "You're about to start a message chain for {recipientLabel}. The first message will be sent now. The next ones will be sent after they're read and only after the delay.",
+        "title": "Start Message Sequence?",
+        "message": "You're about to start a message sequence for {recipientLabel}. The first message will be sent now. The next ones will be sent after they're read and only after the delay.",
         "confirm": "Confirm",
         "cancel": "Cancel"
       },
@@ -1624,7 +1624,7 @@
     "groups": {
       "tabUsers": "Collaborators",
       "tabGroups": "Teams Groups",
-      "onlyBlank": "Groups only receive blank messages, with no chain.",
+      "onlyBlank": "Groups only receive blank messages, with no sequence.",
       "search": "Search group...",
       "empty": "No active groups yet. Add MyDigitalBot to a group chat or a team in Teams.",
       "unnamed": "Unnamed group",
@@ -1763,11 +1763,11 @@
       "recipient": "recipient",
       "smallRecipients": "recipients",
       "broadcastChain": {
-        "title": "Message Chain",
-        "chainHelp": "Creates a message chain: when the recipient sees the message, they receive another message right away or some time later.",
-        "createChain": "Create Chain",
-        "exitChain": "Exit Chain",
-        "chainOff": "Message chains are turned off in Automations. Turn the option on before sending.",
+        "title": "Message Sequence",
+        "chainHelp": "Creates a message sequence: when the recipient sees a message, they receive the next one right away or some time later.",
+        "createChain": "Create Sequence",
+        "exitChain": "Exit Sequence",
+        "chainOff": "Message sequences are turned off in Automations. Turn the option on before sending.",
         "chainMessage": "Message",
         "chainLengthMax": "Maximum of 10 Messages",
         "chainLengthAdd": "Add Message",
@@ -1782,7 +1782,7 @@
         "chainDelayBefore": "Delay before the Message ",
         "chainHour": "Hours",
         "chainMinute": "Minutes",
-        "chainFirstMessage": "The first message has no delay. It's sent when the chain starts.",
+        "chainFirstMessage": "The first message has no delay. It's sent when the sequence starts.",
         "chainNoDelay": "No delay. Sent after the previous message is read.",
         "chainDelayMinutes": "Waits {minutes, plural, one {# minute} other {# minutes}} after it's read.",
         "chainDelayHours": "Waits {hours, plural, one {# hour} other {# hours}} after it's read.",
@@ -1882,11 +1882,11 @@
     "recipient": "recipient",
     "smallRecipients": "recipients",
     "broadcastChain": {
-      "title": "Message Chain",
-      "chainHelp": "Creates a message chain: when the recipient sees the message, they receive another message right away or some time later.",
-      "createChain": "Create Chain",
-      "exitChain": "Exit Chain",
-      "chainOff": "Message chains are turned off in Automations. Turn the option on before sending.",
+      "title": "Message Sequence",
+      "chainHelp": "Creates a message sequence: when the recipient sees a message, they receive the next one right away or some time later.",
+      "createChain": "Create Sequence",
+      "exitChain": "Exit Sequence",
+      "chainOff": "Message sequences are turned off in Automations. Turn the option on before sending.",
       "chainMessage": "Message",
       "chainLengthMax": "Maximum of 10 Messages",
       "chainLengthAdd": "Add Message",
@@ -1901,7 +1901,7 @@
       "chainDelayBefore": "Delay before the Message ",
       "chainHour": "Hours",
       "chainMinute": "Minutes",
-      "chainFirstMessage": "The first message has no delay. It's sent when the chain starts.",
+      "chainFirstMessage": "The first message has no delay. It's sent when the sequence starts.",
       "chainNoDelay": "No delay. Sent after the previous message is read.",
       "chainDelayMinutes": "Waits {minutes, plural, one {# minute} other {# minutes}} after it's read.",
       "chainDelayHours": "Waits {hours, plural, one {# hour} other {# hours}} after it's read.",
@@ -1925,13 +1925,13 @@
     "feedback": {
       "chooseRecipients": "Choose recipients",
       "chainDisabled": {
-        "title": "Read chains are disabled",
-        "message": "Enable read chain messages in Automations first."
+        "title": "Message sequences are off",
+        "message": "Turn on message sequences in Automations first."
       },
       "chainIncomplete": {
-        "title": "Complete the chain",
-        "message": "A read chain needs 2 to 10 freeform messages, and every message must have text or attachments. Tracked links must also be complete.",
-        "scheduledMessage": "A scheduled read chain needs 2 to 10 freeform messages, and every message must have text or attachments. Tracked links must also be complete."
+        "title": "Complete the sequence",
+        "message": "A message sequence needs 2 to 10 freeform messages, and every message must have text or attachments. Tracked links must also be complete.",
+        "scheduledMessage": "A scheduled message sequence needs 2 to 10 freeform messages, and every message must have text or attachments. Tracked links must also be complete."
       },
       "invalidLinks": {
         "title": "Invalid tracked links",
@@ -1955,20 +1955,20 @@
         "invalid": "Enter a valid time.",
         "range": "Choose a time between 08:00 and 20:00."
       },
-      "chainSendFailed": "Failed to send read chain.",
-      "chainScheduleFailed": "Failed to schedule read chain.",
+      "chainSendFailed": "Failed to send the message sequence.",
+      "chainScheduleFailed": "Failed to schedule the message sequence.",
       "unknownError": "Unknown error.",
       "requestFailed": "Request failed with status {status}.",
       "unknownRecipient": "Unknown recipient",
       "failedRecipients": "Failed recipients:",
       "andMore": "- And {count} more...",
       "titles": {
-        "chainStarted": "Read chain started",
-        "chainStartedIssues": "Read chain started with issues",
+        "chainStarted": "Message sequence started",
+        "chainStartedIssues": "Message sequence started with issues",
         "sent": "Broadcast sent",
         "sentIssues": "Broadcast completed with issues",
-        "chainScheduled": "Read chain scheduled",
-        "chainScheduledIssues": "Read chain scheduled with issues",
+        "chainScheduled": "Message sequence scheduled",
+        "chainScheduledIssues": "Message sequence scheduled with issues",
         "scheduled": "Broadcast scheduled",
         "scheduledIssues": "Broadcast scheduled with issues"
       },
@@ -1978,7 +1978,7 @@
         "scheduled": "{channel} broadcast scheduled with {ok, plural, one {# success} other {# successes}} and {failed, plural, one {# failure} other {# failures}}."
       },
       "notes": {
-        "chainWhatsapp": "Message 1 was sent if the 24h window was open. If not, the opening message was sent and the chain waits for a reply.",
+        "chainWhatsapp": "Message 1 was sent if the 24h window was open. If not, the opening message was sent and the sequence waits for a reply.",
         "chainTeams": "Message 1 was sent. Each next message follows once the previous one is read.",
         "chainScheduled": "Message 1 will be sent at the scheduled time. The next messages will continue after read receipts.",
         "scheduled": "These counts mean the broadcast was scheduled for those recipients. Delivery success will only be known when the scheduled broadcast is actually sent."
@@ -1995,7 +1995,7 @@
   },
   "BroadcastScheduled": {
     "Chain": {
-      "tag": "Chain · {count, plural, one {# message} other {# messages}}",
+      "tag": "Sequence · {count, plural, one {# message} other {# messages}}",
       "progress": "{done} of {total} people finished",
       "step": "Message {index}",
       "noText": "No text",
@@ -2004,11 +2004,11 @@
       "afterRead": "Goes out when the previous one is read",
       "delay": "Goes out {minutes} min after the previous one is read",
       "reached": "Received by {count} of {total}",
-      "showSteps": "Show the chain's messages",
-      "hideSteps": "Hide the chain's messages",
-      "noEdit": "Chains can't be edited: cancel this one and create another.",
-      "cancel": "Cancel chain",
-      "stop": "Stop chain",
+      "showSteps": "Show the sequence's messages",
+      "hideSteps": "Hide the sequence's messages",
+      "noEdit": "Sequences can't be edited: cancel this one and create another.",
+      "cancel": "Cancel sequence",
+      "stop": "Stop sequence",
       "editStep": "Edit this message",
       "stepLockedEdit": "Already received or waiting to go out: it can't be edited.",
       "questionNoEdit": "Questions can't be edited here: only the text of messages.",
@@ -2026,7 +2026,7 @@
       },
       "stepSaved": {
         "title": "Message updated",
-        "message": "The chain will send the new text."
+        "message": "The sequence will send the new text."
       },
       "stepEditGone": {
         "title": "It can no longer be edited",
@@ -2035,46 +2035,46 @@
       "keep": "Keep it",
       "removeStep": "Remove this message",
       "stepLocked": "Already received or waiting to go out: it can't be removed.",
-      "minSteps": "A chain needs at least 2 messages. To remove more, cancel the chain.",
+      "minSteps": "A sequence needs at least 2 messages. To remove more, cancel the sequence.",
       "confirmRemove": {
         "title": "Remove message {index}?",
-        "scheduled": "The chain keeps {count} messages. If it was created today, 1 send goes back to today's limit.",
-        "running": "Nobody received it yet: the chain goes from the previous message straight to the next one. If it was created today, 1 send goes back to today's limit.",
+        "scheduled": "The sequence keeps {count} messages. If it was created today, 1 send goes back to today's limit.",
+        "running": "Nobody received it yet: the sequence goes from the previous message straight to the next one. If it was created today, 1 send goes back to today's limit.",
         "confirm": "Remove message"
       },
       "stepRemoved": {
         "title": "Message removed",
-        "message": "The chain carries on without this message."
+        "message": "The sequence carries on without this message."
       },
       "stepGone": {
         "title": "It can no longer be removed",
         "message": "Meanwhile someone received this message or the next one. The list was refreshed."
       },
       "confirmCancel": {
-        "title": "Cancel this chain?",
-        "message": "No message goes out. If the chain was created today, its sends go back to today's limit.",
-        "confirm": "Cancel chain"
+        "title": "Cancel this sequence?",
+        "message": "No message goes out. If the sequence was created today, its sends go back to today's limit.",
+        "confirm": "Cancel sequence"
       },
       "confirmStop": {
-        "title": "Stop this chain?",
+        "title": "Stop this sequence?",
         "message": "The remaining messages won't go out and the ones already sent stay. If it was created today, the messages that didn't reach anyone go back to today's limit.",
-        "confirm": "Stop chain"
+        "confirm": "Stop sequence"
       },
       "cancelled": {
-        "title": "Chain cancelled",
-        "message": "The chain was cancelled and won't go out."
+        "title": "Sequence cancelled",
+        "message": "The sequence was cancelled and won't go out."
       },
       "stopped": {
-        "title": "Chain stopped",
+        "title": "Sequence stopped",
         "message": "The remaining messages won't go out."
       },
       "sending": {
-        "title": "The chain is going out now",
+        "title": "The sequence is going out now",
         "message": "Try again in a minute: it can no longer be cancelled, but you'll be able to stop it."
       },
       "error": {
         "title": "Something went wrong",
-        "message": "We couldn't cancel the chain. Refresh the page and try again."
+        "message": "We couldn't cancel the sequence. Refresh the page and try again."
       }
     },
     "Title": "Scheduled messages",
@@ -2490,7 +2490,7 @@
     "loading": "Loading files...",
     "noFiles": "No files have been uploaded in messages yet.",
     "noMatches": "No file matches the search.",
-    "inUseHint": "This file is going to be sent in a scheduled message or an active chain. If it were deleted now, the message would go out without it. It can be deleted after the message is sent or canceled.",
+    "inUseHint": "This file is going to be sent in a scheduled message or an active message sequence. If it were deleted now, the message would go out without it. It can be deleted after the message is sent or canceled.",
     "openScheduled": "View the scheduled message that uses this file",
     "download": "Download {name}",
     "table": {
@@ -3275,11 +3275,11 @@
       "broadcast_scheduled": "Message scheduled",
       "broadcast_schedule_updated": "Schedule edited",
       "broadcast_schedule_deleted": "Schedule deleted",
-      "broadcast_read_chain_created": "Read chain created",
-      "broadcast_read_chain_cancelled": "Message chain cancelled",
-      "broadcast_read_chain_stopped": "Message chain stopped",
-      "broadcast_read_chain_step_removed": "Message removed from a chain",
-      "broadcast_read_chain_step_edited": "Chain message edited",
+      "broadcast_read_chain_created": "Message sequence created",
+      "broadcast_read_chain_cancelled": "Message sequence cancelled",
+      "broadcast_read_chain_stopped": "Message sequence stopped",
+      "broadcast_read_chain_step_removed": "Message removed from a sequence",
+      "broadcast_read_chain_step_edited": "Sequence message edited",
       "message_template_sent": "Template sent to a user",
       "template_created": "WhatsApp template created",
       "media_deleted": "Media file deleted",
@@ -3336,7 +3336,7 @@
         "scheduledFor": "Scheduled for",
         "timezone": "Timezone",
         "status": "Status",
-        "enabled": "Read chains",
+        "enabled": "Message sequences",
         "withTemplate": "With template",
         "scheduled": "Scheduled",
         "source": "Source",
@@ -3345,7 +3345,7 @@
         "category": "Category",
         "color": "Color",
         "active": "Active",
-        "steps": "Messages in chain",
+        "steps": "Messages in sequence",
         "sent": "Sent",
         "waitingForReply": "Waiting for reply",
         "error": "Error"
@@ -3590,9 +3590,9 @@
       "messageFilesTitle": "File limit reached",
       "messageFiles": "Each message can have up to {limit, plural, one {# file} other {# files}}. Remove one to add another.",
       "messageFilesRemaining": "You can only add {remaining, plural, =0 {no more files} one {# more file} other {# more files}} to this message ({limit} max). Pick fewer or remove some.",
-      "chainTooLongTitle": "Chain too long",
-      "chainTooLong": "A chain can have up to {limit} messages.",
-      "inStep": "In chain message {step}:",
+      "chainTooLongTitle": "Sequence too long",
+      "chainTooLong": "A sequence can have up to {limit} messages.",
+      "inStep": "In sequence message {step}:",
       "assistantsTitle": "Assistant limit reached",
       "assistants": "The {plan} plan lets you create {limit, plural, one {# assistant} other {# assistants}}. Upgrade your plan to create more.",
       "assistantsNoDetail": "You have reached your plan's assistant limit. Upgrade your plan to create more.",
@@ -3613,7 +3613,7 @@
       "scheduledTitle": "Scheduled message limit reached",
       "dailyTitle": "Today's send limit reached",
       "daily": "You've used today's {limit} sends on {channel}. The counter resets at {time}.",
-      "dailyChain": "This chain needs {steps} sends, but you only have {remaining, plural, one {# send} other {# sends}} left today on {channel}. Shorten the chain or wait until {time}.",
+      "dailyChain": "This sequence needs {steps} sends, but you only have {remaining, plural, one {# send} other {# sends}} left today on {channel}. Shorten the sequence or wait until {time}.",
       "scheduled": "You can have up to {limit, plural, one {# scheduled message} other {# scheduled messages}} waiting to be sent. Cancel or delete one in scheduled messages to schedule another."
     },
     "counter": {
@@ -3635,10 +3635,10 @@
       "scheduledLabel": "Scheduled messages",
       "dailyShort": "Sends today",
       "dailyLabel": "Today's sends on this channel",
-      "dailyHint": "Each send counts 1, however many people it goes to. A chain counts 1 per message and a scheduled message counts on the day it is scheduled. Automations don't count. Resets at {time}.",
+      "dailyHint": "Each send counts 1, however many people it goes to. A message sequence counts 1 per message and a scheduled message counts on the day it is scheduled. Automations don't count. Resets at {time}.",
       "weeklyLabel": "Messages this week on {channel}",
       "weeklyHint": "Messages each collaborator sent this week on each channel: to the assistant and answers to quizzes, surveys and open questions. Above the limit the assistant stops answering until Monday at 00:00.",
-      "scheduledHint": "Counts the scheduled messages you created that are still waiting to be sent. Those from automations and chains don't count."
+      "scheduledHint": "Counts the scheduled messages you created that are still waiting to be sent. Those from automations and message sequences don't count."
     }
   },
   "Admin": {
@@ -3695,7 +3695,7 @@
       "save": "Save",
       "confirmTitle": "Save the {plan} plan",
       "confirmMessage": "{count, plural, =0 {No organization is on this plan.} one {This changes the limits of # organization right away.} other {This changes the limits of # organizations right away.}} Continue?",
-      "hint": "Technical maximums: 10 messages per chain and 50 MB per file.",
+      "hint": "Technical maximums: 10 messages per sequence and 50 MB per file.",
       "locked": "DIGIK plan, can't be edited"
     },
     "limits": {
@@ -3712,7 +3712,7 @@
       "messageChars": "Characters per message",
       "filesPerMessage": "Files per message",
       "fileSizeMb": "MB per file",
-      "chainMessages": "Messages per chain"
+      "chainMessages": "Messages per sequence"
     }
   },
   "Pagination": {
