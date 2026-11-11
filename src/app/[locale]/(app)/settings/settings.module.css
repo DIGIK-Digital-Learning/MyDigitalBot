@@ -1,22 +1,36 @@
 .page {
-  width: min(1100px, 100%);
+  /* Largura toda, como as outras páginas (#239). */
+  width: 100%;
   /* As grelhas seguem a largura da página, que depende do menu lateral. */
   container-type: inline-size;
-  margin: 0 auto;
-  padding: 28px 24px 48px;
+  padding: var(--gutter-y) var(--gutter-x) 48px;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 22px;
 }
 
-.pageTitle {
-  margin: 0;
-  color: #0f172a;
-  font-size: clamp(28px, 4vw, 36px);
-  font-weight: 850;
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
 }
 
-.pageDescription,
+/* Título e subtítulo iguais aos das outras páginas (Multimédia, Perguntas). */
+.pageTitle {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.1;
+  font-weight: 800;
+  color: #0f1c3f;
+}
+
+.pageDescription {
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: 0.95rem;
+}
+
 .sectionHeading p {
   margin: 6px 0 0;
   color: #64748b;
@@ -555,6 +569,8 @@
 
 .detailsCell {
   color: #4b5563;
+  /* Larga o bastante para não partir "WhatsApp" a meio (#239). */
+  min-width: 300px;
   max-width: 460px;
 }
 
@@ -582,7 +598,8 @@
 .detailValue {
   margin: 0;
   color: #111827;
-  overflow-wrap: anywhere;
+  /* Só parte o que não cabe de todo (um id comprido), não as palavras. */
+  overflow-wrap: break-word;
 }
 
 .noDetails {
