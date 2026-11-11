@@ -916,7 +916,7 @@
     "search": "Procurar",
     "filter": "Filtrar",
     "clear": "Limpar",
-    "clearAll": "Limpar tudo",
+    "clearAll": "Limpar filtros",
     "close": "Fechar",
     "removeFilter": "Remover filtro",
     "save": "Guardar",
@@ -964,7 +964,7 @@
     "title": "Utilizadores",
     "searchPlaceholder": "Procurar",
     "manageTags": "Gerir Tags",
-    "newUser": "Novo Utilizador",
+    "newUser": "Novo utilizador",
     "importCsv": "Importar CSV",
     "pagination": {
       "summary": "Página {page} de {totalPages} · {totalUsers} utilizadores",
@@ -980,10 +980,9 @@
       "assistant": "Assistente"
     },
     "row": {
-      "more": "Mais opções",
       "view": "Ver",
       "edit": "Editar",
-      "delete": "Apagar"
+      "delete": "Eliminar"
     },
     "filters": {
       "title": "Filtros",
@@ -1290,7 +1289,7 @@
       "pause": "Pausar",
       "any": "Qualquer",
       "edit": "Editar",
-      "delete": "Apagar"
+      "delete": "Eliminar"
     },
     "queueTable": {
       "rule": "Regra",
@@ -2116,7 +2115,8 @@
     "Actions": {
       "view": "Ver",
       "edit": "Editar",
-      "delete": "Eliminar"
+      "delete": "Eliminar",
+      "remove": "Remover"
     },
     "ViewModal": {
       "question": {
@@ -2185,7 +2185,7 @@
     "Delete": {
       "title": "Tem a certeza que quer apagar esta mensagem?",
       "deleteMessage": "Esta ação não pode ser desfeita.",
-      "delete": "Apagar",
+      "delete": "Eliminar",
       "cancel": "Cancelar"
     },
     "Errors": {
@@ -2522,7 +2522,7 @@
   },
   "Assistants": {
     "myAssistants": "Os meus Assistentes",
-    "createAssistant": "Criar Assistente",
+    "createAssistant": "Novo assistente",
     "loadingOrg": "A carregar organização…",
     "empty": "Sem assistentes ainda.",
     "loading": "A carregar assistentes…",
@@ -2910,9 +2910,9 @@
     "delete": "Eliminar Utilizadores",
     "deleteUsers": "Eliminar users selecionados",
     "confirmUserDeletion": {
-      "title": "Apagar {number}  user(s)?",
+      "title": "Eliminar {number} utilizador(es)?",
       "message": "Esta ação não pode ser desfeita",
-      "confirm": "Apagar",
+      "confirm": "Eliminar",
       "cancel": "Cancelar"
     },
     "noTags": "Ainda não há tags"

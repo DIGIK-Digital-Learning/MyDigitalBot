@@ -19,6 +19,8 @@ import { useAlert } from "@/app/components/Alert/AlertProvider";
 import CharCounter from "@/app/components/CharCounter/CharCounter";
 import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import FilePickerButton from "@/app/components/FilePickerButton/FilePickerButton";
+import RowAction from "@/app/components/RowAction/RowAction";
+import { Plus, Undo2 } from "lucide-react";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
 import { limitKeepingCurrent } from "@/lib/plans/limitRules";
 
@@ -564,6 +566,7 @@ export default function AssistantsHub() {
                 : translation("Assistants.createAssistant")
             }
           >
+            <Plus size={16} aria-hidden />
             {translation("Assistants.createAssistant")}
           </button>
         </div>
@@ -680,21 +683,20 @@ export default function AssistantsHub() {
                     </>
                   ) : (
                     <>
-                      <button
-                        className={styles.ghostBtn}
+                      {/* #238: o mesmo Editar e Eliminar das outras páginas. */}
+                      <RowAction
+                        kind="edit"
+                        label={translation("Assistants.details.edit")}
                         onClick={() => {
                           setDraft(selected ? { ...selected } : null);
                           setIsEditing(true);
                         }}
-                      >
-                        {translation("Assistants.details.edit")}
-                      </button>
-                      <button
-                        className={styles.dangerBtn}
+                      />
+                      <RowAction
+                        kind="delete"
+                        label={translation("Assistants.details.delete")}
                         onClick={deleteAssistant}
-                      >
-                        {translation("Assistants.details.delete")}
-                      </button>
+                      />
                     </>
                   )}
                 </div>
@@ -830,19 +832,22 @@ export default function AssistantsHub() {
                                   }`}
                                 >
                                   <span>{file.name}</span>
-                                  <button
-                                    type="button"
-                                    className={styles.fileActionBtn}
-                                    onClick={() =>
-                                      toggleVectorFileRemoval(file.id)
+                                  {/* Só se tira ao guardar: até lá, desfaz-se. */}
+                                  <RowAction
+                                    kind={
+                                      isMarkedForRemoval ? "keep" : "remove"
                                     }
-                                  >
-                                    {translation(
+                                    icon={isMarkedForRemoval ? Undo2 : undefined}
+                                    className={styles.fileActionBtn}
+                                    label={translation(
                                       isMarkedForRemoval
                                         ? "Assistants.vector.keep"
                                         : "Assistants.vector.remove",
                                     )}
-                                  </button>
+                                    onClick={() =>
+                                      toggleVectorFileRemoval(file.id)
+                                    }
+                                  />
                                 </li>
                               );
                             })}
@@ -981,13 +986,11 @@ export default function AssistantsHub() {
                       ) : null}
 
                       <div className={styles.rowEnd}>
-                        <button
-                          type="button"
-                          className={styles.dangerBtn}
+                        <RowAction
+                          kind="delete"
+                          label={translation("Common.delete")}
                           onClick={deleteVectorStore}
-                        >
-                          {translation("Common.delete")}
-                        </button>
+                        />
                       </div>
                     </>
                   )}

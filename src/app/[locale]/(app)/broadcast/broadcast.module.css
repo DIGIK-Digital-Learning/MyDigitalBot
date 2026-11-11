@@ -521,6 +521,9 @@
 }
 
 .filterClearAll {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   border: none;
   background: transparent;
   font-size: 12px;

@@ -916,7 +916,7 @@
     "search": "Search",
     "filter": "Filter",
     "clear": "Clear",
-    "clearAll": "Clear all",
+    "clearAll": "Clear filters",
     "close": "Close",
     "removeFilter": "Remove filter",
     "save": "Save",
@@ -964,7 +964,7 @@
     "title": "Users",
     "searchPlaceholder": "Search",
     "manageTags": "Manage Tags",
-    "newUser": "New User",
+    "newUser": "New user",
     "importCsv": "Import CSV",
     "pagination": {
       "summary": "Page {page} of {totalPages} · {totalUsers} users",
@@ -980,7 +980,6 @@
       "assistant": "Assistant"
     },
     "row": {
-      "more": "More options",
       "view": "View",
       "edit": "Edit",
       "delete": "Delete"
@@ -2116,7 +2115,8 @@
     "Actions": {
       "view": "View",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "remove": "Remove"
     },
     "ViewModal": {
       "question": {
@@ -2522,7 +2522,7 @@
   },
   "Assistants": {
     "myAssistants": "My Assistants",
-    "createAssistant": "Create Assistant",
+    "createAssistant": "New assistant",
     "loadingOrg": "Loading organization…",
     "empty": "No assistants yet.",
     "loading": "Loading assistants…",
@@ -2910,7 +2910,7 @@
     "delete": "Delete Users",
     "deleteUsers": "Delete selected users",
     "confirmUserDeletion": {
-      "title": "Delete {number}  user(s)?",
+      "title": "Delete {number} user(s)?",
       "message": "This action can't be undone",
       "confirm": "Delete",
       "cancel": "Cancel"

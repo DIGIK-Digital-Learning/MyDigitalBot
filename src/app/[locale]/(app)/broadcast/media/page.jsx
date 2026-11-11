@@ -12,6 +12,7 @@ import useOrganization from "@/app/hooks/useOrganization";
 import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
 
 import styles from "./media.module.css";
+import RowAction from "@/app/components/RowAction/RowAction";
 
 function formatDate(value) {
   if (!value) return "-";
@@ -388,9 +389,9 @@ export default function MediaPage() {
                           </a>
                         ) : null}
 
-                        <button
-                          type="button"
-                          className={styles.deleteButton}
+                        <RowAction
+                          kind="delete"
+                          label={translation("Common.delete")}
                           onClick={() => handleDelete(item)}
                           disabled={item.inUse || deletingPath === item.path}
                           title={
@@ -398,9 +399,7 @@ export default function MediaPage() {
                               ? translation("Media.inUseHint")
                               : undefined
                           }
-                        >
-                          {translation("Common.delete")}
-                        </button>
+                        />
                       </td>
                     </tr>
                   );

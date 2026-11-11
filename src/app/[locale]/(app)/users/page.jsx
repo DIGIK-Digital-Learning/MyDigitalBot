@@ -10,16 +10,15 @@ import ManageTagsModal from "./ManageTagsModal/ManageTagsModal";
 import EditUserModal from "./EditUserModal";
 import ViewUserModal from "./ViewUserModal"; // ← NEW
 import PillSelect from "@/app/components/PillSelect/PillSelect";
+import RowAction, { RowActions } from "@/app/components/RowAction/RowAction";
+import { rowClickHandler } from "@/app/components/RowAction/rowClick";
 import {
-  MoreHorizontal,
-  Eye,
-  Pencil,
-  Trash2,
   Plus,
   Tag,
   Filter,
   Upload,
   ChevronDown,
+  X,
 } from "lucide-react";
 import useOrganization from "@/app/hooks/useOrganization";
 import { useAuth } from "@/app/AuthContext.jsx";
@@ -743,12 +742,14 @@ async function openCreateUserModal() {
             );
           })}
           <button
+            type="button"
             className={styles.filterClearAll}
             onClick={() => {
               setSelectedTagIds([]);
               setSelectedAssistantIds([]);
             }}
           >
+            <X size={14} aria-hidden />
             {translation("Common.clearAll")}
           </button>
         </div>
@@ -809,7 +810,8 @@ async function openCreateUserModal() {
               return (
                 <div
                   key={u.id}
-                  className={`${styles.row} ${i % 2 ? styles.rowAlt : ""}`}
+                  className={`${styles.row} ${styles.rowClickable} ${i % 2 ? styles.rowAlt : ""}`}
+                  onClick={rowClickHandler(() => openViewFor(u))}
                 >
                   <div className={styles.cellChk}>
                     <label className={styles.chkWrap}>
@@ -822,11 +824,7 @@ async function openCreateUserModal() {
                     </label>
                   </div>
 
-                  <div
-                    className={styles.cellName}
-                    role="button"
-                    onMouseUp={() => openViewFor(u)}
-                  >
+                  <div className={styles.cellName}>
                     <div className={styles.avatar}>{initial(u.name)}</div>
                     <div className={styles.nameBlock}>
                       <div className={styles.name}>{u.name}</div>
@@ -898,43 +896,27 @@ async function openCreateUserModal() {
                   </div>
 
                   <div className={styles.cellKebab}>
-                    <button
-                      className={`${styles.iconBtn} ${styles.kebabDefault}`}
-                      aria-label={translation("Users.row.more")}
-                      onClick={() => openEditFor(u)}
-                    >
-                      <MoreHorizontal size={18} />
-                    </button>
-
-                    <div
-                      className={styles.rowActions}
-                      aria-label={translation("Common.actions")}
-                    >
-                      <button
-                        className={styles.rowActBtn}
+                    {/* #238: sempre visíveis (antes só ao passar o rato). */}
+                    <RowActions label={translation("Common.actions")}>
+                      <RowAction
+                        kind="view"
+                        label={translation("Users.row.view")}
                         onClick={() => openViewFor(u)}
-                        title={translation("Users.row.view")}
-                      >
-                        <Eye size={16} />{" "}
-                        <span>{translation("Users.row.view")}</span>
-                      </button>
-                      <button
-                        className={styles.rowActBtn}
+                        className={styles.rowAction}
+                      />
+                      <RowAction
+                        kind="edit"
+                        label={translation("Users.row.edit")}
                         onClick={() => openEditFor(u)}
-                        title={translation("Users.row.edit")}
-                      >
-                        <Pencil size={16} />{" "}
-                        <span>{translation("Users.row.edit")}</span>
-                      </button>
-                      <button
-                        className={`${styles.rowActBtn} ${styles.rowActBtnDanger}`}
+                        className={styles.rowAction}
+                      />
+                      <RowAction
+                        kind="delete"
+                        label={translation("Users.row.delete")}
                         onClick={() => deleteUserById(u)}
-                        title={translation("Users.row.delete")}
-                      >
-                        <Trash2 size={16} />{" "}
-                        <span>{translation("Users.row.delete")}</span>
-                      </button>
-                    </div>
+                        className={styles.rowAction}
+                      />
+                    </RowActions>
                   </div>
                 </div>
               );

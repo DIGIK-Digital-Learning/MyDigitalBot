@@ -9,12 +9,10 @@ import {
   Clock3,
   Eye,
   MessageSquare,
-  Pencil,
   PlayCircle,
   Plus,
   ToggleLeft,
   ToggleRight,
-  Trash2,
   UserPlus,
 } from "lucide-react";
 import styles from "./automations.module.css";
@@ -28,6 +26,7 @@ import { useTranslations } from "next-intl";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
 import usePlanLimitPrompt from "@/app/hooks/usePlanLimitPrompt";
 import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
+import RowAction, { RowActions } from "@/app/components/RowAction/RowAction";
 
 const TRIGGER_OPTIONS = [
   {
@@ -161,6 +160,7 @@ export default function AutomationsPage() {
   const translation = useTranslations("Automations");
   const planTranslation = useTranslations("Plans.limits");
   const usageTranslation = useTranslations("Plans.usage");
+  const commonTranslation = useTranslations("Common");
 
   const translatedTriggerOptions = useMemo(
     () =>
@@ -854,40 +854,32 @@ export default function AutomationsPage() {
                   </div>
 
                   <div className={styles.cellKebab}>
-                    <button
-                      className={styles.rowActBtn}
-                      onClick={() => toggleRule(rule)}
-                      title={
-                        rule.is_active
-                          ? translation("rulesTable.pause")
-                          : translation("rulesTable.activate")
-                      }
-                    >
-                      {rule.is_active ? (
-                        <ToggleRight size={16} />
-                      ) : (
-                        <ToggleLeft size={16} />
-                      )}
-                    </button>
-
-                    <button
-                      className={styles.rowActBtn}
-                      onClick={() => {
-                        setEditingRule(rule);
-                        setModalOpen(true);
-                      }}
-                      title={translation("rulesTable.edit")}
-                    >
-                      <Pencil size={16} />
-                    </button>
-
-                    <button
-                      className={`${styles.rowActBtn} ${styles.rowActBtnDanger}`}
-                      onClick={() => handleDeleteRule(rule)}
-                      title={translation("rulesTable.delete")}
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    {/* #238: o mesmo aspeto e o mesmo texto que nas outras páginas. */}
+                    <RowActions label={commonTranslation("actions")}>
+                      <RowAction
+                        kind="toggle"
+                        icon={rule.is_active ? ToggleRight : ToggleLeft}
+                        label={
+                          rule.is_active
+                            ? translation("rulesTable.pause")
+                            : translation("rulesTable.activate")
+                        }
+                        onClick={() => toggleRule(rule)}
+                      />
+                      <RowAction
+                        kind="edit"
+                        label={translation("rulesTable.edit")}
+                        onClick={() => {
+                          setEditingRule(rule);
+                          setModalOpen(true);
+                        }}
+                      />
+                      <RowAction
+                        kind="delete"
+                        label={translation("rulesTable.delete")}
+                        onClick={() => handleDeleteRule(rule)}
+                      />
+                    </RowActions>
                   </div>
                 </div>
               );

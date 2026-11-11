@@ -15,7 +15,7 @@
   --col-tags: minmax(110px, 1.4fr);
   --col-assistant: minmax(240px, 0.9fr);
   /* make this wide enough to hold "Ver • Editar • Apagar" */
-  --col-actions: 260px;
+  --col-actions: 250px; /* Ver + Editar + Eliminar, sempre visíveis (#238) */
   /* try 240–300px depending on your labels */
 
   --row-h: 56px;
@@ -463,62 +463,16 @@
   margin-top: 6px;
 }
 
-/* tail cell (kebab → inline actions on hover) */
+/* tail cell: ações sempre visíveis (#238) */
 .cellKebab {
-  position: relative;
   display: flex;
   justify-content: flex-end;
   align-items: center;
 }
 
-.kebabDefault {
-  transition: opacity 0.12s ease;
-}
-
-.row:hover .kebabDefault {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.rowActions {
-  position: absolute;
-  right: 0;
-  display: inline-flex;
-  gap: 6px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.12s ease;
-}
-
-.row:hover .rowActions {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.rowActBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 9999px;
-  border: 1px solid var(--ui-border);
-  background: #fff;
-  color: #0f1c3f;
+/* #238: clicar na linha abre o mesmo que "Ver". */
+.rowClickable {
   cursor: pointer;
-  font-weight: 600;
-  font-size: 12px;
-}
-
-.rowActBtn:hover {
-  background: #f7fbff;
-  border-color: #9fd3ff;
-}
-
-.rowActBtnDanger {
-  color: #b42318;
-  background: #fff5f5;
-  border-color: #ffd0d0;
 }
 
 /* ─────────── Modal styles (kept from your file) ─────────── */
@@ -783,15 +737,21 @@
     --col-week: 130px;
     --col-tags: minmax(110px, 1fr);
     --col-assistant: minmax(180px, 1fr);
-    --col-actions: 92px;
+    --col-actions: 112px;
   }
 
-  .rowActBtn {
-    padding: 0 8px;
+  /* Sem espaço para o texto: só os ícones (o texto fica no tooltip). */
+  .cellKebab .rowAction {
+    width: 30px;
+    padding: 0;
   }
 
-  .rowActBtn span {
-    display: none;
+  .cellKebab .rowAction span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
   }
 }
 
@@ -831,15 +791,24 @@
   cursor: pointer;
 }
 
+/* "Limpar filtros": transparente com ✕, como no resto da app (#238). */
 .filterClearAll {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   height: 28px;
   padding: 0 10px;
   border-radius: 9999px;
-  border: 1px solid #ffd0d0;
-  background: #fff5f5;
-  color: #b42318;
+  border: 0;
+  background: transparent;
+  color: #475569;
   font-weight: 600;
   cursor: pointer;
+}
+
+.filterClearAll:hover {
+  background: #f1f5f9;
+  color: #0f1c3f;
 }
 
 /* popover */
@@ -1655,16 +1624,6 @@
     width: auto;
   }
 
-  /* Make the default kebab always visible on mobile,
-     and disable the “show on hover” inline actions. */
-  .rowActions {
-    display: none !important;
-  }
-
-  .kebabDefault {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-  }
 }
 
 .sectionDivider {

@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import NewBadge from "@/app/components/NewBadge/NewBadge";
 import Pagination from "@/app/components/Pagination/Pagination";
+import RowAction from "@/app/components/RowAction/RowAction";
 
 import styles from "../tracked-links.module.css";
 
 /**
- * Links criados (#189): os que contam para os 100 do plano, com o ✕ para
+ * Links criados (#189): os que contam para os 100 do plano, com o 🗑 para
  * eliminar e a etiqueta "Novo" nos criados desde a última visita. Por
  * páginas, para a lista não crescer sem fim.
  */
@@ -67,19 +67,14 @@ export default function SavedLinksSection({ links, loading, isNew, onDelete }) {
                 </span>
               </div>
 
-              <button
-                type="button"
-                className={styles.savedDelete}
+              <RowAction
+                kind="delete"
+                compact
+                label={translation("Broadcast.linkLibrary.delete", {
+                  label: link.label,
+                })}
                 onClick={() => onDelete(link)}
-                aria-label={translation("Broadcast.linkLibrary.delete", {
-                  label: link.label,
-                })}
-                title={translation("Broadcast.linkLibrary.delete", {
-                  label: link.label,
-                })}
-              >
-                <X size={14} />
-              </button>
+              />
             </li>
           ))}
         </ul>

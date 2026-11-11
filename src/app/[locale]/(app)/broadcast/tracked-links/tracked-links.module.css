@@ -221,25 +221,6 @@
   font-weight: 800;
 }
 
-.viewBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 34px;
-  padding: 0 14px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, var(--brand-1), var(--brand-2));
-  color: #fff;
-  text-decoration: none;
-  font-weight: 700;
-  border: 0;
-  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.18);
-}
-
-.viewBtn:hover {
-  filter: brightness(1.03);
-}
-
 .emptyBox,
 .errorBox {
   padding: 18px 20px;
@@ -325,25 +306,6 @@
   white-space: nowrap;
 }
 
-.savedDelete {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: 1px solid var(--ui-border);
-  border-radius: 8px;
-  background: #fff;
-  color: #0f1c3f;
-  cursor: pointer;
-}
-
-.savedDelete:hover {
-  background: #fee4e2;
-  color: #b42318;
-}
-
 /* Links enviados: um grupo por link, com os envios ao abrir. */
 .sentSection {
   display: flex;
@@ -358,6 +320,10 @@
   color: #0f1c3f;
   font-size: 0.9rem;
   font-weight: 600;
+  cursor: pointer;
+}
+
+.rowClickable {
   cursor: pointer;
 }
 
