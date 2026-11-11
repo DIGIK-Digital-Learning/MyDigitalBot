@@ -1,12 +1,13 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import phoneCountryCodes from "@/messages/phoneCountryCodes.json";
 import { useAuth } from "@/app/AuthContext";
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 import useOrganization from "@/app/hooks/useOrganization";
 import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
+import PageTabs, { TabPanel } from "@/app/components/PageTabs/PageTabs";
 import {
   applyThemeVariables,
   DEFAULT_THEME,
@@ -22,6 +23,7 @@ import LogoUploader from "./LogoUploader";
 import ThemePreview from "./ThemePreview";
 import ActivityLog from "./components/ActivityLog";
 import OpeningMessageSettings from "./components/OpeningMessageSettings";
+import { DEFAULT_TAB, tabFromParam } from "./helpers/settingsTabs";
 import styles from "./settings.module.css";
 
 const EMPTY_FORM = {
@@ -52,6 +54,9 @@ export default function SettingsPage() {
   const openingTranslation = useTranslations("OpeningMessage");
   const showAlert = useAlert();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tab = tabFromParam(searchParams.get("tab"));
   const { user, loading: authLoading } = useAuth();
   const { org, loading: orgLoading } = useOrganization(user);
   const { stopLoading } = useGlobalLoader();
@@ -109,6 +114,21 @@ export default function SettingsPage() {
     if (!authLoading && !orgLoading && !loading) stopLoading();
   }, [authLoading, loading, orgLoading, stopLoading]);
 
+  /*
+   * Mudar de separador não perde o que se escreveu: o formulário vive aqui,
+   * na página, e não dentro de cada separador.
+   */
+  function goToTab(next) {
+    if (next === tab) return;
+
+    const params = new URLSearchParams(searchParams.toString());
+    if (next === DEFAULT_TAB) params.delete("tab");
+    else params.set("tab", next);
+
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
+
   function setField(field, value) {
     setFeedback(null);
     setForm((current) => ({ ...current, [field]: value }));
@@ -128,11 +148,13 @@ export default function SettingsPage() {
 
     if (!form.name.trim()) {
       setFeedback({ tone: "error", message: t("validation.nameRequired") });
+      goToTab("organizacao");
       return;
     }
 
     if (form.name.trim().length > 150) {
       setFeedback({ tone: "error", message: t("validation.nameTooLong") });
+      goToTab("organizacao");
       return;
     }
 
@@ -141,6 +163,7 @@ export default function SettingsPage() {
       !isValidHexColor(form.theme.secondary)
     ) {
       setFeedback({ tone: "error", message: t("validation.invalidColor") });
+      goToTab("organizacao");
       return;
     }
 
@@ -154,6 +177,8 @@ export default function SettingsPage() {
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
+        /* O tenant do Teams já é de outra organização: está nas Integrações. */
+        if (response.status === 409) goToTab("integracoes");
         const message =
           response.status === 409
             ? t("validation.teamsConflict")
@@ -222,213 +247,244 @@ export default function SettingsPage() {
     );
   }
 
+  const tabs = [
+    { id: "organizacao", label: t("tabs.organization") },
+    { id: "integracoes", label: t("tabs.integrations") },
+    { id: "historico", label: t("tabs.activity") },
+  ];
+
+  const formFooter = (
+    <div className={styles.formFooter}>
+      {feedback && (
+        <p
+          className={
+            feedback.tone === "success"
+              ? styles.successMessage
+              : styles.errorMessage
+          }
+          role="status"
+        >
+          {feedback.message}
+        </p>
+      )}
+      <button className={styles.primaryButton} disabled={saving}>
+        {saving ? t("saving") : t("save")}
+      </button>
+    </div>
+  );
+
   return (
     <main className={styles.page}>
-      <header>
+      <header className={styles.header}>
         <h1 className={styles.pageTitle}>{t("title")}</h1>
         <p className={styles.pageDescription}>{t("description")}</p>
       </header>
 
-      <form className={styles.form} onSubmit={save}>
-        <section className={styles.section}>
-          <div className={styles.sectionHeading}>
-            <h2>{t("organization.title")}</h2>
-            <p>{t("organization.description")}</p>
-          </div>
-          <div className={styles.formGrid}>
-            <label className={styles.field}>
-              <span>{t("organization.name")}</span>
-              <input
-                value={form.name}
-                onChange={(event) => setField("name", event.target.value)}
-                maxLength={150}
-                disabled={saving}
-                required
-              />
-            </label>
-            <label className={styles.field}>
-              <span>{t("organization.defaultCountryCode")}</span>
-              <select
-                value={form.default_phone_country_code}
-                onChange={(event) =>
-                  setField("default_phone_country_code", event.target.value)
-                }
-                disabled={saving}
-              >
-                {phoneCountryCodes.map((country) => (
-                  <option key={country.iso2} value={country.code}>
-                    {country.name} ({country.code})
-                  </option>
-                ))}
-              </select>
-              <small>{t("organization.defaultCountryCodeHelp")}</small>
-            </label>
-          </div>
-        </section>
+      <PageTabs
+        tabs={tabs}
+        active={tab}
+        onChange={goToTab}
+        label={t("tabs.label")}
+        idPrefix="settings"
+      />
 
-        <section className={styles.section}>
-          <div className={styles.sectionHeading}>
-            <h2>{t("appearance.title")}</h2>
-            <p>{t("appearance.description")}</p>
-          </div>
-
-          <div className={styles.appearanceGrid}>
-            <div className={styles.colorFields}>
-              {["primary", "secondary"].map((color) => (
-                <label className={styles.field} key={color}>
-                  <span>{t(`appearance.${color}`)}</span>
-                  <div className={styles.colorControl}>
-                    <input
-                      type="color"
-                      value={normalizeHexForColorInput(
-                        form.theme[color],
-                        DEFAULT_THEME[color],
-                      )}
-                      onChange={(event) =>
-                        setThemeColor(color, event.target.value)
-                      }
-                      disabled={saving}
-                      aria-label={t(`appearance.${color}Picker`)}
-                    />
-                    <input
-                      value={form.theme[color]}
-                      onChange={(event) =>
-                        setThemeColor(color, event.target.value)
-                      }
-                      disabled={saving}
-                      aria-invalid={!isValidHexColor(form.theme[color])}
-                      maxLength={7}
-                      spellCheck={false}
-                    />
-                  </div>
+      {tab === "organizacao" ? (
+        <TabPanel id="organizacao" idPrefix="settings">
+          <form className={styles.form} onSubmit={save}>
+            <section className={styles.section}>
+              <div className={styles.sectionHeading}>
+                <h2>{t("organization.title")}</h2>
+                <p>{t("organization.description")}</p>
+              </div>
+              <div className={styles.formGrid}>
+                <label className={styles.field}>
+                  <span>{t("organization.name")}</span>
+                  <input
+                    value={form.name}
+                    onChange={(event) => setField("name", event.target.value)}
+                    maxLength={150}
+                    disabled={saving}
+                    required
+                  />
                 </label>
-              ))}
-            </div>
-            <ThemePreview
-              theme={form.theme}
-              logoUrl={logoUrl}
-              orgName={form.name}
-            />
-          </div>
+                <label className={styles.field}>
+                  <span>{t("organization.defaultCountryCode")}</span>
+                  <select
+                    value={form.default_phone_country_code}
+                    onChange={(event) =>
+                      setField("default_phone_country_code", event.target.value)
+                    }
+                    disabled={saving}
+                  >
+                    {phoneCountryCodes.map((country) => (
+                      <option key={country.iso2} value={country.code}>
+                        {country.name} ({country.code})
+                      </option>
+                    ))}
+                  </select>
+                  <small>{t("organization.defaultCountryCodeHelp")}</small>
+                </label>
+              </div>
+            </section>
 
-          <div className={styles.brandingUploads}>
-            <div className={styles.logoBlock}>
-              <h3>{t("logo.title")}</h3>
-              <LogoUploader
-                orgId={orgId}
-                logoUrl={logoUrl}
-                orgName={form.name}
-                disabled={saving}
-                onLogoChange={handleLogoChange}
-              />
-            </div>
-            <div className={styles.logoBlock}>
-              <h3>{t("favicon.title")}</h3>
-              <LogoUploader
-                variant="favicon"
-                orgId={orgId}
-                logoUrl={faviconUrl}
-                disabled={saving}
-                onLogoChange={handleFaviconChange}
-              />
-            </div>
-          </div>
-        </section>
+            <section className={styles.section}>
+              <div className={styles.sectionHeading}>
+                <h2>{t("appearance.title")}</h2>
+                <p>{t("appearance.description")}</p>
+              </div>
 
-        <section className={styles.section}>
-          <div className={styles.sectionHeading}>
-            <h2>{t("integrations.title")}</h2>
-            <p>{t("integrations.description")}</p>
-          </div>
-
-          <div className={styles.integrationBlock}>
-            <h3>{t("integrations.whatsappTitle")}</h3>
-            <div className={styles.formGrid}>
-              <label className={styles.field}>
-                <span>{t("integrations.wabaId")}</span>
-                <input
-                  value={form.waba_id}
-                  onChange={(event) => setField("waba_id", event.target.value)}
-                  disabled={saving}
+              <div className={styles.appearanceGrid}>
+                <div className={styles.colorFields}>
+                  {["primary", "secondary"].map((color) => (
+                    <label className={styles.field} key={color}>
+                      <span>{t(`appearance.${color}`)}</span>
+                      <div className={styles.colorControl}>
+                        <input
+                          type="color"
+                          value={normalizeHexForColorInput(
+                            form.theme[color],
+                            DEFAULT_THEME[color],
+                          )}
+                          onChange={(event) =>
+                            setThemeColor(color, event.target.value)
+                          }
+                          disabled={saving}
+                          aria-label={t(`appearance.${color}Picker`)}
+                        />
+                        <input
+                          value={form.theme[color]}
+                          onChange={(event) =>
+                            setThemeColor(color, event.target.value)
+                          }
+                          disabled={saving}
+                          aria-invalid={!isValidHexColor(form.theme[color])}
+                          maxLength={7}
+                          spellCheck={false}
+                        />
+                      </div>
+                    </label>
+                  ))}
+                </div>
+                <ThemePreview
+                  theme={form.theme}
+                  logoUrl={logoUrl}
+                  orgName={form.name}
                 />
-              </label>
-              <label className={styles.field}>
-                <span>
-                  {t("integrations.namespace")}
-                  <small className={styles.optionalLabel}>
-                    · {t("integrations.namespaceOptional")}
-                  </small>
-                </span>
-                <input
-                  value={form.waba_namespace}
-                  onChange={(event) =>
-                    setField("waba_namespace", event.target.value)
-                  }
-                  disabled={saving}
-                />
-              </label>
+              </div>
+
+              <div className={styles.brandingUploads}>
+                <div className={styles.logoBlock}>
+                  <h3>{t("logo.title")}</h3>
+                  <LogoUploader
+                    orgId={orgId}
+                    logoUrl={logoUrl}
+                    orgName={form.name}
+                    disabled={saving}
+                    onLogoChange={handleLogoChange}
+                  />
+                </div>
+                <div className={styles.logoBlock}>
+                  <h3>{t("favicon.title")}</h3>
+                  <LogoUploader
+                    variant="favicon"
+                    orgId={orgId}
+                    logoUrl={faviconUrl}
+                    disabled={saving}
+                    onLogoChange={handleFaviconChange}
+                  />
+                </div>
+              </div>
+            </section>
+
+            {formFooter}
+          </form>
+        </TabPanel>
+      ) : null}
+
+      {tab === "integracoes" ? (
+        <TabPanel id="integracoes" idPrefix="settings" className={styles.form}>
+          <form className={styles.form} onSubmit={save}>
+            <section className={styles.section}>
+              <div className={styles.sectionHeading}>
+                <h2>{t("integrations.title")}</h2>
+                <p>{t("integrations.description")}</p>
+              </div>
+
+              <div className={styles.integrationBlock}>
+                <h3>{t("integrations.whatsappTitle")}</h3>
+                <div className={styles.formGrid}>
+                  <label className={styles.field}>
+                    <span>{t("integrations.wabaId")}</span>
+                    <input
+                      value={form.waba_id}
+                      onChange={(event) =>
+                        setField("waba_id", event.target.value)
+                      }
+                      disabled={saving}
+                    />
+                  </label>
+                  <label className={styles.field}>
+                    <span>
+                      {t("integrations.namespace")}
+                      <small className={styles.optionalLabel}>
+                        · {t("integrations.namespaceOptional")}
+                      </small>
+                    </span>
+                    <input
+                      value={form.waba_namespace}
+                      onChange={(event) =>
+                        setField("waba_namespace", event.target.value)
+                      }
+                      disabled={saving}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div className={styles.integrationBlock}>
+                <h3>{t("integrations.teamsTitle")}</h3>
+                <label className={styles.field}>
+                  <span>{t("integrations.tenantId")}</span>
+                  <input
+                    value={form.teams_tenant_id}
+                    onChange={(event) =>
+                      setField("teams_tenant_id", event.target.value)
+                    }
+                    disabled={saving}
+                  />
+                  <small>{t("integrations.tenantIdHelp")}</small>
+                </label>
+              </div>
+            </section>
+
+            {formFooter}
+          </form>
+
+          <section className={styles.section} aria-labelledby="opening-title">
+            <div className={styles.sectionHeading}>
+              <h2 id="opening-title">{openingTranslation("title")}</h2>
+              <p>{openingTranslation("subtitle")}</p>
             </div>
-          </div>
 
-          <div className={styles.integrationBlock}>
-            <h3>{t("integrations.teamsTitle")}</h3>
-            <label className={styles.field}>
-              <span>{t("integrations.tenantId")}</span>
-              <input
-                value={form.teams_tenant_id}
-                onChange={(event) =>
-                  setField("teams_tenant_id", event.target.value)
-                }
-                disabled={saving}
-              />
-              <small>{t("integrations.tenantIdHelp")}</small>
-            </label>
-          </div>
-        </section>
+            {org?.id ? (
+              <OpeningMessageSettings orgId={org.id} orgName={org.name} />
+            ) : null}
+          </section>
+        </TabPanel>
+      ) : null}
 
-        <div className={styles.formFooter}>
-          {feedback && (
-            <p
-              className={
-                feedback.tone === "success"
-                  ? styles.successMessage
-                  : styles.errorMessage
-              }
-              role="status"
-            >
-              {feedback.message}
-            </p>
-          )}
-          <button className={styles.primaryButton} disabled={saving}>
-            {saving ? t("saving") : t("save")}
-          </button>
-        </div>
-      </form>
+      {tab === "historico" ? (
+        <TabPanel id="historico" idPrefix="settings">
+          <section className={styles.section} aria-labelledby="activity-title">
+            <div className={styles.sectionHeading}>
+              <h2 id="activity-title">{activityTranslation("Title")}</h2>
+              <p>{activityTranslation("Subtitle")}</p>
+            </div>
 
-      <section className={styles.section} aria-labelledby="activity-title">
-        <div className={styles.sectionHeader}>
-          <h2 id="activity-title" className={styles.sectionTitle}>
-            {activityTranslation("Title")}
-          </h2>
-          <p className={styles.sectionText}>
-            {activityTranslation("Subtitle")}
-          </p>
-        </div>
-
-        {org?.id ? <ActivityLog orgId={org.id} /> : null}
-      </section>
-      <section className={styles.section} aria-labelledby="opening-title">
-        <div className={styles.sectionHeader}>
-          <h2 id="opening-title" className={styles.sectionTitle}>
-            {openingTranslation("title")}
-          </h2>
-          <p className={styles.sectionText}>{openingTranslation("subtitle")}</p>
-        </div>
-
-        {org?.id ? (
-          <OpeningMessageSettings orgId={org.id} orgName={org.name} />
-        ) : null}
-      </section>
+            {org?.id ? <ActivityLog orgId={org.id} /> : null}
+          </section>
+        </TabPanel>
+      ) : null}
     </main>
   );
 }

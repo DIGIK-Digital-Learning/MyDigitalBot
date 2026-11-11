@@ -3417,7 +3417,7 @@
   },
   "Settings": {
     "title": "Definições",
-    "description": "Gere a organização, a aparência e as integrações num só lugar.",
+    "description": "Gere a organização e as integrações, e consulta o histórico de atividade.",
     "loadError": "Não foi possível carregar as definições.",
     "organizationMissing": "Não foi encontrada uma organização para esta conta.",
     "retry": "Tentar novamente",
@@ -3497,6 +3497,12 @@
       "nameTooLong": "O nome não pode exceder 150 caracteres.",
       "invalidColor": "Usa cores hexadecimais com 3 ou 6 dígitos, por exemplo #0af ou #00aaff.",
       "teamsConflict": "Este Tenant ID do Microsoft Teams já está associado a outra organização."
+    },
+    "tabs": {
+      "label": "Secções das definições",
+      "organization": "Organização",
+      "integrations": "Integrações",
+      "activity": "Histórico de atividade"
     }
   },
   "Dashboard": {

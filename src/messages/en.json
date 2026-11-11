@@ -3417,7 +3417,7 @@
   },
   "Settings": {
     "title": "Settings",
-    "description": "Manage the organization, appearance and integrations in one place.",
+    "description": "Manage the organization and integrations, and check the activity history.",
     "loadError": "Couldn't load the settings.",
     "organizationMissing": "No organization was found for this account.",
     "retry": "Try again",
@@ -3497,6 +3497,12 @@
       "nameTooLong": "The name can't exceed 150 characters.",
       "invalidColor": "Use hex colors with 3 or 6 digits, for example #0af or #00aaff.",
       "teamsConflict": "This Microsoft Teams Tenant ID is already associated with another organization."
+    },
+    "tabs": {
+      "label": "Settings sections",
+      "organization": "Organization",
+      "integrations": "Integrations",
+      "activity": "Activity history"
     }
   },
   "Dashboard": {
