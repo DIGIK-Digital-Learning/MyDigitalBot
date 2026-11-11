@@ -6,7 +6,6 @@ import styles from "./users.module.css";
 import {
   Pencil,
   X,
-  RefreshCcw,
   Check,
   CheckCheck,
   CircleAlert,
@@ -262,18 +261,7 @@ export default function ViewUserModal({
           <section className={styles.panelWide}>
             <div className={styles.threadsLayout}>
               <div className={styles.panel}>
-                <div className={styles.panelHead}>
-                  Threads
-                  <button
-                    className={styles.iconBtn}
-                    style={{ marginLeft: "auto" }}
-                    title={translation("reload")}
-                    onClick={() => loadThreads(user.id)}
-                    disabled={threadsLoading}
-                  >
-                    <RefreshCcw size={16} />
-                  </button>
-                </div>
+                <div className={styles.panelHead}>Threads</div>
 
                 <div className={`${styles.panelBody} ${styles.threadList}`}>
                   {threadsLoading && (

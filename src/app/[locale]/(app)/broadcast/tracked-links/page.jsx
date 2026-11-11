@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   Fragment,
   useCallback,
@@ -15,6 +14,8 @@ import { useTranslations } from "next-intl";
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 import { useAuth } from "@/app/AuthContext";
 import NewBadge from "@/app/components/NewBadge/NewBadge";
+import { RowActionLink } from "@/app/components/RowAction/RowAction";
+import { rowClickHandler } from "@/app/components/RowAction/rowClick";
 import Pagination from "@/app/components/Pagination/Pagination";
 import useOrganization from "@/app/hooks/useOrganization";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
@@ -310,9 +311,10 @@ export default function TrackedLinksPage() {
                     return (
                       <Fragment key={rowKey}>
                         <tr
-                          className={
-                            link.deleted ? styles.rowDeleted : undefined
-                          }
+                          className={`${styles.rowClickable} ${
+                            link.deleted ? styles.rowDeleted : ""
+                          }`}
+                          onClick={rowClickHandler(() => toggle(rowKey))}
                         >
                           <td className={styles.expandCell}>
                             <button
@@ -389,14 +391,12 @@ export default function TrackedLinksPage() {
                                 </td>
                                 <td>
                                   {send.sendGroupId ? (
-                                    <Link
+                                    <RowActionLink
                                       href={`/broadcast/tracked-links/detail?${new URLSearchParams(
                                         { sendGroupId: send.sendGroupId },
                                       ).toString()}`}
-                                      className={styles.viewBtn}
-                                    >
-                                      {translation("TrackedLinks.view")}
-                                    </Link>
+                                      label={translation("TrackedLinks.view")}
+                                    />
                                   ) : null}
                                 </td>
                                 <td className={styles.numberCell}>

@@ -1,3 +1,5 @@
+import { X } from "lucide-react";
+
 import styles from "../../broadcast.module.css";
 
 export default function ActiveFilters({
@@ -52,12 +54,14 @@ export default function ActiveFilters({
       })}
 
       <button
+        type="button"
         className={styles.filterClearAll}
         onClick={() => {
           setSelectedTagIds([]);
           setSelectedAssistantIds([]);
         }}
       >
+        <X size={14} aria-hidden />
         {translation("Common.clearAll")}
       </button>
     </div>

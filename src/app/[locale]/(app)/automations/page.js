@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import useRefreshOnReturn from "@/app/hooks/useRefreshOnReturn";
 import {
   Bot,
   CalendarClock,
@@ -8,13 +9,10 @@ import {
   Clock3,
   Eye,
   MessageSquare,
-  Pencil,
   PlayCircle,
   Plus,
-  RefreshCw,
   ToggleLeft,
   ToggleRight,
-  Trash2,
   UserPlus,
 } from "lucide-react";
 import styles from "./automations.module.css";
@@ -28,6 +26,7 @@ import { useTranslations } from "next-intl";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
 import usePlanLimitPrompt from "@/app/hooks/usePlanLimitPrompt";
 import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
+import RowAction, { RowActions } from "@/app/components/RowAction/RowAction";
 
 const TRIGGER_OPTIONS = [
   {
@@ -161,6 +160,7 @@ export default function AutomationsPage() {
   const translation = useTranslations("Automations");
   const planTranslation = useTranslations("Plans.limits");
   const usageTranslation = useTranslations("Plans.usage");
+  const commonTranslation = useTranslations("Common");
 
   const translatedTriggerOptions = useMemo(
     () =>
@@ -218,24 +218,18 @@ export default function AutomationsPage() {
     planUsage?.automations != null &&
     planUsage.automations >= planLimits.automations;
 
+  /*
+   * `silent`: ao voltar à página (#236) as listas trocam sem o ecrã de
+   * carregamento e sem aviso se falhar (fica o que já estava).
+   */
   const refreshAll = useCallback(
-    async (showSuccessAlert = false) => {
+    async ({ silent = false } = {}) => {
       /* O contador acompanha cada criação, alteração e remoção. */
       reloadPlanUsage();
 
-      if (!orgId) {
-        if (showSuccessAlert && typeof showAlertRef.current === "function") {
-          await showAlertRef.current({
-            title: translation("alerts.noOrg.title"),
-            message: translation("alerts.noOrg.message"),
-            tone: "warning",
-          });
-        }
+      if (!orgId) return;
 
-        return;
-      }
-
-      startLoading();
+      if (!silent) startLoading();
 
       try {
         const responses = await Promise.all([
@@ -303,18 +297,10 @@ export default function AutomationsPage() {
         );
         setAssistants(Array.isArray(assistantsData) ? assistantsData : []);
         setReadChainsEnabled(Boolean(featureData?.item?.read_chains_enabled));
-
-        if (showSuccessAlert && typeof showAlertRef.current === "function") {
-          await showAlertRef.current({
-            title: translation("alerts.refreshSuccess.title"),
-            message: translation("alerts.refreshSuccess.message"),
-            tone: "success",
-          });
-        }
       } catch (err) {
         console.warn("[Automations] refresh error:", err);
 
-        if (typeof showAlertRef.current === "function") {
+        if (!silent && typeof showAlertRef.current === "function") {
           await showAlertRef.current({
             title: translation("alerts.loadFailed.title"),
             message: translation("alerts.loadFailed.message"),
@@ -322,7 +308,7 @@ export default function AutomationsPage() {
           });
         }
       } finally {
-        stopLoading();
+        if (!silent) stopLoading();
       }
     },
     [orgId, startLoading, stopLoading, translation, reloadPlanUsage],
@@ -332,6 +318,10 @@ export default function AutomationsPage() {
     if (authLoading || orgLoading || !orgId) return;
     refreshAll();
   }, [authLoading, orgLoading, orgId, refreshAll]);
+
+  useRefreshOnReturn(
+    useCallback(() => refreshAll({ silent: true }), [refreshAll]),
+  );
 
   useEffect(() => {
     if (!createMenuOpen) return;
@@ -690,15 +680,6 @@ export default function AutomationsPage() {
           <button
             type="button"
             className={`${styles.actionBtn} ${styles.actionBtnSecondary}`}
-            onClick={() => refreshAll(true)}
-          >
-            <RefreshCw size={16} />
-            <span>{translation("refresh")}</span>
-          </button>
-
-          <button
-            type="button"
-            className={`${styles.actionBtn} ${styles.actionBtnSecondary}`}
             onClick={() => runAutomation("/api/automations/run/inactivity")}
           >
             <Clock3 size={16} />
@@ -873,40 +854,32 @@ export default function AutomationsPage() {
                   </div>
 
                   <div className={styles.cellKebab}>
-                    <button
-                      className={styles.rowActBtn}
-                      onClick={() => toggleRule(rule)}
-                      title={
-                        rule.is_active
-                          ? translation("rulesTable.pause")
-                          : translation("rulesTable.activate")
-                      }
-                    >
-                      {rule.is_active ? (
-                        <ToggleRight size={16} />
-                      ) : (
-                        <ToggleLeft size={16} />
-                      )}
-                    </button>
-
-                    <button
-                      className={styles.rowActBtn}
-                      onClick={() => {
-                        setEditingRule(rule);
-                        setModalOpen(true);
-                      }}
-                      title={translation("rulesTable.edit")}
-                    >
-                      <Pencil size={16} />
-                    </button>
-
-                    <button
-                      className={`${styles.rowActBtn} ${styles.rowActBtnDanger}`}
-                      onClick={() => handleDeleteRule(rule)}
-                      title={translation("rulesTable.delete")}
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    {/* #238: o mesmo aspeto e o mesmo texto que nas outras páginas. */}
+                    <RowActions label={commonTranslation("actions")}>
+                      <RowAction
+                        kind="toggle"
+                        icon={rule.is_active ? ToggleRight : ToggleLeft}
+                        label={
+                          rule.is_active
+                            ? translation("rulesTable.pause")
+                            : translation("rulesTable.activate")
+                        }
+                        onClick={() => toggleRule(rule)}
+                      />
+                      <RowAction
+                        kind="edit"
+                        label={translation("rulesTable.edit")}
+                        onClick={() => {
+                          setEditingRule(rule);
+                          setModalOpen(true);
+                        }}
+                      />
+                      <RowAction
+                        kind="delete"
+                        label={translation("rulesTable.delete")}
+                        onClick={() => handleDeleteRule(rule)}
+                      />
+                    </RowActions>
                   </div>
                 </div>
               );

@@ -916,7 +916,7 @@
     "search": "Search",
     "filter": "Filter",
     "clear": "Clear",
-    "clearAll": "Clear all",
+    "clearAll": "Clear filters",
     "close": "Close",
     "removeFilter": "Remove filter",
     "save": "Save",
@@ -964,7 +964,7 @@
     "title": "Users",
     "searchPlaceholder": "Search",
     "manageTags": "Manage Tags",
-    "newUser": "New User",
+    "newUser": "New user",
     "importCsv": "Import CSV",
     "pagination": {
       "summary": "Page {page} of {totalPages} · {totalUsers} users",
@@ -980,7 +980,6 @@
       "assistant": "Assistant"
     },
     "row": {
-      "more": "More options",
       "view": "View",
       "edit": "Edit",
       "delete": "Delete"
@@ -1135,7 +1134,6 @@
     "failed": "Failed",
     "edit": "Edit",
     "close": "Close",
-    "reload": "Reload",
     "loading": "Loading…",
     "noThreads": "This user has no threads.",
     "messages": "Messages",
@@ -1253,7 +1251,6 @@
   },
   "Automations": {
     "searchAutomations": "Search automations...",
-    "refresh": "Refresh",
     "runInactivity": "Run inactivity",
     "materialize": "Materialize",
     "newAutomation": "New automation",
@@ -1376,10 +1373,6 @@
       "noOrg": {
         "title": "Organization missing",
         "message": "We couldn't identify the organization yet. Try again in a few seconds."
-      },
-      "refreshSuccess": {
-        "title": "Automations refreshed",
-        "message": "Rules, queues and sends were refreshed successfully."
       },
       "loadFailed": {
         "title": "Error loading automations",
@@ -2080,7 +2073,6 @@
     "Title": "Scheduled messages",
     "Subtitle": "Scheduled messages for organization {organization}",
     "NewMessage": "New message",
-    "Refresh": "Refresh",
     "Loading": "Loading scheduled messages...",
     "Timezone": "Timezone",
     "ConfirmDelete": "Are you sure you want to delete this scheduled message?",
@@ -2123,7 +2115,8 @@
     "Actions": {
       "view": "View",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "remove": "Remove"
     },
     "ViewModal": {
       "question": {
@@ -2529,7 +2522,7 @@
   },
   "Assistants": {
     "myAssistants": "My Assistants",
-    "createAssistant": "Create Assistant",
+    "createAssistant": "New assistant",
     "loadingOrg": "Loading organization…",
     "empty": "No assistants yet.",
     "loading": "Loading assistants…",
@@ -2917,7 +2910,7 @@
     "delete": "Delete Users",
     "deleteUsers": "Delete selected users",
     "confirmUserDeletion": {
-      "title": "Delete {number}  user(s)?",
+      "title": "Delete {number} user(s)?",
       "message": "This action can't be undone",
       "confirm": "Delete",
       "cancel": "Cancel"
@@ -2927,7 +2920,6 @@
   "Analytics": {
     "title": "Analytics",
     "description": "Activity, delivery, automations and links for the organization in the selected period.",
-    "refresh": "Refresh",
     "updatedAt": "Updated at {time}",
     "retry": "Try again",
     "loading": "Loading analytics...",
@@ -3228,7 +3220,6 @@
     "Title": "Activity history",
     "Subtitle": "Chronology of the actions made in the organization, newest first.",
     "Loading": "Loading history...",
-    "Refresh": "Refresh",
     "Filters": {
       "from": "From",
       "to": "To",
@@ -3513,7 +3504,6 @@
     "description": "Overview of your organization's usage and setup.",
     "organizationMissing": "No organization was found for this account.",
     "loadError": "Couldn't load the dashboard.",
-    "refresh": "Refresh",
     "retry": "Try again",
     "updatedAt": "Updated at {time}",
     "groups": {

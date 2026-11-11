@@ -1,4 +1,4 @@
-import { RefreshCw, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import PillSelect from "@/app/components/PillSelect/PillSelect";
 import styles from "../scheduled.module.css";
 
@@ -15,7 +15,6 @@ export default function ScheduledFilters({
   dateFilter,
   onDateChange,
   onClearDate,
-  onRefresh,
   usage = null,
 }) {
   return (
@@ -81,15 +80,6 @@ export default function ScheduledFilters({
           boxSizing: "border-box",
         }}
       />
-
-      <button
-        type="button"
-        onClick={onRefresh}
-        className={styles.refreshButton}
-      >
-        <RefreshCw aria-hidden className={styles.buttonIcon} />
-        <span>{translation("Refresh")}</span>
-      </button>
 
       {/* Contador do limite do plano ("2 / 100", #186), sempre à direita. */}
       {usage ? <div className={styles.usageSlot}>{usage}</div> : null}

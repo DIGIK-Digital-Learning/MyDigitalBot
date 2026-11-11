@@ -430,8 +430,6 @@
 .dateInput::-webkit-calendar-picker-indicator {
   cursor: pointer;
 }
-
-.refreshButton,
 .ghostButton {
   display: inline-flex;
   align-items: center;
@@ -447,16 +445,7 @@
     opacity 140ms ease;
 }
 
-.refreshButton {
-  background: #ffffff;
-  color: #111827;
-  border: 1px solid var(--ui-border, #d1d5db);
-  margin-left: auto;
-}
 
-.refreshButton:hover {
-  background: #f9fafb;
-}
 
 .ghostButton {
   background: transparent;
@@ -468,8 +457,6 @@
   color: #111827;
   background: #f3f4f6;
 }
-
-.refreshButton:disabled,
 .ghostButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;

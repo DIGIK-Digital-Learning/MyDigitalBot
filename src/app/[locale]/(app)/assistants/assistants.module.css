@@ -98,6 +98,7 @@
   justify-content: center;
   border-radius: 12px;
   font-weight: 700;
+  gap: 6px;
 }
 
 /* ===== Buttons ===== */
@@ -122,22 +123,12 @@
   padding: 10px 14px;
   cursor: pointer;
 }
-.dangerBtn {
-  border: none;
-  background: var(--danger);
-  color: #fff;
-  border-radius: 10px;
-  padding: 10px 14px;
-  cursor: pointer;
-}
 .ctaPrimary,
-.ghostBtn,
-.dangerBtn {
+.ghostBtn {
   transition: transform 0.06s ease;
 }
 .ctaPrimary:active,
-.ghostBtn:active,
-.dangerBtn:active {
+.ghostBtn:active {
   transform: translateY(1px);
 }
 
@@ -338,7 +329,6 @@ input[type="range"].slider {
   margin-left: auto;
 }
 .actionsRow .ghostBtn,
-.actionsRow .dangerBtn,
 .actionsRow .ctaPrimary {
   white-space: nowrap;
 }
@@ -509,8 +499,7 @@ body.modalOpen {
   background: #f3f7fb;
 }
 
-.paperCard .ghostBtn:disabled,
-.paperCard .dangerBtn:disabled {
+.paperCard .ghostBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -584,17 +573,6 @@ body.modalOpen {
 
 .fileActionBtn {
   flex: 0 0 auto;
-  border: 1px solid #d6e2ee;
-  border-radius: 8px;
-  padding: 5px 8px;
-  color: var(--text-dark);
-  background: #fff;
-  cursor: pointer;
-  font-size: 0.8rem;
-}
-
-.fileActionBtn:hover {
-  background: #eef5fb;
 }
 
 .formGroup input,

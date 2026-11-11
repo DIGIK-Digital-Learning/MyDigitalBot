@@ -13,6 +13,7 @@ import {
 } from "../helpers/activity.helpers";
 
 import ActivityFilters from "./ActivityFilters";
+import useRefreshOnReturn from "@/app/hooks/useRefreshOnReturn";
 import ActivityTable from "./ActivityTable";
 import ActivityPagination from "./ActivityPagination";
 
@@ -42,11 +43,14 @@ export default function ActivityLog({ orgId }) {
 
   const hasFilters = area !== ALL_AREAS || Boolean(from) || Boolean(to);
 
-  const load = useCallback(async () => {
+  /* `silent`: ao voltar à página (#236) a tabela troca sem piscar. */
+  const load = useCallback(async ({ silent = false } = {}) => {
     if (!orgId) return;
 
-    setLoading(true);
-    setLoadFailed(false);
+    if (!silent) {
+      setLoading(true);
+      setLoadFailed(false);
+    }
 
     try {
       const query = buildQueryString({
@@ -67,19 +71,24 @@ export default function ActivityLog({ orgId }) {
 
       setItems(Array.isArray(result.items) ? result.items : []);
       setTotal(Number(result.total) || 0);
+      setLoadFailed(false);
     } catch (err) {
       console.warn("[ActivityLog] load error:", err);
+      /* Em silêncio, uma falha deixa ficar a tabela que já estava. */
+      if (silent) return;
       setItems([]);
       setTotal(0);
       setLoadFailed(true);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [orgId, area, from, to, page]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  useRefreshOnReturn(useCallback(() => load({ silent: true }), [load]));
 
   const pages = totalPages(total, PAGE_SIZE);
 
@@ -117,8 +126,6 @@ export default function ActivityLog({ orgId }) {
         onFromChange={changeFrom}
         onToChange={changeTo}
         onClear={clearFilters}
-        onRefresh={load}
-        loading={loading}
       />
 
       {loadFailed ? (
