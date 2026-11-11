@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { ADMIN_PLAN_CHANGED_EVENT } from "@/lib/admin/admin.api";
 import { fetchPlanLimits } from "@/lib/plans/plans.api";
 
 const EMPTY = {
@@ -23,7 +24,9 @@ const EMPTY = {
  * que passar do limite. Assim uma falha aqui nunca deixa a pessoa presa.
  *
  * `reload()` volta a pedir os números, para o contador acompanhar depois de
- * criar, apagar ou agendar.
+ * criar, apagar ou agendar. Também volta a pedir quando o administrador muda
+ * o plano da própria organização (#242): sem isto, a faixa da Demo e os
+ * contadores só mudavam com F5.
  */
 export default function usePlanLimits(orgId) {
   const [state, setState] = useState(EMPTY);
@@ -58,6 +61,11 @@ export default function usePlanLimits(orgId) {
   }, [orgId, attempt]);
 
   const reload = useCallback(() => setAttempt((n) => n + 1), []);
+
+  useEffect(() => {
+    window.addEventListener(ADMIN_PLAN_CHANGED_EVENT, reload);
+    return () => window.removeEventListener(ADMIN_PLAN_CHANGED_EVENT, reload);
+  }, [reload]);
 
   return { ...state, reload };
 }
