@@ -1,6 +1,6 @@
 import localFont from "next/font/local";
 import "./globals.css";
-import { cookies } from "next/headers";
+import { getLocale } from "next-intl/server";
 import { AuthProvider } from "./AuthContext";
 import { GlobalLoaderProvider } from "./LoadingScreen/GlobalLoaderContext";
 
@@ -26,8 +26,12 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  const cookieStore = await cookies();
-  const locale = cookieStore.get("NEXT_LOCALE")?.value || "en";
+  /*
+   * #243: a língua da página vem do pedido (o URL, via next-intl) e não do
+   * cookie NEXT_LOCALE. Na primeira visita não há cookie e uma página em PT
+   * dizia ao browser que estava em inglês (e o Chrome oferecia traduzi-la).
+   */
+  const locale = await getLocale();
 
   return (
     <html lang={locale} className={inter.variable}>

@@ -3509,7 +3509,7 @@
     }
   },
   "Dashboard": {
-    "title": "Home",
+    "title": "Portal",
     "description": "Overview of your organization's usage and setup.",
     "organizationMissing": "No organization was found for this account.",
     "loadError": "Couldn't load the dashboard.",

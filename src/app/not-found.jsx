@@ -1,18 +1,13 @@
 // app/not-found.jsx
 import Link from "next/link";
-import { headers, cookies } from "next/headers";
-import { getTranslations } from "next-intl/server";
+import { cookies } from "next/headers";
+import { getLocale, getTranslations } from "next-intl/server";
 import styles from "./[locale]/(auth)/login/login.module.css";
 
 export default async function NotFound() {
-  // Get current path (works for both absolute and relative)
-  const h = await headers();
-  const raw = h.get("x-next-url") || h.get("x-request-url") || "";
-  const pathish = raw.startsWith("http") ? new URL(raw).pathname : raw || "/";
-
-  // Derive locale from first segment, default to 'pt'
-  const segs = pathish.split("/").filter(Boolean);
-  const locale = /^(pt|en)$/i.test(segs[0]) ? segs[0].toLowerCase() : "pt";
+  /* #243: a língua vem do pedido (next-intl). Antes tentava-se lê-la de um
+     cabeçalho que não chega, e /en/... aparecia sempre em português. */
+  const locale = await getLocale();
 
   // Consider user "authed" if Supabase cookies exist
   const c = await cookies();
