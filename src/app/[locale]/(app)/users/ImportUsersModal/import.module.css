@@ -131,19 +131,13 @@
   font-weight: 600;
 }
 
-.formGroup input,
+.formGroup input:not([type="file"]),
 .formGroup select {
   padding: 0.6rem 0.7rem;
   border-radius: 10px;
   border: 1px solid var(--ui-border);
   background: var(--ui-pill);
   color: #0f1c3f;
-}
-
-.formGroup input[type="file"] {
-  padding: 0.55rem 0.7rem;
-  background: var(--ui-pill);
-  cursor: pointer;
 }
 
 .helperText {

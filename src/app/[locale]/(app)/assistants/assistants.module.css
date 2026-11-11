@@ -262,29 +262,6 @@
   border-radius: 8px;
 }
 
-/* specs */
-.specBadge {
-  display: inline-block;
-  margin-top: 12px;
-  margin-bottom: 8px;
-  background: #0c6e9d;
-  color: #eaf7ff;
-  border-radius: 999px;
-  padding: 6px 10px;
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-.specs {
-  display: grid;
-  gap: 10px;
-}
-.specLabel {
-  font-weight: 600;
-}
-.specValueBold {
-  font-weight: 800;
-}
-
 .primaryCard,
 .paperCard,
 .modalContent,
@@ -386,6 +363,31 @@ input[type="range"].slider {
   min-width: 0;
   overflow-x: hidden;
   overflow: hidden;
+}
+
+/* ===== A carregar ===== */
+.loadingState {
+  display: grid;
+  place-items: center;
+  padding: 24px 0;
+}
+.inlineSpinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #d6e4f0;
+  border-top-color: #0070f3;
+  border-radius: 50%;
+  animation: assistantsSpin 0.9s linear infinite;
+}
+@keyframes assistantsSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .inlineSpinner {
+    animation-duration: 2.4s;
+  }
 }
 
 /* ===== Placeholder ===== */
@@ -966,27 +968,6 @@ body.modalOpen {
     left: 0;
     right: auto;
   }
-}
-
-/*
-  A linha do comportamento em leitura.
-
-  As outras especificidades eram uma grelha de tres colunas com uma
-  barra a meio a mostrar o valor. O comportamento nao tem valor para
-  desenhar — tem um nome —, por isso a barra era so um espacador cinzento
-  a alinhar com uma linha que ja nao existe.
-*/
-.specRowBehavior {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.specRowStacked {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
 }
 
 /*

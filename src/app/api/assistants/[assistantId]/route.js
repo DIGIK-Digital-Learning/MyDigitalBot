@@ -5,6 +5,7 @@ import { updateAssistant, deleteAssistant } from "@/lib/repos/assistants.repo";
 
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
+import { assistantTextTooLong } from "@/lib/assistants/assistantTextLimits";
 import {
   getOrgLimits,
   limitKeepingCurrent,
@@ -74,6 +75,19 @@ export async function PATCH(req, { params }) {
         {
           status: 400,
         },
+      );
+    }
+
+    /*
+     * Título até 80 caracteres e descrição até 200. Um assistente gravado
+     * antes destes limites pode ficar com o tamanho que já tinha.
+     */
+    const textTooLong = assistantTextTooLong(patch, orgAuth.assistant);
+
+    if (textTooLong) {
+      return NextResponse.json(
+        { error: "Assistant text is too long", ...textTooLong },
+        { status: 400 },
       );
     }
 

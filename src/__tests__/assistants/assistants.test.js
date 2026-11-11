@@ -386,40 +386,22 @@ describe("AssistantsHub Page", () => {
     expect(await screen.findByText("Gamma desc")).toBeInTheDocument();
   });
 
-  it("mostra o nome da predefinicao em vez dos dois numeros", async () => {
-    const user = userEvent.setup();
+  it("o painel nao mostra o ID nem o bloco de comportamento", async () => {
     renderPage();
 
-    // O Beta nasceu com a predefinicao Criativo (1.1 / 1).
-    await user.click(await screen.findByText("Beta"));
+    expect(await screen.findByText("Alpha instructions")).toBeInTheDocument();
 
-    expect(
-      await screen.findByText("AssistantPresets.creative.name"),
-    ).toBeInTheDocument();
+    // O id interno da OpenAI nao diz nada ao cliente.
+    expect(screen.queryByText("oa_1")).toBeNull();
 
-    // "Criativo" diz ao cliente o que o assistente faz; "1.10" nao diz.
-    expect(screen.queryByText("Assistants.details.creativity")).toBeNull();
-    expect(screen.queryByText("Assistants.details.variety")).toBeNull();
-
-    // O modelo tambem saiu do ecra: nao se escolhe nem se mostra. O id
-    // cru ("gpt-4.1") nunca foi para os olhos do cliente.
+    // O comportamento escolhe-se so ao criar: o painel ja nao o mostra.
+    expect(screen.queryByText("Assistants.details.specs")).toBeNull();
+    expect(screen.queryByText("Assistants.details.behavior")).toBeNull();
+    expect(screen.queryByText("Assistants.details.customBehavior")).toBeNull();
     expect(screen.queryByText(/gpt-/i)).toBeNull();
-    expect(screen.queryByText("Assistants.details.model")).toBeNull();
   });
 
-  it("assinala como personalizado um assistente afinado a mao", async () => {
-    renderPage();
-
-    // O Alpha tem temperatura 0.7 (a do Normal) mas top_p 0.2. Nao se
-    // comporta como o Normal, e chamar-lhe Normal seria mentir.
-    expect(
-      await screen.findByText("Assistants.details.customBehavior"),
-    ).toBeInTheDocument();
-
-    expect(screen.queryByText("AssistantPresets.normal.name")).toBeNull();
-  });
-
-  it("em edicao oferece as tres predefinicoes e nenhum deslizador", async () => {
+  it("em edicao nao ha predefinicoes, e titulo e descricao tem contador", async () => {
     const user = userEvent.setup();
     renderPage();
 
@@ -429,45 +411,88 @@ describe("AssistantsHub Page", () => {
       screen.getByRole("button", { name: "Assistants.details.edit" }),
     );
 
-    expect(screen.getAllByRole("radio")).toHaveLength(3);
+    expect(screen.queryAllByRole("radio")).toHaveLength(0);
     expect(screen.queryAllByRole("slider")).toHaveLength(0);
-
-    // O comportamento e a unica coisa que se escolhe: o seletor de
-    // modelo saiu daqui como ja tinha saido da criacao.
     expect(screen.queryAllByRole("combobox")).toHaveLength(0);
+
+    // Titulo ate 80 e descricao ate 200, com o contador ao lado.
+    expect(screen.getByDisplayValue("Alpha")).toHaveAttribute("maxLength", "80");
+    expect(screen.getByDisplayValue("Alpha desc")).toHaveAttribute(
+      "maxLength",
+      "200",
+    );
+    expect(screen.getByText("5 / 80")).toBeInTheDocument();
+    expect(screen.getByText("10 / 200")).toBeInTheDocument();
   });
 
-  it("guarda os valores da predefinicao escolhida", async () => {
+  it("um assistente antigo com titulo longo pode ficar com o tamanho que tem", async () => {
     const user = userEvent.setup();
-    renderPage();
-
-    expect(await screen.findByText("Alpha instructions")).toBeInTheDocument();
-
-    await user.click(
-      screen.getByRole("button", { name: "Assistants.details.edit" }),
-    );
-
-    await user.click(screen.getByRole("radio", { name: /formal/i }));
-    await user.click(
-      screen.getByRole("button", { name: "Assistants.details.save" }),
-    );
-
-    const patch = await waitFor(() => {
-      const call = mocks.fetch.mock.calls.find(
-        (c) => c[0] === "/api/assistants/asst_1" && c[1]?.method === "PATCH",
-      );
-      expect(call).toBeTruthy();
-      return JSON.parse(call[1].body);
+    const longName = "T".repeat(95);
+    const baseFetch = mocks.fetch.getMockImplementation();
+    mocks.fetch.mockImplementation((input, init = {}) => {
+      const url = typeof input === "string" ? input : input.url;
+      if (url === `/api/assistants/asst_1` && !init.method) {
+        return makeResponse({ ...DETAILS_1, name: longName });
+      }
+      return baseFetch(input, init);
     });
 
-    expect(patch.temperature).toBe(0.2);
+    renderPage();
 
-    // Sem seletor, o modelo do assistente tem de sobreviver a gravacao.
-    expect(patch.model).toBe("gpt-4.1");
+    expect(await screen.findByText("Alpha instructions")).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Assistants.details.edit" }),
+    );
 
-    // O top_p tem de vir corrigido para 1: o assistente tinha 0.2, e
-    // escolher uma predefinicao escreve os dois parametros.
-    expect(patch.top_p).toBe(1);
+    expect(screen.getByDisplayValue(longName)).toHaveAttribute(
+      "maxLength",
+      "95",
+    );
+  });
+
+  it("enquanto carrega mostra o spinner e nao o texto de lista vazia", async () => {
+    let finishList;
+    const baseFetch = mocks.fetch.getMockImplementation();
+    mocks.fetch.mockImplementation((input, init = {}) => {
+      const url = typeof input === "string" ? input : input.url;
+      if (url === `/api/assistants?orgId=${ORG_ID}`) {
+        return new Promise((resolve) => {
+          finishList = () => resolve(baseFetch(input, init));
+        });
+      }
+      return baseFetch(input, init);
+    });
+
+    renderPage();
+
+    expect(
+      screen.getAllByRole("status", { name: "Assistants.loading" }).length,
+    ).toBeGreaterThan(0);
+    expect(screen.queryByText("Assistants.empty")).toBeNull();
+    expect(screen.queryByText("Assistants.placeholder")).toBeNull();
+
+    finishList();
+
+    expect(await screen.findByText("Alpha instructions")).toBeInTheDocument();
+    expect(
+      screen.queryAllByRole("status", { name: "Assistants.loading" }),
+    ).toHaveLength(0);
+  });
+
+  it("sem assistentes, depois de carregar, mostra o texto de lista vazia", async () => {
+    const baseFetch = mocks.fetch.getMockImplementation();
+    mocks.fetch.mockImplementation((input, init = {}) => {
+      const url = typeof input === "string" ? input : input.url;
+      if (url === `/api/assistants?orgId=${ORG_ID}`) return makeResponse([]);
+      return baseFetch(input, init);
+    });
+
+    renderPage();
+
+    expect(await screen.findByText("Assistants.empty")).toBeInTheDocument();
+    expect(
+      screen.queryAllByRole("status", { name: "Assistants.loading" }),
+    ).toHaveLength(0);
   });
   
   it("edits an attached vector store and removes an existing file", async () => {
@@ -666,6 +691,31 @@ describe("AssistantsHub Page", () => {
 
       expect(await screen.findByText("a.pdf")).toBeInTheDocument();
       expect(appMocks.alert).not.toHaveBeenCalled();
+    });
+
+    it("o botão de escolher ficheiros usa o texto da app, não o do browser", async () => {
+      const user = userEvent.setup({ applyAccept: false });
+      mockWith({ ...DETAILS_1, vectorStoreId: 42 });
+      renderPage();
+
+      await screen.findByText("old.pdf");
+      await user.click(
+        screen.getByRole("button", { name: "Assistants.vector.edit" }),
+      );
+
+      /*
+       * O texto do <input type="file"> nativo vem do browser e fica na
+       * língua dele. O nosso label dá-lhe o nome, e o estado diz o que se
+       * escolheu.
+       */
+      const input = document.getElementById("vector-store-edit-files");
+      expect(input).toHaveAccessibleName(/chooseFiles/);
+      expect(screen.getByText("noFileChosen")).toBeInTheDocument();
+
+      await user.upload(input, [pdf("a.pdf"), pdf("b.pdf")]);
+
+      expect(await screen.findByText("filesChosen")).toBeInTheDocument();
+      expect(screen.queryByText("noFileChosen")).toBeNull();
     });
   });
 });

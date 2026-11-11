@@ -8,6 +8,7 @@ import PillSelect from "@/app/components/PillSelect/PillSelect";
 import mapCsvRow from "./helpers";
 import { Download } from "lucide-react";
 import usePlanLimitPrompt from "@/app/hooks/usePlanLimitPrompt";
+import FilePickerButton from "@/app/components/FilePickerButton/FilePickerButton";
 
 const PREVIEW_LIMIT = 10;
 
@@ -260,12 +261,13 @@ export default function ImportUsersModal({
           <div className={styles.formGroup}>
             <label htmlFor="importFile">{t("file")}</label>
 
-            <input
+            {/* O nome escolhido já aparece por baixo ("selectedFile"). */}
+            <FilePickerButton
               id="importFile"
-              type="file"
               accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
               onChange={(e) => handleFileChange(e.target.files?.[0])}
               disabled={isSubmitting}
+              showStatus={false}
             />
 
             {fileName ? (

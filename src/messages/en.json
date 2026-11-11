@@ -907,6 +907,12 @@
     "analytics": "Analytics"
   },
   "Common": {
+    "filePicker": {
+      "chooseFile": "Choose file",
+      "chooseFiles": "Choose files",
+      "noFileChosen": "No file chosen",
+      "filesChosen": "{count} files chosen"
+    },
     "search": "Search",
     "filter": "Filter",
     "clear": "Clear",
@@ -959,6 +965,7 @@
     "searchPlaceholder": "Search",
     "manageTags": "Manage Tags",
     "newUser": "New User",
+    "importCsv": "Import CSV",
     "pagination": {
       "summary": "Page {page} of {totalPages} · {totalUsers} users",
       "perPage": "{count} / page",
@@ -2525,13 +2532,11 @@
     "createAssistant": "Create Assistant",
     "loadingOrg": "Loading organization…",
     "empty": "No assistants yet.",
+    "loading": "Loading assistants…",
     "details": {
       "descriptionPlaceholder": "Short description",
       "instructionsPlaceholder": "Assistant instructions",
       "createdAt": "Created on",
-      "specs": "Details:",
-      "behavior": "Behavior",
-      "customBehavior": "Custom ({temperature})",
       "save": "Save",
       "saving": "Saving...",
       "cancel": "Cancel",

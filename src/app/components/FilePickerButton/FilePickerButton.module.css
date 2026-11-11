@@ -1,0 +1,64 @@
+/*
+ * Escolher ficheiros com texto da app. O input nativo fica escondido mas
+ * acessível: o label com o nosso texto abre a janela do sistema.
+ */
+.filePicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--ui-pill, #f1f5f9);
+}
+
+.button {
+  position: relative;
+  flex: 0 0 auto;
+  border: 1px solid #d6e2ee;
+  border-radius: 8px;
+  padding: 6px 12px;
+  color: var(--text-dark);
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.button:hover {
+  background: #eef5fb;
+}
+
+.button:focus-within {
+  outline: 2px solid #0070f3;
+  outline-offset: 2px;
+}
+
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.disabled:hover {
+  background: #fff;
+}
+
+/* Escondido mas acessível (não `display: none`, que o tirava do teclado). */
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.status {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-dark);
+  font-size: 0.85rem;
+}
