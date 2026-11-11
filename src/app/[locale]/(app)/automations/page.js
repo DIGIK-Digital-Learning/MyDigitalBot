@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import useRefreshOnReturn from "@/app/hooks/useRefreshOnReturn";
 import {
   Bot,
   CalendarClock,
@@ -11,7 +12,6 @@ import {
   Pencil,
   PlayCircle,
   Plus,
-  RefreshCw,
   ToggleLeft,
   ToggleRight,
   Trash2,
@@ -218,24 +218,18 @@ export default function AutomationsPage() {
     planUsage?.automations != null &&
     planUsage.automations >= planLimits.automations;
 
+  /*
+   * `silent`: ao voltar à página (#236) as listas trocam sem o ecrã de
+   * carregamento e sem aviso se falhar (fica o que já estava).
+   */
   const refreshAll = useCallback(
-    async (showSuccessAlert = false) => {
+    async ({ silent = false } = {}) => {
       /* O contador acompanha cada criação, alteração e remoção. */
       reloadPlanUsage();
 
-      if (!orgId) {
-        if (showSuccessAlert && typeof showAlertRef.current === "function") {
-          await showAlertRef.current({
-            title: translation("alerts.noOrg.title"),
-            message: translation("alerts.noOrg.message"),
-            tone: "warning",
-          });
-        }
+      if (!orgId) return;
 
-        return;
-      }
-
-      startLoading();
+      if (!silent) startLoading();
 
       try {
         const responses = await Promise.all([
@@ -303,18 +297,10 @@ export default function AutomationsPage() {
         );
         setAssistants(Array.isArray(assistantsData) ? assistantsData : []);
         setReadChainsEnabled(Boolean(featureData?.item?.read_chains_enabled));
-
-        if (showSuccessAlert && typeof showAlertRef.current === "function") {
-          await showAlertRef.current({
-            title: translation("alerts.refreshSuccess.title"),
-            message: translation("alerts.refreshSuccess.message"),
-            tone: "success",
-          });
-        }
       } catch (err) {
         console.warn("[Automations] refresh error:", err);
 
-        if (typeof showAlertRef.current === "function") {
+        if (!silent && typeof showAlertRef.current === "function") {
           await showAlertRef.current({
             title: translation("alerts.loadFailed.title"),
             message: translation("alerts.loadFailed.message"),
@@ -322,7 +308,7 @@ export default function AutomationsPage() {
           });
         }
       } finally {
-        stopLoading();
+        if (!silent) stopLoading();
       }
     },
     [orgId, startLoading, stopLoading, translation, reloadPlanUsage],
@@ -332,6 +318,10 @@ export default function AutomationsPage() {
     if (authLoading || orgLoading || !orgId) return;
     refreshAll();
   }, [authLoading, orgLoading, orgId, refreshAll]);
+
+  useRefreshOnReturn(
+    useCallback(() => refreshAll({ silent: true }), [refreshAll]),
+  );
 
   useEffect(() => {
     if (!createMenuOpen) return;
@@ -687,15 +677,6 @@ export default function AutomationsPage() {
         </div>
 
         <div className={styles.toolbarRight}>
-          <button
-            type="button"
-            className={`${styles.actionBtn} ${styles.actionBtnSecondary}`}
-            onClick={() => refreshAll(true)}
-          >
-            <RefreshCw size={16} />
-            <span>{translation("refresh")}</span>
-          </button>
-
           <button
             type="button"
             className={`${styles.actionBtn} ${styles.actionBtnSecondary}`}

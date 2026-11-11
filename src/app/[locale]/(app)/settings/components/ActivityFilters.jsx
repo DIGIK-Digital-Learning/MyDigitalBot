@@ -1,4 +1,4 @@
-import { RefreshCw, X } from "lucide-react";
+import { X } from "lucide-react";
 import PillSelect from "@/app/components/PillSelect/PillSelect";
 import styles from "../settings.module.css";
 
@@ -12,8 +12,6 @@ export default function ActivityFilters({
   onFromChange,
   onToChange,
   onClear,
-  onRefresh,
-  loading,
 }) {
   const hasFilters = (area && area !== "all") || from || to;
 
@@ -63,16 +61,6 @@ export default function ActivityFilters({
           <span>{translation("Filters.clear")}</span>
         </button>
       ) : null}
-
-      <button
-        type="button"
-        onClick={onRefresh}
-        className={styles.refreshButton}
-        disabled={loading}
-      >
-        <RefreshCw aria-hidden className={styles.buttonIcon} />
-        <span>{translation("Refresh")}</span>
-      </button>
     </div>
   );
 }

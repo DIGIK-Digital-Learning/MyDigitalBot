@@ -1135,7 +1135,6 @@
     "failed": "Falhou",
     "edit": "Editar",
     "close": "Fechar",
-    "reload": "Recarregar",
     "loading": "A carregar…",
     "noThreads": "Este utilizador não tem threads.",
     "messages": "Mensagens",
@@ -1253,7 +1252,6 @@
   },
   "Automations": {
     "searchAutomations": "Pesquisar automações...",
-    "refresh": "Atualizar",
     "runInactivity": "Correr inatividade",
     "materialize": "Materializar",
     "newAutomation": "Nova automação",
@@ -1376,10 +1374,6 @@
       "noOrg": {
         "title": "Organização em falta",
         "message": "Ainda não foi possível identificar a organização. Tenta novamente dentro de alguns segundos."
-      },
-      "refreshSuccess": {
-        "title": "Automações atualizadas",
-        "message": "As regras, filas e envios foram atualizados com sucesso."
       },
       "loadFailed": {
         "title": "Erro ao carregar automações",
@@ -2080,7 +2074,6 @@
     "Title": "Mensagens agendadas",
     "Subtitle": "Mensagens agendadas da organização {organization}",
     "NewMessage": "Nova mensagem",
-    "Refresh": "Atualizar",
     "Loading": "A carregar mensagens agendadas...",
     "Timezone": "Fuso horário",
     "ConfirmDelete": "Tens a certeza que queres eliminar esta mensagem agendada?",
@@ -2927,7 +2920,6 @@
   "Analytics": {
     "title": "Métricas",
     "description": "Atividade, entrega, automações e links da organização no período selecionado.",
-    "refresh": "Atualizar",
     "updatedAt": "Atualizado às {time}",
     "retry": "Tentar novamente",
     "loading": "A carregar métricas...",
@@ -3228,7 +3220,6 @@
     "Title": "Histórico de atividade",
     "Subtitle": "Cronologia das ações feitas na organização, da mais recente para a mais antiga.",
     "Loading": "A carregar histórico...",
-    "Refresh": "Atualizar",
     "Filters": {
       "from": "De",
       "to": "Até",
@@ -3513,7 +3504,6 @@
     "description": "Visão geral da utilização e configuração da organização.",
     "organizationMissing": "Não foi encontrada uma organização para esta conta.",
     "loadError": "Não foi possível carregar a dashboard.",
-    "refresh": "Atualizar",
     "retry": "Tentar novamente",
     "updatedAt": "Atualizado às {time}",
     "groups": {

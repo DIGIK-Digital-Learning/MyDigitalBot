@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import useRefreshOnReturn from "@/app/hooks/useRefreshOnReturn";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { ChevronRight, Maximize2, RefreshCw } from "lucide-react";
+import { ChevronRight, Maximize2 } from "lucide-react";
 import { useAuth } from "@/app/AuthContext";
 import useOrganization from "@/app/hooks/useOrganization";
 import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
@@ -670,6 +671,9 @@ export default function AnalyticsPage() {
   const exportRef = useRef(null);
   const exportInProgress = useRef(false);
   const isExporting = isExportingPdf || isExportingExcel;
+  /* Ao voltar à página não se trocam os números a meio de uma exportação. */
+  const isExportingRef = useRef(isExporting);
+  isExportingRef.current = isExporting;
   const canExport = Boolean(metrics && metricsOrgId === orgId && metrics.period?.value === period && !isLoadingMetrics && !error);
 
   /**
@@ -751,13 +755,16 @@ export default function AnalyticsPage() {
   };
 
   /**
-   * Carrega métricas da API para a organização e período atual.
+   * Carrega métricas da API para a organização e período atual. `silent`:
+   * ao voltar à página (#236) os números trocam sem escurecer o ecrã.
    */
-  const loadMetrics = useCallback(async () => {
+  const loadMetrics = useCallback(async ({ silent = false } = {}) => {
     if (!orgId) return;
 
-    setError("");
-    setIsLoadingMetrics(true);
+    if (!silent) {
+      setError("");
+      setIsLoadingMetrics(true);
+    }
 
     try {
       const res = await fetch(`/api/analytics/overview?orgId=${orgId}&period=${period}`, {
@@ -772,13 +779,15 @@ export default function AnalyticsPage() {
 
       setMetrics(data);
       setMetricsOrgId(orgId);
-      setExportNotice(null);
+      setError("");
+      if (!silent) setExportNotice(null);
       setUpdatedAt(new Date());
     } catch (err) {
       console.warn("[Analytics] load error:", err);
-      setError(t("errors.load"));
+      /* Em silêncio, uma falha deixa ficar os números que já estavam. */
+      if (!silent) setError(t("errors.load"));
     } finally {
-      setIsLoadingMetrics(false);
+      if (!silent) setIsLoadingMetrics(false);
     }
   }, [orgId, period, t]);
 
@@ -786,6 +795,12 @@ export default function AnalyticsPage() {
     if (authLoading || orgLoading || !orgId) return;
     loadMetrics();
   }, [authLoading, orgLoading, orgId, loadMetrics]);
+
+  useRefreshOnReturn(
+    useCallback(() => {
+      if (!isExportingRef.current) loadMetrics({ silent: true });
+    }, [loadMetrics]),
+  );
 
   // Dados recebidos da API, separados por grupo.
   const users = metrics?.users ?? {};
@@ -979,15 +994,6 @@ export default function AnalyticsPage() {
           >
             {isExportingExcel ? t("customization.exporting") : t("customization.exportExcel")}
           </button>
-          <button
-            type="button"
-            className={styles.refreshButton}
-            onClick={loadMetrics}
-            disabled={isLoadingMetrics || isExporting}
-          >
-            <RefreshCw size={15} className={isLoadingMetrics ? styles.spin : ""} aria-hidden="true" />
-            {t("refresh")}
-          </button>
         </div>
       </PageHeader>
 
@@ -1009,7 +1015,7 @@ export default function AnalyticsPage() {
       {error ? (
         <div className={styles.errorBox} role="alert">
           <p>{error}</p>
-          <button type="button" onClick={loadMetrics} disabled={isLoadingMetrics || isExporting}>
+          <button type="button" onClick={() => loadMetrics()} disabled={isLoadingMetrics || isExporting}>
             {t("retry")}
           </button>
         </div>

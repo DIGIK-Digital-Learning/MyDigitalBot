@@ -176,7 +176,6 @@
 
 .primaryButton,
 .secondaryButton,
-.refreshButton,
 .deleteButton {
   display: inline-flex;
   align-items: center;
@@ -215,15 +214,7 @@
   background: #e5e7eb;
 }
 
-.refreshButton {
-  background: #ffffff;
-  color: #111827;
-  border: 1px solid var(--ui-border, #d1d5db);
-}
 
-.refreshButton:hover {
-  background: #f9fafb;
-}
 
 .deleteButton {
   background: #fff5f5;
@@ -237,7 +228,6 @@
 
 .primaryButton:disabled,
 .secondaryButton:disabled,
-.refreshButton:disabled,
 .deleteButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -1586,8 +1576,6 @@
     width: 100%;
     min-width: 100%;
   }
-
-  .refreshButton,
   .primaryButton {
     width: 100%;
   }
