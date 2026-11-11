@@ -3509,7 +3509,7 @@
     }
   },
   "Dashboard": {
-    "title": "Início",
+    "title": "Portal",
     "description": "Visão geral da utilização e configuração da organização.",
     "organizationMissing": "Não foi encontrada uma organização para esta conta.",
     "loadError": "Não foi possível carregar a dashboard.",

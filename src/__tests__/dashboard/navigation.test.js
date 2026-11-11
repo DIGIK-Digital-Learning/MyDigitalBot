@@ -43,4 +43,13 @@ describe("authenticated navigation", () => {
     expect(page).toContain("`/${locale}${DEFAULT_AUTH_REDIRECT}`");
     expect(page).not.toContain("/${locale}/users");
   });
+
+  /* #244: depois do login vai-se para o Portal. O menu e o título da página
+     têm de dizer o mesmo (antes o título dizia «Início» / «Home»). */
+  it("the page after login has the same name as the menu item", () => {
+    for (const locale of ["pt", "en"]) {
+      const messages = JSON.parse(read(`../../messages/${locale}.json`));
+      expect(messages.Dashboard.title).toBe(messages.Nav.home);
+    }
+  });
 });
