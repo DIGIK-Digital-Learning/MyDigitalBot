@@ -1,3 +1,4 @@
+import { botLocale } from "@/lib/bot/botLanguage";
 import { claimCollaboratorMessage } from "@/lib/repos/collaboratorWeeklyMessages.repo";
 import { weeklyMessagesWeekStart } from "@/lib/plans/weeklyMessages";
 
@@ -5,15 +6,16 @@ import { getOrgLimits } from "./planLimits";
 
 /*
  * O aviso ao colaborador quando passa as mensagens da semana, sem números,
- * na língua da organização (a escolhida no topo do site).
+ * na língua do colaborador (#241): a última em que escreveu, senão a da
+ * organização (a escolhida no topo do site).
  */
 export const WEEKLY_LIMIT_NOTICE = {
   pt: "Atingiste o teu limite de mensagens semanais. Poderás voltar a utilizar o serviço a partir de segunda-feira.",
   en: "You've reached your weekly message limit. You'll be able to use the service again from Monday.",
 };
 
-export function weeklyLimitNotice(organization) {
-  return WEEKLY_LIMIT_NOTICE[organization?.locale] || WEEKLY_LIMIT_NOTICE.pt;
+export function weeklyLimitNotice(organization, user = null) {
+  return WEEKLY_LIMIT_NOTICE[botLocale({ organization, user })];
 }
 
 /**
@@ -51,7 +53,7 @@ export async function claimCollaboratorWeeklyMessage(
 
     return {
       allowed: result.ok,
-      notice: result.notify ? weeklyLimitNotice(organization) : null,
+      notice: result.notify ? weeklyLimitNotice(organization, user) : null,
     };
   } catch (error) {
     console.error("[Weekly limit] failed to count message", {

@@ -16,10 +16,27 @@ export const OPENING_TEMPLATE_VARIABLES = {
   body: "mensagem",
 };
 
-export const OPENING_TEMPLATE_PREVIEW = {
-  text: "Olá, {{nome}}. O teu acesso ao assistente MyDigitalBot, disponibilizado por {{empresa}}, foi ativado. Para o abrir, toca no botão abaixo.",
-  button: "Aceder ao Assistente",
+/*
+ * O texto publicado na Bird, em cada língua do template (#241). A versão em
+ * inglês tem de ser criada no mesmo projeto do Bird, com as mesmas variáveis
+ * ({{nome}} e {{empresa}}), e aprovada pela Meta.
+ */
+export const OPENING_TEMPLATE_PREVIEWS = {
+  pt: {
+    text: "Olá, {{nome}}. O teu acesso ao assistente MyDigitalBot, disponibilizado por {{empresa}}, foi ativado. Para o abrir, toca no botão abaixo.",
+    button: "Aceder ao Assistente",
+  },
+  en: {
+    text: "Hi, {{nome}}. Your access to the MyDigitalBot assistant, provided by {{empresa}}, has been activated. To open it, tap the button below.",
+    button: "Open the Assistant",
+  },
 };
+
+export const OPENING_TEMPLATE_PREVIEW = OPENING_TEMPLATE_PREVIEWS.pt;
+
+export function openingTemplatePreviewFor(locale) {
+  return OPENING_TEMPLATE_PREVIEWS[locale] || OPENING_TEMPLATE_PREVIEWS.pt;
+}
 
 export const OPENING_TEMPLATE_INTRO =
   "Olá {{nome}}!\n\nDesejas receber comunicações da {{empresa}}?";
@@ -65,8 +82,12 @@ function fill(text, values) {
   );
 }
 
-export function renderOpeningTemplatePreview({ name, orgName } = {}) {
-  return fill(OPENING_TEMPLATE_PREVIEW.text, {
+export function renderOpeningTemplatePreview({
+  name,
+  orgName,
+  locale = "pt",
+} = {}) {
+  return fill(openingTemplatePreviewFor(locale).text, {
     [OPENING_TEMPLATE_VARIABLES.name]: name || "",
     [OPENING_TEMPLATE_VARIABLES.company]: orgName || "",
   });
@@ -105,6 +126,10 @@ export function buildOpeningTemplateParams({ userName, orgName } = {}) {
  *
  * O id guardado é o do projeto, que é estável; cada edição no Bird cria uma
  * nova versão, e o envio pede sempre a mais recente.
+ *
+ * `localeEn` (#241) é a língua da versão em inglês no Bird (ex.: "en"). Só
+ * se preenche BIRD_OPENING_TEMPLATE_LOCALE_EN depois de a Meta aprovar essa
+ * versão; até lá, todos recebem a portuguesa.
  */
 export function getOpeningTemplateConfig(env = process.env) {
   const projectId = String(env.BIRD_OPENING_TEMPLATE_PROJECT_ID || "").trim();
@@ -120,5 +145,15 @@ export function getOpeningTemplateConfig(env = process.env) {
   return {
     projectId,
     locale: String(env.BIRD_OPENING_TEMPLATE_LOCALE || "pt-PT").trim(),
+    localeEn: String(env.BIRD_OPENING_TEMPLATE_LOCALE_EN || "").trim() || null,
   };
+}
+
+/**
+ * A língua do template a pedir ao Bird para um colaborador: a inglesa quando
+ * o bot fala inglês com ele e essa versão já está configurada; senão a de
+ * sempre.
+ */
+export function openingTemplateLocale(config, language) {
+  return language === "en" && config?.localeEn ? config.localeEn : config.locale;
 }

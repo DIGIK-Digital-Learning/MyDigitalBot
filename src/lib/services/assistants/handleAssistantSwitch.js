@@ -1,3 +1,4 @@
+import { botLocale } from "@/lib/bot/botLanguage";
 import { extractInboundReply } from "@/lib/whatsapp/question";
 import {
   buildSwitchMenu,
@@ -31,10 +32,11 @@ const defaultDeps = {
  *   menu: muda o assistente ativo e confirma.
  *
  * `send({ text, actions, list })` envia a mensagem e devolve o resultado do
- * Bird.
+ * Bird. Os textos saem na língua do colaborador (#241).
  */
 export async function handleAssistantSwitch({
   user,
+  organization = null,
   payload,
   inboundMsgId = null,
   contactId = null,
@@ -42,6 +44,7 @@ export async function handleAssistantSwitch({
   deps,
 }) {
   const d = { ...defaultDeps, ...deps };
+  const locale = botLocale({ organization, user });
 
   const assignedIds = (user.assistant_ids || []).map(Number);
   if (assignedIds.length < 2) return { handled: false };
@@ -64,7 +67,7 @@ export async function handleAssistantSwitch({
 
   const assistants = (await d.getAssistantsInOrg(user.organization_id))
     .filter((a) => assignedIds.includes(Number(a.id)))
-    .sort((a, b) => String(a.name).localeCompare(String(b.name), "pt"));
+    .sort((a, b) => String(a.name).localeCompare(String(b.name), locale));
 
   if (assistants.length < 2) return { handled: false };
 
@@ -108,7 +111,11 @@ export async function handleAssistantSwitch({
 
   // Palavra-chave, ou toque num botão de um assistente entretanto retirado.
   if (!chosen) {
-    const menu = buildSwitchMenu({ assistants, activeId: user.assistant_id });
+    const menu = buildSwitchMenu({
+      assistants,
+      activeId: user.assistant_id,
+      locale,
+    });
     const sendRes = await send(menu);
 
     await record({ content: menu.text, role: "assistant", sendRes });
@@ -132,7 +139,7 @@ export async function handleAssistantSwitch({
   // O menu fica válido para novos toques; só a resposta escrita deixa de contar.
   await d.setUserAssistantMenu(user.id, { sentAt: null });
 
-  const text = switchConfirmationText(chosen, { alreadyActive });
+  const text = switchConfirmationText(chosen, { alreadyActive, locale });
   const sendRes = await send({ text, actions: null, list: null });
 
   await record({ content: text, role: "assistant", sendRes });
