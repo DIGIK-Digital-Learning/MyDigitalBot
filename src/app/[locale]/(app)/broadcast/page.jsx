@@ -218,13 +218,6 @@ export default function BroadcastPage() {
 
   const initialScheduledDate = useMemo(() => buildInitialScheduledDate(), []);
   const [scheduledFor, setScheduledFor] = useState(initialScheduledDate);
-  const [hourDraft, setHourDraft] = useState(() =>
-    formatHour(initialScheduledDate),
-  );
-  const [minuteDraft, setMinuteDraft] = useState(() =>
-    formatMinute(initialScheduledDate),
-  );
-  const [timeError, setTimeError] = useState("");
 
   const [readChainsFeatureEnabled, setReadChainsFeatureEnabled] =
     useState(false);
@@ -1386,6 +1379,12 @@ export default function BroadcastPage() {
     onAddFile: openFilePicker,
     onPickFromMedia: setMediaPickerKind,
     onAddLink: () => setActiveToolPanel("links"),
+    /* #235: o 🔗 na barra da mensagem abre e fecha o painel dos links. */
+    linksToggle: {
+      active: activeToolPanel === "links",
+      count: trackedLinksCount,
+      onToggle: () => toggleToolPanel("links"),
+    },
     suggest: textSuggestion,
     imageSuggest: imageSuggestion,
     linkPreview,
@@ -1410,7 +1409,10 @@ export default function BroadcastPage() {
   };
 
   /* Num grupo não há links rastreados (#166): o "+" deixa de os oferecer. */
-  if (isGroupAudience) composerTools.onAddLink = null;
+  if (isGroupAudience) {
+    composerTools.onAddLink = null;
+    composerTools.linksToggle = null;
+  }
 
   const trackedLinksValid =
     normalizedTrackedLinks.length === composerTrackedLinks.length &&
@@ -1524,94 +1526,17 @@ export default function BroadcastPage() {
       chainSteps.every(trackedLinksValidForStep) &&
       chainSteps.every(chainStepDelayValid));
 
-  useEffect(() => {
-    setHourDraft(formatHour(scheduledFor));
-    setMinuteDraft(formatMinute(scheduledFor));
-  }, [scheduledFor]);
-
-  const commitTimeParts = useCallback(
-    (hourValue, minuteValue) => {
-      const rawHour = String(hourValue || "").trim();
-      const rawMinute = String(minuteValue || "").trim();
-
-      if (!rawHour || !rawMinute) {
-        setTimeError(translation("Broadcast.feedback.time.bothParts"));
-        return false;
-      }
-
-      if (!/^\d{1,2}$/.test(rawHour) || !/^\d{1,2}$/.test(rawMinute)) {
-        setTimeError(translation("Broadcast.feedback.time.numbersOnly"));
-        return false;
-      }
-
-      const hours = Number(rawHour);
-      const minutes = Number(rawMinute);
-
-      if (Number.isNaN(hours) || Number.isNaN(minutes)) {
-        setTimeError(translation("Broadcast.feedback.time.invalid"));
-        return false;
-      }
-
-      if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
-        setTimeError(translation("Broadcast.feedback.time.invalid"));
-        return false;
-      }
-
-      const totalMinutes = hours * 60 + minutes;
-      const minMinutes = 8 * 60;
-      const maxMinutes = 20 * 60;
-
-      if (totalMinutes < minMinutes || totalMinutes > maxMinutes) {
-        setTimeError(translation("Broadcast.feedback.time.range"));
-        return false;
-      }
-
-      const next = new Date(scheduledFor);
-      next.setHours(hours, minutes, 0, 0);
-
-      setScheduledFor(next);
-      setHourDraft(String(hours).padStart(2, "0"));
-      setMinuteDraft(String(minutes).padStart(2, "0"));
-      setTimeError("");
-
-      return true;
-    },
-    [scheduledFor, translation],
-  );
-
-  function handleHourChange(value) {
-    setHourDraft(
-      String(value || "")
-        .replace(/\D/g, "")
-        .slice(0, 2),
-    );
-    setTimeError("");
+  /*
+   * A hora proposta é calculada ao abrir a página. Quem escreve a mensagem
+   * durante uns minutos e só depois carrega em «Agendar» encontrava uma hora
+   * já passada e o erro a vermelho: nesse caso, propõe-se a próxima válida.
+   */
+  function chooseDeliveryMode(mode) {
+    if (mode === "schedule" && scheduledFor.getTime() <= Date.now()) {
+      setScheduledFor(buildInitialScheduledDate());
+    }
+    setDeliveryMode(mode);
   }
-
-  function handleMinuteChange(value) {
-    setMinuteDraft(
-      String(value || "")
-        .replace(/\D/g, "")
-        .slice(0, 2),
-    );
-    setTimeError("");
-  }
-
-  useEffect(() => {
-    if (!hourDraft.trim() || !minuteDraft.trim()) return;
-    if (hourDraft.length < 2 || minuteDraft.length < 2) return;
-
-    const currentHour = formatHour(scheduledFor);
-    const currentMinute = formatMinute(scheduledFor);
-
-    if (hourDraft === currentHour && minuteDraft === currentMinute) return;
-
-    const timeout = setTimeout(() => {
-      commitTimeParts(hourDraft, minuteDraft);
-    }, 1000);
-
-    return () => clearTimeout(timeout);
-  }, [commitTimeParts, hourDraft, minuteDraft, scheduledFor]);
 
   const hasManualContent =
     composerMessage.trim().length > 0 || composerFiles.length > 0;
@@ -1712,7 +1637,7 @@ export default function BroadcastPage() {
 
   const scheduleInvalid =
     deliveryMode === "schedule" &&
-    (!scheduledFor || scheduledFor.getTime() <= Date.now() || !!timeError);
+    (!scheduledFor || scheduledFor.getTime() <= Date.now());
 
   /*
    * Limite de agendadas do plano (#186): com a conta cheia, Agendar fica
@@ -2539,17 +2464,6 @@ export default function BroadcastPage() {
       return;
     }
 
-    const committed = commitTimeParts(hourDraft, minuteDraft);
-
-    if (!committed) {
-      await showAlert({
-        title: translation("Broadcast.feedback.invalidTime.title"),
-        message: translation("Broadcast.feedback.invalidTime.message"),
-        tone: "warning",
-      });
-      return;
-    }
-
     if (!scheduledFor || Number.isNaN(scheduledFor.getTime())) {
       await showAlert({
         title: translation("Broadcast.feedback.chooseDateTime.title"),
@@ -2560,7 +2474,6 @@ export default function BroadcastPage() {
     }
 
     const scheduledDate = new Date(scheduledFor);
-    scheduledDate.setHours(Number(hourDraft), Number(minuteDraft), 0, 0);
 
     if (scheduledDate.getTime() <= Date.now()) {
       await showAlert({
@@ -2776,20 +2689,9 @@ export default function BroadcastPage() {
     day: "2-digit",
     month: "2-digit",
   });
-  const draftHourNumber = Number(hourDraft);
-  const draftMinuteNumber = Number(minuteDraft);
-  const hasValidTimeDraft =
-    /^\d{1,2}$/.test(hourDraft) &&
-    /^\d{1,2}$/.test(minuteDraft) &&
-    draftHourNumber >= 0 &&
-    draftHourNumber <= 23 &&
-    draftMinuteNumber >= 0 &&
-    draftMinuteNumber <= 59;
-  const scheduleTimeLabel = hasValidTimeDraft
-    ? `${String(draftHourNumber).padStart(2, "0")}:${String(
-        draftMinuteNumber,
-      ).padStart(2, "0")}`
-    : `${formatHour(scheduledFor)}:${formatMinute(scheduledFor)}`;
+  const scheduleTimeLabel = `${formatHour(scheduledFor)}:${formatMinute(
+    scheduledFor,
+  )}`;
   const scheduleActionLabel = translation("Broadcast.scheduleFor", {
     date: scheduleDateLabel,
     time: scheduleTimeLabel,
@@ -2863,12 +2765,6 @@ export default function BroadcastPage() {
     <SchedulePanel
       scheduledFor={scheduledFor}
       setScheduledFor={setScheduledFor}
-      hourDraft={hourDraft}
-      minuteDraft={minuteDraft}
-      handleHourChange={handleHourChange}
-      handleMinuteChange={handleMinuteChange}
-      commitTimeParts={commitTimeParts}
-      timeError={timeError}
       scheduleInvalid={scheduleInvalid}
       browserTimeZone={browserTimeZone}
       translation={translation}
@@ -2940,12 +2836,10 @@ export default function BroadcastPage() {
         title={translation("Broadcast.composer.surveyTitle")}
         onBack={() => setComposeMode(null)}
         activeToolPanel={activeToolPanel}
-        toggleToolPanel={toggleToolPanel}
         deliveryMode={deliveryMode}
-        setDeliveryMode={setDeliveryMode}
+        setDeliveryMode={chooseDeliveryMode}
         sending={sending}
         schedulePanel={schedulePanel}
-        trackedLinksCount={trackedLinksCount}
         translation={translation}
         phone={
           <SurveyComposer
@@ -2968,12 +2862,10 @@ export default function BroadcastPage() {
         title={translation("Broadcast.start.question")}
         onBack={() => setComposeMode(null)}
         activeToolPanel={activeToolPanel}
-        toggleToolPanel={toggleToolPanel}
         deliveryMode={deliveryMode}
-        setDeliveryMode={setDeliveryMode}
+        setDeliveryMode={chooseDeliveryMode}
         sending={sending}
         schedulePanel={schedulePanel}
-        trackedLinksCount={trackedLinksCount}
         translation={translation}
         phone={
           <OpenQuestionComposer
@@ -2996,12 +2888,10 @@ export default function BroadcastPage() {
         title={translation("Broadcast.composer.quizTitle")}
         onBack={() => setComposeMode(null)}
         activeToolPanel={activeToolPanel}
-        toggleToolPanel={toggleToolPanel}
         deliveryMode={deliveryMode}
-        setDeliveryMode={setDeliveryMode}
+        setDeliveryMode={chooseDeliveryMode}
         sending={sending}
         schedulePanel={schedulePanel}
-        trackedLinksCount={trackedLinksCount}
         translation={translation}
         phone={
           <QuizComposer
@@ -3026,15 +2916,11 @@ export default function BroadcastPage() {
         hint={chainQuestionKind ? null : translation("Broadcast.composer.hint")}
         warning={composerWarning}
         activeToolPanel={activeToolPanel}
-        toggleToolPanel={toggleToolPanel}
         deliveryMode={deliveryMode}
-        setDeliveryMode={setDeliveryMode}
+        setDeliveryMode={chooseDeliveryMode}
         sending={sending}
         schedulePanel={schedulePanel}
-        trackedLinksCount={trackedLinksCount}
         translation={translation}
-        leftToolsContent={chainDelayTools}
-        showLinks={!isGroupAudience}
         chainControls={
           isGroupAudience ? null : (
             <ChainMessagesBar
@@ -3052,6 +2938,7 @@ export default function BroadcastPage() {
                 updateChainStepKind(activeChainStepIndex, kind)
               }
               maxSteps={chainStepsLimit}
+              delayContent={chainDelayTools}
               translation={translation}
             />
           )

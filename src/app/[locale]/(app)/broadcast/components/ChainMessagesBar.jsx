@@ -15,6 +15,8 @@ export default function ChainMessagesBar({
   /* Máximo de passos do plano (#187); sem ele, os 10 de antes. */
   maxSteps = 10,
   onChangeStepKind,
+  /* Tempo de espera do passo ativo (ou a nota do 1.º passo). */
+  delayContent = null,
   translation,
 }) {
   if (!enabled && !chainMode) {
@@ -107,12 +109,10 @@ export default function ChainMessagesBar({
               className={styles.chainStepAdd}
               onClick={duplicateChainStep}
               disabled={chainSteps.length >= maxSteps}
+              aria-label={translation("Broadcast.broadcastChain.chainDuplicate")}
               title={translation("Broadcast.broadcastChain.chainDuplicate")}
             >
               <Copy size={15} />
-              {/* <span>
-                {translation("Broadcast.broadcastChain.chainDuplicate")}
-              </span> */}
             </button>
 
             <button
@@ -120,37 +120,14 @@ export default function ChainMessagesBar({
               className={`${styles.chainStepAdd} ${styles.chainStepRemove}`}
               onClick={() => removeChainStep(activeChainStepIndex)}
               disabled={chainSteps.length <= 2}
+              aria-label={translation("Broadcast.broadcastChain.chainRemove")}
               title={translation("Broadcast.broadcastChain.chainRemove")}
             >
               <Trash2 size={15} />
-              {/* <span>{translation("Broadcast.broadcastChain.chainRemove")}</span> */}
-            </button>
-          </div>
-
-          <div className={styles.chainActionsRow}>
-            {/* <button
-              type="button"
-              className={styles.kbdBtn}
-              onClick={duplicateChainStep}
-              disabled={chainSteps.length >= maxSteps}
-            >
-              <Copy size={14} />
-              <span>
-                {translation("Broadcast.broadcastChain.chainDuplicate")}
-              </span>
             </button>
 
-            <button
-              type="button"
-              className={styles.kbdBtn}
-              onClick={() => removeChainStep(activeChainStepIndex)}
-              disabled={chainSteps.length <= 2}
-            >
-              <Trash2 size={14} />
-              <span>{translation("Broadcast.broadcastChain.chainRemove")}</span>
-            </button> */}
-
-            <span className={styles.chainCounter}>
+            {/* #235: o contador fica na mesma linha, encostado à direita. */}
+            <span className={styles.chainCounter} data-testid="chain-counter">
               {chainSteps.length}
               {Number.isFinite(maxSteps) ? `/${maxSteps}` : ""}{" "}
               {translation("Broadcast.broadcastChain.chainMessages")}
@@ -181,6 +158,16 @@ export default function ChainMessagesBar({
                   {translation(labelKey)}
                 </button>
               ))}
+            </div>
+          ) : null}
+
+          {/*
+            #235: o tempo de espera é do passo, por isso fica aqui, com as
+            outras opções do passo (antes estava por baixo do telemóvel).
+          */}
+          {delayContent ? (
+            <div className={styles.chainDelayRow} data-testid="chain-delay">
+              {delayContent}
             </div>
           ) : null}
         </>
