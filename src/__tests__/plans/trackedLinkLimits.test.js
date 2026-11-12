@@ -126,13 +126,13 @@ describe("saveTrackedLinksWithinPlan", () => {
     expect(mocks.saveTrackedLinks).not.toHaveBeenCalled();
   });
 
-  it("grava os links com o limite do plano", async () => {
+  it("grava os links com o limite do plano e diz quantos eram novos", async () => {
     expect(
       await saveTrackedLinksWithinPlan(1, [
         GUIA,
         { label: "", destinationUrl: "x" },
       ]),
-    ).toEqual({});
+    ).toEqual({ added: 1 });
     expect(mocks.saveTrackedLinks).toHaveBeenCalledWith(1, [GUIA], 100);
   });
 

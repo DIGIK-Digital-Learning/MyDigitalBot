@@ -2294,7 +2294,7 @@
     "saved": {
       "title": "Links criados",
       "description": "Os links que contam para o teu plano. Eliminar um link não apaga as estatísticas dos envios em que foi usado.",
-      "empty": "Ainda não tens links criados. Os links entram aqui quando os usas numa mensagem."
+      "empty": "Ainda não tens links criados. Cria um aqui ou usa um numa mensagem."
     },
     "showDeleted": "Mostrar eliminados",
     "deleted": "Eliminado",
@@ -2306,6 +2306,24 @@
     "sent": {
       "title": "Links enviados",
       "description": "Um grupo por link, com os totais de todos os envios. Abre um grupo para veres cada envio. Os links eliminados aparecem noutra cor."
+    },
+    "create": {
+      "button": "Criar link",
+      "title": "Criar link",
+      "description": "O link fica nesta lista e pronto a usar no Enviar mensagem. Só conta como enviado quando for numa mensagem.",
+      "labelField": "Nome",
+      "labelPlaceholder": "Ex.: Calendário de formações",
+      "urlField": "Destino",
+      "urlPlaceholder": "https://",
+      "urlHelp": "O endereço da página, a começar por http:// ou https://",
+      "save": "Criar link",
+      "saving": "A criar...",
+      "invalidUrl": "O destino tem de começar por http:// ou https://",
+      "full": "Chegaste aos {limit} links do teu plano. Elimina um link desta lista para poderes criar um novo.",
+      "existsTitle": "Esse link já existe",
+      "existsMessage": "Já tinhas um link com este nome e destino. Continua na lista, pronto a usar.",
+      "failedTitle": "Não foi possível criar o link",
+      "failedMessage": "Tenta novamente daqui a pouco."
     }
   },
   "Questions": {
@@ -3256,6 +3274,7 @@
       "message_template_sent": "Template enviado a um colaborador",
       "template_created": "Template WhatsApp criado",
       "media_deleted": "Ficheiro de multimédia eliminado",
+      "tracked_link_created": "Link rastreado criado",
       "tracked_link_deleted": "Link rastreado eliminado",
       "organization_created": "Organização criada",
       "organization_settings_updated": "Definições da organização alteradas",
