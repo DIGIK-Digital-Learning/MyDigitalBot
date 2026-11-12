@@ -277,9 +277,6 @@ export default function AssistantsHub() {
           name: draft.name,
           description: draft.description,
           instructions: draft.instructions,
-          model: draft.model,
-          temperature: draft.temperature,
-          top_p: draft.top_p,
         }),
       });
       if (!res.ok) {

@@ -252,8 +252,12 @@ describe("AssistantsHub Page", () => {
       name: "Alpha renamed",
       description: "New description",
       instructions: "New instructions",
-      model: "gpt-4.1",
     });
+
+    // O modelo e a temperatura já não se editam (#250).
+    expect(sent).not.toHaveProperty("model");
+    expect(sent).not.toHaveProperty("temperature");
+    expect(sent).not.toHaveProperty("top_p");
 
     /*
      * O `id` e o `open_ai_id` nao vao no corpo, e nao e um esquecimento.

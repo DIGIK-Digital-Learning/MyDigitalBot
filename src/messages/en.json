@@ -2559,25 +2559,9 @@
       "deleteCollection": "Couldn't delete the collection. {detail}"
     }
   },
-  "AssistantPresets": {
-    "formal": {
-      "name": "Formal",
-      "description": "Predictable answers that stick to the instructions. For procedures and factual information."
-    },
-    "normal": {
-      "name": "Normal",
-      "description": "A balance between consistency and natural tone. Works for most cases."
-    },
-    "creative": {
-      "name": "Creative",
-      "description": "More varied answers with more initiative. For conversation and suggestions."
-    }
-  },
   "CreateAssistant": {
     "createFailed": "Couldn't create the assistant",
     "title": "Create new Assistant",
-    "presetLabel": "Behavior",
-    "presetHelp": "Sets how predictable or varied the Assistant is when answering. You can change it later when editing.",
     "name": "Name",
     "nameHelp": "Name that will be associated with the Assistant.",
     "description": "Description",

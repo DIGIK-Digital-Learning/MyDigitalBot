@@ -1,5 +1,6 @@
 import { assistantLanguageRule } from "@/lib/bot/botLanguage";
 import { openai } from "@/lib/openai/client";
+import { textModelRequest } from "@/lib/openai/models";
 import { getStoreById } from "../repos/store.repo";
 import { stripOpenAICitations } from "./removeOAiCitations";
 
@@ -81,12 +82,6 @@ export async function generateAssistantResponse({
     throw new Error("Assistant ID is required");
   }
 
-  if (!assistant.model) {
-    throw new Error(
-      `Assistant ${assistant.id} does not have a model configured`,
-    );
-  }
-
   if (!conversationId) {
     throw new Error("OpenAI conversation ID is required");
   }
@@ -99,20 +94,15 @@ export async function generateAssistantResponse({
 
   const vectorStoreOpenAiId = await resolveAssistantVectorStore(assistant);
 
+  /*
+   * #250: o modelo é o da app (src/lib/openai/models.js), igual para todos
+   * os assistentes. Sem temperature nem top_p: o 6 Luna não os aceita.
+   */
   const request = {
-    model: assistant.model,
+    ...textModelRequest(),
     conversation: conversationId,
     input: cleanMessage,
   };
-
-  if (
-    typeof assistant.model === "string" &&
-    assistant.model.startsWith("gpt-5.6")
-  ) {
-    request.reasoning = {
-      effort: "none",
-    };
-  }
 
   const instructions = [
     typeof assistant.instructions === "string"
@@ -125,14 +115,6 @@ export async function generateAssistantResponse({
 
   if (instructions) {
     request.instructions = instructions;
-  }
-
-  if (assistant.temperature !== null && assistant.temperature !== undefined) {
-    request.temperature = Number(assistant.temperature);
-  }
-
-  if (assistant.top_p !== null && assistant.top_p !== undefined) {
-    request.top_p = Number(assistant.top_p);
   }
 
   if (vectorStoreOpenAiId) {

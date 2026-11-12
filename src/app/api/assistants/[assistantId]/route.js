@@ -18,14 +18,11 @@ import {
   requireOrgForAssistant,
 } from "@/lib/auth/guards";
 
-const ALLOWED_ASSISTANT_PATCH_FIELDS = [
-  "name",
-  "description",
-  "instructions",
-  "model",
-  "top_p",
-  "temperature",
-];
+/*
+ * O modelo, a temperature e o top_p já não se editam (#250): todos os
+ * assistentes seguem o modelo da app (src/lib/openai/models.js).
+ */
+const ALLOWED_ASSISTANT_PATCH_FIELDS = ["name", "description", "instructions"];
 
 export async function GET(_req, { params }) {
   try {
