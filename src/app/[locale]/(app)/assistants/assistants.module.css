@@ -3,12 +3,35 @@
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr) 380px;
   gap: 24px;
-  height: 100dvh - 34px;
-  min-height: 0;
+  /*
+   * A página ocupa o espaço que sobra por baixo da barra de cima e das faixas
+   * de plano (Demo, "Estás a experimentar…"), e não mais: com muitos
+   * assistentes é a lista que faz scroll, não a página. O mínimo evita
+   * colunas espremidas em ecrãs muito baixos. Ver as regras :has() abaixo.
+   */
+  height: 100%;
+  min-height: 520px;
   width: 100%;
   padding: 16px 24px 20px;
   box-sizing: border-box;
   color: var(--text);
+}
+
+/*
+ * Só nesta página: a coluna principal da app fica com a altura do ecrã
+ * (menos a barra de cima), e o conteúdo por baixo das faixas estica até ao
+ * fundo. É isto que dá ao .hub uma altura certa para os 100%. Só com as três
+ * colunas lado a lado: abaixo de 1200px o chat vai para baixo e a página
+ * volta a crescer e a fazer scroll.
+ */
+@media (min-width: 1201px) {
+  :global(.main-col):has(.hub) {
+    height: calc(100dvh - var(--topbar-h));
+  }
+  :global(.app-main):has(.hub) {
+    height: 100%;
+    min-height: 0;
+  }
 }
 
 .listCol,
@@ -44,6 +67,17 @@
   flex: 1;
   min-height: 0;
   overflow: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #d3deea transparent;
+}
+.list::-webkit-scrollbar {
+  width: 8px;
+}
+.list::-webkit-scrollbar-thumb {
+  background: #d3deea;
+  border-radius: 8px;
 }
 .listItem {
   display: flex;
@@ -51,7 +85,7 @@
   min-width: 0;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 8px 12px;
   border-radius: 12px;
   border: 1px solid transparent;
   color: #334157;
@@ -70,7 +104,7 @@
   border: none;
   box-shadow: inset 0 1px 0 #ffffff20;
   border-radius: 9999px;
-  padding: 10px 14px;
+  padding: 8px 14px;
 }
 /* Nomes longos quebram até duas linhas, sem scroll lateral na lista. */
 .listItemName {
@@ -87,7 +121,15 @@
   padding-top: 10px;
   border-top: 1px dashed #e5edf5;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.limitNote {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: #5b6b80;
+  text-align: center;
 }
 .listFooter .ctaPrimary {
   width: 100%;
@@ -216,8 +258,26 @@
   margin-bottom: 10px;
 }
 .subdued {
-  margin: 6px 0 8px;
+  margin: 2px 0 10px;
   opacity: 0.95;
+}
+
+/* Rótulos «Descrição» e «Instruções» no cartão azul. */
+.fieldLabel {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.primaryCard.editing .fieldLabel {
+  margin-bottom: 4px;
+}
+.paperEmpty {
+  color: #8693a5;
+  font-style: italic;
 }
 
 /* EDIT MODE — textarea should scroll and size nicely */
@@ -281,11 +341,13 @@ input[type="range"].slider {
 }
 
 /* ===== Meta + Actions ===== */
+/* Em ecrãs estreitos os botões passam para baixo da data em vez de cortar. */
 .metaBar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px 16px;
   margin-top: 12px;
 }
 .metaBar .metaGrid {
@@ -603,7 +665,13 @@ body.modalOpen {
 }
 /* A conversa de teste passa para baixo do painel em vez de desaparecer. */
 @media (max-width: 1200px) {
+  /*
+   * Aqui a página volta a crescer (o chat está por baixo), por isso é a lista
+   * que tem um máximo: no máximo a altura do ecrã, e o resto faz scroll.
+   */
   .hub {
+    height: auto;
+    min-height: 0;
     grid-template-columns: 240px minmax(0, 1fr);
     grid-template-areas:
       "list main"
@@ -611,6 +679,8 @@ body.modalOpen {
   }
   .listCol {
     grid-area: list;
+    align-self: start;
+    max-height: calc(100dvh - var(--topbar-h) - 36px);
   }
   .mainCol {
     grid-area: main;
@@ -710,260 +780,4 @@ body.modalOpen {
 .infoIcon:hover::after,
 .infoIcon:hover::before {
   opacity: 1;
-}
-
-/* ───────── Predefinições de comportamento ───────── */
-
-/*
-  Três opções em coluna, cada uma com nome e explicação.
-  Em coluna e não lado a lado porque a explicação é o que permite
-  escolher: espremida em três colunas, deixava de se ler.
-*/
-/*
-  As tres predefinicoes, lado a lado.
-
-  A descricao de cada uma saiu de baixo do nome e foi para o botao de
-  informacao: tres linhas em vez de nove, e o espaco devolvido as
-  instrucoes.
-*/
-.presetGroup {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.presetCell {
-  position: relative;
-}
-
-.presetOption {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  /* o espaco a direita e do botao de informacao, que flutua por cima */
-  padding: 11px 34px 11px 12px;
-  border: 1px solid var(--ui-border, #e5edf5);
-  border-radius: 10px;
-  background: var(--ui-bg, #ffffff);
-  cursor: pointer;
-  transition:
-    border-color 0.15s ease,
-    background 0.15s ease,
-    box-shadow 0.15s ease,
-    transform 0.15s ease;
-}
-
-.presetOption:hover {
-  border-color: var(--brand-1, #30a9e0);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.1);
-}
-
-/* carregar afunda o cartao: confirma o toque antes de a escolha mudar */
-.presetOption:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
-}
-
-/*
-  O radio fica invisivel mas continua a existir: escondido com
-  `display: none` sairia da arvore de acessibilidade e deixaria de
-  responder ao teclado. O ponto ao lado e so desenho.
-*/
-.presetInput {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.presetDot {
-  flex: 0 0 auto;
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  border: 2px solid #cbd8e6;
-  background: #ffffff;
-  transition:
-    border-color 0.15s ease,
-    background 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-.presetName {
-  font-weight: 600;
-  font-size: 0.92rem;
-  line-height: 1.25;
-  color: var(--ink, #191e3b);
-  /*
-    O nome quebra em vez de ser cortado com reticencias: "Criativo"
-    truncado para "C..." nao diz nada a quem esta a escolher.
-  */
-  overflow-wrap: anywhere;
-}
-
-.presetOptionActive {
-  border-color: var(--brand-1, #30a9e0);
-  background: linear-gradient(
-    180deg,
-    #ffffff 0%,
-    var(--chip-bg, #eaf6ff) 100%
-  );
-  /*
-    Borda dupla por dentro mais um halo: destaca a escolha sem empurrar
-    o conteudo, que era o que uma borda mais grossa faria.
-  */
-  box-shadow:
-    inset 0 0 0 1px var(--brand-1, #30a9e0),
-    0 4px 14px rgba(48, 169, 224, 0.2);
-}
-
-.presetOptionActive:hover {
-  box-shadow:
-    inset 0 0 0 1px var(--brand-1, #30a9e0),
-    0 10px 22px rgba(48, 169, 224, 0.26);
-}
-
-.presetOptionActive .presetDot {
-  border-color: var(--brand-1, #30a9e0);
-  background: var(--brand-1, #30a9e0);
-  box-shadow: inset 0 0 0 3px #ffffff;
-}
-
-.presetOption:focus-within {
-  outline: 2px solid var(--brand-1, #30a9e0);
-  outline-offset: 2px;
-}
-
-/* ----- botao de informacao de cada predefinicao ----- */
-
-.presetInfoWrapper {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  display: inline-flex;
-}
-
-.presetInfoButton {
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  border: 1px solid #dbe3ee;
-  border-radius: 999px;
-  background: #ffffff;
-  color: #52657a;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition:
-    background 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease;
-}
-
-.presetInfoButton:hover {
-  background: var(--chip-bg, #eaf6ff);
-  border-color: var(--brand-1, #30a9e0);
-  color: var(--brand-1, #30a9e0);
-}
-
-/*
-  Com a bolha aberta o botao fica cheio.
-  Sem isto, com tres iguais lado a lado, nao se percebia de qual delas
-  era a explicacao que esta no ecra.
-*/
-.presetInfoButtonOpen,
-.presetInfoButtonOpen:hover {
-  background: var(--brand-1, #30a9e0);
-  border-color: var(--brand-1, #30a9e0);
-  color: #ffffff;
-}
-
-.presetInfoPopover {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  z-index: 50;
-  width: 230px;
-  max-width: calc(100vw - 48px);
-  background: rgba(15, 23, 42, 0.96);
-  backdrop-filter: blur(8px);
-  color: #ffffff;
-  border-radius: 12px;
-  padding: 11px 13px;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.45;
-  box-shadow:
-    0 20px 44px rgba(15, 23, 42, 0.3),
-    0 2px 6px rgba(15, 23, 42, 0.18);
-  animation: presetInfoIn 0.16s cubic-bezier(0.2, 0.8, 0.3, 1);
-}
-
-@keyframes presetInfoIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px) scale(0.97);
-  }
-}
-
-/* na ultima coluna a bolha abre para dentro, senao saia do cartao */
-.presetCell:last-child .presetInfoPopover {
-  left: auto;
-  right: 0;
-}
-
-.presetInfoPopover::before {
-  content: "";
-  position: absolute;
-  top: -5px;
-  left: 12px;
-  width: 10px;
-  height: 10px;
-  background: rgba(15, 23, 42, 0.96);
-  transform: rotate(45deg);
-}
-
-.presetCell:last-child .presetInfoPopover::before {
-  left: auto;
-  right: 12px;
-}
-
-/* estreito de mais para tres colunas: passam a uma so */
-@media (max-width: 560px) {
-  .presetGroup {
-    grid-template-columns: 1fr;
-  }
-
-  .presetCell:last-child .presetInfoPopover,
-  .presetCell:last-child .presetInfoPopover::before {
-    left: 0;
-    right: auto;
-  }
-}
-
-/*
-  Respeitar quem pediu menos animacao no sistema. Movimento nao e
-  decoracao para toda a gente: ha quem lhe reaja mal.
-*/
-@media (prefers-reduced-motion: reduce) {
-  .presetOption,
-  .presetDot,
-  .presetInfoButton {
-    transition: none;
-  }
-
-  .presetOption:hover {
-    transform: none;
-  }
-
-  .presetInfoPopover {
-    animation: none;
-  }
 }

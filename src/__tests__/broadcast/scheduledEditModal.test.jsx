@@ -2,7 +2,10 @@ import React from "react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import ScheduledEditModal from "@/app/[locale]/(app)/broadcast/scheduled/components/ScheduledEditModal";
+import ScheduledEditModal, {
+  editTimeSlots,
+  isPastSlot,
+} from "@/app/[locale]/(app)/broadcast/scheduled/components/ScheduledEditModal";
 import {
   normalizeUser,
 } from "@/app/[locale]/(app)/broadcast/scheduled/helpers/recipient.helpers";
@@ -16,12 +19,19 @@ const orgUsers = [
   { id: 5702, name: "Alexandre", phone_number: "+351935000003" },
 ].map(normalizeUser);
 
-function renderModal(payload, { channel = "whatsapp", onSave = vi.fn() } = {}) {
+function renderModal(
+  payload,
+  {
+    channel = "whatsapp",
+    onSave = vi.fn(),
+    scheduledFor = "2099-01-01T12:00:00Z",
+  } = {},
+) {
   const item = normalizeBroadcast({
     id: "b-1",
     channel,
     status: "queued",
-    scheduled_for: "2099-01-01T12:00:00Z",
+    scheduled_for: scheduledFor,
     timezone: "Europe/Lisbon",
     payload,
   });
@@ -191,5 +201,64 @@ describe("ScheduledEditModal: destinatários", () => {
     expect(onSave.mock.calls[0][0].recipients).toEqual([
       expect.objectContaining({ userId: "5704" }),
     ]);
+  });
+});
+
+describe("ScheduledEditModal: hora", () => {
+  const message = { message: "Olá", recipients: [{ userId: 5704 }] };
+  const at = (h, m) => new Date(2099, 0, 1, h, m).toISOString();
+
+  it("escolhe-se numa lista das 08:00 às 20:00, de 15 em 15, com o «i»", () => {
+    renderModal(message, { scheduledFor: at(12, 0) });
+
+    const select = screen.getByLabelText("EditModal.hour");
+    const options = within(select).getAllByRole("option");
+
+    expect(select).toHaveValue("12:00");
+    expect(options).toHaveLength(49);
+    expect(options[0]).toHaveValue("08:00");
+    expect(options.at(-1)).toHaveValue("20:00");
+    expect(screen.queryByText("EditModal.minute")).toBeNull();
+    expect(screen.getByLabelText("EditModal.chooseTime")).toBeInTheDocument();
+  });
+
+  it("uma agendada antiga fora da lista mantém a hora que tinha", () => {
+    renderModal(message, { scheduledFor: at(21, 30) });
+
+    expect(screen.getByLabelText("EditModal.hour")).toHaveValue("21:30");
+    expect(editTimeSlots("21:30")).toContain("21:30");
+    expect(editTimeSlots("12:00")).toHaveLength(49);
+  });
+
+  it("guardar envia a hora escolhida na lista", () => {
+    const { onSave } = renderModal(message, { scheduledFor: at(12, 0) });
+
+    fireEvent.change(screen.getByLabelText("EditModal.hour"), {
+      target: { value: "09:45" },
+    });
+    fireEvent.submit(screen.getByLabelText("EditModal.hour").closest("form"));
+
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ date: "2099-01-01", hour: "09", minute: "45" }),
+    );
+  });
+
+  it("hoje, as horas que já passaram ficam desativadas", () => {
+    const now = new Date(2026, 10, 12, 14, 10);
+
+    expect(isPastSlot("2026-11-12", "14:00", now)).toBe(true);
+    expect(isPastSlot("2026-11-12", "14:15", now)).toBe(false);
+    expect(isPastSlot("2026-11-13", "08:00", now)).toBe(false);
+  });
+
+  it("não deixa escolher um dia que já passou", () => {
+    renderModal(message, { scheduledFor: at(12, 0) });
+
+    const today = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    expect(screen.getByLabelText("EditModal.date")).toHaveAttribute(
+      "min",
+      `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`,
+    );
   });
 });

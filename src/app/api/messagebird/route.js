@@ -1416,10 +1416,6 @@ async function handleEvent(rawJSON) {
     return;
   }
 
-  if (!assistantRow.model) {
-    throw new Error(`Assistant ${assistantRow.id} has no model configured`);
-  }
-
   const channel = "whatsapp";
 
   /*

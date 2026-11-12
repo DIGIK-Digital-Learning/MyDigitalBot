@@ -168,7 +168,6 @@ describe("CreateAssistantModal", () => {
       name: "My Assistant",
       description: "Desc",
       instructions: "Instr",
-      model: "gpt-5.6-luna",
     });
 
     expect(mocks.onCreated).toHaveBeenCalled();
@@ -313,120 +312,27 @@ describe("CreateAssistantModal", () => {
     expect(confirmMock).not.toHaveBeenCalled();
   });
 
-  it("cria com a predefinicao Normal quando nenhuma e escolhida", async () => {
+  it("não pede comportamento nem envia modelo ou temperatura (#250)", async () => {
     const user = userEvent.setup();
     renderModal();
 
+    // O 6 Luna não aceita temperatura: as predefinições saíram.
+    expect(screen.queryAllByRole("radio")).toHaveLength(0);
+    expect(screen.queryByText("CreateAssistant.presetLabel")).toBeNull();
+
     const [nameInput] = screen.getAllByRole("textbox");
     await user.type(nameInput, "My Assistant");
-
     await user.click(
       screen.getByRole("button", { name: "CreateAssistant.create" }),
     );
 
     await waitFor(() => expect(mocks.fetch).toHaveBeenCalled());
 
+    // O modelo é o da app, escolhido no servidor.
     const body = JSON.parse(createCalls()[0][1].body);
-
-    expect(body.temperature).toBe(0.7);
-    expect(body.top_p).toBe(1);
-  });
-
-  it("envia a temperatura da predefinicao escolhida", async () => {
-    const user = userEvent.setup();
-    renderModal();
-
-    const [nameInput] = screen.getAllByRole("textbox");
-    await user.type(nameInput, "My Assistant");
-
-    // Formal e Criativo tem de dar valores diferentes, senao a escolha
-    // do utilizador nao muda nada.
-    await user.click(screen.getByRole("radio", { name: /Formal/i }));
-    await user.click(
-      screen.getByRole("button", { name: "CreateAssistant.create" }),
-    );
-
-    await waitFor(() => expect(mocks.fetch).toHaveBeenCalled());
-
-    const body = JSON.parse(createCalls()[0][1].body);
-
-    expect(body.temperature).toBe(0.2);
-
-    // O top_p fica no valor por omissao em todas: a OpenAI recomenda
-    // alterar a temperature OU o top_p, nunca os dois.
-    expect(body.top_p).toBe(1);
-  });
-
-  it("mostra as tres predefinicoes e nenhum controlo numerico", async () => {
-    renderModal();
-
-    expect(screen.getAllByRole("radio")).toHaveLength(3);
-
-    // Os deslizadores de criatividade e variedade sairam da criacao.
-    // Quem cria um assistente pela primeira vez nao sabe o que sao.
-    expect(screen.queryAllByRole("slider")).toHaveLength(0);
-  });
-
-  it("mostra a descricao da predefinicao ao carregar no icone", async () => {
-    const user = userEvent.setup();
-    renderModal();
-
-    // Fechada de origem: sao tres linhas em vez de nove, e e por isso
-    // que as instrucoes ganharam espaco.
-    expect(screen.queryByText("AssistantPresets.formal.description")).toBeNull();
-
-    await user.click(
-      screen.getByRole("button", { name: "AssistantPresets.formal.name" }),
-    );
-
-    expect(
-      screen.getByText("AssistantPresets.formal.description"),
-    ).toBeInTheDocument();
-  });
-
-  it("abrir uma descricao fecha a anterior", async () => {
-    const user = userEvent.setup();
-    renderModal();
-
-    await user.click(
-      screen.getByRole("button", { name: "AssistantPresets.formal.name" }),
-    );
-    await user.click(
-      screen.getByRole("button", { name: "AssistantPresets.creative.name" }),
-    );
-
-    // Duas bolhas abertas ao mesmo tempo deixavam de dizer a qual das
-    // predefinicoes pertence cada explicacao.
-    expect(screen.queryByText("AssistantPresets.formal.description")).toBeNull();
-    expect(
-      screen.getByText("AssistantPresets.creative.description"),
-    ).toBeInTheDocument();
-  });
-
-  it("carregar no mesmo icone fecha a descricao", async () => {
-    const user = userEvent.setup();
-    renderModal();
-
-    const botao = screen.getByRole("button", {
-      name: "AssistantPresets.normal.name",
-    });
-
-    await user.click(botao);
-    await user.click(botao);
-
-    expect(screen.queryByText("AssistantPresets.normal.description")).toBeNull();
-  });
-
-  it("escolher uma predefinicao fecha a descricao aberta", async () => {
-    const user = userEvent.setup();
-    renderModal();
-
-    await user.click(
-      screen.getByRole("button", { name: "AssistantPresets.formal.name" }),
-    );
-    await user.click(screen.getByRole("radio", { name: /formal/i }));
-
-    expect(screen.queryByText("AssistantPresets.formal.description")).toBeNull();
+    expect(body).not.toHaveProperty("model");
+    expect(body).not.toHaveProperty("temperature");
+    expect(body).not.toHaveProperty("top_p");
   });
 
   it("cria um so assistente quando se carrega varias vezes em criar", async () => {

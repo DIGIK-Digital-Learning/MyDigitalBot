@@ -17,6 +17,7 @@ import {
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
 import { assistantTextTooLong } from "@/lib/assistants/assistantTextLimits";
+import { AI_MODELS } from "@/lib/openai/models";
 
 import {
   handleApiError,
@@ -88,23 +89,16 @@ export async function POST(req) {
 
     const name = typeof body?.name === "string" ? body.name.trim() : "";
 
-    const model = typeof body?.model === "string" ? body.model.trim() : "";
+    /*
+     * #250: o modelo é o da app, igual para todos; o que vier no pedido não
+     * conta. Fica gravado só como registo do modelo com que foi criado.
+     */
+    const model = AI_MODELS.text;
 
     if (!name) {
       return NextResponse.json(
         {
           error: "Assistant name is required",
-        },
-        {
-          status: 400,
-        },
-      );
-    }
-
-    if (!model) {
-      return NextResponse.json(
-        {
-          error: "Assistant model is required",
         },
         {
           status: 400,
@@ -184,9 +178,10 @@ export async function POST(req) {
 
       model,
 
-      top_p: body.top_p ?? null,
+      /* O 6 Luna não aceita temperature nem top_p (#250). */
+      top_p: null,
 
-      temperature: body.temperature ?? null,
+      temperature: null,
     });
 
     await recordAuditEvent(orgAuth, {
