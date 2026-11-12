@@ -950,8 +950,18 @@
 
 .timeRow {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 140px));
+  grid-template-columns: minmax(0, 180px);
   gap: 14px;
+}
+
+/* «Hora» e o «i» com o horário, na mesma linha. */
+.timeLabelRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #374151;
+  font-weight: 600;
+  font-size: 0.92rem;
 }
 
 .field {

@@ -2132,7 +2132,7 @@
       "date": "Data",
       "timezone": "Fuso horário",
       "hour": "Hora",
-      "minute": "Minuto",
+      "chooseTime": "Só é possível agendar entre as 08:00 e as 20:00, de 15 em 15 minutos.",
       "cancel": "Cancelar",
       "save": "Guardar alterações",
       "saving": "A guardar...",
