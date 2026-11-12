@@ -20,6 +20,9 @@
  * Este ficheiro não lê variáveis de ambiente.
  */
 
+import { DEFAULT_BOT_LOCALE } from "@/lib/bot/botLanguage";
+import { botText } from "@/lib/bot/botTexts";
+
 import { QUIZ_MAX_OPTIONS, QUIZ_OPTION_MAX_LENGTH } from "./question";
 
 /* Mensagem inteira, sem acentos nem pontuação, igual a uma destas. */
@@ -31,7 +34,9 @@ const SWITCH_KEYWORDS = [
   "trocar de assistente",
   "mudar de assistente",
   "assistants",
+  "assistant",
   "switch assistant",
+  "change assistant",
 ];
 
 export const SWITCH_KEYWORD = "assistentes";
@@ -39,7 +44,6 @@ export const SWITCH_KEYWORD = "assistentes";
 /* Limites da Meta para a mensagem de lista. */
 const LIST_MAX_ITEMS = 10;
 const LIST_ITEM_MAX_LENGTH = 24;
-const LIST_BUTTON_LABEL = "Ver assistentes";
 
 /* Minutos durante os quais um número ou nome escrito conta como escolha. */
 export const SWITCH_MENU_TYPED_MINUTES = 10;
@@ -80,13 +84,20 @@ function labelsAreDistinct(assistants, maxLength) {
 
 /**
  * Menu a enviar: `actions` para botões, `list` para a mensagem de lista, e
- * nenhum dos dois quando vai a lista numerada em texto.
+ * nenhum dos dois quando vai a lista numerada em texto. Os textos saem na
+ * língua do colaborador (#241).
  */
-export function buildSwitchMenu({ assistants = [], activeId = null }) {
+export function buildSwitchMenu({
+  assistants = [],
+  activeId = null,
+  locale = DEFAULT_BOT_LOCALE,
+}) {
   const active = assistants.find((a) => Number(a.id) === Number(activeId));
-  const current = active ? ` Agora estás com ${active.name}.` : "";
+  const current = active
+    ? ` ${botText(locale, "switchCurrent", { name: active.name })}`
+    : "";
 
-  const question = `Com que assistente queres falar?${current}`;
+  const question = `${botText(locale, "switchQuestion")}${current}`;
 
   if (
     assistants.length <= QUIZ_MAX_OPTIONS &&
@@ -110,7 +121,7 @@ export function buildSwitchMenu({ assistants = [], activeId = null }) {
       text: question,
       actions: null,
       list: {
-        buttonLabel: LIST_BUTTON_LABEL,
+        buttonLabel: botText(locale, "switchListButton"),
         items: assistants.map((a, index) => {
           const title = assistantButtonLabel(a.name, LIST_ITEM_MAX_LENGTH);
 
@@ -131,7 +142,7 @@ export function buildSwitchMenu({ assistants = [], activeId = null }) {
   const lines = assistants.map((a, index) => `${index + 1}. ${a.name}`);
 
   return {
-    text: `${question} Responde com o número.\n\n${lines.join("\n")}`,
+    text: `${question} ${botText(locale, "switchReplyWithNumber")}\n\n${lines.join("\n")}`,
     actions: null,
     list: null,
   };
@@ -162,12 +173,20 @@ export function resolveSwitchChoice({ reply, assistants = [] }) {
   return null;
 }
 
-export function switchConfirmationText(assistant, { alreadyActive = false } = {}) {
-  const lead = alreadyActive
-    ? `Já estás a falar com ${assistant.name}.`
-    : `Agora estás a falar com ${assistant.name}.`;
+export function switchConfirmationText(
+  assistant,
+  { alreadyActive = false, locale = DEFAULT_BOT_LOCALE } = {},
+) {
+  const lead = botText(
+    locale,
+    alreadyActive ? "switchAlreadyActive" : "switchSwitched",
+    { name: assistant.name },
+  );
+  const howTo = botText(locale, "switchHowTo", {
+    keyword: botText(locale, "switchKeyword"),
+  });
 
-  return `${lead} Para trocar, escreve "${SWITCH_KEYWORD}".`;
+  return `${lead} ${howTo}`;
 }
 
 export function isSwitchMenuFresh(sentAt, now = Date.now()) {

@@ -27,8 +27,11 @@ import { BroadcastError, normalizeFiles, isImageType } from "./shared";
 import {
   buildOpeningTemplateParams,
   getOpeningTemplateConfig,
+  openingTemplateLocale,
   sanitizeOpeningBody,
 } from "@/lib/whatsapp/openingTemplate";
+import { botLocale } from "@/lib/bot/botLanguage";
+import { getUserLocale } from "@/lib/repos/userLocale.repo";
 import {
   findPendingOpeningGate,
   openingGateExpiresAt,
@@ -134,7 +137,7 @@ async function loadOrgForWhatsapp(orgId) {
   const { data: org, error } = await supabaseAdmin
     .from("organization")
     .select(
-      "id, name, channel_id, waba_namespace, default_phone_country_code, whatsapp_opening_body",
+      "id, name, channel_id, waba_namespace, default_phone_country_code, whatsapp_opening_body, locale",
     )
     .eq("id", orgId)
     .single();
@@ -881,6 +884,27 @@ export async function sendWhatsappBroadcast(input = {}) {
       }
     }
 
+    /*
+     * #241: o template vai na língua do bot para este colaborador (a dele,
+     * senão a da organização). A versão inglesa só é usada quando está
+     * configurada; até lá, e para não fazer leituras escusadas, todos
+     * recebem a portuguesa.
+     */
+    const templateConfig = config.localeEn
+      ? {
+          ...config,
+          locale: openingTemplateLocale(
+            config,
+            botLocale({
+              organization: org,
+              user: user
+                ? { ...user, locale: await getUserLocale(user.id) }
+                : null,
+            }),
+          ),
+        }
+      : config;
+
     console.log("[WA template final]", {
       sendGroupId,
       recipient: label,
@@ -888,7 +912,8 @@ export async function sendWhatsappBroadcast(input = {}) {
       whatsappBsuid,
       birdContactId,
       contact,
-      projectId: config.projectId,
+      projectId: templateConfig.projectId,
+      locale: templateConfig.locale,
       kvPairs,
     });
 
@@ -898,7 +923,7 @@ export async function sendWhatsappBroadcast(input = {}) {
         endpoint: messagesEndpoint,
         accessKey,
         contact,
-        config,
+        config: templateConfig,
         kvPairs,
       });
     } catch (err) {

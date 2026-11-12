@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
   createMessage: vi.fn(),
   createQuestion: vi.fn(),
   resolveTrackedLinks: vi.fn(),
+  getUserLocale: vi.fn(),
   fetch: vi.fn(),
 }));
 
@@ -58,6 +59,10 @@ vi.mock("@/lib/repos/whatsappOpeningGate.repo", () => ({
   getWhatsappOpeningGate: (...args) => mocks.getWhatsappOpeningGate(...args),
   markWhatsappOpeningGateSent: (...args) =>
     mocks.markWhatsappOpeningGateSent(...args),
+}));
+
+vi.mock("@/lib/repos/userLocale.repo", () => ({
+  getUserLocale: (...args) => mocks.getUserLocale(...args),
 }));
 
 vi.mock("@/lib/repos/questions.repo", () => ({
@@ -129,6 +134,7 @@ describe("sendWhatsappBroadcast", () => {
     mocks.createMessage.mockResolvedValue({ id: 900 });
     mocks.createQuestion.mockResolvedValue({ id: 10 });
     mocks.resolveTrackedLinks.mockResolvedValue([]);
+    mocks.getUserLocale.mockResolvedValue(null);
     mocks.fetch.mockResolvedValue({
       ok: true,
       status: 200,
@@ -261,6 +267,53 @@ describe("sendWhatsappBroadcast", () => {
       "po-1",
       "bird-msg-1",
     );
+  });
+
+  describe("opening template language (#241)", () => {
+    const send = () =>
+      sendWhatsappBroadcast({
+        orgId: 1,
+        message: "Dica de hoje",
+        recipients: [{ userId: 42 }],
+      });
+
+    it("keeps the Portuguese template while the English one is not configured", async () => {
+      mocks.getUserLocale.mockResolvedValue("en");
+
+      await send();
+
+      expect(birdCall().body.template.locale).toBe("pt-PT");
+      expect(mocks.getUserLocale).not.toHaveBeenCalled();
+    });
+
+    it("sends the English template to a collaborator who speaks English", async () => {
+      vi.stubEnv("BIRD_OPENING_TEMPLATE_LOCALE_EN", "en");
+      mocks.getUserLocale.mockResolvedValue("en");
+
+      await send();
+
+      expect(mocks.getUserLocale).toHaveBeenCalledWith(42);
+      expect(birdCall().body.template.locale).toBe("en");
+    });
+
+    it("follows the organization language when the collaborator has none", async () => {
+      vi.stubEnv("BIRD_OPENING_TEMPLATE_LOCALE_EN", "en");
+      mocks.org = { ...ORG, locale: "en" };
+
+      await send();
+
+      expect(birdCall().body.template.locale).toBe("en");
+    });
+
+    it("keeps Portuguese for a Portuguese speaker in an English organization", async () => {
+      vi.stubEnv("BIRD_OPENING_TEMPLATE_LOCALE_EN", "en");
+      mocks.org = { ...ORG, locale: "en" };
+      mocks.getUserLocale.mockResolvedValue("pt");
+
+      await send();
+
+      expect(birdCall().body.template.locale).toBe("pt-PT");
+    });
   });
 
   it("queues later broadcasts behind the active opening template without sending another one", async () => {

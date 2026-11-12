@@ -1,3 +1,5 @@
+import { DEFAULT_BOT_LOCALE } from "@/lib/bot/botLanguage";
+import { botText } from "@/lib/bot/botTexts";
 import {
   isSwitchKeyword,
   switchConfirmationText,
@@ -16,7 +18,7 @@ import { getUserById, updateUser } from "@/lib/repos/user.repo";
 
 export const ASSISTANT_SWITCH_ACTION = "mdbAssistantSwitch";
 
-const SWITCH_COMMANDS = ["assistentes", "assistente"];
+const SWITCH_COMMANDS = ["assistentes", "assistente", "assistants", "assistant"];
 
 export function isSwitchCommand(command) {
   return SWITCH_COMMANDS.includes(String(command || "").toLowerCase());
@@ -29,13 +31,19 @@ export function isSwitchCommand(command) {
  */
 export const SWITCH_MAX_BUTTONS = 5;
 
-export function buildAssistantSwitchCard({ assistants = [], activeId = null }) {
+export function buildAssistantSwitchCard({
+  assistants = [],
+  activeId = null,
+  locale = DEFAULT_BOT_LOCALE,
+}) {
   const active = assistants.find((a) => Number(a.id) === Number(activeId));
-  const current = active ? ` Agora estás com ${active.name}.` : "";
+  const current = active
+    ? ` ${botText(locale, "switchCurrent", { name: active.name })}`
+    : "";
 
   const question = {
     type: "TextBlock",
-    text: `Com que assistente queres falar?${current}`,
+    text: `${botText(locale, "switchQuestion")}${current}`,
     wrap: true,
   };
 
@@ -66,13 +74,13 @@ export function buildAssistantSwitchCard({ assistants = [], activeId = null }) {
         ? [
             {
               type: "Action.Submit",
-              title: "Trocar",
+              title: botText(locale, "switchSubmit"),
               /* O assistentId escolhido chega no value, junto com a ação. */
               data: {
                 msteams: {
                   type: "messageBack",
-                  displayText: "Trocar de assistente",
-                  text: "Trocar de assistente",
+                  displayText: botText(locale, "switchSubmitText"),
+                  text: botText(locale, "switchSubmitText"),
                 },
                 action: ASSISTANT_SWITCH_ACTION,
               },
@@ -100,13 +108,14 @@ const defaultDeps = { getAssistantsInOrg, getUserById, updateUser };
 /**
  * Devolve `{ handled: false }` quando a mensagem não é um pedido de troca e
  * deve seguir para o assistente. `send({ text, attachments })` envia ao
- * colaborador.
+ * colaborador. `locale` é a língua do colaborador (#241).
  */
 export async function handleTeamsAssistantSwitch({
   userId,
   text = "",
   value = null,
   isCommand = false,
+  locale = DEFAULT_BOT_LOCALE,
   send,
   deps,
 }) {
@@ -125,14 +134,14 @@ export async function handleTeamsAssistantSwitch({
     /* O comando pede uma resposta; a palavra solta segue para o assistente. */
     if (!isCommand) return { handled: false };
 
-    await send({ text: "Só tens um assistente atribuído." });
+    await send({ text: botText(locale, "switchSingle") });
 
     return { handled: true, outcome: "single" };
   }
 
   const assistants = (await d.getAssistantsInOrg(user.organization_id))
     .filter((a) => assignedIds.includes(Number(a.id)))
-    .sort((a, b) => String(a.name).localeCompare(String(b.name), "pt"));
+    .sort((a, b) => String(a.name).localeCompare(String(b.name), locale));
 
   const chosen = isTap
     ? assistants.find((a) => Number(a.id) === Number(value.assistantId))
@@ -142,7 +151,11 @@ export async function handleTeamsAssistantSwitch({
   if (!chosen) {
     await send({
       attachments: [
-        buildAssistantSwitchCard({ assistants, activeId: user.assistant_id }),
+        buildAssistantSwitchCard({
+          assistants,
+          activeId: user.assistant_id,
+          locale,
+        }),
       ],
     });
 
@@ -155,7 +168,9 @@ export async function handleTeamsAssistantSwitch({
     await d.updateUser(user.id, { assistantId: chosen.id });
   }
 
-  await send({ text: switchConfirmationText(chosen, { alreadyActive }) });
+  await send({
+    text: switchConfirmationText(chosen, { alreadyActive, locale }),
+  });
 
   return {
     handled: true,

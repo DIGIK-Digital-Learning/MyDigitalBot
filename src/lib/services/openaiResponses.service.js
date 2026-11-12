@@ -1,3 +1,4 @@
+import { assistantLanguageRule } from "@/lib/bot/botLanguage";
 import { openai } from "@/lib/openai/client";
 import { getStoreById } from "../repos/store.repo";
 import { stripOpenAICitations } from "./removeOAiCitations";
@@ -60,10 +61,17 @@ export async function resolveAssistantVectorStore(assistant) {
   return store.open_ai_id;
 }
 
+/**
+ * `locale` (opcional) é a língua em que o bot está a falar com o colaborador
+ * (#241): junta às instruções a regra de responder na língua em que ele
+ * escreveu, com essa como recurso. Sem `locale` (ex.: teste nas páginas do
+ * administrador), as instruções ficam como o administrador as escreveu.
+ */
 export async function generateAssistantResponse({
   assistant,
   conversationId,
   message,
+  locale = null,
 }) {
   if (!assistant) {
     throw new Error("Assistant configuration is required");
@@ -106,11 +114,17 @@ export async function generateAssistantResponse({
     };
   }
 
-  if (
-    typeof assistant.instructions === "string" &&
-    assistant.instructions.trim()
-  ) {
-    request.instructions = assistant.instructions.trim();
+  const instructions = [
+    typeof assistant.instructions === "string"
+      ? assistant.instructions.trim()
+      : "",
+    locale ? assistantLanguageRule(locale) : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
+  if (instructions) {
+    request.instructions = instructions;
   }
 
   if (assistant.temperature !== null && assistant.temperature !== undefined) {

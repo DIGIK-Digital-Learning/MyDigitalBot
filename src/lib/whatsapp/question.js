@@ -12,6 +12,9 @@
  *   replyTo.id é o id da mensagem enviada.
  */
 
+import { DEFAULT_BOT_LOCALE } from "@/lib/bot/botLanguage";
+import { BOT_TEXTS, botText } from "@/lib/bot/botTexts";
+
 export const QUESTION_KINDS = ["quiz", "survey", "open"];
 
 /* Tipos com botões de resposta rápida. */
@@ -32,15 +35,18 @@ export const QUESTION_FEEDBACK_MAX_LENGTH = 1024;
 /* Dias durante os quais uma pergunta aceita respostas. */
 export const QUESTION_VALIDITY_DAYS = 7;
 
-export const DEFAULT_QUIZ_FEEDBACK_CORRECT = "Certo! ✅";
-export const DEFAULT_QUIZ_FEEDBACK_INCORRECT =
-  "Não é essa. A resposta certa é: {{certa}}";
+/*
+ * Textos por omissão, em português. A versão na língua do colaborador (#241)
+ * vem de BOT_TEXTS: quizFeedbackText e surveyThanksText recebem a língua.
+ */
+export const DEFAULT_QUIZ_FEEDBACK_CORRECT = BOT_TEXTS.pt.quizCorrect;
+export const DEFAULT_QUIZ_FEEDBACK_INCORRECT = BOT_TEXTS.pt.quizIncorrect;
 
 /* Agradecimento por omissão depois de escolher numa sondagem. */
-export const DEFAULT_SURVEY_THANKS = "Obrigado pela tua resposta!";
+export const DEFAULT_SURVEY_THANKS = BOT_TEXTS.pt.surveyThanks;
 
 /* Resposta a um toque numa pergunta cujo prazo já passou. */
-export const EXPIRED_QUESTION_TEXT = "Esta pergunta já não aceita respostas.";
+export const EXPIRED_QUESTION_TEXT = BOT_TEXTS.pt.questionExpired;
 
 export function sanitizeOptionLabel(value) {
   return String(value ?? "")
@@ -225,12 +231,12 @@ export function isSurveyValid(input) {
  * Texto enviado depois da escolha numa sondagem. O administrador pode
  * escrevê-lo; fica guardado em feedback_correct.
  */
-export function surveyThanksText(question) {
+export function surveyThanksText(question, locale = DEFAULT_BOT_LOCALE) {
   const custom = cleanMultiline(
     question?.feedback_correct ?? question?.thanksText,
   );
 
-  return custom || DEFAULT_SURVEY_THANKS;
+  return custom || botText(locale, "surveyThanks");
 }
 
 export function makeEmptyOpenQuestion() {
@@ -293,10 +299,14 @@ function fill(text, values) {
 
 /**
  * Texto enviado ao contacto depois de responder. Quando o administrador não
- * escreveu feedback, usa-se o texto por omissão. `{{certa}}` é o título da
- * opção certa.
+ * escreveu feedback, usa-se o texto por omissão, na língua do colaborador.
+ * `{{certa}}` é o título da opção certa.
  */
-export function quizFeedbackText(question, isCorrect) {
+export function quizFeedbackText(
+  question,
+  isCorrect,
+  locale = DEFAULT_BOT_LOCALE,
+) {
   const options = Array.isArray(question?.options) ? question.options : [];
   const correctIndex = getCorrectOptionIndex(options);
   const values = { certa: options[correctIndex]?.label || "" };
@@ -308,10 +318,7 @@ export function quizFeedbackText(question, isCorrect) {
   const text = cleanMultiline(custom);
 
   return fill(
-    text ||
-      (isCorrect
-        ? DEFAULT_QUIZ_FEEDBACK_CORRECT
-        : DEFAULT_QUIZ_FEEDBACK_INCORRECT),
+    text || botText(locale, isCorrect ? "quizCorrect" : "quizIncorrect"),
     values,
   );
 }

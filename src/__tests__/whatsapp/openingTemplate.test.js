@@ -84,7 +84,7 @@ describe("getOpeningTemplateConfig", () => {
         BIRD_OPENING_TEMPLATE_PROJECT_ID: " proj-1 ",
         BIRD_OPENING_TEMPLATE_LOCALE: "en",
       }),
-    ).toEqual({ projectId: "proj-1", locale: "en" });
+    ).toEqual({ projectId: "proj-1", locale: "en", localeEn: null });
   });
 
   it("defaults the locale to pt-PT", () => {

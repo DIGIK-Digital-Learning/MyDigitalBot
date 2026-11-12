@@ -1,18 +1,19 @@
+import { botLocale } from "@/lib/bot/botLanguage";
 import { claimLimitNotice } from "@/lib/repos/collaboratorWeeklyMessages.repo";
 
 import { getOrgLimits } from "./planLimits";
 
 /*
  * O aviso ao colaborador quando a Demo da empresa terminou (#209), na língua
- * da organização (a escolhida no topo do site).
+ * do colaborador (#241): a última em que escreveu, senão a da organização.
  */
 export const PLAN_EXPIRED_NOTICE = {
   pt: "O assistente não está disponível de momento. Fala com o responsável da tua empresa.",
   en: "The assistant isn't available right now. Please talk to the person in charge at your company.",
 };
 
-export function planExpiredNotice(organization) {
-  return PLAN_EXPIRED_NOTICE[organization?.locale] || PLAN_EXPIRED_NOTICE.pt;
+export function planExpiredNotice(organization, user = null) {
+  return PLAN_EXPIRED_NOTICE[botLocale({ organization, user })];
 }
 
 /**
@@ -50,7 +51,7 @@ export async function checkCollaboratorPlanActive(
 
     return {
       allowed: false,
-      notice: first ? planExpiredNotice(organization) : null,
+      notice: first ? planExpiredNotice(organization, user) : null,
     };
   } catch (error) {
     console.error("[Plan] failed to check expired plan", {

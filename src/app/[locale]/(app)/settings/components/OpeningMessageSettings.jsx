@@ -1,33 +1,38 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import WhatsAppPhone, {
   WhatsAppBubble,
   WhatsAppButton,
 } from "@/app/components/WhatsAppPhone/WhatsAppPhone";
 import {
-  OPENING_TEMPLATE_PREVIEW,
+  openingTemplatePreviewFor,
   renderOpeningTemplatePreview,
 } from "@/lib/whatsapp/openingTemplate";
 
 import styles from "../settings.module.css";
 
-/** Pré-visualização fixa do template DigikBot, com valores de exemplo. */
+/**
+ * Pré-visualização fixa do template DigikBot, com valores de exemplo, na
+ * língua escolhida no site, que é aquela em que o bot começa a falar (#241).
+ */
 export default function OpeningMessageSettings({ orgName }) {
   const translation = useTranslations("OpeningMessage");
+  const locale = useLocale();
   const sampleName = translation("sampleName");
   const companyName = orgName || translation("sampleCompany");
   const message = renderOpeningTemplatePreview({
     name: sampleName,
     orgName: companyName,
+    locale,
   });
 
   return (
     <div className={styles.opening}>
       <WhatsAppPhone contactName={sampleName}>
         <WhatsAppBubble>{message}</WhatsAppBubble>
-        <WhatsAppButton>{OPENING_TEMPLATE_PREVIEW.button}</WhatsAppButton>
+        <WhatsAppButton>{openingTemplatePreviewFor(locale).button}</WhatsAppButton>
       </WhatsAppPhone>
 
       <div className={styles.openingDetails}>
