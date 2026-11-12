@@ -2132,7 +2132,7 @@
       "date": "Date",
       "timezone": "Time zone",
       "hour": "Hour",
-      "minute": "Minute",
+      "chooseTime": "You can only schedule between 08:00 and 20:00, in 15-minute steps.",
       "cancel": "Cancel",
       "save": "Save changes",
       "saving": "Saving...",
@@ -2294,7 +2294,7 @@
     "saved": {
       "title": "Links guardados",
       "description": "The links that count toward your plan. Deleting a link doesn't delete the stats for the sends it was used in.",
-      "empty": "You haven't created any links yet. Links appear here when you use them in a message."
+      "empty": "You don't have any links yet. Create one here or use one in a message."
     },
     "showDeleted": "Show deleted",
     "deleted": "Deleted",
@@ -2306,6 +2306,24 @@
     "sent": {
       "title": "Links sent",
       "description": "One group per link, with the totals of all sends. Open a group to see each send. Deleted links appear in a different colour."
+    },
+    "create": {
+      "button": "Create link",
+      "title": "Create link",
+      "description": "The link goes into this list, ready to use in Send message. It only counts as sent once it goes out in a message.",
+      "labelField": "Name",
+      "labelPlaceholder": "E.g.: Training calendar",
+      "urlField": "Destination",
+      "urlPlaceholder": "https://",
+      "urlHelp": "The page address, starting with http:// or https://",
+      "save": "Create link",
+      "saving": "Creating...",
+      "invalidUrl": "The destination must start with http:// or https://",
+      "full": "You've reached the {limit} links in your plan. Delete a link from this list to create a new one.",
+      "existsTitle": "That link already exists",
+      "existsMessage": "You already had a link with this name and destination. It is still in the list, ready to use.",
+      "failedTitle": "Couldn't create the link",
+      "failedMessage": "Please try again in a moment."
     }
   },
   "Questions": {
@@ -2523,7 +2541,10 @@
       "saving": "Saving...",
       "cancel": "Cancel",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "descriptionLabel": "Description",
+      "instructionsLabel": "Instructions",
+      "noInstructions": "No instructions."
     },
     "vector": {
       "create": "Create file collection",
@@ -2559,25 +2580,9 @@
       "deleteCollection": "Couldn't delete the collection. {detail}"
     }
   },
-  "AssistantPresets": {
-    "formal": {
-      "name": "Formal",
-      "description": "Predictable answers that stick to the instructions. For procedures and factual information."
-    },
-    "normal": {
-      "name": "Normal",
-      "description": "A balance between consistency and natural tone. Works for most cases."
-    },
-    "creative": {
-      "name": "Creative",
-      "description": "More varied answers with more initiative. For conversation and suggestions."
-    }
-  },
   "CreateAssistant": {
     "createFailed": "Couldn't create the assistant",
     "title": "Create new Assistant",
-    "presetLabel": "Behavior",
-    "presetHelp": "Sets how predictable or varied the Assistant is when answering. You can change it later when editing.",
     "name": "Name",
     "nameHelp": "Name that will be associated with the Assistant.",
     "description": "Description",
@@ -2590,7 +2595,7 @@
   "Chatbox": {
     "try": "Try Assistant",
     "threadId": "Thread ID:",
-    "placeholder": "Type your message...",
+    "placeholder": "Type a message…",
     "send": "Send",
     "errorReply": "Reply error",
     "errorApi": "Error communicating with the API.",
@@ -2619,7 +2624,13 @@
         "title": "Connection error",
         "message": "Check your connection and try again."
       }
-    }
+    },
+    "talkingTo": "Talking to {name}",
+    "empty": "Type a message to see how this assistant replies.",
+    "examplesLabel": "Or try:",
+    "example1": "Hi! How can you help me?",
+    "example2": "Explain simply what you do.",
+    "example3": "Give me an example of a question I can ask you."
   },
   "Reports": {
     "eyebrow": "Metrics and reports",
@@ -3263,6 +3274,7 @@
       "message_template_sent": "Template sent to a user",
       "template_created": "WhatsApp template created",
       "media_deleted": "Media file deleted",
+      "tracked_link_created": "Tracked link created",
       "tracked_link_deleted": "Tracked link deleted",
       "organization_created": "Organization created",
       "organization_settings_updated": "Organization settings changed",

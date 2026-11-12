@@ -10,7 +10,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:file": "vitest run",
-    "test:whatsapp-gate:db": "node tools/test-whatsapp-gate-db.mjs"
+    "test:whatsapp-gate:db": "node tools/test-whatsapp-gate-db.mjs",
+    "check:ai-model": "node --env-file=.env.local tools/check-ai-model.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.10.1",

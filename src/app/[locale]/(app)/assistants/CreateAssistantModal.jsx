@@ -12,11 +12,6 @@ import {
   ASSISTANT_DESCRIPTION_MAX_CHARS,
   ASSISTANT_NAME_MAX_CHARS,
 } from "@/lib/assistants/assistantTextLimits";
-import PresetPicker from "./PresetPicker";
-import {
-  DEFAULT_ASSISTANT_PRESET,
-  getAssistantPreset,
-} from "./assistantPresets";
 
 export default function CreateAssistantModal({
   orgId,
@@ -38,15 +33,12 @@ export default function CreateAssistantModal({
   );
   const instructionsTooLong =
     instructionsLimit !== null && instructions.length > instructionsLimit;
-  /**
-   * A predefinição escolhida.
-   *
-   * O modelo deixou de ser escolhido aqui: fica no valor por omissão e
-   * muda-se na edição, onde quem já conhece o assistente o pode afinar.
+  /*
+   * O modelo não se escolhe aqui nem na edição (#250): todos os assistentes
+   * seguem o da app (src/lib/openai/models.js). O comportamento Normal /
+   * Formal / Criativo saiu, porque o 6 Luna não aceita temperatura; o tom
+   * fica nas instruções.
    */
-  const [preset, setPreset] = useState(DEFAULT_ASSISTANT_PRESET);
-  // O modelo com que os assistentes nascem. Alterável na edição.
-  const DEFAULT_MODEL = "gpt-5.6-luna";
   /**
    * Um pedido de cada vez. A ref trava os cliques seguidos, que chegam
    * antes de o botão aparecer desativado; o estado desativa o botão.
@@ -89,9 +81,6 @@ export default function CreateAssistantModal({
         name: name,
         description: description,
         instructions: instructions,
-        model: DEFAULT_MODEL,
-        top_p: getAssistantPreset(preset).top_p,
-        temperature: getAssistantPreset(preset).temperature,
       }),
     });
 
@@ -244,38 +233,6 @@ export default function CreateAssistantModal({
               limit={instructionsLimit}
             />
           </div>
-          <div className={styles.formGroup}>
-            <label>
-              {translation("CreateAssistant.presetLabel")}
-              <span
-                className={styles.infoIcon}
-                data-tooltip={translation("CreateAssistant.presetHelp")}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10
-           10-4.48 10-10S17.52 2 12 2zm0 18c-4.41
-           0-8-3.59-8-8s3.59-8 8-8 8 3.59 8
-           8-3.59 8-8 8zm-1-13h2v2h-2zm0
-           4h2v6h-2z"
-                  />
-                </svg>
-              </span>
-            </label>
-
-            <PresetPicker
-              name="create-assistant-preset"
-              value={preset}
-              onChange={setPreset}
-            />
-          </div>
-
           <div className={styles.buttonGroup}>
             <button type="submit" disabled={submitting || instructionsTooLong}>
               {translation("CreateAssistant.create")}

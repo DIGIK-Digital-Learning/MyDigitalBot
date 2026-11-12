@@ -54,6 +54,7 @@ export const AUDIT_ACTIONS = Object.freeze({
 
   MEDIA_DELETED: "media.deleted",
 
+  TRACKED_LINK_CREATED: "tracked_link.created",
   TRACKED_LINK_DELETED: "tracked_link.deleted",
 
   ORGANIZATION_CREATED: "organization.created",

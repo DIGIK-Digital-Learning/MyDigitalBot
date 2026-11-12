@@ -1,6 +1,7 @@
 import sharp from "sharp";
 
 import { openai } from "@/lib/openai/client";
+import { AI_MODELS } from "@/lib/openai/models";
 
 export const IMAGE_PROMPT_MAX_LENGTH = 600;
 
@@ -8,11 +9,10 @@ export const IMAGE_PROMPT_MAX_LENGTH = 600;
 export const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 
 /*
- * O modelo que a OpenAI recomenda para gerar imagens no dia a dia (rápido e
- * de boa qualidade). Qualidade média em 1024x1024: num telemóvel não se nota
- * a diferença para a alta, e sai mais rápido e mais barato.
+ * O modelo de imagem está em src/lib/openai/models.js (#250). Qualidade
+ * média em 1024x1024: num telemóvel não se nota a diferença para a alta, e
+ * sai mais rápido e mais barato.
  */
-const IMAGE_MODEL = "gpt-image-2.5-flare";
 const IMAGE_SIZE = "1024x1024";
 const IMAGE_QUALITY = "medium";
 
@@ -61,7 +61,7 @@ export async function generateBroadcastImage({ prompt = "", deps = {} }) {
 
   const response = await client.images.generate(
     {
-      model: IMAGE_MODEL,
+      model: AI_MODELS.image,
       prompt: buildPrompt(request),
       size: IMAGE_SIZE,
       quality: IMAGE_QUALITY,

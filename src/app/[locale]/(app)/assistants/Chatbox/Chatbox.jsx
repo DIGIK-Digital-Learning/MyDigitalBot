@@ -10,14 +10,25 @@ export default function ChatSandbox({ assistant }) {
   const translation = useTranslations();
   const showAlert = useAlert();
   const [conversationId, setConversationId] = useState("");
-  const [threadId, setThreadId] = useState("");
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const trimmedInput = input.trim();
 
-  async function handleSend(e) {
+  /* Mensagens de exemplo do chat vazio: um clique envia logo. */
+  const examples = [
+    translation("Chatbox.example1"),
+    translation("Chatbox.example2"),
+    translation("Chatbox.example3"),
+  ];
+
+  function handleSend(e) {
     e.preventDefault();
+    sendMessage(trimmedInput);
+  }
+
+  async function sendMessage(text) {
+    if (!text || isSending) return;
 
     if (!assistant?.id) {
       await showAlert({
@@ -39,7 +50,7 @@ export default function ChatSandbox({ assistant }) {
     //   return;
     // }
 
-    const newUserMsg = { role: "user", content: trimmedInput };
+    const newUserMsg = { role: "user", content: text };
 
     setMessages((prev) => [newUserMsg, ...prev]);
     setInput("");
@@ -50,12 +61,10 @@ export default function ChatSandbox({ assistant }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: input,
+          message: text,
           conversationId,
         }),
       });
-
-      console.log(res);
 
       const data = await res.json().catch(() => ({}));
 
@@ -94,7 +103,6 @@ export default function ChatSandbox({ assistant }) {
         ...prev,
       ]);
 
-      setThreadId(data.threadId || threadId);
       setConversationId(data.conversationId);
     } catch (err) {
       console.warn("[Chatbox] send message error:", err);
@@ -116,21 +124,34 @@ export default function ChatSandbox({ assistant }) {
 
   return (
     <div className={styles.wrapper}>
-      <h2 className={styles.headline}>
-        {translation("Chatbox.try")}{" "}
-        {threadId && (
-          <span className={styles.threadBadge}>
-            Thread&nbsp;ID:&nbsp;{threadId}
-          </span>
-        )}
-        {conversationId && (
-          <span className={styles.threadBadge}>
-            Conversation&nbsp;ID:&nbsp;{conversationId}
-          </span>
-        )}
-      </h2>
+      <h2 className={styles.headline}>{translation("Chatbox.try")}</h2>
+      {assistant?.name && (
+        <p className={styles.talkingTo}>
+          {translation("Chatbox.talkingTo", { name: assistant.name })}
+        </p>
+      )}
 
       <div className={styles.viewport}>
+        {!messages.length && !isSending && (
+          <div className={styles.emptyState}>
+            <p>{translation("Chatbox.empty")}</p>
+            <p className={styles.examplesLabel}>
+              {translation("Chatbox.examplesLabel")}
+            </p>
+            <div className={styles.examples}>
+              {examples.map((example) => (
+                <button
+                  key={example}
+                  type="button"
+                  className={styles.example}
+                  onClick={() => sendMessage(example)}
+                >
+                  {example}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {isSending && <div className={styles.assistant}>...</div>}
         {messages.map((m, i) => (
           <div key={i} className={styles[m.role]}>

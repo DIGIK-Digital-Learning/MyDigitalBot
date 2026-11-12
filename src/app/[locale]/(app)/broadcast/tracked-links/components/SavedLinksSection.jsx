@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import NewBadge from "@/app/components/NewBadge/NewBadge";
@@ -13,8 +14,19 @@ import styles from "../tracked-links.module.css";
  * Links criados (#189): os que contam para os 100 do plano, com o 🗑 para
  * eliminar e a etiqueta "Novo" nos criados desde a última visita. Por
  * páginas, para a lista não crescer sem fim.
+ *
+ * "Criar link" abre a janela para criar um link sem enviar uma mensagem
+ * (`onCreate`). No limite do plano (`full`) fica desativado e diz porquê.
  */
-export default function SavedLinksSection({ links, loading, isNew, onDelete }) {
+export default function SavedLinksSection({
+  links,
+  loading,
+  isNew,
+  onDelete,
+  onCreate = null,
+  full = false,
+  limit = null,
+}) {
   const translation = useTranslations();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
@@ -32,14 +44,34 @@ export default function SavedLinksSection({ links, loading, isNew, onDelete }) {
 
   return (
     <section className={styles.savedCard}>
-      <div>
-        <h2 className={styles.savedTitle}>
-          {translation("TrackedLinks.saved.title")}
-        </h2>
-        <p className={styles.subtitle}>
-          {translation("TrackedLinks.saved.description")}
-        </p>
+      <div className={styles.savedHead}>
+        <div>
+          <h2 className={styles.savedTitle}>
+            {translation("TrackedLinks.saved.title")}
+          </h2>
+          <p className={styles.subtitle}>
+            {translation("TrackedLinks.saved.description")}
+          </p>
+        </div>
+
+        {onCreate ? (
+          <button
+            type="button"
+            className={styles.createButton}
+            onClick={onCreate}
+            disabled={full}
+          >
+            <Plus size={16} aria-hidden />
+            {translation("TrackedLinks.create.button")}
+          </button>
+        ) : null}
       </div>
+
+      {onCreate && full ? (
+        <p className={styles.savedFull}>
+          {translation("TrackedLinks.create.full", { limit })}
+        </p>
+      ) : null}
 
       {loading && !links.length ? (
         <div className={styles.savedEmpty}>

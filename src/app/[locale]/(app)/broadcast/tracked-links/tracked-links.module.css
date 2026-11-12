@@ -257,6 +257,41 @@
   gap: 12px;
 }
 
+/* Título e descrição à esquerda, "Criar link" à direita. */
+.savedHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.createButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 10px;
+  background: var(--brand-1);
+  color: #fff;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.createButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.savedFull {
+  margin: 0;
+  color: #b42318;
+  font-size: 0.85rem;
+}
+
 .savedTitle {
   margin: 0;
   color: #0f1c3f;

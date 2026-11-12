@@ -281,8 +281,9 @@ export async function releaseDailySend(claimKey, { deps = {} } = {}) {
  * `links` é a lista `trackedLinks` do envio (numa corrente, de todos os
  * passos juntos).
  *
- * Devolve `{}` quando está tudo dentro, ou `{ body }` com a resposta 409:
- * é preciso eliminar links para criar novos.
+ * Devolve `{ added }` quando está tudo dentro (quantos links eram novos;
+ * `{}` se não havia links), ou `{ body }` com a resposta 409: é preciso
+ * eliminar links para criar novos.
  */
 export async function saveTrackedLinksWithinPlan(
   orgId,
@@ -308,7 +309,7 @@ export async function saveTrackedLinksWithinPlan(
   const save = deps.saveTrackedLinks || saveTrackedLinks;
   const result = await save(orgId, list, limits.limits.trackedLinks);
 
-  if (result.ok) return {};
+  if (result.ok) return { added: result.added };
 
   return {
     body: {

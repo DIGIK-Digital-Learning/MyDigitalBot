@@ -1026,10 +1026,6 @@ async function handleUserInteraction(activity) {
 
   await assertAssistantMatchesOrganization(assistant, org.id);
 
-  if (!assistant.model) {
-    throw new Error(`Assistant ${assistant.id} has no model configured`);
-  }
-
   /*
    * =========================================================
    * DB THREAD

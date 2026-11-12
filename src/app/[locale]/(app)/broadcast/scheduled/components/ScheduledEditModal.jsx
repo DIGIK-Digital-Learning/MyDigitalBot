@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { Users, X } from "lucide-react";
 
 import styles from "../scheduled.module.css";
 import PillSelect from "@/app/components/PillSelect/PillSelect";
+import InfoHint from "../../components/InfoHint";
+import { scheduleTimeSlots } from "../../lib/helpers";
 import RecipientPicker from "./RecipientPicker";
 import QuestionFields from "./QuestionFields";
 import {
@@ -96,6 +98,25 @@ function buildCandidate(orgUser, channel) {
   };
 }
 
+/* As horas da lista do Enviar mensagem: 08:00 a 20:00, de 15 em 15 minutos. */
+const TIME_SLOTS = scheduleTimeSlots();
+
+/*
+ * As horas a mostrar. Uma agendada antiga pode ter uma hora fora da lista
+ * (ex.: 21:30 ou 12:07): fica na lista para não mudar sozinha ao abrir.
+ */
+export function editTimeSlots(currentSlot) {
+  return TIME_SLOTS.includes(currentSlot)
+    ? TIME_SLOTS
+    : [...TIME_SLOTS, currentSlot].sort();
+}
+
+/* Num dia de hoje, as horas que já passaram não se podem escolher. */
+export function isPastSlot(date, slot, now = new Date()) {
+  if (!date) return false;
+  return new Date(`${date}T${slot}:00`).getTime() <= now.getTime();
+}
+
 function buildEntry(recipient, candidates, channel, unknownLabel) {
   const found = findCandidateForRecipient(recipient, candidates, channel);
 
@@ -119,6 +140,7 @@ export default function ScheduledEditModal({
   saving,
 }) {
   const [recipientPickerOpen, setRecipientPickerOpen] = useState(false);
+  const timeSelectId = useId();
 
   /* Mensagem para grupos do Teams (#166): mostra os grupos, sem editar. */
   const groupItems = getScheduledGroups(item);
@@ -205,6 +227,10 @@ export default function ScheduledEditModal({
 
     return [...entries.values()];
   }, [editForm.recipients, recipientCandidates, editForm.channel, translation]);
+
+  const currentSlot = `${String(editForm.hour).padStart(2, "0")}:${String(
+    editForm.minute,
+  ).padStart(2, "0")}`;
 
   function removeRecipient(key) {
     setEditForm((prev) => ({
@@ -474,13 +500,21 @@ export default function ScheduledEditModal({
               <span>{translation("EditModal.date")}</span>
               <input
                 type="date"
+                min={toDateInputValue(new Date())}
                 value={editForm.date}
-                onChange={(event) =>
-                  setEditForm((prev) => ({
-                    ...prev,
-                    date: event.target.value,
-                  }))
-                }
+                onChange={(event) => {
+                  const date = event.target.value;
+                  setEditForm((prev) => {
+                    /* Hoje com uma hora que já passou: a primeira que ainda dá. */
+                    const slot = `${prev.hour}:${prev.minute}`;
+                    const next = isPastSlot(date, slot)
+                      ? TIME_SLOTS.find((s) => !isPastSlot(date, s))
+                      : null;
+                    if (!next) return { ...prev, date };
+                    const [hour, minute] = next.split(":");
+                    return { ...prev, date, hour, minute };
+                  });
+                }}
                 className={styles.input}
               />
             </label>
@@ -496,40 +530,39 @@ export default function ScheduledEditModal({
             </label>
           </div>
 
+          {/*
+            A hora escolhe-se na mesma lista do Enviar mensagem (#235), em
+            vez de hora e minuto escritos à mão.
+          */}
           <div className={styles.timeRow}>
-            <label className={styles.field}>
-              <span>{translation("EditModal.hour")}</span>
-              <input
-                type="number"
-                min="0"
-                max="23"
-                value={editForm.hour}
-                onChange={(event) =>
-                  setEditForm((prev) => ({
-                    ...prev,
-                    hour: event.target.value,
-                  }))
-                }
-                className={styles.input}
-              />
-            </label>
+            <div className={styles.field}>
+              <div className={styles.timeLabelRow}>
+                <label htmlFor={timeSelectId}>
+                  {translation("EditModal.hour")}
+                </label>
+                <InfoHint text={translation("EditModal.chooseTime")} />
+              </div>
 
-            <label className={styles.field}>
-              <span>{translation("EditModal.minute")}</span>
-              <input
-                type="number"
-                min="0"
-                max="59"
-                value={editForm.minute}
-                onChange={(event) =>
-                  setEditForm((prev) => ({
-                    ...prev,
-                    minute: event.target.value,
-                  }))
-                }
-                className={styles.input}
-              />
-            </label>
+              <select
+                id={timeSelectId}
+                value={currentSlot}
+                onChange={(event) => {
+                  const [hour, minute] = event.target.value.split(":");
+                  setEditForm((prev) => ({ ...prev, hour, minute }));
+                }}
+                className={styles.nativeSelect}
+              >
+                {editTimeSlots(currentSlot).map((slot) => (
+                  <option
+                    key={slot}
+                    value={slot}
+                    disabled={isPastSlot(editForm.date, slot)}
+                  >
+                    {slot}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className={styles.modalFooter}>

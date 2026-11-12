@@ -3,6 +3,7 @@ vi.mock("@/lib/openai/client", () => ({ openai: {} }));
 vi.mock("@/lib/services/openaiResponses.service", () => ({
   resolveAssistantVectorStore: vi.fn(),
 }));
+import { AI_MODELS } from "@/lib/openai/models";
 import { evaluateOpenQuestion } from "@/lib/services/questions/evaluateOpenQuestion";
 import { appendQuestionContext } from "@/lib/services/questions/appendQuestionContext";
 
@@ -35,7 +36,10 @@ describe("avaliação isolada", () => {
     const args = setup();
     expect(await evaluateOpenQuestion(args)).toEqual(evaluation);
     const [request, options] = args.deps.openai.responses.create.mock.calls[0];
-    expect(request.model).toBe("gpt-5.6");
+    // #250: o modelo da app, com respostas rápidas e sem temperatura.
+    expect(request.model).toBe(AI_MODELS.text);
+    expect(request.reasoning).toEqual({ effort: "none" });
+    expect(request).not.toHaveProperty("temperature");
     expect(request.instructions).toContain("Sê breve.");
     expect(request.conversation).toBeUndefined();
     expect(request.tools).toEqual([

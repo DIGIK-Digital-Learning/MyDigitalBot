@@ -2132,7 +2132,7 @@
       "date": "Data",
       "timezone": "Fuso horário",
       "hour": "Hora",
-      "minute": "Minuto",
+      "chooseTime": "Só é possível agendar entre as 08:00 e as 20:00, de 15 em 15 minutos.",
       "cancel": "Cancelar",
       "save": "Guardar alterações",
       "saving": "A guardar...",
@@ -2294,7 +2294,7 @@
     "saved": {
       "title": "Links criados",
       "description": "Os links que contam para o teu plano. Eliminar um link não apaga as estatísticas dos envios em que foi usado.",
-      "empty": "Ainda não tens links criados. Os links entram aqui quando os usas numa mensagem."
+      "empty": "Ainda não tens links criados. Cria um aqui ou usa um numa mensagem."
     },
     "showDeleted": "Mostrar eliminados",
     "deleted": "Eliminado",
@@ -2306,6 +2306,24 @@
     "sent": {
       "title": "Links enviados",
       "description": "Um grupo por link, com os totais de todos os envios. Abre um grupo para veres cada envio. Os links eliminados aparecem noutra cor."
+    },
+    "create": {
+      "button": "Criar link",
+      "title": "Criar link",
+      "description": "O link fica nesta lista e pronto a usar no Enviar mensagem. Só conta como enviado quando for numa mensagem.",
+      "labelField": "Nome",
+      "labelPlaceholder": "Ex.: Calendário de formações",
+      "urlField": "Destino",
+      "urlPlaceholder": "https://",
+      "urlHelp": "O endereço da página, a começar por http:// ou https://",
+      "save": "Criar link",
+      "saving": "A criar...",
+      "invalidUrl": "O destino tem de começar por http:// ou https://",
+      "full": "Chegaste aos {limit} links do teu plano. Elimina um link desta lista para poderes criar um novo.",
+      "existsTitle": "Esse link já existe",
+      "existsMessage": "Já tinhas um link com este nome e destino. Continua na lista, pronto a usar.",
+      "failedTitle": "Não foi possível criar o link",
+      "failedMessage": "Tenta novamente daqui a pouco."
     }
   },
   "Questions": {
@@ -2523,7 +2541,10 @@
       "saving": "A guardar...",
       "cancel": "Cancelar",
       "edit": "Editar",
-      "delete": "Eliminar"
+      "delete": "Eliminar",
+      "descriptionLabel": "Descrição",
+      "instructionsLabel": "Instruções",
+      "noInstructions": "Sem instruções."
     },
     "vector": {
       "create": "Criar coleção de ficheiros",
@@ -2559,25 +2580,9 @@
       "deleteCollection": "Não foi possível eliminar a coleção. {detail}"
     }
   },
-  "AssistantPresets": {
-    "formal": {
-      "name": "Formal",
-      "description": "Respostas previsíveis e agarradas às instruções. Para procedimentos e informação factual."
-    },
-    "normal": {
-      "name": "Normal",
-      "description": "Equilíbrio entre consistência e naturalidade. Serve para a maioria dos casos."
-    },
-    "creative": {
-      "name": "Criativo",
-      "description": "Respostas mais variadas e com mais iniciativa. Para conversa e sugestões."
-    }
-  },
   "CreateAssistant": {
     "createFailed": "Não foi possível criar o assistente",
     "title": "Criar novo Assistente",
-    "presetLabel": "Comportamento",
-    "presetHelp": "Define quão previsível ou variado o Assistant é a responder. Podes mudar depois na edição.",
     "name": "Nome",
     "nameHelp": "Nome que vai ficar associado ao Assistant.",
     "description": "Descrição",
@@ -2590,7 +2595,7 @@
   "Chatbox": {
     "try": "Experimentar Assistente",
     "threadId": "Thread ID:",
-    "placeholder": "Escreva a sua mensagem...",
+    "placeholder": "Escreve uma mensagem…",
     "send": "Enviar",
     "errorReply": "Erro na resposta",
     "errorApi": "Erro ao comunicar com a API.",
@@ -2619,7 +2624,13 @@
         "title": "Erro de ligação",
         "message": "Verifica a ligação e tenta novamente."
       }
-    }
+    },
+    "talkingTo": "A falar com {name}",
+    "empty": "Escreve uma mensagem para ver como este assistente responde.",
+    "examplesLabel": "Ou experimenta:",
+    "example1": "Olá! Em que me podes ajudar?",
+    "example2": "Explica-me de forma simples o que fazes.",
+    "example3": "Dá-me um exemplo de pergunta que te posso fazer."
   },
   "Reports": {
     "eyebrow": "Métricas e relatórios",
@@ -3263,6 +3274,7 @@
       "message_template_sent": "Template enviado a um colaborador",
       "template_created": "Template WhatsApp criado",
       "media_deleted": "Ficheiro de multimédia eliminado",
+      "tracked_link_created": "Link rastreado criado",
       "tracked_link_deleted": "Link rastreado eliminado",
       "organization_created": "Organização criada",
       "organization_settings_updated": "Definições da organização alteradas",

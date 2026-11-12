@@ -1,12 +1,10 @@
 import { openai } from "@/lib/openai/client";
+import { textModelRequest } from "@/lib/openai/models";
 import { stripOpenAICitations } from "@/lib/services/removeOAiCitations";
 
 export const SUGGESTION_KINDS = ["message", "quiz", "survey", "open"];
 export const SUGGESTION_PROMPT_MAX_LENGTH = 600;
 export const SUGGESTION_TEXT_MAX_LENGTH = 1024;
-
-/* O modelo por omissão dos assistentes; a sugestão não depende de nenhum. */
-const SUGGESTION_MODEL = "gpt-5.6-luna";
 
 const TOKEN_RE = /\{\{\s*([\w.-]+)\s*\}\}/g;
 const BASE_TOKENS = ["nome", "empresa"];
@@ -66,9 +64,9 @@ export async function suggestMessageText({
 
   const response = await client.responses.create(
     {
-      model: SUGGESTION_MODEL,
+      /* O modelo dos assistentes (#250); a sugestão não depende de nenhum. */
+      ...textModelRequest(),
       store: false,
-      reasoning: { effort: "none" },
       instructions: [
         "Escreves o texto de uma mensagem de WhatsApp que uma organização envia aos seus colaboradores.",
         KIND_GUIDANCE[kind] || KIND_GUIDANCE.message,

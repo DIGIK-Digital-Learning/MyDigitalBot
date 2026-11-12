@@ -23,6 +23,7 @@ import useSeenSince from "@/app/hooks/useSeenSince";
 import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
 
 import useDeleteTrackedLink from "../hooks/useDeleteTrackedLink";
+import CreateLinkModal from "./components/CreateLinkModal";
 import SavedLinksSection from "./components/SavedLinksSection";
 import styles from "./tracked-links.module.css";
 
@@ -70,6 +71,7 @@ export default function TrackedLinksPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const { limits, usage, reload: reloadPlanUsage } = usePlanLimits(org?.id);
   const isNew = useSeenSince("seen.trackedLinks", org?.id);
@@ -192,6 +194,7 @@ export default function TrackedLinksPage() {
 
   const createdCount = usage?.trackedLinks ?? createdLinks.length;
   const createdLimit = limits?.trackedLinks;
+  const createdFull = createdLimit != null && createdCount >= createdLimit;
 
   return (
     <div className={styles.screen}>
@@ -207,9 +210,7 @@ export default function TrackedLinksPage() {
             </div>
             <div
               className={`${styles.statValue} ${
-                createdLimit != null && createdCount >= createdLimit
-                  ? styles.statFull
-                  : ""
+                createdFull ? styles.statFull : ""
               }`}
             >
               {createdCount}
@@ -235,8 +236,18 @@ export default function TrackedLinksPage() {
           loading={loading}
           isNew={isNew}
           onDelete={deleteLink}
+          onCreate={() => setCreateOpen(true)}
+          full={createdFull}
+          limit={createdLimit}
         />
       ) : null}
+
+      <CreateLinkModal
+        orgId={org?.id}
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={reload}
+      />
 
       <section className={styles.sentSection}>
         <div>
