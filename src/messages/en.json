@@ -1464,8 +1464,7 @@
     "removeThumbnail": "Remove thumbnail",
     "remove": "Remove",
     "files": "Files",
-    "selectSendTime": "Select the date and time to send",
-    "chooseTime": "Choose a time between 08:00 and 20:00",
+    "chooseTime": "You can only schedule between 08:00 and 20:00, in 15-minute steps.",
     "trackedLinks": "Tracked Links",
     "addLink": "Add Link",
     "linkButtonTag": "Button",
@@ -1758,8 +1757,8 @@
       "broadcastChain": {
         "title": "Message Sequence",
         "chainHelp": "Creates a message sequence: when the recipient sees a message, they receive the next one right away or some time later.",
-        "createChain": "Create Sequence",
-        "exitChain": "Exit Sequence",
+        "createChain": "Create sequence",
+        "exitChain": "Exit sequence",
         "chainOff": "Message sequences are turned off in Automations. Turn the option on before sending.",
         "chainMessage": "Message",
         "chainLengthMax": "Maximum of 10 Messages",
@@ -1877,8 +1876,8 @@
     "broadcastChain": {
       "title": "Message Sequence",
       "chainHelp": "Creates a message sequence: when the recipient sees a message, they receive the next one right away or some time later.",
-      "createChain": "Create Sequence",
-      "exitChain": "Exit Sequence",
+      "createChain": "Create sequence",
+      "exitChain": "Exit sequence",
       "chainOff": "Message sequences are turned off in Automations. Turn the option on before sending.",
       "chainMessage": "Message",
       "chainLengthMax": "Maximum of 10 Messages",
@@ -1930,10 +1929,6 @@
         "title": "Invalid tracked links",
         "message": "Please complete all tracked links and avoid duplicate keys."
       },
-      "invalidTime": {
-        "title": "Invalid time",
-        "message": "Please enter a valid time between 08:00 and 20:00."
-      },
       "chooseDateTime": {
         "title": "Choose date and time",
         "message": "Choose a date and time."
@@ -1941,12 +1936,6 @@
       "pastDate": {
         "title": "Invalid schedule date",
         "message": "The scheduled date must be in the future."
-      },
-      "time": {
-        "bothParts": "Fill in both hour and minute.",
-        "numbersOnly": "Use only numbers.",
-        "invalid": "Enter a valid time.",
-        "range": "Choose a time between 08:00 and 20:00."
       },
       "chainSendFailed": "Failed to send the message sequence.",
       "chainScheduleFailed": "Failed to schedule the message sequence.",
@@ -3775,7 +3764,9 @@
   "WhatsAppPhone": {
     "available": "Available",
     "online": "online",
-    "contact": "Contact"
+    "contact": "Contact",
+    "teamsChat": "Chat",
+    "teamsShared": "Shared"
   },
   "Redirect": {
     "unavailable": "Link unavailable",
