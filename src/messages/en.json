@@ -2294,7 +2294,7 @@
     "saved": {
       "title": "Links guardados",
       "description": "The links that count toward your plan. Deleting a link doesn't delete the stats for the sends it was used in.",
-      "empty": "You haven't created any links yet. Links appear here when you use them in a message."
+      "empty": "You don't have any links yet. Create one here or use one in a message."
     },
     "showDeleted": "Show deleted",
     "deleted": "Deleted",
@@ -2306,6 +2306,24 @@
     "sent": {
       "title": "Links sent",
       "description": "One group per link, with the totals of all sends. Open a group to see each send. Deleted links appear in a different colour."
+    },
+    "create": {
+      "button": "Create link",
+      "title": "Create link",
+      "description": "The link goes into this list, ready to use in Send message. It only counts as sent once it goes out in a message.",
+      "labelField": "Name",
+      "labelPlaceholder": "E.g.: Training calendar",
+      "urlField": "Destination",
+      "urlPlaceholder": "https://",
+      "urlHelp": "The page address, starting with http:// or https://",
+      "save": "Create link",
+      "saving": "Creating...",
+      "invalidUrl": "The destination must start with http:// or https://",
+      "full": "You've reached the {limit} links in your plan. Delete a link from this list to create a new one.",
+      "existsTitle": "That link already exists",
+      "existsMessage": "You already had a link with this name and destination. It is still in the list, ready to use.",
+      "failedTitle": "Couldn't create the link",
+      "failedMessage": "Please try again in a moment."
     }
   },
   "Questions": {
@@ -3256,6 +3274,7 @@
       "message_template_sent": "Template sent to a user",
       "template_created": "WhatsApp template created",
       "media_deleted": "Media file deleted",
+      "tracked_link_created": "Tracked link created",
       "tracked_link_deleted": "Tracked link deleted",
       "organization_created": "Organization created",
       "organization_settings_updated": "Organization settings changed",
