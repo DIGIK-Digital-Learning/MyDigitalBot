@@ -79,6 +79,9 @@ import { handleQuestionReply } from "@/lib/services/questions/handleQuestionRepl
 import { claimCollaboratorWeeklyMessage } from "@/lib/services/plans/collaboratorWeeklyLimit";
 import { checkCollaboratorPlanActive } from "@/lib/services/plans/planExpiredNotice";
 import { handleAssistantSwitch } from "@/lib/services/assistants/handleAssistantSwitch";
+import { botLocale, detectMessageLanguage } from "@/lib/bot/botLanguage";
+import { botText } from "@/lib/bot/botTexts";
+import { withConversationLanguage } from "@/lib/services/bot/conversationLanguage";
 
 import { assertAssistantBelongsToOrg } from "@/lib/auth/guards";
 
@@ -920,6 +923,17 @@ async function handleEvent(rawJSON) {
   }
 
   /*
+   * #241: a língua em que o bot responde. Começa na da organização e
+   * passa à do colaborador quando ele escreve claramente noutra. Só
+   * conta o que escreveu à mão, não o texto de um botão em que tocou.
+   */
+  const typedText = isInboundText && !inboundReply.isQuickReply ? text : "";
+
+  if (user) {
+    user = await withConversationLanguage(user, typedText);
+  }
+
+  /*
    * Unregistered user.
    */
   if (!user) {
@@ -936,7 +950,11 @@ async function handleEvent(rawJSON) {
         type: "text",
 
         text: {
-          text: "Este número não se encontra registado, por favor fale com os administradores.",
+          text: botText(
+            detectMessageLanguage(typedText) ||
+              botLocale({ organization: channelOrganization }),
+            "whatsappNotRegistered",
+          ),
         },
       },
     });
@@ -1149,6 +1167,8 @@ async function handleEvent(rawJSON) {
    */
   const switchResult = await handleAssistantSwitch({
     user,
+
+    organization,
 
     payload: evt.payload,
 
@@ -1604,6 +1624,8 @@ async function handleEvent(rawJSON) {
     conversationId,
 
     message: text,
+
+    locale: botLocale({ organization, user }),
   });
 
   const aiText = String(aiResponse?.aiResponse || "").trim();

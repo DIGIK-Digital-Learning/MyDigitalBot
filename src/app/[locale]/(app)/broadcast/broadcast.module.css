@@ -141,22 +141,6 @@
   margin-top: 14px;
 }
 
-.messageToolsLeft {
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-  min-width: 0;
-}
-
-.messageToolsActions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-left: auto;
-}
-
 .secondaryActionBtn {
   display: inline-flex;
   align-items: center;
@@ -226,49 +210,13 @@
   color: #c00;
 }
 
+/* #235: o calendário e, logo por baixo, a lista das horas, da mesma largura. */
 .scheduleLayout {
   margin-top: 12px;
   display: grid;
-  grid-template-columns: 280px minmax(0, 320px);
-  gap: 20px;
+  grid-template-columns: minmax(0, 260px);
+  gap: 12px;
   align-items: start;
-}
-
-.scheduleCalendarCol {
-  min-width: 0;
-}
-
-.scheduleTimeCol {
-  min-width: 0;
-}
-
-.scheduleTimeCard {
-  border: 1px solid var(--ui-border);
-  border-radius: 14px;
-  background: #f8fafc;
-  padding: 14px;
-  display: grid;
-  gap: 14px;
-}
-
-.scheduleSummaryLabel {
-  font-size: 12px;
-  font-weight: 700;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.scheduleSummaryValue {
-  font-size: 20px;
-  font-weight: 700;
-  color: #0f172a;
-  line-height: 1.2;
-}
-
-.scheduleMiniHint {
-  font-size: 12px;
-  color: #64748b;
 }
 
 .calendarWrap {
@@ -278,52 +226,70 @@
   max-width: 100%;
 }
 
-.timeInputWrap {
-  margin-top: 6px;
-  display: grid;
-}
-
 .timeInputGroup {
   display: grid;
   gap: 6px;
 }
 
-.timeInputsRow {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 8px;
+.timeLabelRow {
+  display: flex;
   align-items: center;
+  gap: 6px;
 }
 
-.timeInputsCompact {
-  display: inline-grid;
-  grid-template-columns: 72px auto 72px;
-  gap: 8px;
-  align-items: center;
-  width: max-content;
-}
-
-.timeInputSmall {
-  width: 72px;
+/* #235: a hora escolhe-se numa lista, de 15 em 15 minutos. */
+.timeSelect {
+  width: 100%;
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid var(--ui-border);
   background: #fff;
-  text-align: center;
-  font-size: 18px;
+  font: inherit;
+  font-size: 16px;
   font-weight: 700;
+  color: #0f172a;
+  cursor: pointer;
 }
 
-.timeInputSmall:focus {
+.timeSelect:focus {
   outline: none;
   border-color: #1f6fff;
   box-shadow: 0 0 0 3px rgba(31, 111, 255, 0.12);
 }
 
-.timeSeparator {
-  font-weight: 700;
-  color: #666;
-  text-align: center;
+/* Ícone «i» com explicação, igual ao da aba Media. */
+.infoHint {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ui-muted, #64748b);
+  cursor: help;
+  border-radius: 50%;
+}
+
+.infoHint:hover,
+.infoHint:focus-visible {
+  color: #0f1c3f;
+  outline: none;
+}
+
+.infoTooltip {
+  position: fixed;
+  z-index: 50;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #0f1c3f;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: normal;
+  pointer-events: none;
+  box-shadow: 0 6px 20px rgba(15, 28, 63, 0.18);
 }
 
 .calendarWrap :global(.react-datepicker) {
@@ -838,6 +804,13 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+/* #235: o tempo de espera do passo, com as outras opções do passo. */
+.chainDelayRow {
+  padding-top: 10px;
+  border-top: 1px dashed var(--ui-border, #dfe7f1);
 }
 
 .chainStepTab,
@@ -882,24 +855,6 @@
 }
 
 .chainStepAdd:disabled,
-.chainActionsRow button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.chainActionsRow {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.chainActionsRow .kbdBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
 .chainCounter {
   margin-left: auto;
   color: #64748b;
@@ -1024,21 +979,6 @@
   }
 }
 
-@media (max-width: 900px) {
-  .scheduleLayout {
-    grid-template-columns: 1fr;
-  }
-
-  .timeInputsCompact {
-    width: 100%;
-    grid-template-columns: 1fr auto 1fr;
-  }
-
-  .timeInputSmall {
-    width: 100%;
-  }
-}
-
 @media (max-width: 720px) {
   .modalBackdrop {
     padding: 12px;
@@ -1071,9 +1011,7 @@
     align-items: stretch;
   }
 
-  .messageToolsLeft,
-  .messageToolsActions {
-    width: 100%;
+  .messageToolsRow.areaTools {
     justify-content: flex-start;
   }
 
@@ -1213,6 +1151,110 @@
 }
 
 /* ---------- Compor dentro do telemóvel ---------- */
+
+/*
+ * #235: telemóvel, ferramentas e, ao agendar, o calendário. O painel decide
+ * pela sua própria largura (container query), não pela do ecrã.
+ * Estreito: tudo numa coluna, com o calendário por baixo dos botões de envio.
+ * Com 620px ou mais: o calendário sobe para a direita do telemóvel.
+ */
+.composerBody {
+  container-type: inline-size;
+}
+
+.composerGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "phone"
+    "links"
+    "warning"
+    "tools"
+    "schedule";
+  align-items: start;
+}
+
+.areaPhone {
+  grid-area: phone;
+  min-width: 0;
+}
+
+.areaWarning {
+  grid-area: warning;
+}
+
+.areaTools {
+  grid-area: tools;
+  justify-content: flex-end;
+}
+
+.areaSchedule {
+  grid-area: schedule;
+  min-width: 0;
+  margin-top: 16px;
+}
+
+.areaLinks {
+  grid-area: links;
+}
+
+@container (min-width: 620px) {
+  /*
+   * Telemóvel e calendário juntos, ao centro, com a mesma altura: o
+   * telemóvel estica até à altura do calendário (a conversa é que cresce).
+   * Sem o resumo da data, o calendário e a hora ficam da altura do
+   * telemóvel: o telemóvel mantém os 480px de quando não há calendário e o
+   * cartão do calendário estica até ao fim do telemóvel.
+   */
+  .composerGridScheduling {
+    grid-template-columns: minmax(0, 480px) 290px;
+    grid-template-areas:
+      "phone schedule"
+      "links links"
+      "warning warning"
+      "tools tools";
+    justify-content: center;
+    align-items: stretch;
+    column-gap: 24px;
+  }
+
+  .composerGridScheduling .areaPhone {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .composerGridScheduling .areaPhone .phoneWrap {
+    flex: 1 1 auto;
+  }
+
+  .composerGridScheduling .areaSchedule {
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .composerGridScheduling .areaSchedule > .toolPanelCard {
+    flex: 1 1 auto;
+  }
+
+  /* Na coluna do lado, o calendário e a hora ficam um por baixo do outro. */
+  .composerGridScheduling .scheduleLayout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .composerGridScheduling .scheduleHint {
+    margin-top: 0;
+  }
+
+  .composerGridScheduling .toolPanelCard {
+    padding: 14px;
+  }
+
+  .composerGridScheduling .calendarWrap :global(.react-datepicker) {
+    width: 100%;
+  }
+}
 
 .composerHead {
   display: flex;
@@ -1492,6 +1534,28 @@
 .formatBtn:focus-visible {
   background: rgba(0, 0, 0, 0.06);
   color: #111b21;
+}
+
+/* #235: o 🔗 dos links rastreados, com o número de links. */
+.linksBtn {
+  position: relative;
+}
+
+.linksBtnBadge {
+  position: absolute;
+  top: -3px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--chip-text, #2563eb);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 /* Botão ligado: a formatação está onde está o cursor. */

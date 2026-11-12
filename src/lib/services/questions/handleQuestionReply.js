@@ -1,5 +1,6 @@
+import { botLocale } from "@/lib/bot/botLanguage";
+import { botText } from "@/lib/bot/botTexts";
 import {
-  EXPIRED_QUESTION_TEXT,
   extractInboundReply,
   isQuestionExpired,
   quizFeedbackText,
@@ -151,6 +152,9 @@ export async function handleQuestionReply({
   const personalize = (text) =>
     interpolateBroadcastMessage(text, { user, org: organization });
 
+  /* Os textos do bot saem na língua do colaborador (#241). */
+  const locale = botLocale({ organization, user });
+
   const found = await findQuestionForReply({
     user,
     payload,
@@ -210,7 +214,7 @@ export async function handleQuestionReply({
   }
 
   if (isQuestionExpired(question, Date.now(), message?.created_at)) {
-    await reply_(EXPIRED_QUESTION_TEXT);
+    await reply_(botText(locale, "questionExpired"));
 
     return {
       handled: true,
@@ -262,6 +266,7 @@ export async function handleQuestionReply({
           assistant: thread.assistant,
           question: { ...question, body: message.content || question.body },
           answerText: reply.text,
+          locale,
         });
       } catch (error) {
         reviewNeeded = true;
@@ -289,7 +294,7 @@ export async function handleQuestionReply({
     if (evaluation) {
       await sendOpenReply(evaluation.feedback);
     }
-    const expected = `Resposta esperada:\n${question.expected_answer}`;
+    const expected = `${botText(locale, "expectedAnswer")}\n${question.expected_answer}`;
     await sendOpenReply(expected);
 
     try {
@@ -325,8 +330,8 @@ export async function handleQuestionReply({
 
   const feedback = personalize(
     isSurvey
-      ? surveyThanksText(question)
-      : quizFeedbackText(question, isCorrect),
+      ? surveyThanksText(question, locale)
+      : quizFeedbackText(question, isCorrect, locale),
   );
 
   await reply_(feedback);

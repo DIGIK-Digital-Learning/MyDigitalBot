@@ -16,9 +16,61 @@ export function asList(data, preferredKey = "items") {
   return [];
 }
 
-export function buildInitialScheduledDate() {
-  const d = new Date();
-  d.setMinutes(Math.ceil(d.getMinutes() / 5) * 5, 0, 0);
+/* Horário em que se pode agendar (o mesmo que a validação da hora aceita). */
+export const SCHEDULE_FIRST_HOUR = 8;
+export const SCHEDULE_LAST_HOUR = 20;
+/* A hora escolhe-se numa lista, de 15 em 15 minutos (#235). */
+export const SCHEDULE_STEP_MINUTES = 15;
+
+const pad2 = (value) => String(value).padStart(2, "0");
+
+/* "08:00", "08:15", … "20:00": as horas que a lista oferece. */
+export function scheduleTimeSlots() {
+  const slots = [];
+  for (
+    let minutes = SCHEDULE_FIRST_HOUR * 60;
+    minutes <= SCHEDULE_LAST_HOUR * 60;
+    minutes += SCHEDULE_STEP_MINUTES
+  ) {
+    slots.push(`${pad2(Math.floor(minutes / 60))}:${pad2(minutes % 60)}`);
+  }
+  return slots;
+}
+
+/* "HH:MM" de uma data, como nas opções da lista. */
+export function timeSlotOf(date) {
+  return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
+}
+
+/* A mesma data com a hora "HH:MM". */
+export function withTimeSlot(date, slot) {
+  const [hours, minutes] = String(slot).split(":").map(Number);
+  const next = new Date(date);
+  next.setHours(hours, minutes, 0, 0);
+  return next;
+}
+
+/*
+ * Hora proposta ao agendar: pelo menos 5 minutos à frente, arredondada aos 15
+ * (a primeira opção da lista que ainda serve) e dentro do horário. Antes das
+ * 08:00 propõe as 08:00 desse dia; depois das 20:00, as 08:00 do dia seguinte.
+ */
+export function buildInitialScheduledDate(now = new Date()) {
+  const d = new Date(now.getTime() + 5 * 60 * 1000);
+  d.setMinutes(
+    Math.ceil(d.getMinutes() / SCHEDULE_STEP_MINUTES) * SCHEDULE_STEP_MINUTES,
+    0,
+    0,
+  );
+
+  const minutes = d.getHours() * 60 + d.getMinutes();
+  if (minutes < SCHEDULE_FIRST_HOUR * 60) {
+    d.setHours(SCHEDULE_FIRST_HOUR, 0, 0, 0);
+  } else if (minutes > SCHEDULE_LAST_HOUR * 60) {
+    d.setDate(d.getDate() + 1);
+    d.setHours(SCHEDULE_FIRST_HOUR, 0, 0, 0);
+  }
+
   return d;
 }
 

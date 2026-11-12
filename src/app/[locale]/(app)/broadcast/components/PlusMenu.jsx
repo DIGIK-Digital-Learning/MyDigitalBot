@@ -247,9 +247,34 @@ export default function PlusMenu({
   );
 }
 
+/*
+ * #235: os links rastreados fazem parte da mensagem, por isso o botão está na
+ * barra da mensagem (antes estava junto de «Enviar agora | Agendar»). Mostra
+ * quantos links há e abre o painel logo por baixo do telemóvel.
+ */
+function TrackedLinksButton({ active, count, onToggle, label }) {
+  return (
+    <button
+      type="button"
+      className={`${styles.formatBtn} ${styles.linksBtn}`}
+      aria-label={label}
+      aria-pressed={Boolean(active)}
+      title={label}
+      onClick={onToggle}
+    >
+      <Link2 size={17} aria-hidden="true" />
+      {count > 0 ? (
+        <span className={styles.linksBtnBadge} data-testid="links-count">
+          {count}
+        </span>
+      ) : null}
+    </button>
+  );
+}
+
 /**
- * Barra inferior do telemóvel com o "+", os emojis e os botões de
- * formatação.
+ * Barra inferior do telemóvel com o "+", os emojis, os links rastreados e os
+ * botões de formatação.
  */
 export function PlusMenuBar({ tools, translation }) {
   if (!tools) return null;
@@ -279,6 +304,12 @@ export function PlusMenuBar({ tools, translation }) {
         filesFullHint={tools.messageLimits?.filesFullHint}
       />
       <EmojiButton editorRef={tools.editorRef} translation={translation} />
+      {tools.linksToggle ? (
+        <TrackedLinksButton
+          {...tools.linksToggle}
+          label={translation("Broadcast.trackedLinks")}
+        />
+      ) : null}
       <FormatToolbar editorRef={tools.editorRef} translation={translation} />
     </>
   );

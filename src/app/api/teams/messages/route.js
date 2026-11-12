@@ -27,6 +27,13 @@ import {
 import { handleQuestionReply } from "@/lib/services/questions/handleQuestionReply";
 import { claimCollaboratorWeeklyMessage } from "@/lib/services/plans/collaboratorWeeklyLimit";
 import { checkCollaboratorPlanActive } from "@/lib/services/plans/planExpiredNotice";
+import {
+  botLocale,
+  detectMessageLanguage,
+  localeFromTeams,
+} from "@/lib/bot/botLanguage";
+import { botText } from "@/lib/bot/botTexts";
+import { withConversationLanguage } from "@/lib/services/bot/conversationLanguage";
 
 import {
   linkTeamsUserByEmail,
@@ -145,8 +152,6 @@ async function assertAssistantMatchesOrganization(assistant, organizationId) {
 
 
 
-const NOT_REGISTERED_TEXT =
-  "Ainda não estás registado na MyDigitalBot.<br>Pede ao administrador da tua empresa para te adicionar com o email da tua conta Microsoft. Assim que o fizer, ficas ligado automaticamente.";
 
 /*
  * Someone the bot does not know yet (#153): link them
@@ -852,9 +857,10 @@ async function handleUserInteraction(activity) {
   const org = await getOrganizationByTeamsTenantId(tenantId);
 
   if (!org) {
+    /* Sem organização, a única pista da língua é a do Teams (#241). */
     await sendReply(
       activity,
-      "Parece que o teu tenant não está registado e por causa disso não consegues utilizar este serviço.<br>Por favor vai a MyDigitalBot.com e regista a tua organização.",
+      botText(localeFromTeams(activity?.locale), "teamsTenantNotRegistered"),
     );
 
     return;
@@ -879,17 +885,34 @@ async function handleUserInteraction(activity) {
    * Resolve the user ONLY inside the tenant's
    * organization.
    */
-  const user =
+  let user =
     (await getTeamsUserForOrganization({
       aadObjectId,
       organizationId: org.id,
     })) || (await resolveUnknownTeamsUser(activity, org));
 
+  /*
+   * #241: a língua em que o bot responde. Começa na da organização e
+   * passa à do colaborador quando ele escreve claramente noutra. Um
+   * toque num cartão (activity.value) não conta.
+   */
+  const typedText = activity?.value ? "" : message;
+
   if (!user) {
-    await sendReply(activity, NOT_REGISTERED_TEXT);
+    await sendReply(
+      activity,
+      botText(
+        detectMessageLanguage(typedText) || botLocale({ organization: org }),
+        "teamsNotRegistered",
+      ),
+    );
 
     return;
   }
+
+  user = await withConversationLanguage(user, typedText);
+
+  const locale = botLocale({ organization: org, user });
 
   /*
    * A Demo da empresa terminou (#209): o assistente
@@ -923,16 +946,15 @@ async function handleUserInteraction(activity) {
 
       isCommand: cmd.isCommand,
 
+      locale,
+
       send: ({ text, attachments }) =>
         sendReply(activity, text ?? "", { attachments }),
     });
 
     if (switchResult.handled) return;
   } else if (cmd.isCommand) {
-    await sendReply(
-      activity,
-      "A troca de assistente só está disponível na conversa privada com o bot.",
-    );
+    await sendReply(activity, botText(locale, "switchPersonalOnly"));
 
     return;
   }
@@ -1227,6 +1249,8 @@ async function handleUserInteraction(activity) {
     conversationId: openAiConversationId,
 
     message,
+
+    locale,
   });
 
   const text = String(aiResponse?.aiResponse ?? "").trim();
@@ -1448,7 +1472,10 @@ async function handleUserInstallation(activity) {
   if (!org) {
     await sendReply(
       activity,
-      "Este Tenant da Microsoft Teams não está registado em MyDigitalBot. Por favor contacta o teu administrador para registar esta Organização em MyDigitalBot.com.<br>Para mais ajuda escreve --help.",
+      botText(
+        localeFromTeams(activity?.locale),
+        "teamsTenantNotRegisteredInstall",
+      ),
     );
 
     return;
@@ -1462,7 +1489,10 @@ async function handleUserInstallation(activity) {
     })) || (await resolveUnknownTeamsUser(activity, org));
 
   if (!user) {
-    await sendReply(activity, NOT_REGISTERED_TEXT);
+    await sendReply(
+      activity,
+      botText(botLocale({ organization: org }), "teamsNotRegistered"),
+    );
 
     return;
   }

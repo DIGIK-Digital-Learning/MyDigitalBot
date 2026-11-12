@@ -1464,8 +1464,7 @@
     "removeThumbnail": "Remover miniatura",
     "remove": "Remover",
     "files": "Ficheiros",
-    "selectSendTime": "Seleciona a Data e Hora para enviar",
-    "chooseTime": "Escolhe um tempo entre as 08:00 e as 20:00",
+    "chooseTime": "Só é possível agendar entre as 08:00 e as 20:00, de 15 em 15 minutos.",
     "trackedLinks": "Links Rastreados",
     "addLink": "Adicionar Link",
     "linkButtonTag": "Botão",
@@ -1758,8 +1757,8 @@
       "broadcastChain": {
         "title": "Sequência de Mensagens",
         "chainHelp": "Cria uma sequência de mensagens: quando o destinatário vê uma mensagem, recebe a seguinte logo ou algum tempo depois.",
-        "createChain": "Cria Sequência",
-        "exitChain": "Sai da Sequência",
+        "createChain": "Criar sequência",
+        "exitChain": "Sair da sequência",
         "chainOff": "As sequências de mensagens estão desligadas nas Automações. Liga a opção antes de enviar.",
         "chainMessage": "Mensagem",
         "chainLengthMax": "Máximo de 10 Mensagens",
@@ -1877,8 +1876,8 @@
     "broadcastChain": {
       "title": "Sequência de Mensagens",
       "chainHelp": "Cria uma sequência de mensagens: quando o destinatário vê uma mensagem, recebe a seguinte logo ou algum tempo depois.",
-      "createChain": "Cria Sequência",
-      "exitChain": "Sai da Sequência",
+      "createChain": "Criar sequência",
+      "exitChain": "Sair da sequência",
       "chainOff": "As sequências de mensagens estão desligadas nas Automações. Liga a opção antes de enviar.",
       "chainMessage": "Mensagem",
       "chainLengthMax": "Máximo de 10 Mensagens",
@@ -1930,10 +1929,6 @@
         "title": "Links rastreados inválidos",
         "message": "Completa todos os links rastreados e não repitas chaves."
       },
-      "invalidTime": {
-        "title": "Hora inválida",
-        "message": "Escolhe uma hora válida entre as 08:00 e as 20:00."
-      },
       "chooseDateTime": {
         "title": "Escolhe a data e a hora",
         "message": "Escolhe uma data e uma hora."
@@ -1941,12 +1936,6 @@
       "pastDate": {
         "title": "Data de agendamento inválida",
         "message": "A data agendada tem de ser no futuro."
-      },
-      "time": {
-        "bothParts": "Preenche a hora e os minutos.",
-        "numbersOnly": "Usa só números.",
-        "invalid": "Escreve uma hora válida.",
-        "range": "Escolhe uma hora entre as 08:00 e as 20:00."
       },
       "chainSendFailed": "Não foi possível enviar a sequência de mensagens.",
       "chainScheduleFailed": "Não foi possível agendar a sequência de mensagens.",
@@ -3775,7 +3764,9 @@
   "WhatsAppPhone": {
     "available": "Disponível",
     "online": "online",
-    "contact": "Contacto"
+    "contact": "Contacto",
+    "teamsChat": "Chat",
+    "teamsShared": "Partilhado"
   },
   "Redirect": {
     "unavailable": "Ligação indisponível",
