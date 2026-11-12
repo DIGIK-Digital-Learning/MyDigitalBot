@@ -2523,7 +2523,10 @@
       "saving": "Saving...",
       "cancel": "Cancel",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "descriptionLabel": "Description",
+      "instructionsLabel": "Instructions",
+      "noInstructions": "No instructions."
     },
     "vector": {
       "create": "Create file collection",
@@ -2574,7 +2577,7 @@
   "Chatbox": {
     "try": "Try Assistant",
     "threadId": "Thread ID:",
-    "placeholder": "Type your message...",
+    "placeholder": "Type a message…",
     "send": "Send",
     "errorReply": "Reply error",
     "errorApi": "Error communicating with the API.",
@@ -2603,7 +2606,13 @@
         "title": "Connection error",
         "message": "Check your connection and try again."
       }
-    }
+    },
+    "talkingTo": "Talking to {name}",
+    "empty": "Type a message to see how this assistant replies.",
+    "examplesLabel": "Or try:",
+    "example1": "Hi! How can you help me?",
+    "example2": "Explain simply what you do.",
+    "example3": "Give me an example of a question I can ask you."
   },
   "Reports": {
     "eyebrow": "Metrics and reports",

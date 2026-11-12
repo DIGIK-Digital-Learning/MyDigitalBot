@@ -566,6 +566,15 @@ export default function AssistantsHub() {
             <Plus size={16} aria-hidden />
             {translation("Assistants.createAssistant")}
           </button>
+          {/* No limite, diz porquê o botão está desativado (sem depender do rato). */}
+          {assistantsFull && (
+            <p className={styles.limitNote}>
+              {translation("Plans.limits.assistants", {
+                plan: plan?.name ?? "",
+                limit: limits.assistants,
+              })}
+            </p>
+          )}
         </div>
       </aside>
 
@@ -598,6 +607,9 @@ export default function AssistantsHub() {
                     length={String(read("name")).length}
                     limit={textLimits.name}
                   />
+                  <span className={styles.fieldLabel}>
+                    {translation("Assistants.details.descriptionLabel")}
+                  </span>
                   <input
                     className={styles.inputSub}
                     value={read("description")}
@@ -613,6 +625,9 @@ export default function AssistantsHub() {
                     length={String(read("description")).length}
                     limit={textLimits.description}
                   />
+                  <span className={styles.fieldLabel}>
+                    {translation("Assistants.details.instructionsLabel")}
+                  </span>
                   <textarea
                     className={styles.instructionsInput}
                     value={read("instructions")}
@@ -631,17 +646,26 @@ export default function AssistantsHub() {
                 </>
               ) : (
                 <>
-                  <p className={styles.subdued}>{selected.description}</p>
+                  {selected.description && (
+                    <>
+                      <span className={styles.fieldLabel}>
+                        {translation("Assistants.details.descriptionLabel")}
+                      </span>
+                      <p className={styles.subdued}>{selected.description}</p>
+                    </>
+                  )}
+                  <span className={styles.fieldLabel}>
+                    {translation("Assistants.details.instructionsLabel")}
+                  </span>
                   <div className={styles.instructionsPaper}>
-                    {selected.instructions}
+                    {selected.instructions || (
+                      <span className={styles.paperEmpty}>
+                        {translation("Assistants.details.noInstructions")}
+                      </span>
+                    )}
                   </div>
                 </>
               )}
-
-              {/*
-                O comportamento (Normal, Criativo…) escolhe-se só ao criar o
-                assistente: o painel deixou de o mostrar e de o editar.
-              */}
 
               {/* Meta + Actions */}
               <div className={styles.metaBar}>
@@ -1009,7 +1033,8 @@ export default function AssistantsHub() {
       {/* RIGHT: live chat */}
       <section className={styles.chatCol}>
         {selected && !authLoading && !orgLoading && (
-          <ChatSandbox assistant={selected} />
+          /* key: ao trocar de assistente, a conversa de teste recomeça. */
+          <ChatSandbox key={selected.id} assistant={selected} />
         )}
       </section>
 

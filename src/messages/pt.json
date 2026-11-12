@@ -2523,7 +2523,10 @@
       "saving": "A guardar...",
       "cancel": "Cancelar",
       "edit": "Editar",
-      "delete": "Eliminar"
+      "delete": "Eliminar",
+      "descriptionLabel": "Descrição",
+      "instructionsLabel": "Instruções",
+      "noInstructions": "Sem instruções."
     },
     "vector": {
       "create": "Criar coleção de ficheiros",
@@ -2574,7 +2577,7 @@
   "Chatbox": {
     "try": "Experimentar Assistente",
     "threadId": "Thread ID:",
-    "placeholder": "Escreva a sua mensagem...",
+    "placeholder": "Escreve uma mensagem…",
     "send": "Enviar",
     "errorReply": "Erro na resposta",
     "errorApi": "Erro ao comunicar com a API.",
@@ -2603,7 +2606,13 @@
         "title": "Erro de ligação",
         "message": "Verifica a ligação e tenta novamente."
       }
-    }
+    },
+    "talkingTo": "A falar com {name}",
+    "empty": "Escreve uma mensagem para ver como este assistente responde.",
+    "examplesLabel": "Ou experimenta:",
+    "example1": "Olá! Em que me podes ajudar?",
+    "example2": "Explica-me de forma simples o que fazes.",
+    "example3": "Dá-me um exemplo de pergunta que te posso fazer."
   },
   "Reports": {
     "eyebrow": "Métricas e relatórios",

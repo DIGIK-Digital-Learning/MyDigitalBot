@@ -4,16 +4,34 @@
   grid-template-columns: 260px minmax(0, 1fr) 380px;
   gap: 24px;
   /*
-   * A página ocupa o ecrã que sobra por baixo da barra de cima, e não mais:
-   * com muitos assistentes é a lista que faz scroll, não a página. O mínimo
-   * evita colunas espremidas em ecrãs muito baixos.
+   * A página ocupa o espaço que sobra por baixo da barra de cima e das faixas
+   * de plano (Demo, "Estás a experimentar…"), e não mais: com muitos
+   * assistentes é a lista que faz scroll, não a página. O mínimo evita
+   * colunas espremidas em ecrãs muito baixos. Ver as regras :has() abaixo.
    */
-  height: calc(100dvh - var(--topbar-h));
+  height: 100%;
   min-height: 520px;
   width: 100%;
   padding: 16px 24px 20px;
   box-sizing: border-box;
   color: var(--text);
+}
+
+/*
+ * Só nesta página: a coluna principal da app fica com a altura do ecrã
+ * (menos a barra de cima), e o conteúdo por baixo das faixas estica até ao
+ * fundo. É isto que dá ao .hub uma altura certa para os 100%. Só com as três
+ * colunas lado a lado: abaixo de 1200px o chat vai para baixo e a página
+ * volta a crescer e a fazer scroll.
+ */
+@media (min-width: 1201px) {
+  :global(.main-col):has(.hub) {
+    height: calc(100dvh - var(--topbar-h));
+  }
+  :global(.app-main):has(.hub) {
+    height: 100%;
+    min-height: 0;
+  }
 }
 
 .listCol,
@@ -103,7 +121,15 @@
   padding-top: 10px;
   border-top: 1px dashed #e5edf5;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.limitNote {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: #5b6b80;
+  text-align: center;
 }
 .listFooter .ctaPrimary {
   width: 100%;
@@ -232,8 +258,26 @@
   margin-bottom: 10px;
 }
 .subdued {
-  margin: 6px 0 8px;
+  margin: 2px 0 10px;
   opacity: 0.95;
+}
+
+/* Rótulos «Descrição» e «Instruções» no cartão azul. */
+.fieldLabel {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.primaryCard.editing .fieldLabel {
+  margin-bottom: 4px;
+}
+.paperEmpty {
+  color: #8693a5;
+  font-style: italic;
 }
 
 /* EDIT MODE — textarea should scroll and size nicely */
