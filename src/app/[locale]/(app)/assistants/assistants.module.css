@@ -3,8 +3,13 @@
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr) 380px;
   gap: 24px;
-  height: 100dvh - 34px;
-  min-height: 0;
+  /*
+   * A página ocupa o ecrã que sobra por baixo da barra de cima, e não mais:
+   * com muitos assistentes é a lista que faz scroll, não a página. O mínimo
+   * evita colunas espremidas em ecrãs muito baixos.
+   */
+  height: calc(100dvh - var(--topbar-h));
+  min-height: 520px;
   width: 100%;
   padding: 16px 24px 20px;
   box-sizing: border-box;
@@ -44,6 +49,17 @@
   flex: 1;
   min-height: 0;
   overflow: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #d3deea transparent;
+}
+.list::-webkit-scrollbar {
+  width: 8px;
+}
+.list::-webkit-scrollbar-thumb {
+  background: #d3deea;
+  border-radius: 8px;
 }
 .listItem {
   display: flex;
@@ -51,7 +67,7 @@
   min-width: 0;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 8px 12px;
   border-radius: 12px;
   border: 1px solid transparent;
   color: #334157;
@@ -70,7 +86,7 @@
   border: none;
   box-shadow: inset 0 1px 0 #ffffff20;
   border-radius: 9999px;
-  padding: 10px 14px;
+  padding: 8px 14px;
 }
 /* Nomes longos quebram até duas linhas, sem scroll lateral na lista. */
 .listItemName {
@@ -281,11 +297,13 @@ input[type="range"].slider {
 }
 
 /* ===== Meta + Actions ===== */
+/* Em ecrãs estreitos os botões passam para baixo da data em vez de cortar. */
 .metaBar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px 16px;
   margin-top: 12px;
 }
 .metaBar .metaGrid {
@@ -603,7 +621,13 @@ body.modalOpen {
 }
 /* A conversa de teste passa para baixo do painel em vez de desaparecer. */
 @media (max-width: 1200px) {
+  /*
+   * Aqui a página volta a crescer (o chat está por baixo), por isso é a lista
+   * que tem um máximo: no máximo a altura do ecrã, e o resto faz scroll.
+   */
   .hub {
+    height: auto;
+    min-height: 0;
     grid-template-columns: 240px minmax(0, 1fr);
     grid-template-areas:
       "list main"
@@ -611,6 +635,8 @@ body.modalOpen {
   }
   .listCol {
     grid-area: list;
+    align-self: start;
+    max-height: calc(100dvh - var(--topbar-h) - 36px);
   }
   .mainCol {
     grid-area: main;
