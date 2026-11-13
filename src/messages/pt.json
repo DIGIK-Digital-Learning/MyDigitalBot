@@ -2890,6 +2890,12 @@
     "buttonLogin": "Ir para Login",
     "buttonUser": "Ir para Colaboradores"
   },
+  "UnderConstruction": {
+    "title": "Site em construção",
+    "message": "Estamos a preparar o novo site. Se já é cliente, pode iniciar sessão normalmente.",
+    "buttonLogin": "Iniciar sessão",
+    "buttonPortal": "Ir para o Portal"
+  },
   "Delete": {
     "title": "Tem a certeza?",
     "namedTitle": "Tem a certeza que quer eliminar {name}?",

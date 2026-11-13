@@ -20,6 +20,21 @@ const PRIVATE_ROUTE_ROOTS = new Set([
   "templates",
   "users",
 ]);
+/* Páginas de marketing que vão para a «Em construção» com
+   MAINTENANCE_MODE=true. A /legal e os links rastreados (/r) ficam de fora. */
+const MARKETING_ROUTE_ROOTS = new Set([
+  "",
+  "contact",
+  "how-it-works",
+  "pricing",
+  "product",
+  "solution",
+]);
+const UNDER_CONSTRUCTION_ROOT = "under-construction";
+
+function localizedPath(locale, path) {
+  return locale === routing.defaultLocale ? path : `/${locale}${path}`;
+}
 
 function getRouteInfo(pathname) {
   const segments = pathname.split("/").filter(Boolean);
@@ -44,8 +59,7 @@ export async function proxy(request) {
 
   if (!user && PRIVATE_ROUTE_ROOTS.has(root)) {
     const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname =
-      locale === routing.defaultLocale ? "/login" : `/${locale}/login`;
+    loginUrl.pathname = localizedPath(locale, "/login");
     loginUrl.search = "";
     loginUrl.searchParams.set(
       "next",
@@ -57,6 +71,27 @@ export async function proxy(request) {
     return copyResponseCookies(
       sessionResponse,
       NextResponse.redirect(loginUrl),
+    );
+  }
+
+  /* Com o site em manutenção o marketing vai para a «Em construção»; sem
+     manutenção é a «Em construção» que volta para a página inicial. */
+  const maintenance = process.env.MAINTENANCE_MODE === "true";
+  if (
+    maintenance
+      ? MARKETING_ROUTE_ROOTS.has(root)
+      : root === UNDER_CONSTRUCTION_ROOT
+  ) {
+    const targetUrl = request.nextUrl.clone();
+    targetUrl.pathname = localizedPath(
+      locale,
+      maintenance ? `/${UNDER_CONSTRUCTION_ROOT}` : "/",
+    );
+    targetUrl.search = "";
+
+    return copyResponseCookies(
+      sessionResponse,
+      NextResponse.redirect(targetUrl),
     );
   }
 
