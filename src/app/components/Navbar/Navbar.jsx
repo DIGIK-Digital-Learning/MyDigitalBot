@@ -334,94 +334,93 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
+
+              {/* Definições: Organização, Integrações e Histórico de atividade. */}
+              <div className={styles.group}>
+                <button
+                  type="button"
+                  className={`${styles.navItem} ${styles.navToggle} ${
+                    settingsSectionActive ? styles.active : ""
+                  }`}
+                  onClick={() => setSettingsOpen((prev) => !prev)}
+                  aria-expanded={settingsOpen}
+                  aria-controls="settings-subnav"
+                >
+                  <span className={styles.navItemMain}>
+                    <Settings aria-hidden className={styles.icon} />
+                    <span>{translation("Nav.options")}</span>
+                  </span>
+
+                  <ChevronDown
+                    aria-hidden
+                    className={`${styles.chevron} ${
+                      settingsOpen ? styles.chevronOpen : ""
+                    }`}
+                  />
+                </button>
+
+                {settingsOpen && (
+                  <div id="settings-subnav" className={styles.subnav}>
+                    <Link
+                      href="/settings"
+                      onClick={onNavClick("/settings")}
+                      className={`${styles.subnavItem} ${
+                        isExactActive("/settings") ? styles.active : ""
+                      }`}
+                    >
+                      <Building2 aria-hidden className={styles.subnavIcon} />
+                      <span>{translation("Settings.tabs.organization")}</span>
+                    </Link>
+
+                    <Link
+                      href="/settings/integrations"
+                      onClick={onNavClick("/settings/integrations")}
+                      className={`${styles.subnavItem} ${
+                        isActive("/settings/integrations") ? styles.active : ""
+                      }`}
+                    >
+                      <Plug aria-hidden className={styles.subnavIcon} />
+                      <span>{translation("Settings.tabs.integrations")}</span>
+                    </Link>
+
+                    <Link
+                      href="/settings/activity"
+                      onClick={onNavClick("/settings/activity")}
+                      className={`${styles.subnavItem} ${
+                        isActive("/settings/activity") ? styles.active : ""
+                      }`}
+                    >
+                      <History aria-hidden className={styles.subnavIcon} />
+                      <span>{translation("Settings.tabs.activity")}</span>
+                    </Link>
+                  </div>
+                )}
+              </div>
             </nav>
 
-            {isAdmin && (
-              <Link
-                href="/platform-admin"
-                onClick={onNavClick("/platform-admin")}
-                className={`${styles.navItem} ${styles.options} ${
-                  isActive("/platform-admin") ? styles.active : ""
-                }`}
-              >
-                <ShieldCheck aria-hidden className={styles.icon} />
-                <span>{translation("Nav.admin")}</span>
-              </Link>
-            )}
-
-            {/* Definições: Organização, Integrações e Histórico de atividade. */}
-            <div
-              className={`${styles.group} ${styles.settingsGroup} ${
-                isAdmin ? styles.afterAdmin : ""
-              }`}
-            >
-              <button
-                type="button"
-                className={`${styles.navItem} ${styles.navToggle} ${
-                  settingsSectionActive ? styles.active : ""
-                }`}
-                onClick={() => setSettingsOpen((prev) => !prev)}
-                aria-expanded={settingsOpen}
-                aria-controls="settings-subnav"
-              >
-                <span className={styles.navItemMain}>
-                  <Settings aria-hidden className={styles.icon} />
-                  <span>{translation("Nav.options")}</span>
-                </span>
-
-                <ChevronDown
-                  aria-hidden
-                  className={`${styles.chevron} ${
-                    settingsOpen ? styles.chevronOpen : ""
+            {/* No fundo: a Administração (só a DIGIK vê) e, por baixo, o Sair. */}
+            <div className={styles.bottom}>
+              {isAdmin && (
+                <Link
+                  href="/platform-admin"
+                  onClick={onNavClick("/platform-admin")}
+                  className={`${styles.navItem} ${
+                    isActive("/platform-admin") ? styles.active : ""
                   }`}
-                />
-              </button>
-
-              {settingsOpen && (
-                <div id="settings-subnav" className={styles.subnav}>
-                  <Link
-                    href="/settings"
-                    onClick={onNavClick("/settings")}
-                    className={`${styles.subnavItem} ${
-                      isExactActive("/settings") ? styles.active : ""
-                    }`}
-                  >
-                    <Building2 aria-hidden className={styles.subnavIcon} />
-                    <span>{translation("Settings.tabs.organization")}</span>
-                  </Link>
-
-                  <Link
-                    href="/settings/integrations"
-                    onClick={onNavClick("/settings/integrations")}
-                    className={`${styles.subnavItem} ${
-                      isActive("/settings/integrations") ? styles.active : ""
-                    }`}
-                  >
-                    <Plug aria-hidden className={styles.subnavIcon} />
-                    <span>{translation("Settings.tabs.integrations")}</span>
-                  </Link>
-
-                  <Link
-                    href="/settings/activity"
-                    onClick={onNavClick("/settings/activity")}
-                    className={`${styles.subnavItem} ${
-                      isActive("/settings/activity") ? styles.active : ""
-                    }`}
-                  >
-                    <History aria-hidden className={styles.subnavIcon} />
-                    <span>{translation("Settings.tabs.activity")}</span>
-                  </Link>
-                </div>
+                >
+                  <ShieldCheck aria-hidden className={styles.icon} />
+                  <span>{translation("Nav.admin")}</span>
+                </Link>
               )}
-            </div>
 
-            <button
-              onClick={handleSignOut}
-              className={`${styles.navItem} ${styles.signOut}`}
-            >
-              <LogOut aria-hidden className={styles.icon} />
-              <span>{translation("Nav.logout")}</span>
-            </button>
+              <button
+                onClick={handleSignOut}
+                className={`${styles.navItem} ${styles.signOut}`}
+              >
+                <LogOut aria-hidden className={styles.icon} />
+                <span>{translation("Nav.logout")}</span>
+              </button>
+            </div>
           </>
         ) : (
           <nav className={styles.nav}>

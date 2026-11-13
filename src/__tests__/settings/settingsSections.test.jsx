@@ -83,6 +83,22 @@ describe("submenu das Definições na barra lateral", () => {
     }
   });
 
+  it("fica na lista com as outras funcionalidades; a Administração e o Sair no fundo", () => {
+    const navEnd = navbar.indexOf("</nav>");
+    expect(navbar.indexOf('aria-controls="broadcast-subnav"')).toBeLessThan(
+      navbar.indexOf('aria-controls="settings-subnav"'),
+    );
+    expect(navbar.indexOf('aria-controls="settings-subnav"')).toBeLessThan(
+      navEnd,
+    );
+    /* A Administração fica no fundo, por cima do Sair. */
+    expect(navbar.indexOf('href="/platform-admin"')).toBeGreaterThan(navEnd);
+    expect(navbar.indexOf('href="/platform-admin"')).toBeLessThan(
+      navbar.indexOf("onClick={handleSignOut}"),
+    );
+    expect(navbar.indexOf("onClick={handleSignOut}")).toBeGreaterThan(navEnd);
+  });
+
   it("a Organização só fica marcada na própria página", () => {
     expect(navbar).toContain('isExactActive("/settings")');
   });
