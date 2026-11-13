@@ -6,6 +6,7 @@ import Papa from "papaparse";
 import styles from "./import.module.css";
 import PillSelect from "@/app/components/PillSelect/PillSelect";
 import mapCsvRow from "./helpers";
+import readUsersWorkbook from "./readUsersWorkbook";
 import { Download } from "lucide-react";
 import usePlanLimitPrompt from "@/app/hooks/usePlanLimitPrompt";
 import FilePickerButton from "@/app/components/FilePickerButton/FilePickerButton";
@@ -86,28 +87,16 @@ export default function ImportUsersModal({
     item.code ? t(`reasons.${item.code}`, { tags: item.tags }) : item.reason;
 
   async function readExcelFile(file) {
-    const XLSX = await import("xlsx");
+    const ExcelJS = await import("exceljs");
 
     const buffer = await file.arrayBuffer();
-    const workbook = XLSX.read(buffer, {
-      type: "array",
-      cellDates: false,
-    });
+    const rows = await readUsersWorkbook(buffer, ExcelJS);
 
-    const sheetName = workbook.SheetNames.includes("Users")
-      ? "Users"
-      : workbook.SheetNames[0];
-
-    if (!sheetName) {
+    if (!rows) {
       throw new Error(t("errors.noSheets"));
     }
 
-    const worksheet = workbook.Sheets[sheetName];
-
-    return XLSX.utils.sheet_to_json(worksheet, {
-      defval: "",
-      raw: false,
-    });
+    return rows;
   }
 
   async function readCsvFile(file) {
