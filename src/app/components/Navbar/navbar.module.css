@@ -13,6 +13,12 @@
   padding: 16px;
   box-sizing: border-box;
   z-index: 1;
+  /* Com vários submenus abertos (Mensagens e Definições), os itens podem
+     não caber na altura do ecrã: a barra faz scroll por dentro. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
 }
 
 .brand {
