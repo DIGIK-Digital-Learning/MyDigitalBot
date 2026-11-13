@@ -2890,6 +2890,12 @@
     "buttonLogin": "Go to Login",
     "buttonUser": "Go to Collaborators"
   },
+  "UnderConstruction": {
+    "title": "Website under construction",
+    "message": "We're preparing the new website. If you're already a customer, you can sign in as usual.",
+    "buttonLogin": "Sign in",
+    "buttonPortal": "Go to Portal"
+  },
   "Delete": {
     "title": "Are you sure?",
     "namedTitle": "Are you sure you want to delete {name}?",
