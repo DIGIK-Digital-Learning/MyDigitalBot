@@ -162,6 +162,11 @@
   cursor: pointer;
 }
 
+/* As Definições (com o submenu) ficam no fundo da barra, por cima do Sair. */
+.settingsGroup {
+  margin-top: auto;
+}
+
 /* Com a Administração (#208) por cima, as Definições ficam logo a seguir. */
 .afterAdmin {
   margin-top: 0;

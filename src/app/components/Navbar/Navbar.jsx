@@ -24,6 +24,9 @@ import {
   Zap,
   BarChart3,
   ShieldCheck,
+  Building2,
+  Plug,
+  History,
 } from "lucide-react";
 import { useState, useCallback, useEffect } from "react";
 import { useMobileNav } from "@/app/components/MobileNav/MobileNavContext";
@@ -67,8 +70,10 @@ export default function Navbar() {
 
   const usersSectionActive = isActive("/users");
   const broadcastSectionActive = isActive("/broadcast");
+  const settingsSectionActive = isActive("/settings");
   const [usersOpen, setUsersOpen] = useState(usersSectionActive);
   const [broadcastOpen, setBroadcastOpen] = useState(broadcastSectionActive);
+  const [settingsOpen, setSettingsOpen] = useState(settingsSectionActive);
 
   useEffect(() => setPendingHref(null), [pathName]);
   useEffect(() => close(), [pathName]);
@@ -81,7 +86,11 @@ export default function Navbar() {
     if (usersSectionActive) {
       setUsersOpen(true);
     }
-  }, [broadcastSectionActive, usersSectionActive]);
+
+    if (settingsSectionActive) {
+      setSettingsOpen(true);
+    }
+  }, [broadcastSectionActive, settingsSectionActive, usersSectionActive]);
 
   const onNavClick = (href) => (e) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1)
@@ -340,16 +349,71 @@ export default function Navbar() {
               </Link>
             )}
 
-            <Link
-              href="/settings"
-              onClick={onNavClick("/settings")}
-              className={`${styles.navItem} ${styles.options} ${
+            {/* Definições: Organização, Integrações e Histórico de atividade. */}
+            <div
+              className={`${styles.group} ${styles.settingsGroup} ${
                 isAdmin ? styles.afterAdmin : ""
-              } ${isActive("/settings") ? styles.active : ""}`}
+              }`}
             >
-              <Settings aria-hidden className={styles.icon} />
-              <span>{translation("Nav.options")}</span>
-            </Link>
+              <button
+                type="button"
+                className={`${styles.navItem} ${styles.navToggle} ${
+                  settingsSectionActive ? styles.active : ""
+                }`}
+                onClick={() => setSettingsOpen((prev) => !prev)}
+                aria-expanded={settingsOpen}
+                aria-controls="settings-subnav"
+              >
+                <span className={styles.navItemMain}>
+                  <Settings aria-hidden className={styles.icon} />
+                  <span>{translation("Nav.options")}</span>
+                </span>
+
+                <ChevronDown
+                  aria-hidden
+                  className={`${styles.chevron} ${
+                    settingsOpen ? styles.chevronOpen : ""
+                  }`}
+                />
+              </button>
+
+              {settingsOpen && (
+                <div id="settings-subnav" className={styles.subnav}>
+                  <Link
+                    href="/settings"
+                    onClick={onNavClick("/settings")}
+                    className={`${styles.subnavItem} ${
+                      isExactActive("/settings") ? styles.active : ""
+                    }`}
+                  >
+                    <Building2 aria-hidden className={styles.subnavIcon} />
+                    <span>{translation("Settings.tabs.organization")}</span>
+                  </Link>
+
+                  <Link
+                    href="/settings/integrations"
+                    onClick={onNavClick("/settings/integrations")}
+                    className={`${styles.subnavItem} ${
+                      isActive("/settings/integrations") ? styles.active : ""
+                    }`}
+                  >
+                    <Plug aria-hidden className={styles.subnavIcon} />
+                    <span>{translation("Settings.tabs.integrations")}</span>
+                  </Link>
+
+                  <Link
+                    href="/settings/activity"
+                    onClick={onNavClick("/settings/activity")}
+                    className={`${styles.subnavItem} ${
+                      isActive("/settings/activity") ? styles.active : ""
+                    }`}
+                  >
+                    <History aria-hidden className={styles.subnavIcon} />
+                    <span>{translation("Settings.tabs.activity")}</span>
+                  </Link>
+                </div>
+              )}
+            </div>
 
             <button
               onClick={handleSignOut}

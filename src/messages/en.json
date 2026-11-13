@@ -3506,7 +3506,6 @@
       "teamsConflict": "This Microsoft Teams Tenant ID is already associated with another organization."
     },
     "tabs": {
-      "label": "Settings sections",
       "organization": "Organization",
       "integrations": "Integrations",
       "activity": "Activity history"
