@@ -3,7 +3,6 @@ import { getLocale, getMessages } from "next-intl/server";
 import { ConfirmProvider } from "../components/Confirm/ConfirmProvider";
 import NavCursor from "../components/NavCursor/NavCursor";
 import TopLoader from "./(marketing)/components/TopLoader/TopLoader";
-import SiteUnavailable from "../components/SiteUnavailable/SiteUnavailable";
 import { AlertProvider } from "../components/Alert/AlertProvider";
 import HtmlLang from "../components/HtmlLang/HtmlLang";
 
