@@ -13,6 +13,12 @@
   padding: 16px;
   box-sizing: border-box;
   z-index: 1;
+  /* Com vários submenus abertos (Mensagens e Definições), os itens podem
+     não caber na altura do ecrã: a barra faz scroll por dentro. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
 }
 
 .brand {
@@ -151,25 +157,13 @@
   color: #fff;
 }
 
-.options {
+/* As funcionalidades (com as Definições) ficam em cima; no fundo, a
+   Administração (só a DIGIK vê) e o Sair. */
+.bottom {
   margin-top: auto;
-  width: 100%;
-  padding: 10px 12px;
-  border: none;
-  border-radius: 12px;
-  background: #ffffff00;
-  color: white;
-  cursor: pointer;
-}
-
-/* Com a Administração (#208) por cima, as Definições ficam logo a seguir. */
-.afterAdmin {
-  margin-top: 0;
-}
-
-.options:hover {
-  opacity: 0.9;
-  background: #9c9c9c;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .signOut {
