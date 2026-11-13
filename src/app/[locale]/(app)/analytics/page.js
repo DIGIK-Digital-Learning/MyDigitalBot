@@ -619,10 +619,14 @@ function LinksTable({ rows, maxClicks, offset = 0, format, t }) {
   );
 }
 
-/* Sem título nem descrição: só as ações da página. */
+/*
+ * Sem título nem descrição: só as ações da página, que não vão para o PDF
+ * (data-html2canvas-ignore). Por isso o cabeçalho não é uma secção do PDF:
+ * sairia com 0 px de altura.
+ */
 function PageHeader({ children }) {
   return (
-    <header className={styles.header} data-pdf-section>
+    <header className={styles.header}>
       {children}
     </header>
   );
