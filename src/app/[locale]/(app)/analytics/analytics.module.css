@@ -1265,3 +1265,19 @@ tr[data-medal="gold"] .rankingLabel {
 .exportingPdf .columnsWide > .section:only-child {
   grid-column: 1 / -1;
 }
+
+/*
+ * O html2canvas desenha num canvas, que não conhece tabular-nums: põe cada
+ * algarismo onde a página o pôs (com largura fixa) mas desenha-o com a
+ * largura normal, e o «12» saía «1 2». Sem tabular-nums no clone, as
+ * posições batem com o que o canvas desenha. O !important é para vencer
+ * seletores mais específicos, como .summaryItem p, e só vale no clone do PDF.
+ */
+.exportingPdf * { font-variant-numeric: normal !important; }
+
+/*
+ * Com várias palavras soltas num elemento flex, o html2canvas desalinha os
+ * espaços («Semdados para mostrar .», «Verlista completa ( 10)»).
+ */
+.exportingPdf .emptyState,
+.exportingPdf .rankingMore { display: block; }
