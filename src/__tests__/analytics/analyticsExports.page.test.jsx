@@ -70,4 +70,23 @@ describe("exports in the current staging dashboard", () => {
     expect(root.querySelector("section")).not.toHaveAttribute("data-pdf-section");
     expect(root.querySelectorAll("section[data-pdf-section]")).toHaveLength(7);
   });
+  /*
+   * O html2canvas não desenha o que tem data-html2canvas-ignore. Uma secção
+   * do PDF que só tenha isso sai com 0 px de altura e o jsPDF rebenta
+   * («wrong PNG signature»). Foi o que aconteceu ao cabeçalho a 28/10, quando
+   * ficou só com os botões.
+   */
+  it("every PDF section keeps something html2canvas will draw", async () => {
+    await ready();
+    const root = document.querySelector('[data-analytics-pdf-root="true"]');
+    const sections = [...root.querySelectorAll("[data-pdf-section]")]
+      .filter((section) => !section.parentElement?.closest("[data-pdf-section]"));
+    expect(sections.length).toBeGreaterThan(0);
+    for (const section of sections) {
+      const printable = section.cloneNode(true);
+      printable.querySelectorAll("[data-html2canvas-ignore]").forEach((node) => node.remove());
+      const drawsSomething = printable.textContent.trim() !== "" || printable.querySelector("svg, canvas, img");
+      expect(drawsSomething, section.outerHTML.slice(0, 80)).toBeTruthy();
+    }
+  });
 });

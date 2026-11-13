@@ -105,6 +105,10 @@ export async function exportAnalyticsPdf({
   }
 
   function addCanvasToPdf(canvas) {
+    // Uma secção sem nada para desenhar dá um canvas com 0 px. O toDataURL
+    // devolve "data:," e o jsPDF rebentava com «wrong PNG signature».
+    if (!canvas.width || !canvas.height) return;
+
     const imageWidth = usableWidth;
     const imageHeight = (canvas.height * imageWidth) / canvas.width;
 
