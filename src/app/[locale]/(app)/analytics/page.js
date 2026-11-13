@@ -1253,7 +1253,8 @@ export default function AnalyticsPage() {
                       onClick={() => setIsFullLinksListOpen(true)}
                     >
                       {t("rankings.viewAllLinks", { count: format(topTrackedLinks.length) })}
-                      <ChevronRight size={15} aria-hidden="true" />
+                      {/* A seta só diz que é clicável: no PDF o html2canvas punha-a na linha de baixo. */}
+                      <ChevronRight size={15} aria-hidden="true" data-html2canvas-ignore />
                     </button>
                   ) : null}
                 </div>
