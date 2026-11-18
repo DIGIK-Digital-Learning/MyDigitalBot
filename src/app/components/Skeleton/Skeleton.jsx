@@ -45,10 +45,16 @@ export function Skeleton({ width, height, radius, className = "" }) {
  */
 export function SkeletonStatus({ className, label, children }) {
   const translation = useTranslations("Common");
+  const text = label ?? translation("loading");
 
   return (
-    <div className={className} role="status" aria-busy="true">
-      <span className={styles.srOnly}>{label ?? translation("loading")}</span>
+    <div
+      className={className}
+      role="status"
+      aria-busy="true"
+      aria-label={text}
+    >
+      <span className={styles.srOnly}>{text}</span>
       {children}
     </div>
   );

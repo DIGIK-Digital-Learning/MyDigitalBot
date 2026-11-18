@@ -5,6 +5,11 @@ import { useTranslations } from "next-intl";
 
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 import { useConfirm } from "@/app/components/Confirm/ConfirmProvider";
+import {
+  Skeleton,
+  SkeletonRows,
+  SkeletonStatus,
+} from "@/app/components/Skeleton/Skeleton";
 import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import {
   announceAdminPlanChanged,
@@ -325,7 +330,21 @@ export default function AdminPage() {
   }
 
   if (status === "loading") {
-    return <div className={styles.page}>{translation("Admin.loading")}</div>;
+    return (
+      <SkeletonStatus className={styles.page} label={translation("Admin.loading")}>
+        {[4, 6].map((rows) => (
+          <section key={rows} className={styles.section}>
+            <div className={styles.skeletonHeading}>
+              <Skeleton width="30%" height={18} />
+              <Skeleton width="55%" />
+            </div>
+            <div className={styles.tableWrap}>
+              <SkeletonRows rows={rows} columns={5} />
+            </div>
+          </section>
+        ))}
+      </SkeletonStatus>
+    );
   }
 
   if (status === "forbidden") {

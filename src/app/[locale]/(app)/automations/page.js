@@ -18,8 +18,8 @@ import {
 import styles from "./automations.module.css";
 import { useAuth } from "@/app/AuthContext";
 import useOrganization from "@/app/hooks/useOrganization";
-import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
 import { useConfirm } from "@/app/components/Confirm/ConfirmProvider";
+import { SkeletonTable } from "@/app/components/Skeleton/Skeleton";
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 import { RuleModal } from "./RuleModal/RuleModal";
 import { useTranslations } from "next-intl";
@@ -147,7 +147,6 @@ function RunStatusChip({ status }) {
 export default function AutomationsPage() {
   const { user, loading: authLoading } = useAuth();
   const { org, loading: orgLoading } = useOrganization(user);
-  const { startLoading, stopLoading } = useGlobalLoader();
   const confirm = useConfirm();
   const showAlert = useAlert();
 
@@ -187,8 +186,11 @@ export default function AutomationsPage() {
 
   const [readChainsEnabled, setReadChainsEnabled] = useState(false);
   const [readChainsSaving, setReadChainsSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const orgId = org?.id;
+  // A tabela mostra o skeleton enquanto as listas carregam (#272).
+  const tableLoading = authLoading || orgLoading || (Boolean(orgId) && loading);
 
   const assistantsById = useMemo(() => {
     const map = new Map();
@@ -229,7 +231,7 @@ export default function AutomationsPage() {
 
       if (!orgId) return;
 
-      if (!silent) startLoading();
+      if (!silent) setLoading(true);
 
       try {
         const responses = await Promise.all([
@@ -308,10 +310,10 @@ export default function AutomationsPage() {
           });
         }
       } finally {
-        if (!silent) stopLoading();
+        if (!silent) setLoading(false);
       }
     },
-    [orgId, startLoading, stopLoading, translation, reloadPlanUsage],
+    [orgId, translation, reloadPlanUsage],
   );
 
   useEffect(() => {
@@ -776,7 +778,9 @@ export default function AutomationsPage() {
         </div>
       </div>
 
-      {tab === "rules" ? (
+      {tableLoading ? (
+        <SkeletonTable columns={6} />
+      ) : tab === "rules" ? (
         <div className={styles.tableCard}>
           <div className={styles.table}>
             <div className={`${styles.row} ${styles.header}`}>

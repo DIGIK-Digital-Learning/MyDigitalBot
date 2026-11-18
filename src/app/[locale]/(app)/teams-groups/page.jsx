@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 import { useAuth } from "@/app/AuthContext";
+import { Skeleton, SkeletonTable } from "@/app/components/Skeleton/Skeleton";
 import useOrganization from "@/app/hooks/useOrganization";
 import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
 
@@ -140,14 +141,18 @@ export default function TeamsGroupsPage() {
             <div className={styles.statLabel}>
               {translation("TeamsGroups.totalGroups")}
             </div>
-            <div className={styles.statValue}>{items.length}</div>
+            <div className={styles.statValue}>
+              {loading ? <Skeleton width={36} height={28} /> : items.length}
+            </div>
           </div>
 
           <div className={styles.statCard}>
             <div className={styles.statLabel}>
               {translation("TeamsGroups.activeGroups")}
             </div>
-            <div className={styles.statValue}>{activeCount}</div>
+            <div className={styles.statValue}>
+              {loading ? <Skeleton width={36} height={28} /> : activeCount}
+            </div>
           </div>
         </div>
       </div>
@@ -167,9 +172,7 @@ export default function TeamsGroupsPage() {
       </div>
 
       {loading && (
-        <div className={styles.emptyBox}>
-          {translation("TeamsGroups.loading")}
-        </div>
+        <SkeletonTable columns={4} label={translation("TeamsGroups.loading")} />
       )}
 
       {!loading && error && <div className={styles.errorBox}>{error}</div>}

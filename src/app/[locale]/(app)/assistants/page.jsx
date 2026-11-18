@@ -20,18 +20,45 @@ import CharCounter from "@/app/components/CharCounter/CharCounter";
 import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import FilePickerButton from "@/app/components/FilePickerButton/FilePickerButton";
 import RowAction from "@/app/components/RowAction/RowAction";
+import {
+  Skeleton,
+  SkeletonStatus,
+  SkeletonText,
+} from "@/app/components/Skeleton/Skeleton";
 import { Plus, Undo2 } from "lucide-react";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
 import { limitKeepingCurrent } from "@/lib/plans/limitRules";
 
 const STORAGE_BUCKET = "assistant-uploads";
 
-/* Spinner pequeno, no sítio onde o conteúdo vai aparecer. */
-function LoadingState({ label }) {
+/* A lista de assistentes a carregar. */
+function ListSkeleton({ label }) {
   return (
-    <div className={styles.loadingState} role="status" aria-label={label}>
-      <span className={styles.inlineSpinner} aria-hidden="true" />
-    </div>
+    <SkeletonStatus label={label}>
+      {["72%", "56%", "64%", "48%"].map((width) => (
+        <div key={width} className={styles.listItem}>
+          <Skeleton width={width} />
+        </div>
+      ))}
+    </SkeletonStatus>
+  );
+}
+
+/* O assistente a carregar: o cartão azul e um cartão escuro por baixo. */
+function DetailSkeleton({ label }) {
+  return (
+    <SkeletonStatus className={styles.skeletonDetail} label={label}>
+      <div
+        className={`${styles.card} ${styles.primaryCard} ${styles.skeletonCard}`}
+      >
+        <Skeleton width="40%" height={24} radius={8} />
+        <SkeletonText lines={3} />
+      </div>
+      <div className={`${styles.card} ${styles.skeletonCard}`}>
+        <Skeleton width="30%" height={16} />
+        <SkeletonText lines={2} />
+      </div>
+    </SkeletonStatus>
   );
 }
 
@@ -541,7 +568,7 @@ export default function AssistantsHub() {
 
           {!assistants.length &&
             (isListLoading ? (
-              <LoadingState label={translation("Assistants.loading")} />
+              <ListSkeleton label={translation("Assistants.loading")} />
             ) : (
               <div className={styles.emptyState}>
                 <p>{translation("Assistants.empty")}</p>
@@ -1020,9 +1047,7 @@ export default function AssistantsHub() {
             </section>
           </>
         ) : isListLoading || detailLoading ? (
-          <div className={styles.placeholderCard}>
-            <LoadingState label={translation("Assistants.loading")} />
-          </div>
+          <DetailSkeleton label={translation("Assistants.loading")} />
         ) : (
           <div className={styles.placeholderCard}>
             <p>{translation("Assistants.placeholder")}</p>

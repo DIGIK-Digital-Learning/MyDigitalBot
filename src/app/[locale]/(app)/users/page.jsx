@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import styles from "./users.module.css";
 import CreateUserModal from "./CreateUser";
 import ImportUsersModal from "./ImportUsersModal/ImportUsersModal";
-import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
 import ManageTagsModal from "./ManageTagsModal/ManageTagsModal";
 import EditUserModal from "./EditUserModal";
 import ViewUserModal from "./ViewUserModal"; // ← NEW
@@ -27,6 +26,11 @@ import usePlanLimitPrompt from "@/app/hooks/usePlanLimitPrompt";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
 import useCollaboratorWeeklyUsage from "@/app/hooks/useCollaboratorWeeklyUsage";
 import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
+import {
+  Skeleton,
+  SkeletonStatus,
+  SkeletonText,
+} from "@/app/components/Skeleton/Skeleton";
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 import FilterMenu from "./FilterMenu";
 import QuickActionsBar from "./QuickActions/QuickActions";
@@ -41,6 +45,7 @@ export default function UsersPage() {
   const { org, loading: orgLoading } = useOrganization(user);
 
   const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(true);
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState(new Set());
   const [assistantsList, setAssistantsList] = useState([]);
@@ -102,12 +107,14 @@ export default function UsersPage() {
     return localStorage.getItem("usersView") || "list";
   });
 
-  const { startLoading, stopLoading } = useGlobalLoader();
   useEffect(() => {
     localStorage.setItem("usersView", view);
   }, [view]);
 
   const orgId = org?.id;
+  // A tabela mostra o skeleton até chegar a primeira lista (e ao mudar de página).
+  const tableLoading =
+    authLoading || orgLoading || (Boolean(orgId) && usersLoading);
   const defaultPhoneCode = org?.default_phone_country_code || "+351";
 
   /*
@@ -263,7 +270,7 @@ export default function UsersPage() {
       return;
     }
 
-    startLoading();
+    setUsersLoading(true);
 
     try {
       const res = await fetch(
@@ -300,10 +307,10 @@ export default function UsersPage() {
         });
       }
     } finally {
-      stopLoading();
+      setUsersLoading(false);
     }
   },
-  [orgId, page, pageSize, startLoading, stopLoading, translation, reloadPlanUsage],
+  [orgId, page, pageSize, translation, reloadPlanUsage],
 );
 
   useEffect(() => {
@@ -802,7 +809,39 @@ async function openCreateUserModal() {
               <div className={styles.cellHeadRight}>{usersUsageCounter}</div>
             </div>
 
-            {visible.map((u, i) => {
+            {tableLoading ? (
+              <SkeletonStatus>
+                {Array.from({ length: 8 }, (_, i) => (
+                  <div
+                    key={i}
+                    className={`${styles.row} ${i % 2 ? styles.rowAlt : ""}`}
+                  >
+                    <div className={styles.cellChk}>
+                      <Skeleton width={16} height={16} radius={4} />
+                    </div>
+                    <div className={styles.cellName}>
+                      <Skeleton width={34} height={34} radius="50%" />
+                      <SkeletonText />
+                    </div>
+                    <div className={styles.cellPhone}>
+                      <Skeleton width="70%" />
+                    </div>
+                    <div className={styles.cellWeek}>
+                      <Skeleton width="60%" />
+                    </div>
+                    <div className={styles.cellTags}>
+                      <Skeleton width={64} height={22} radius={999} />
+                    </div>
+                    <div className={styles.cellAssistant}>
+                      <Skeleton width="80%" height={30} radius={999} />
+                    </div>
+                    <div className={styles.cellKebab} />
+                  </div>
+                ))}
+              </SkeletonStatus>
+            ) : null}
+
+            {!tableLoading && visible.map((u, i) => {
               const all = Array.isArray(u.tags) ? u.tags : [];
               const shown = all.slice(0, MAX_TAGS);
               const extra = all.length - shown.length;

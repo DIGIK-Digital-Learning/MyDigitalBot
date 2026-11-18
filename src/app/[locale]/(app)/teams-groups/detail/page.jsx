@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 import { useAuth } from "@/app/AuthContext";
+import { SkeletonDetail } from "@/app/components/Skeleton/Skeleton";
 import useOrganization from "@/app/hooks/useOrganization";
 import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
 
@@ -222,9 +223,7 @@ export default function TeamsGroupDetailPage() {
       </Link>
 
       {loading && (
-        <div className={styles.emptyBox}>
-          {translation("TeamsGroups.loading")}
-        </div>
+        <SkeletonDetail stats={0} label={translation("TeamsGroups.loading")} />
       )}
 
       {!loading && error && <div className={styles.errorBox}>{error}</div>}

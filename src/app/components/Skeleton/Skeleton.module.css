@@ -1,5 +1,7 @@
 /* Skeletons de carregamento (#272). Cor translúcida, para ficarem bem
-   tanto nos cartões brancos como no fundo cinzento da app. */
+   tanto nos cartões brancos como no fundo cinzento da app. Num cartão
+   escuro, a página muda --skeleton-base e --skeleton-shine para branco
+   translúcido. */
 
 .block {
   display: block;
@@ -10,9 +12,9 @@
   border-radius: 6px;
   background: linear-gradient(
     90deg,
-    rgba(15, 28, 63, 0.07) 25%,
-    rgba(15, 28, 63, 0.035) 50%,
-    rgba(15, 28, 63, 0.07) 75%
+    var(--skeleton-base, rgba(15, 28, 63, 0.07)) 25%,
+    var(--skeleton-shine, rgba(15, 28, 63, 0.035)) 50%,
+    var(--skeleton-base, rgba(15, 28, 63, 0.07)) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.3s ease-in-out infinite;
