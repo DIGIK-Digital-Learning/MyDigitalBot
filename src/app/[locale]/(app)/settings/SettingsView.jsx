@@ -22,6 +22,7 @@ import LogoUploader from "./LogoUploader";
 import ThemePreview from "./ThemePreview";
 import ActivityLog from "./components/ActivityLog";
 import OpeningMessageSettings from "./components/OpeningMessageSettings";
+import SettingsSkeleton from "./components/SettingsSkeleton";
 import styles from "./settings.module.css";
 
 const EMPTY_FORM = {
@@ -202,13 +203,7 @@ export default function SettingsView({ section }) {
   }
 
   if (authLoading || loading || orgLoading) {
-    return (
-      <main className={styles.page} aria-busy="true">
-        <div className={styles.pageSkeleton} />
-        <div className={styles.sectionSkeleton} />
-        <div className={styles.sectionSkeleton} />
-      </main>
-    );
+    return <SettingsSkeleton section={section} />;
   }
 
   if (loadError) {

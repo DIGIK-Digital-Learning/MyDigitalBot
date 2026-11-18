@@ -1,4 +1,5 @@
 import { History } from "lucide-react";
+import { SkeletonTable } from "@/app/components/Skeleton/Skeleton";
 import styles from "../settings.module.css";
 import {
   actionLabelKey,
@@ -18,9 +19,12 @@ export default function ActivityTable({
 }) {
   if (loading) {
     return (
-      <div className={styles.stateBox} role="status">
-        {translation("Loading")}
-      </div>
+      <SkeletonTable
+        rows={8}
+        columns={5}
+        card={false}
+        label={translation("Loading")}
+      />
     );
   }
 

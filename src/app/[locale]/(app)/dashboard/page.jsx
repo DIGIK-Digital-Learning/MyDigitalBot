@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { useAuth } from "@/app/AuthContext.jsx";
 import useOrganization from "@/app/hooks/useOrganization";
-import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
 
 import { DashboardHeader } from "./components/DashboardHeader";
 import { DashboardSection } from "./components/DashboardSection";
@@ -27,7 +25,6 @@ export default function DashboardPage() {
 
   const { user, loading: authLoading } = useAuth();
   const { org, loading: orgLoading } = useOrganization(user);
-  const { startLoading, stopLoading } = useGlobalLoader();
 
   const orgId = org?.id;
 
@@ -35,26 +32,6 @@ export default function DashboardPage() {
     orgId,
     !authLoading && !orgLoading,
   );
-
-  useEffect(() => {
-    const isInitialLoading =
-      authLoading || orgLoading || (Boolean(orgId) && loading && !overview);
-
-    if (isInitialLoading) {
-      startLoading();
-      return;
-    }
-
-    stopLoading();
-  }, [
-    authLoading,
-    orgLoading,
-    orgId,
-    loading,
-    overview,
-    startLoading,
-    stopLoading,
-  ]);
 
   const users = overview?.users || EMPTY_OVERVIEW.users;
   const content = overview?.content || EMPTY_OVERVIEW.content;
