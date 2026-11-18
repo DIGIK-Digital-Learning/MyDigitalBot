@@ -13,6 +13,7 @@ import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
 
 import styles from "./media.module.css";
 import RowAction from "@/app/components/RowAction/RowAction";
+import { SkeletonTable } from "@/app/components/Skeleton/Skeleton";
 
 function formatDate(value) {
   if (!value) return "-";
@@ -268,7 +269,7 @@ export default function MediaPage() {
       </div>
 
       {loading && (
-        <div className={styles.emptyBox}>{translation("Media.loading")}</div>
+        <SkeletonTable columns={5} label={translation("Media.loading")} />
       )}
 
       {!loading && error && <div className={styles.errorBox}>{error}</div>}

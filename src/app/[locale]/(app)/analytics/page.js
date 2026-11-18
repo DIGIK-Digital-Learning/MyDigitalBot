@@ -8,6 +8,7 @@ import { ChevronRight, Maximize2 } from "lucide-react";
 import { useAuth } from "@/app/AuthContext";
 import useOrganization from "@/app/hooks/useOrganization";
 import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
+import AnalyticsSkeleton from "./AnalyticsSkeleton";
 import styles from "./analytics.module.css";
 import { exportAnalyticsPdf } from "./lib/analytics.export";
 import { exportAnalyticsExcel } from "./lib/analytics.excel";
@@ -632,19 +633,6 @@ function PageHeader({ children }) {
   );
 }
 
-function LoadingState() {
-  return (
-    <div className={styles.loadingState} aria-busy="true" aria-label="Loading">
-      <div className={`${styles.skeleton} ${styles.skeletonWide}`} />
-      <div className={`${styles.skeleton} ${styles.skeletonWide}`} />
-      <div className={styles.loadingColumns}>
-        <div className={styles.skeleton} />
-        <div className={styles.skeleton} />
-      </div>
-    </div>
-  );
-}
-
 /**
  * Página principal de métricas.
  * Carrega dados da API e apresenta os painéis.
@@ -945,7 +933,7 @@ export default function AnalyticsPage() {
     return (
       <main className={styles.page}>
         <PageHeader />
-        <LoadingState />
+        <AnalyticsSkeleton />
       </main>
     );
   }

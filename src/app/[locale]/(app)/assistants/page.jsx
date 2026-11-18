@@ -23,17 +23,9 @@ import RowAction from "@/app/components/RowAction/RowAction";
 import { Plus, Undo2 } from "lucide-react";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
 import { limitKeepingCurrent } from "@/lib/plans/limitRules";
+import { DetailSkeleton, ListSkeleton } from "./AssistantsSkeleton";
 
 const STORAGE_BUCKET = "assistant-uploads";
-
-/* Spinner pequeno, no sítio onde o conteúdo vai aparecer. */
-function LoadingState({ label }) {
-  return (
-    <div className={styles.loadingState} role="status" aria-label={label}>
-      <span className={styles.inlineSpinner} aria-hidden="true" />
-    </div>
-  );
-}
 
 export default function AssistantsHub() {
   const translation = useTranslations();
@@ -541,7 +533,7 @@ export default function AssistantsHub() {
 
           {!assistants.length &&
             (isListLoading ? (
-              <LoadingState label={translation("Assistants.loading")} />
+              <ListSkeleton label={translation("Assistants.loading")} />
             ) : (
               <div className={styles.emptyState}>
                 <p>{translation("Assistants.empty")}</p>
@@ -1020,9 +1012,7 @@ export default function AssistantsHub() {
             </section>
           </>
         ) : isListLoading || detailLoading ? (
-          <div className={styles.placeholderCard}>
-            <LoadingState label={translation("Assistants.loading")} />
-          </div>
+          <DetailSkeleton label={translation("Assistants.loading")} />
         ) : (
           <div className={styles.placeholderCard}>
             <p>{translation("Assistants.placeholder")}</p>

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Check, Search, X } from "lucide-react";
 
+import { Skeleton, SkeletonStatus } from "@/app/components/Skeleton/Skeleton";
 import { mediaForPicker, toComposerFile } from "../lib/mediaPicker";
 import styles from "./mediaPicker.module.css";
 
@@ -154,9 +155,18 @@ export default function MediaPickerModal({
 
         <div className={styles.body}>
           {loading ? (
-            <p className={styles.message}>
-              {translation("Broadcast.mediaPicker.loading")}
-            </p>
+            <SkeletonStatus
+              className={styles.grid}
+              label={translation("Broadcast.mediaPicker.loading")}
+            >
+              {[0, 1, 2, 3, 4, 5].map((index) => (
+                <div key={index} className={styles.tile}>
+                  <Skeleton height={96} radius={6} />
+                  <Skeleton width="75%" />
+                  <Skeleton width="40%" height={10} />
+                </div>
+              ))}
+            </SkeletonStatus>
           ) : error ? (
             <p className={`${styles.message} ${styles.error}`}>
               {translation("Broadcast.mediaPicker.loadFailed")}

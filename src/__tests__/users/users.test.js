@@ -259,7 +259,10 @@ describe("UsersPage", () => {
   it("loads users/assistants/tags on mount and renders user rows", async () => {
     render(React.createElement(UsersPage));
 
+    // #272: a tabela mostra o skeleton enquanto a lista carrega.
+    expect(screen.getByRole("status")).toHaveAttribute("aria-busy", "true");
     expect(await screen.findByText("Alice")).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(screen.getByText("alice@example.com")).toBeInTheDocument();
 
     expect(screen.getByText("Bob")).toBeInTheDocument();
@@ -268,9 +271,6 @@ describe("UsersPage", () => {
     expect(mocks.fetch).toHaveBeenCalledWith(USERS_LIST_URL);
     expect(mocks.fetch).toHaveBeenCalledWith(`/api/assistants?orgId=${ORG_ID}`);
     expect(mocks.fetch).toHaveBeenCalledWith(`/api/tags?orgId=${ORG_ID}`);
-
-    expect(mocks.startLoading).toHaveBeenCalled();
-    await waitFor(() => expect(mocks.stopLoading).toHaveBeenCalled());
   });
 
   it("filters the list by search text", async () => {

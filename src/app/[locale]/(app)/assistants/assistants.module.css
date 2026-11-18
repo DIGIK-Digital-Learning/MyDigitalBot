@@ -417,29 +417,19 @@ input[type="range"].slider {
   overflow: hidden;
 }
 
-/* ===== A carregar ===== */
-.loadingState {
-  display: grid;
-  place-items: center;
-  padding: 24px 0;
+/* ===== A carregar (skeleton, #272) ===== */
+.skeletonDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
-.inlineSpinner {
-  width: 28px;
-  height: 28px;
-  border: 3px solid #d6e4f0;
-  border-top-color: #0070f3;
-  border-radius: 50%;
-  animation: assistantsSpin 0.9s linear infinite;
-}
-@keyframes assistantsSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .inlineSpinner {
-    animation-duration: 2.4s;
-  }
+/* Cartões escuros: barras em branco translúcido. */
+.skeletonCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  --skeleton-base: rgba(255, 255, 255, 0.16);
+  --skeleton-shine: rgba(255, 255, 255, 0.28);
 }
 
 /* ===== Placeholder ===== */
