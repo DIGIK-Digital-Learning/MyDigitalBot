@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/AuthContext";
 import useOrganization from "@/app/hooks/useOrganization";
 import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
+import { SkeletonDetail } from "@/app/components/Skeleton/Skeleton";
 import LoaderLink from "@/app/[locale]/(marketing)/components/TopLoader/LoaderLink";
 import styles from "./detail.module.css";
 import { useTranslations } from "next-intl";
@@ -136,9 +137,7 @@ export default function TrackedLinkDetailPage() {
         </LoaderLink>
       </div>
 
-      {loading && (
-        <div className={styles.emptyBox}>{translation("loading")}</div>
-      )}
+      {loading && <SkeletonDetail stats={4} label={translation("loading")} />}
 
       {!loading && error && <div className={styles.errorBox}>{error}</div>}
 

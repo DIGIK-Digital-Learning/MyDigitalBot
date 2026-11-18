@@ -9,6 +9,7 @@ import { useTranslations } from "next-intl";
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 import { useAuth } from "@/app/AuthContext";
 import PillSelect from "@/app/components/PillSelect/PillSelect";
+import { SkeletonTable } from "@/app/components/Skeleton/Skeleton";
 import useOrganization from "@/app/hooks/useOrganization";
 import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
 import { QUESTION_KINDS } from "@/lib/whatsapp/question";
@@ -373,9 +374,7 @@ export default function QuestionsPage() {
       </div>
 
       {loading && (
-        <div className={styles.emptyBox}>
-          {translation("Questions.loading")}
-        </div>
+        <SkeletonTable columns={4} label={translation("Questions.loading")} />
       )}
 
       {!loading && error && <div className={styles.errorBox}>{error}</div>}

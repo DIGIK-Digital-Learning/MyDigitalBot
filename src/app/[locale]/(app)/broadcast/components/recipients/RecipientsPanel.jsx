@@ -1,6 +1,11 @@
 import { Filter } from "lucide-react";
 
 import FilterMenu from "@/app/[locale]/(app)/users/FilterMenu";
+import {
+  Skeleton,
+  SkeletonStatus,
+  SkeletonText,
+} from "@/app/components/Skeleton/Skeleton";
 
 import styles from "../../broadcast.module.css";
 import ActiveFilters from "./ActiveFilters";
@@ -26,6 +31,7 @@ export default function RecipientsPanel({
   allOnPageSelected,
   channel,
   translation,
+  loading = false,
 }) {
   return (
     <>
@@ -75,19 +81,35 @@ export default function RecipientsPanel({
         />
 
         <div className={styles.listBox}>
-          {filtered.map((user, index) => (
-            <RecipientRow
-              key={user.id}
-              user={user}
-              index={index}
-              selected={selected.has(user.id)}
-              onToggle={() => toggleOne(user.id)}
-              channel={channel}
-              translation={translation}
-            />
-          ))}
+          {loading ? (
+            <SkeletonStatus>
+              {[0, 1, 2, 3, 4, 5].map((index) => (
+                <div
+                  key={index}
+                  className={`${styles.row} ${index % 2 ? styles.rowAlt : ""}`}
+                >
+                  <Skeleton width={16} height={16} radius={4} />
+                  <Skeleton width={28} height={28} radius="50%" />
+                  <SkeletonText />
+                </div>
+              ))}
+            </SkeletonStatus>
+          ) : null}
 
-          {filtered.length === 0 && (
+          {!loading &&
+            filtered.map((user, index) => (
+              <RecipientRow
+                key={user.id}
+                user={user}
+                index={index}
+                selected={selected.has(user.id)}
+                onToggle={() => toggleOne(user.id)}
+                channel={channel}
+                translation={translation}
+              />
+            ))}
+
+          {!loading && filtered.length === 0 && (
             <div className={styles.empty}>
               {translation("Broadcast.emptyUsers")}
             </div>

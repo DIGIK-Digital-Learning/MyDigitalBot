@@ -377,21 +377,18 @@
   color: #991b1b;
 }
 
-.pageSkeleton,
-.sectionSkeleton {
-  border-radius: 16px;
-  background: linear-gradient(90deg, #eef2f7 25%, #f8fafc 50%, #eef2f7 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.3s infinite;
+/* Skeleton da página (SettingsSkeleton): mesmo espaçamento da página. */
+.skeletonStack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 22px;
+  min-width: 0;
 }
 
-.pageSkeleton {
-  width: 280px;
-  height: 42px;
-}
-
-.sectionSkeleton {
-  height: 210px;
+.header.skeletonStack,
+.sectionHeading.skeletonStack {
+  gap: 10px;
 }
 
 .activity {
@@ -767,12 +764,6 @@
 .secondaryBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-@keyframes shimmer {
-  to {
-    background-position: -200% 0;
-  }
 }
 
 @media (max-width: 800px) {

@@ -108,6 +108,13 @@
   padding: 14px;
 }
 
+/* Painel a carregar (BroadcastSkeleton, #272). */
+.skeletonPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 .panelTitle {
   font-weight: 700;
   margin-bottom: 8px;

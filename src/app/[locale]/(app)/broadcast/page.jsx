@@ -162,6 +162,7 @@ export default function BroadcastPage() {
   const { stopLoading } = useGlobalLoader();
 
   const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(true);
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState(new Set());
 
@@ -715,7 +716,10 @@ export default function BroadcastPage() {
     (async () => {
       await getUsers();
 
-      if (alive) stopLoading();
+      if (alive) {
+        setUsersLoading(false);
+        stopLoading();
+      }
     })();
 
     return () => {
@@ -3135,6 +3139,7 @@ export default function BroadcastPage() {
               allOnPageSelected={allOnPageSelected}
               channel={channel}
               translation={translation}
+              loading={usersLoading}
             />
           )}
         </div>
