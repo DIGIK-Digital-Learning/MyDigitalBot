@@ -165,11 +165,21 @@ export function SkeletonStats({ count = 3, className = "" }) {
 
 /**
  * Página de detalhe a carregar (pergunta, link, grupo): o cartão do topo com
- * o título, o detalhe e `stats` números, e por baixo a tabela.
+ * o título, o detalhe e `stats` números, e por baixo a tabela. Com `page`,
+ * tem as margens de uma página inteira (para os loading.jsx).
  */
-export function SkeletonDetail({ stats = 3, columns = 4, rows = 5, label }) {
+export function SkeletonDetail({
+  stats = 3,
+  columns = 4,
+  rows = 5,
+  page = false,
+  label,
+}) {
   return (
-    <SkeletonStatus className={styles.stack} label={label}>
+    <SkeletonStatus
+      className={`${styles.stack} ${page ? styles.page : ""}`.trim()}
+      label={label}
+    >
       <div className={`${styles.card} ${styles.detailCard}`}>
         <Skeleton width="50%" height={26} radius={8} />
         <Skeleton width="30%" />

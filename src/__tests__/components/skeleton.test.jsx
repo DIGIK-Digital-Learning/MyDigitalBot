@@ -1,7 +1,13 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { SkeletonPage, SkeletonTable } from "@/app/components/Skeleton/Skeleton";
+import BroadcastLoading from "@/app/[locale]/(app)/broadcast/loading";
+import ScheduledLoading from "@/app/[locale]/(app)/broadcast/scheduled/loading";
+
+const mocks = vi.hoisted(() => ({ pathname: "/broadcast" }));
+
+vi.mock("@/i18n/navigation", () => ({ usePathname: () => mocks.pathname }));
 
 /*
  * #272: os carregamentos da app usam o mesmo skeleton, que os leitores de
@@ -27,5 +33,13 @@ describe("Skeleton", () => {
 
     expect(screen.getAllByRole("status")).toHaveLength(1);
     expect(screen.getByRole("status")).toHaveTextContent("loading");
+  });
+
+  it("o loading de /broadcast mostra o skeleton da página de baixo para onde se vai", () => {
+    mocks.pathname = "/broadcast/scheduled";
+    const { container } = render(<BroadcastLoading />);
+    const { container: scheduled } = render(<ScheduledLoading />);
+
+    expect(container.innerHTML).toBe(scheduled.innerHTML);
   });
 });
