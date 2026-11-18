@@ -17,6 +17,7 @@ import NewBadge from "@/app/components/NewBadge/NewBadge";
 import { RowActionLink } from "@/app/components/RowAction/RowAction";
 import { rowClickHandler } from "@/app/components/RowAction/rowClick";
 import Pagination from "@/app/components/Pagination/Pagination";
+import { SkeletonTable } from "@/app/components/Skeleton/Skeleton";
 import useOrganization from "@/app/hooks/useOrganization";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
 import useSeenSince from "@/app/hooks/useSeenSince";
@@ -283,9 +284,10 @@ export default function TrackedLinksPage() {
         </div>
 
         {loading && (
-          <div className={styles.emptyBox}>
-            {translation("TrackedLinks.loading")}
-          </div>
+          <SkeletonTable
+            columns={7}
+            label={translation("TrackedLinks.loading")}
+          />
         )}
 
         {!loading && error && <div className={styles.errorBox}>{error}</div>}

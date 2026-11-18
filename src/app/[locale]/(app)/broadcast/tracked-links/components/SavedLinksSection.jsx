@@ -7,6 +7,10 @@ import { useTranslations } from "next-intl";
 import NewBadge from "@/app/components/NewBadge/NewBadge";
 import Pagination from "@/app/components/Pagination/Pagination";
 import RowAction from "@/app/components/RowAction/RowAction";
+import {
+  SkeletonStatus,
+  SkeletonText,
+} from "@/app/components/Skeleton/Skeleton";
 
 import styles from "../tracked-links.module.css";
 
@@ -74,9 +78,15 @@ export default function SavedLinksSection({
       ) : null}
 
       {loading && !links.length ? (
-        <div className={styles.savedEmpty}>
-          {translation("TrackedLinks.loading")}
-        </div>
+        <SkeletonStatus label={translation("TrackedLinks.loading")}>
+          <ul className={styles.savedList}>
+            {[0, 1, 2].map((index) => (
+              <li key={index} className={styles.savedItem}>
+                <SkeletonText />
+              </li>
+            ))}
+          </ul>
+        </SkeletonStatus>
       ) : null}
 
       {!loading && !links.length ? (

@@ -158,6 +158,34 @@ export function SkeletonStats({ count = 3, className = "" }) {
 }
 
 /**
+ * Página de detalhe a carregar (pergunta, link, grupo): o cartão do topo com
+ * o título, o detalhe e `stats` números, e por baixo a tabela.
+ */
+export function SkeletonDetail({ stats = 3, columns = 4, rows = 5, label }) {
+  return (
+    <SkeletonStatus className={styles.stack} label={label}>
+      <div className={`${styles.card} ${styles.detailCard}`}>
+        <Skeleton width="50%" height={26} radius={8} />
+        <Skeleton width="30%" />
+        {stats ? (
+          <div className={styles.detailStats}>
+            {range(stats).map((index) => (
+              <span key={index} className={styles.detailStat}>
+                <Skeleton width="70%" height={10} />
+                <Skeleton width="50%" height={24} radius={8} />
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </div>
+      <div className={styles.card}>
+        <SkeletonRows rows={rows} columns={columns} />
+      </div>
+    </SkeletonStatus>
+  );
+}
+
+/**
  * Página de lista inteira a carregar: cabeçalho, cartões de números
  * (`stats`), pesquisa e tabela. É o que as rotas mostram enquanto a página
  * abre (`loading.jsx`).

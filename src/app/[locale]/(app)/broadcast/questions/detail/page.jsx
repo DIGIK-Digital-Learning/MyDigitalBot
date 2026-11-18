@@ -9,6 +9,7 @@ import { useTranslations } from "next-intl";
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 import { useAuth } from "@/app/AuthContext";
 import PillSelect from "@/app/components/PillSelect/PillSelect";
+import { SkeletonDetail } from "@/app/components/Skeleton/Skeleton";
 import useOrganization from "@/app/hooks/useOrganization";
 import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
 import { VERDICTS } from "@/lib/services/questions/questionReports";
@@ -332,9 +333,7 @@ export default function QuestionDetailPage() {
       </div>
 
       {loading && (
-        <div className={styles.emptyBox}>
-          {translation("Questions.detail.loading")}
-        </div>
+        <SkeletonDetail label={translation("Questions.detail.loading")} />
       )}
 
       {!loading && error && <div className={styles.errorBox}>{error}</div>}

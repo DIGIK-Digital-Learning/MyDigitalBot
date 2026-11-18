@@ -11,6 +11,7 @@ import {
 import NewBadge from "@/app/components/NewBadge/NewBadge";
 import RowAction, { RowActions } from "@/app/components/RowAction/RowAction";
 import { rowClickHandler } from "@/app/components/RowAction/rowClick";
+import { SkeletonTable } from "@/app/components/Skeleton/Skeleton";
 
 export default function ScheduledTable({
   loading,
@@ -70,7 +71,11 @@ export default function ScheduledTable({
   return (
     <div className={styles.tableCard}>
       {loading ? (
-        <div className={styles.stateBox}>{translation("Loading")}</div>
+        <SkeletonTable
+          columns={7}
+          card={false}
+          label={translation("Loading")}
+        />
       ) : filteredItems.length === 0 ? (
         <div className={styles.stateBox}>
           <CalendarClock aria-hidden className={styles.emptyIcon} />
