@@ -84,6 +84,8 @@
 .leftCol,
 .rightCol {
   display: grid;
+  /* Nada dentro da coluna a pode alargar além da largura dela (#285). */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--gutter-y);
   align-content: start;
   grid-auto-rows: max-content;
@@ -445,6 +447,20 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+
+/* #285: o aviso dos Grupos Teams parte em linhas e ocupa o que sobra; os
+   botões ficam com a sua largura numa só linha. Antes, o aviso (nowrap)
+   empurrava o painel para fora do ecrã. */
+.recipientsActionsRow > .subline {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+}
+
+.recipientsActionsRow > button {
+  flex: none;
+  white-space: nowrap;
 }
 
 .searchWrap {
