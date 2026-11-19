@@ -235,14 +235,16 @@ describe("hora numa lista de 15 em 15 minutos", () => {
     vi.setSystemTime(new Date(2026, 10, 11, 9, 0));
 
     const setScheduledFor = renderPanel(new Date(2026, 10, 12, 10, 0));
-    const select = screen.getByLabelText("Broadcast.hour");
+    const trigger = screen.getByLabelText("Broadcast.hour");
 
-    expect(select.tagName).toBe("SELECT");
-    expect(select).toHaveValue("10:00");
+    // #281: a lista é a da app (abre com um clique), não a nativa do browser.
+    expect(trigger.tagName).toBe("BUTTON");
+    expect(trigger).toHaveTextContent("10:00");
     // Não há campos para escrever a hora.
     expect(screen.queryByRole("textbox")).toBeNull();
 
-    fireEvent.change(select, { target: { value: "14:45" } });
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByRole("option", { name: "14:45" }));
 
     const chosen = setScheduledFor.mock.calls[0][0];
     expect(chosen.getDate()).toBe(12);
@@ -255,6 +257,7 @@ describe("hora numa lista de 15 em 15 minutos", () => {
     vi.setSystemTime(new Date(2026, 10, 11, 17, 52));
 
     renderPanel(new Date(2026, 10, 11, 18, 0));
+    fireEvent.click(screen.getByLabelText("Broadcast.hour"));
 
     expect(screen.getByRole("option", { name: "17:45" })).toBeDisabled();
     expect(screen.getByRole("option", { name: "18:00" })).toBeEnabled();
@@ -266,6 +269,7 @@ describe("hora numa lista de 15 em 15 minutos", () => {
     vi.setSystemTime(new Date(2026, 10, 11, 17, 52));
 
     renderPanel(new Date(2026, 10, 12, 9, 0));
+    fireEvent.click(screen.getByLabelText("Broadcast.hour"));
 
     expect(screen.getByRole("option", { name: "08:00" })).toBeEnabled();
   });

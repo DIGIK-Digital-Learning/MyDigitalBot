@@ -245,25 +245,6 @@
 }
 
 /* #235: a hora escolhe-se numa lista, de 15 em 15 minutos. */
-.timeSelect {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--ui-border);
-  background: #fff;
-  font: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  color: #0f172a;
-  cursor: pointer;
-}
-
-.timeSelect:focus {
-  outline: none;
-  border-color: #1f6fff;
-  box-shadow: 0 0 0 3px rgba(31, 111, 255, 0.12);
-}
-
 /* Ícone «i» com explicação, igual ao da aba Media. */
 .infoHint {
   display: inline-flex;
@@ -1435,6 +1416,9 @@
   display: grid;
   gap: 2px;
   z-index: 5;
+  /* A altura máxima vem do PlusMenu.jsx; o que não couber desliza. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .plusItem {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   Building2,
   ChevronDown,
@@ -21,6 +21,13 @@ import EmojiButton from "./EmojiButton";
 import FormatToolbar from "./FormatToolbar";
 import { ImageSuggestBar } from "./ImageSuggestInPhone";
 import { SuggestBar } from "./SuggestInPhone";
+
+// O menu fica 42px acima do fundo do botão «+» (bottom: 42px no CSS).
+const MENU_OFFSET = 42;
+// Folga entre o topo do menu e o topo do telemóvel.
+const MENU_MARGIN = 8;
+// Mesmo num telemóvel muito baixo, o menu mostra pelo menos isto.
+const MENU_MIN_HEIGHT = 160;
 
 /* Cada tipo abre a escolha entre o computador e a multimédia. */
 const FILE_KINDS = [
@@ -88,6 +95,29 @@ export default function PlusMenu({
     };
   }, [open]);
 
+  // O menu abre para cima, dentro do telemóvel, que corta o que lhe sai por
+  // cima (overflow: hidden). Medimos o espaço entre o fundo do menu e o topo
+  // do primeiro antepassado que corta, e o menu nunca passa daí: o que não
+  // couber desliza com a barra.
+  const [maxHeight, setMaxHeight] = useState(null);
+
+  useLayoutEffect(() => {
+    if (!open || !wrapRef.current) return;
+
+    const wrap = wrapRef.current;
+    let clipTop = 0;
+    for (let el = wrap.parentElement; el; el = el.parentElement) {
+      if (getComputedStyle(el).overflowY !== "visible") {
+        clipTop = el.getBoundingClientRect().top;
+        break;
+      }
+    }
+
+    const menuBottom = wrap.getBoundingClientRect().bottom - MENU_OFFSET;
+    const space = menuBottom - Math.max(clipTop, 0) - MENU_MARGIN;
+    setMaxHeight(Math.max(space, MENU_MIN_HEIGHT));
+  }, [open]);
+
   function pick(action) {
     setOpen(false);
     action();
@@ -107,7 +137,11 @@ export default function PlusMenu({
       </button>
 
       {open && (
-        <div className={styles.plusMenu} role="menu">
+        <div
+          className={styles.plusMenu}
+          role="menu"
+          style={maxHeight ? { maxHeight } : undefined}
+        >
           {FILE_KINDS.map(({ kind, Icon, labelKey }) => {
             const isExpanded = expandedKind === kind;
 
