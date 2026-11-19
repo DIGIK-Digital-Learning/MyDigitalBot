@@ -2822,6 +2822,7 @@ export default function BroadcastPage() {
   if (showStartMenu) {
     composer = (
       <>
+        {/* #282: na escolha do tipo de mensagem não há calendário. */}
         <StartMenu
           channel={channel}
           onChoose={setComposeMode}
@@ -2829,9 +2830,6 @@ export default function BroadcastPage() {
           previewTime={previewTime}
           translation={translation}
         />
-        {deliveryMode === "schedule" ? (
-          <div className={styles.inlineToolPanel}>{schedulePanel}</div>
-        ) : null}
       </>
     );
   } else if (isSurveyMode) {

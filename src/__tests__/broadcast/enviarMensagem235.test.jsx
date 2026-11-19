@@ -90,9 +90,11 @@ describe("«Agendar» ao lado do telemóvel", () => {
     );
   }
 
-  it("só mostra o calendário ao agendar", () => {
+  it("#282: o calendário está sempre lá, inativo até carregar em «Agendar»", () => {
     const { rerender } = renderComposer("now");
-    expect(screen.queryByTestId("schedule-side")).toBeNull();
+    const inactive = screen.getByTestId("schedule-side");
+    expect(inactive).toHaveTextContent("calendário");
+    expect(inactive).toHaveAttribute("inert");
 
     rerender(
       <MessageComposer
@@ -107,7 +109,9 @@ describe("«Agendar» ao lado do telemóvel", () => {
         phone={<textarea data-testid="phone" defaultValue="rascunho" />}
       />,
     );
-    expect(screen.getByTestId("schedule-side")).toHaveTextContent("calendário");
+    const active = screen.getByTestId("schedule-side");
+    expect(active).toHaveTextContent("calendário");
+    expect(active).not.toHaveAttribute("inert");
   });
 
   it("mudar de modo não recria o telemóvel (não se perde o que se escreveu)", () => {
@@ -151,9 +155,12 @@ describe("«Agendar» ao lado do telemóvel", () => {
     expect(css).toMatch(
       /"phone"\s*"links"\s*"warning"\s*"tools"\s*"schedule"/,
     );
+    // #282: o texto de ajuda e os campos extra das perguntas ficam em linhas
+    // próprias, para o calendário ter só a altura do telemóvel.
     expect(wide).toMatch(
-      /"phone schedule"\s*"links links"\s*"warning warning"\s*"tools tools"/,
+      /"hint \."\s*"phone schedule"\s*"below \."\s*"links links"\s*"warning warning"\s*"tools tools"/,
     );
+    expect(wide).toMatch(/\.areaPhone\s*\{\s*display: contents;/);
     expect(wide).toMatch(/"phone schedule"/);
     // Telemóvel e calendário juntos ao centro e com a mesma altura: o
     // telemóvel fica com o tamanho de sempre e o cartão do calendário estica.

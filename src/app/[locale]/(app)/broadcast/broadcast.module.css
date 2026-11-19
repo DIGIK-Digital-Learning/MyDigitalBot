@@ -1180,6 +1180,16 @@
   grid-area: schedule;
   min-width: 0;
   margin-top: 16px;
+  transition:
+    opacity 0.15s ease,
+    filter 0.15s ease;
+}
+
+/* #282: em «Enviar agora» o calendário vê-se, mas cinzento e inativo. */
+.areaScheduleInactive {
+  opacity: 0.35;
+  filter: grayscale(1);
+  user-select: none;
 }
 
 .areaLinks {
@@ -1194,10 +1204,20 @@
    * telemóvel: o telemóvel mantém os 480px de quando não há calendário e o
    * cartão do calendário estica até ao fim do telemóvel.
    */
+  /*
+   * #282: na pergunta aberta, na sondagem e no quiz, a coluna do telemóvel
+   * traz também o texto de ajuda (por cima) e os campos extra (por baixo).
+   * Com display: contents, cada peça vai para a sua linha da grelha: na linha
+   * do calendário fica só o telemóvel, e o calendário tem a altura dele, como
+   * na mensagem normal. Sem essas peças, as linhas «hint» e «below» ficam
+   * vazias e não ocupam espaço.
+   */
   .composerGridScheduling {
     grid-template-columns: minmax(0, 480px) 290px;
     grid-template-areas:
+      "hint ."
       "phone schedule"
+      "below ."
       "links links"
       "warning warning"
       "tools tools";
@@ -1207,12 +1227,20 @@
   }
 
   .composerGridScheduling .areaPhone {
-    display: flex;
-    flex-direction: column;
+    display: contents;
   }
 
-  .composerGridScheduling .areaPhone .phoneWrap {
-    flex: 1 1 auto;
+  .composerGridScheduling .areaPhone > .composerHint {
+    grid-area: hint;
+  }
+
+  .composerGridScheduling .areaPhone > .phoneWrap {
+    grid-area: phone;
+    min-width: 0;
+  }
+
+  .composerGridScheduling .areaPhone > .quizMeta {
+    grid-area: below;
   }
 
   .composerGridScheduling .areaSchedule {
