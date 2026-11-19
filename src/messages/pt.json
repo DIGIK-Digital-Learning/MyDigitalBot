@@ -595,7 +595,7 @@
         "8-1": "O Subcontratante poderá recorrer a prestadores de serviços terceiros (subprocessadores) para a prestação do serviço.",
         "8-2": "Estes incluem, a título exemplificativo:",
         "8-3": "O Subcontratante procura selecionar subprocessadores que ofereçam garantias adequadas em matéria de proteção de dados.",
-        "9-1": "Os dados pessoais poderão ser tratados fora do Espaço Económico Europeu (EEE), nomeadamente quando são utilizados subprocessadores internacionais.",
+        "9-1": "Os dados pessoais poderão ser tratados fora do Espaço Económico Europeu (EEE), nomeadamente nos Estados Unidos, pelos subprocessadores Vercel e OpenAI.",
         "9-2": "O Subcontratante procura assegurar que esses tratamentos são realizados com níveis adequados de proteção de dados.",
         "10-1": "O Subcontratante implementa medidas técnicas e organizativas adequadas para proteger os dados pessoais, incluindo:",
         "11-1": "O Subcontratante prestará assistência razoável ao Responsável pelo Tratamento para responder a pedidos dos titulares dos dados, nomeadamente pedidos de acesso, retificação ou eliminação.",
@@ -608,10 +608,10 @@
       },
       "Lists": {
         "4-1": {
-          "1": "dados de identificação (nome, email);",
+          "1": "dados de identificação e contacto (nome, email, telemóvel);",
           "2": "identificadores de utilizador (ex: Microsoft Teams, WhatsApp);",
-          "3": "conteúdo de mensagens e interações;",
-          "4": "metadados (IDs, timestamps, estados);",
+          "3": "conteúdo de mensagens, interações e respostas a perguntas;",
+          "4": "metadados (IDs, datas, estado de entrega e leitura, cliques em links);",
           "5": "dados técnicos (logs, IP, erros)."
         },
         "5-1": {
@@ -636,11 +636,11 @@
         },
         "8-2": {
           "1": "Microsoft (Teams, Azure);",
-          "2": "Vercel (alojamento da aplicação);",
-          "3": "Supabase (base de dados e armazenamento);",
-          "4": "OpenAI;",
-          "5": "MessageBird e Meta (WhatsApp);",
-          "6": "Cloudflare (infraestrutura e segurança)."
+          "2": "Vercel (alojamento da aplicação, Estados Unidos);",
+          "3": "Supabase (base de dados e armazenamento, União Europeia);",
+          "4": "OpenAI (inteligência artificial, Estados Unidos);",
+          "5": "Bird / MessageBird (envio de mensagens de WhatsApp);",
+          "6": "Meta (WhatsApp)."
         },
         "10-1": {
           "1": "proteção de comunicações (ex: HTTPS/TLS);",
@@ -743,23 +743,23 @@
         "3-1-2": "<br></br><strong>Dados de utilização e interação</strong>",
         "3-1-3": "<br></br><strong>Dados técnicos</strong>",
         "6-1": "O MyDigitalBot pode recorrer a tecnologias de inteligência artificial para gerar respostas automáticas e apoiar interações conversacionais.",
-        "6-2": "Para esse efeito, o conteúdo das mensagens poderá ser processado por sistemas de inteligência artificial fornecidos por prestadores de serviços externos, estritamente na medida do necessário para assegurar o funcionamento da solução.",
+        "6-2": "Para esse efeito, o conteúdo das mensagens e o histórico da conversa são processados pelo fornecedor de inteligência artificial (OpenAI), estritamente na medida do necessário para assegurar o funcionamento da solução. Os documentos que a organização carrega para os assistentes ficam guardados por esse fornecedor enquanto estiverem associados ao assistente. Os dados enviados através da API deste fornecedor não são utilizados para treinar modelos.",
         "6-3": "Os utilizadores poderão, em determinados contextos, estar a interagir com um sistema automatizado, sendo as respostas geradas sem intervenção humana direta.",
         "8-1": "Os dados poderão ser tratados por prestadores de serviços necessários ao funcionamento da plataforma, incluindo serviços de infraestrutura, inteligência artificial e canais de comunicação (ex: Microsoft Teams, WhatsApp ou outros).",
         "8-2": "A Gazelle Talent – Consultoria Empresarial, Lda procura selecionar entidades que ofereçam garantias adequadas em matéria de proteção de dados.",
-        "9-1": "Alguns dados poderão ser tratados fora do Espaço Económico Europeu (EEE) por prestadores de serviços utilizados pela plataforma.",
-        "9-2": "A Gazelle Talent – Consultoria Empresarial, Lda procura selecionar parceiros que assegurem níveis adequados de proteção de dados.",
-        "10-1": "Os dados são conservados apenas pelo período necessário ao funcionamento do serviço ou cumprimento de obrigações legais.",
+        "9-1": "A base de dados está alojada na União Europeia (Irlanda). Alguns dados são tratados fora do Espaço Económico Europeu (EEE), nomeadamente nos Estados Unidos, pelo fornecedor de alojamento da aplicação (Vercel) e pelo fornecedor de inteligência artificial (OpenAI).",
+        "9-2": "Estas transferências estão cobertas pelas condições de proteção de dados de cada fornecedor.",
+        "10-1": "Os dados são conservados enquanto a conta da organização estiver ativa, até a organização os apagar ou pedir a sua eliminação, salvo obrigação legal de conservação. Não há eliminação automática.",
         "11-1": "São implementadas medidas técnicas e organizativas adequadas para proteger os dados pessoais contra acesso não autorizado, perda ou divulgação.",
         "12-1": "Os utilizadores podem solicitar acesso, retificação ou eliminação dos seus dados através de: <email>geral@digik.pt</email>",
-        "13-1": "As organizações que utilizam o MyDigitalBot são responsáveis por assegurar que possuem base legal para contactar os utilizadores.",
+        "13-1": "As organizações que utilizam o MyDigitalBot são responsáveis por assegurar que possuem base legal para contactar os utilizadores e por os informar sobre o tratamento dos seus dados, incluindo o registo de leituras, de cliques nos links e de respostas a perguntas.",
         "14-1": "Esta política poderá ser atualizada periodicamente.",
         "15-1": "<strong>Gazelle Talent – Consultoria Empresarial, Lda</strong><br></br><email>geral@digik.pt</email>"
       },
       "Lists": {
         "3-1-1": {
           "1": "Nome;",
-          "2": "Endereço de email;",
+          "2": "Endereço de email e número de telemóvel;",
           "3": "Identificador do utilizador no canal de comunicação utilizado;",
           "4": "Informação associada à organização a que o utilizador pertence."
         },
@@ -768,7 +768,7 @@
           "2": "Conteúdo das interações com os assistentes automatizados;",
           "3": "Histórico conversacional;",
           "4": "Contexto necessário para dar seguimento às interações e melhorar a continuidade da conversa;",
-          "5": "Registos de utilização das funcionalidades da aplicação."
+          "5": "Registos de utilização, incluindo a indicação de que cada mensagem foi entregue e lida, os cliques nos links enviados e as respostas a perguntas e questionários."
         },
         "3-1-3": {
           "1": "Logs técnicos e operacionais;",
@@ -816,11 +816,11 @@
         "2-2": "As mensagens podem ser processadas por estas plataformas de terceiros para efeitos de entrega, segurança e funcionamento dos respetivos serviços, estando sujeitas às políticas e mecanismos de segurança definidos por esses fornecedores.",
         "3-1": "O MyDigitalBot pode recorrer a serviços de inteligência artificial fornecidos por terceiros para processar mensagens e gerar respostas automáticas.",
         "3-2": "Estes serviços são utilizados exclusivamente para suportar o funcionamento da aplicação e não para fins de publicidade.",
-        "3-3": "Sempre que possível, são utilizadas configurações que limitam a retenção e utilização dos dados ao estritamente necessário para a prestação do serviço.",
+        "3-3": "Os dados enviados através da API do fornecedor de inteligência artificial não são utilizados para treinar modelos.",
         "4-1": "Para disponibilizar o serviço, o MyDigitalBot recorre a prestadores de serviços tecnológicos (subprocessadores), que podem tratar dados pessoais em nome da Gazelle Talent – Consultoria Empresarial, Lda.",
         "4-2": "Estes incluem, a título exemplificativo:",
         "4-3": "A Gazelle Talent – Consultoria Empresarial, Lda procura selecionar parceiros que adotem práticas adequadas de segurança e proteção de dados.",
-        "5-1": "Nota: os períodos de retenção poderão variar em função das configurações da plataforma e das necessidades operacionais do serviço."
+        "5-1": "Nota: não há eliminação automática. A organização pode apagar os dados a qualquer momento ou pedir a sua eliminação."
       },
       "Lists": {
         "1-2": {
@@ -831,11 +831,11 @@
           "5": "isolamento lógico entre organizações (multi-tenant)."
         },
         "4-2": {
-          "1": "<strong>Microsoft</strong> – canais de comunicação (Teams) e infraestrutura Azure;",
-          "2": "<strong>Vercel</strong> – alojamento e execução da aplicação;",
-          "3": "<strong>Supabase</strong> – base de dados e armazenamento;",
-          "4": "<strong>OpenAI / Azure OpenAI</strong> – processamento de linguagem natural;",
-          "5": "<strong>MessageBird</strong> – integração com WhatsApp;",
+          "1": "<strong>Microsoft</strong> – canal Microsoft Teams e serviço de bots (Azure);",
+          "2": "<strong>Vercel</strong> – alojamento e execução da aplicação (Estados Unidos);",
+          "3": "<strong>Supabase</strong> – base de dados e armazenamento (União Europeia, Irlanda);",
+          "4": "<strong>OpenAI</strong> – processamento de linguagem natural e pesquisa nos documentos dos assistentes (Estados Unidos);",
+          "5": "<strong>Bird (MessageBird)</strong> – envio e receção de mensagens de WhatsApp;",
           "6": "<strong>Meta (WhatsApp)</strong> – canal de comunicação."
         }
       },
@@ -855,32 +855,32 @@
               "2": "Texto, anexos",
               "3": "Resposta e automação",
               "4": "Execução de serviço",
-              "5": "Até 12 meses",
-              "6": "Microsoft, serviços de IA"
+              "5": "Enquanto a conta estiver ativa",
+              "6": "Supabase, OpenAI, Microsoft, Meta, Bird"
             },
             "2": {
               "1": "Metadados",
-              "2": "IDs, timestamps, estados",
+              "2": "IDs, datas, estado de entrega e leitura, cliques",
               "3": "Entrega, segurança e métricas",
               "4": "Interesse legítimo",
-              "5": "Até 12 meses",
-              "6": "Microsoft, Meta, MessageBird"
+              "5": "Enquanto a conta estiver ativa",
+              "6": "Supabase, Microsoft, Meta, Bird"
             },
             "3": {
               "1": "Logs técnicos",
               "2": "IP, erros",
               "3": "Monitorização e depuração",
               "4": "Interesse legítimo",
-              "5": "30–90 dias",
-              "6": "Infraestrutura cloud"
+              "5": "Conforme o fornecedor de alojamento",
+              "6": "Vercel"
             },
             "4": {
               "1": "Dados de conta",
-              "2": "Nome, email",
+              "2": "Nome, email, telemóvel",
               "3": "Gestão de acessos",
               "4": "Execução de serviço",
               "5": "Enquanto ativo",
-              "6": "Microsoft"
+              "6": "Supabase"
             }
           }
         }

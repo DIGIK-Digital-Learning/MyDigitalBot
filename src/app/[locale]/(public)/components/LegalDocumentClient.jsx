@@ -31,19 +31,19 @@ export default function LegalDocumentClient() {
       "data-processing-agreement": {
         title: tDpa("Title"),
         subtitle: tDpa("LastUpdated"),
-        lastUpdated: "24/03/2026",
+        lastUpdated: "18/11/2026",
         sections: buildDPA(tDpa).sections,
       },
       "privacy-policy": {
         title: tP("Title"),
         subtitle: tP("LastUpdated"),
-        lastUpdated: "24/03/2026",
+        lastUpdated: "18/11/2026",
         sections: buildPrivacy(tP).sections,
       },
       "security-providers": {
         title: tSp("Title"),
         subtitle: tSp("LastUpdated"),
-        lastUpdated: "24/03/2026",
+        lastUpdated: "18/11/2026",
         sections: buildSec(tSp).sections,
       },
     }),

@@ -595,7 +595,7 @@
         "8-1": "The Processor may use third-party service providers (subprocessors) to provide the service.",
         "8-2": "These include, by way of example:",
         "8-3": "The Processor seeks to select subprocessors that offer adequate data protection guarantees.",
-        "9-1": "Personal data may be processed outside the European Economic Area (EEA), in particular where international subprocessors are used.",
+        "9-1": "Personal data may be processed outside the European Economic Area (EEA), in particular in the United States, by the subprocessors Vercel and OpenAI.",
         "9-2": "The Processor seeks to ensure that such processing is carried out with adequate levels of data protection.",
         "10-1": "The Processor implements appropriate technical and organizational measures to protect personal data, including:",
         "11-1": "The Processor will provide reasonable assistance to the Controller in responding to data subject requests, in particular requests for access, rectification or erasure.",
@@ -608,10 +608,10 @@
       },
       "Lists": {
         "4-1": {
-          "1": "identification data (name, email);",
+          "1": "identification and contact data (name, email, mobile phone);",
           "2": "user identifiers (e.g., Microsoft Teams, WhatsApp);",
-          "3": "message content and interactions;",
-          "4": "metadata (IDs, timestamps, statuses);",
+          "3": "message content, interactions and answers to questions;",
+          "4": "metadata (IDs, dates, delivery and read status, link clicks);",
           "5": "technical data (logs, IP, errors)."
         },
         "5-1": {
@@ -636,11 +636,11 @@
         },
         "8-2": {
           "1": "Microsoft (Teams, Azure);",
-          "2": "Vercel (application hosting);",
-          "3": "Supabase (database and storage);",
-          "4": "OpenAI;",
-          "5": "MessageBird and Meta (WhatsApp);",
-          "6": "Cloudflare (infrastructure and security)."
+          "2": "Vercel (application hosting, United States);",
+          "3": "Supabase (database and storage, European Union);",
+          "4": "OpenAI (artificial intelligence, United States);",
+          "5": "Bird / MessageBird (sending WhatsApp messages);",
+          "6": "Meta (WhatsApp)."
         },
         "10-1": {
           "1": "communications protection (e.g., HTTPS/TLS);",
@@ -743,23 +743,23 @@
         "3-1-2": "<br></br><strong>Usage and interaction data</strong>",
         "3-1-3": "<br></br><strong>Technical data</strong>",
         "6-1": "MyDigitalBot may use artificial intelligence technologies to generate automatic responses and support conversational interactions.",
-        "6-2": "For this purpose, the content of messages may be processed by artificial intelligence systems provided by external service providers, strictly to the extent necessary to ensure the operation of the solution.",
+        "6-2": "For this purpose, the content of messages and the conversation history are processed by the artificial intelligence provider (OpenAI), strictly to the extent necessary to ensure the operation of the solution. Documents that the organization uploads to the assistants are stored by this provider for as long as they are linked to the assistant. Data sent through this provider's API is not used to train models.",
         "6-3": "In certain contexts, users may be interacting with an automated system, with responses generated without direct human intervention.",
         "8-1": "Data may be processed by service providers necessary for the operation of the platform, including infrastructure, artificial intelligence and communication channel services (e.g., Microsoft Teams, WhatsApp or others).",
         "8-2": "Gazelle Talent – Consultoria Empresarial, Lda seeks to select entities that offer adequate data protection guarantees.",
-        "9-1": "Some data may be processed outside the European Economic Area (EEA) by service providers used by the platform.",
-        "9-2": "Gazelle Talent – Consultoria Empresarial, Lda seeks to select partners that ensure adequate levels of data protection.",
-        "10-1": "Data is retained only for the period necessary for the operation of the service or compliance with legal obligations.",
+        "9-1": "The database is hosted in the European Union (Ireland). Some data is processed outside the European Economic Area (EEA), in particular in the United States, by the application hosting provider (Vercel) and the artificial intelligence provider (OpenAI).",
+        "9-2": "These transfers are covered by each provider's data protection terms.",
+        "10-1": "Data is retained while the organization's account is active, until the organization deletes it or requests its deletion, unless retention is required by law. There is no automatic deletion.",
         "11-1": "Appropriate technical and organizational measures are implemented to protect personal data against unauthorized access, loss or disclosure.",
         "12-1": "Users may request access to, rectification or erasure of their data through: <email>geral@digik.pt</email>",
-        "13-1": "Organizations that use MyDigitalBot are responsible for ensuring that they have a legal basis to contact users.",
+        "13-1": "Organizations that use MyDigitalBot are responsible for ensuring that they have a legal basis to contact users and for informing them about the processing of their data, including the recording of reads, link clicks and answers to questions.",
         "14-1": "This policy may be updated periodically.",
         "15-1": "<strong>Gazelle Talent – Consultoria Empresarial, Lda</strong><br></br><email>geral@digik.pt</email>"
       },
       "Lists": {
         "3-1-1": {
           "1": "Name;",
-          "2": "Email address;",
+          "2": "Email address and mobile phone number;",
           "3": "User identifier on the communication channel used;",
           "4": "Information associated with the organization the user belongs to."
         },
@@ -768,7 +768,7 @@
           "2": "Content of interactions with automated assistants;",
           "3": "Conversation history;",
           "4": "Context needed to follow up on interactions and improve conversation continuity;",
-          "5": "Usage logs of the application's features."
+          "5": "Usage logs, including whether each message was delivered and read, clicks on the links sent, and answers to questions and quizzes."
         },
         "3-1-3": {
           "1": "Technical and operational logs;",
@@ -816,11 +816,11 @@
         "2-2": "Messages may be processed by these third-party platforms for delivery, security and operation of their respective services, and are subject to the security policies and mechanisms defined by those providers.",
         "3-1": "MyDigitalBot may use artificial intelligence services provided by third parties to process messages and generate automatic responses.",
         "3-2": "These services are used exclusively to support the operation of the application and not for advertising purposes.",
-        "3-3": "Wherever possible, configurations are used that limit the retention and use of data to what is strictly necessary to provide the service.",
+        "3-3": "Data sent through the artificial intelligence provider's API is not used to train models.",
         "4-1": "To provide the service, MyDigitalBot relies on technology service providers (subprocessors), which may process personal data on behalf of Gazelle Talent – Consultoria Empresarial, Lda.",
         "4-2": "These include, by way of example:",
         "4-3": "Gazelle Talent – Consultoria Empresarial, Lda seeks to select partners that adopt appropriate security and data protection practices.",
-        "5-1": "Note: retention periods may vary depending on the platform's settings and the operational needs of the service."
+        "5-1": "Note: there is no automatic deletion. The organization can delete the data at any time or request its deletion."
       },
       "Lists": {
         "1-2": {
@@ -831,11 +831,11 @@
           "5": "logical isolation between organizations (multi-tenant)."
         },
         "4-2": {
-          "1": "<strong>Microsoft</strong> – communication channels (Teams) and Azure infrastructure;",
-          "2": "<strong>Vercel</strong> – application hosting and execution;",
-          "3": "<strong>Supabase</strong> – database and storage;",
-          "4": "<strong>OpenAI / Azure OpenAI</strong> – natural language processing;",
-          "5": "<strong>MessageBird</strong> – WhatsApp integration;",
+          "1": "<strong>Microsoft</strong> – Microsoft Teams channel and bot service (Azure);",
+          "2": "<strong>Vercel</strong> – application hosting and execution (United States);",
+          "3": "<strong>Supabase</strong> – database and storage (European Union, Ireland);",
+          "4": "<strong>OpenAI</strong> – natural language processing and search in the assistants' documents (United States);",
+          "5": "<strong>Bird (MessageBird)</strong> – sending and receiving WhatsApp messages;",
           "6": "<strong>Meta (WhatsApp)</strong> – communication channel."
         }
       },
@@ -855,32 +855,32 @@
               "2": "Text, attachments",
               "3": "Response and automation",
               "4": "Performance of a service",
-              "5": "Up to 12 months",
-              "6": "Microsoft, AI services"
+              "5": "While the account is active",
+              "6": "Supabase, OpenAI, Microsoft, Meta, Bird"
             },
             "2": {
               "1": "Metadata",
-              "2": "IDs, timestamps, statuses",
+              "2": "IDs, dates, delivery and read status, clicks",
               "3": "Delivery, security and metrics",
               "4": "Legitimate interest",
-              "5": "Up to 12 months",
-              "6": "Microsoft, Meta, MessageBird"
+              "5": "While the account is active",
+              "6": "Supabase, Microsoft, Meta, Bird"
             },
             "3": {
               "1": "Technical logs",
               "2": "IP, errors",
               "3": "Monitoring and debugging",
               "4": "Legitimate interest",
-              "5": "30–90 days",
-              "6": "Cloud infrastructure"
+              "5": "As set by the hosting provider",
+              "6": "Vercel"
             },
             "4": {
               "1": "Account data",
-              "2": "Name, email",
+              "2": "Name, email, mobile phone",
               "3": "Access management",
               "4": "Performance of a service",
               "5": "While active",
-              "6": "Microsoft"
+              "6": "Supabase"
             }
           }
         }
