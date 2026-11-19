@@ -1519,13 +1519,13 @@
       "retry": "Try again",
       "noMatches": "No links match your search."
     },
-    "key": "Key",
-    "label": "Label",
-    "destinationUrl": "Destination URL",
+    "key": "Short name",
+    "label": "Link text",
+    "destinationUrl": "Address (URL)",
     "destinationUrlInvalid": "The destination must start with http:// or https://",
     "addPlaceholders": {
-      "first": "Add the placeholder like",
-      "second": "inside the message"
+      "first": "Write",
+      "second": "in the message where you want the link."
     },
     "start": {
       "title": "How do you want to start?",
@@ -1927,7 +1927,7 @@
       },
       "invalidLinks": {
         "title": "Invalid tracked links",
-        "message": "Please complete all tracked links and avoid duplicate keys."
+        "message": "Please complete all tracked links and avoid duplicate short names."
       },
       "chooseDateTime": {
         "title": "Choose date and time",
@@ -1970,9 +1970,9 @@
       "keyPlaceholder": "training",
       "labelPlaceholder": "Open the training",
       "urlPlaceholder": "https://example.com/course/123",
-      "placeholder": "Placeholder:",
+      "placeholder": "In the message:",
       "empty": "No tracked links added yet.",
-      "invalid": "Complete every tracked link and avoid duplicate keys."
+      "invalid": "Complete every tracked link and avoid duplicate short names."
     }
   },
   "BroadcastScheduled": {
@@ -2228,12 +2228,12 @@
     "title": "Tracked Links",
     "subtitle": "The links you created and the stats for the ones already sent.",
     "totalLinks": "Total Links",
-    "search": "Search by name, key, destination or channel",
+    "search": "Search by name, short name, destination or channel",
     "loading": "Loading links",
     "noLinks": "No links were found in this organization.",
     "table": {
       "label": "Name",
-      "key": "Key",
+      "key": "Short name",
       "channel": "Channel",
       "destination": "Destination",
       "recipients": "Recipients",
@@ -2263,8 +2263,8 @@
       "back": "Back",
       "loading": "Loading link details...",
       "trackedLink": "Tracked Link",
-      "key": "key",
-      "destinationUrl": "Destination URL",
+      "key": "short name",
+      "destinationUrl": "Address (URL)",
       "recipients": "Recipients",
       "clicked": "Clicked",
       "notClicked": "Not clicked",

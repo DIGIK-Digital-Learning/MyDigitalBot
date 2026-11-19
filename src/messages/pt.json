@@ -1519,13 +1519,13 @@
       "retry": "Tentar novamente",
       "noMatches": "Nenhum link corresponde à pesquisa."
     },
-    "key": "Chave",
-    "label": "Rótulo",
-    "destinationUrl": "URL Destino",
+    "key": "Nome curto",
+    "label": "Texto do link",
+    "destinationUrl": "Endereço (URL)",
     "destinationUrlInvalid": "O destino tem de começar por http:// ou https://",
     "addPlaceholders": {
-      "first": "Adiciona o placeholder tipo",
-      "second": "dentro da mensagem"
+      "first": "Escreve",
+      "second": "na mensagem no sítio onde queres o link."
     },
     "start": {
       "title": "Como queres começar?",
@@ -1927,7 +1927,7 @@
       },
       "invalidLinks": {
         "title": "Links rastreados inválidos",
-        "message": "Completa todos os links rastreados e não repitas chaves."
+        "message": "Completa todos os links rastreados e não repitas nomes curtos."
       },
       "chooseDateTime": {
         "title": "Escolhe a data e a hora",
@@ -1970,9 +1970,9 @@
       "keyPlaceholder": "formacao",
       "labelPlaceholder": "Aceder à formação",
       "urlPlaceholder": "https://exemplo.pt/curso/123",
-      "placeholder": "Variável:",
+      "placeholder": "Na mensagem:",
       "empty": "Ainda não adicionaste links rastreados.",
-      "invalid": "Completa todos os links rastreados e não repitas chaves."
+      "invalid": "Completa todos os links rastreados e não repitas nomes curtos."
     }
   },
   "BroadcastScheduled": {
@@ -2228,12 +2228,12 @@
     "title": "Links Rastreados",
     "subtitle": "Os links que criaste e as estatísticas dos que já foram enviados.",
     "totalLinks": "Total de Links",
-    "search": "Procura por nome, chave, destino ou canal",
+    "search": "Procura por nome, nome curto, destino ou canal",
     "loading": "A carregar links",
     "noLinks": "Não foram encontrados links nesta organização.",
     "table": {
       "label": "Nome",
-      "key": "Chave",
+      "key": "Nome curto",
       "channel": "Canal",
       "destination": "Destino",
       "recipients": "Recipientes",
@@ -2263,8 +2263,8 @@
       "back": "Voltar",
       "loading": "A carregar os detalhes do link...",
       "trackedLink": "Link Rastreado",
-      "key": "chave",
-      "destinationUrl": "URL Destino",
+      "key": "nome curto",
+      "destinationUrl": "Endereço (URL)",
       "recipients": "Recipientes",
       "clicked": "Clicado",
       "notClicked": "Não clicado",

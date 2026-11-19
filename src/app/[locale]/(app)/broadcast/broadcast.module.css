@@ -707,10 +707,35 @@
   background: #fff;
 }
 
+/* Campos dos links rastreados (pesquisa e formulário). Os componentes já
+   usavam styles.input, mas a classe não existia aqui e os campos saíam com o
+   aspeto por omissão do browser. É o mesmo aspeto do «Criar link» da página
+   Links rastreados. */
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #0f1c3f;
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+.input:focus {
+  outline: 2px solid var(--brand-1);
+  outline-offset: 1px;
+  background: #fff;
+}
+
 .linkLibraryText {
   display: grid;
   gap: 2px;
   min-width: 0;
+  /* O texto ocupa o espaço que sobra: os botões «Usar» e × ficam sempre
+     encostados à direita, alinhados de link para link. */
+  flex: 1 1 auto;
 }
 
 .linkLibraryUrl {

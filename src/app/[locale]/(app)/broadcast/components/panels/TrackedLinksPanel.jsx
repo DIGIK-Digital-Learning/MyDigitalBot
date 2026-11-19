@@ -206,7 +206,10 @@ export default function TrackedLinksPanel({
 
       <div className={styles.modalHelpText}>
         {translation("Broadcast.addPlaceholders.first")}{" "}
-        <code>{`{{link.training}}`}</code>{" "}
+        {/* #284: o mesmo exemplo do campo «Nome curto» (formacao / training). */}
+        <code>{`{{link.${translation(
+          "Broadcast.trackedLinkForm.keyPlaceholder",
+        )}}}`}</code>{" "}
         {translation("Broadcast.addPlaceholders.second")}
       </div>
 
