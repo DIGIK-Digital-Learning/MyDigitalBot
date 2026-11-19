@@ -3782,8 +3782,7 @@
     "available": "Available",
     "online": "online",
     "contact": "Contact",
-    "teamsChat": "Chat",
-    "teamsShared": "Shared"
+    "teamsChat": "Chat"
   },
   "Redirect": {
     "unavailable": "Link unavailable",
