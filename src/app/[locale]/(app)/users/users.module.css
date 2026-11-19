@@ -430,6 +430,18 @@
   gap: 8px;
 }
 
+/* O indicativo fica com a sua largura; o número ocupa o resto e pode encolher.
+   Sem min-width: 0, o <input> não desce abaixo da largura própria (~20
+   caracteres) e sai do cartão do WhatsApp. */
+.phoneRow .phoneCodeSelect {
+  flex: 0 0 auto;
+}
+
+.phoneRow input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .phoneCodeSelect {
   min-width: 110px;
 }
