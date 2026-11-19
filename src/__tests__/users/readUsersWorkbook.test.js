@@ -111,3 +111,20 @@ describe("readUsersWorkbook", () => {
     expect(await readUsersWorkbook(buffer, ExcelJS)).toEqual([]);
   });
 });
+
+describe("#283: coluna dos grupos no CSV", () => {
+  const base = { name: "Ana", email: "ana@example.com" };
+
+  it("aceita «Grupos» (o nome novo na app)", () => {
+    expect(mapCsvRow({ ...base, Grupos: "Vendas, Loja" }).tags).toEqual(
+      mapCsvRow({ ...base, tags: "Vendas, Loja" }).tags,
+    );
+    expect(mapCsvRow({ ...base, groups: "Vendas" }).tags).toEqual(
+      mapCsvRow({ ...base, tags: "Vendas" }).tags,
+    );
+  });
+
+  it("os CSV antigos com «tags» continuam a funcionar", () => {
+    expect(mapCsvRow({ ...base, tags: "Vendas" }).tags).not.toHaveLength(0);
+  });
+});

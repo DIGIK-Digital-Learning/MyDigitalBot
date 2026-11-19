@@ -176,7 +176,18 @@ export default function mapCsvRow(
   ]);
 
   const tags = parseTags(
-    getValue(normalized, ["tags", "tag", "user_tags", "tag_names"]),
+    // #283: na app as tags chamam-se «Grupos»; os CSV antigos com «tags»
+    // continuam a funcionar.
+    getValue(normalized, [
+      "tags",
+      "tag",
+      "user_tags",
+      "tag_names",
+      "grupos",
+      "grupo",
+      "groups",
+      "group",
+    ]),
   );
 
   return {

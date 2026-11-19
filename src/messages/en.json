@@ -935,7 +935,7 @@
     "email": "Email",
     "phone": "Phone no.",
     "name": "Name",
-    "tags": "Tags",
+    "tags": "Groups",
     "noResults": "No results.",
     "chooseAssistant": "Choose assistant",
     "add": "Add",
@@ -963,7 +963,7 @@
   "Users": {
     "title": "Users",
     "searchPlaceholder": "Search",
-    "manageTags": "Manage Tags",
+    "manageTags": "Manage Groups",
     "newUser": "New user",
     "importCsv": "Import CSV",
     "pagination": {
@@ -976,7 +976,7 @@
       "name": "Name",
       "phone": "Phone No.",
       "thisWeek": "This week",
-      "tags": "Tags",
+      "tags": "Groups",
       "assistant": "Assistant"
     },
     "row": {
@@ -1003,8 +1003,8 @@
         "message": "The list of assistants could not be loaded."
       },
       "tagsLoadFailed": {
-        "title": "Error loading tags",
-        "message": "The users' tags could not be loaded."
+        "title": "Error loading groups",
+        "message": "The users' groups could not be loaded."
       },
       "usersLoadFailed": {
         "title": "Error loading users",
@@ -1152,7 +1152,7 @@
     "search": "Search…",
     "clear": "Clear",
     "close": "Close",
-    "tags": "Tags",
+    "tags": "Groups",
     "assistants": "Assistants",
     "empty": "No results."
   },
@@ -1175,8 +1175,8 @@
     "email": "Email",
     "assistant": "Assistant",
     "chooseAssistant": "Choose assistant",
-    "tags": "Tags",
-    "noTags": "No tags available.",
+    "tags": "Groups",
+    "noTags": "No groups available.",
     "remove": "Remove",
     "add": "Add New",
     "delete": "Delete",
@@ -1200,26 +1200,26 @@
     "communicationChannels": "Communication Channels"
   },
   "ManageTagsModal": {
-    "nameTaken": "A tag with that name already exists.",
+    "nameTaken": "A group with that name already exists.",
     "saveFailed": "Could not save. Try again.",
-    "title": "Manage Tags",
+    "title": "Manage Groups",
     "loading": "Loading…",
-    "none": "No tags.",
+    "none": "No groups.",
     "name": "Name:",
     "placeholder": "Group 1",
     "save": "Save",
     "add": "Add",
     "cancel": "Cancel",
     "removeLabel": "Remove {name}",
-    "newLabel": "New tag",
-    "listLabel": "Tags",
+    "newLabel": "New group",
+    "listLabel": "Groups",
     "search": "Search",
     "rename": "Rename",
     "delete": "Delete",
     "close": "Close",
     "noResults": "No results.",
-    "confirmDeleteTitle": "Delete the tag {name}?",
-    "confirmDeleteMessage": "The tag will be removed from all users who have it."
+    "confirmDeleteTitle": "Delete the group {name}?",
+    "confirmDeleteMessage": "The group will be removed from all users who have it."
   },
   "Options": {
     "Title": "Settings",
@@ -1627,8 +1627,8 @@
         "message": "Tracked links are per person and can't go to groups. Remove them before sending."
       },
       "noNameVariable": {
-        "title": "Name variable",
-        "message": "The Name variable has no value in a group. Remove it before sending."
+        "title": "Name tag",
+        "message": "The Name tag has no value in a group. Remove it before sending."
       },
       "confirmSend": {
         "title": "Send to groups?",
@@ -1663,7 +1663,7 @@
         "saveFailed": "Couldn't add the image to the message. Try again."
       },
       "composer": {
-        "openQuestionHint": "Write the question in the bubble and set the expected answer below. Use + for images, links and variables.",
+        "openQuestionHint": "Write the question in the bubble and set the expected answer below. Use + for images, links and tags.",
         "openQuestionBody": "Open question",
         "openQuestionPlaceholder": "What do you want to ask?",
         "expectedAnswer": "Expected answer (required)",
@@ -1671,7 +1671,7 @@
         "expectedAnswerHint": "The contact receives the AI's feedback and then the expected answer. If you turn off evaluation, they only receive the expected answer.",
         "contact": "Contact",
         "back": "Change message type",
-        "hint": "Type directly in the bubble. Use + to add images, links and variables.",
+        "hint": "Type directly in the bubble. Use + to add images, links and tags.",
         "placeholder": "Write the message here...",
         "barHint": "Tap the bubble to write",
         "add": "Add",
@@ -1687,7 +1687,7 @@
         "linkButtonInText": "{count, plural, one {There are no buttons here: the link {labels} goes at the end of the text.} other {There are no buttons here: the links {labels} go at the end of the text.}}",
         "linkNeedsText": "Write some text: on WhatsApp, the link goes in a button and the message needs text.",
         "chainStepNeedsText": "Step {step}: write some text. On WhatsApp, the link goes in a button and the message needs text.",
-        "variables": "Variables",
+        "variables": "Tags",
         "variableName": "Name",
         "variableCompany": "Company",
         "openingTitle": "Opening message",
@@ -1699,7 +1699,7 @@
         "openingLoadFailed": "Couldn't load the opening message.",
         "retry": "Try again",
         "quizTitle": "Quiz",
-        "quizHint": "Write the question in the bubble and the options in the buttons. Mark the correct one in the circle. Use + for images, links and variables. Anyone outside the window receives the opening first.",
+        "quizHint": "Write the question in the bubble and the options in the buttons. Mark the correct one in the circle. Use + for images, links and tags. Anyone outside the window receives the opening first.",
         "quizBody": "Quiz question",
         "quizPlaceholder": "Write the question...",
         "quizOption": "Option {index}",
@@ -1712,7 +1712,7 @@
         "quizFeedbackHint": "If left empty, the default text is sent. You can write '{{'certa'}}' to include the correct option.",
         "quizValidity": "The quiz accepts answers for {days} days. Only each contact's first answer counts.",
         "surveyTitle": "Survey",
-        "surveyHint": "Write the question in the bubble and the options in the buttons. There is no right answer: only the choice is recorded. Use + for images, links and variables.",
+        "surveyHint": "Write the question in the bubble and the options in the buttons. There is no right answer: only the choice is recorded. Use + for images, links and tags.",
         "surveyBody": "Survey question",
         "surveyPlaceholder": "Write the question...",
         "surveyOption": "Option {index}",
@@ -1732,7 +1732,7 @@
         },
         "filtersLoadFailed": {
           "title": "Error loading filters",
-          "message": "Couldn't load the tags or assistants. Some filters may not be available."
+          "message": "Couldn't load the groups or assistants. Some filters may not be available."
         },
         "contentMissing": {
           "title": "Missing content",
@@ -1782,7 +1782,7 @@
       }
     },
     "composer": {
-      "openQuestionHint": "Write the question in the bubble and set the expected answer below. Use + for images, links and variables.",
+      "openQuestionHint": "Write the question in the bubble and set the expected answer below. Use + for images, links and tags.",
       "openQuestionBody": "Open question",
       "openQuestionPlaceholder": "What do you want to ask?",
       "expectedAnswer": "Expected answer (required)",
@@ -1790,7 +1790,7 @@
       "expectedAnswerHint": "The contact receives the AI's feedback and then the expected answer. If you turn off evaluation, they only receive the expected answer.",
       "contact": "Contact",
       "back": "Change message type",
-      "hint": "Type directly in the bubble. Use + to add images, links and variables.",
+      "hint": "Type directly in the bubble. Use + to add images, links and tags.",
       "placeholder": "Write the message here...",
       "barHint": "Tap the bubble to write",
       "add": "Add",
@@ -1806,7 +1806,7 @@
       "linkButtonInText": "{count, plural, one {There are no buttons here: the link {labels} goes at the end of the text.} other {There are no buttons here: the links {labels} go at the end of the text.}}",
       "linkNeedsText": "Write some text: on WhatsApp, the link goes in a button and the message needs text.",
       "chainStepNeedsText": "Step {step}: write some text. On WhatsApp, the link goes in a button and the message needs text.",
-      "variables": "Variables",
+      "variables": "Tags",
       "variableName": "Name",
       "variableCompany": "Company",
       "openingTitle": "Opening message",
@@ -1818,7 +1818,7 @@
       "openingLoadFailed": "Couldn't load the opening message.",
       "retry": "Try again",
       "quizTitle": "Quiz",
-      "quizHint": "Write the question in the bubble and the options in the buttons. Mark the correct one in the circle. Use + for images, links and variables. Anyone outside the window receives the opening first.",
+      "quizHint": "Write the question in the bubble and the options in the buttons. Mark the correct one in the circle. Use + for images, links and tags. Anyone outside the window receives the opening first.",
       "quizBody": "Quiz question",
       "quizPlaceholder": "Write the question...",
       "quizOption": "Option {index}",
@@ -1831,7 +1831,7 @@
       "quizFeedbackHint": "If left empty, the default text is sent. You can write '{{'certa'}}' to include the correct option.",
       "quizValidity": "The quiz accepts answers for {days} days. Only each contact's first answer counts.",
       "surveyTitle": "Survey",
-      "surveyHint": "Write the question in the bubble and the options in the buttons. There is no right answer: only the choice is recorded. Use + for images, links and variables.",
+      "surveyHint": "Write the question in the bubble and the options in the buttons. There is no right answer: only the choice is recorded. Use + for images, links and tags.",
       "surveyBody": "Survey question",
       "surveyPlaceholder": "Write the question...",
       "surveyOption": "Option {index}",
@@ -1851,7 +1851,7 @@
       },
       "filtersLoadFailed": {
         "title": "Error loading filters",
-        "message": "Couldn't load the tags or assistants. Some filters may not be available."
+        "message": "Couldn't load the groups or assistants. Some filters may not be available."
       },
       "contentMissing": {
         "title": "Missing content",
@@ -2388,7 +2388,7 @@
         "name": "Name",
         "email": "Email",
         "phone": "Phone",
-        "tags": "Tags",
+        "tags": "Groups",
         "assistant": "Assistant",
         "channel": "Channel",
         "answer": "Answer",
@@ -2908,11 +2908,11 @@
     "apply": "Replace",
     "addAssistantHint": "Adds this assistant to the ones users already have",
     "replaceAssistantHint": "Users will have only this assistant",
-    "tag": "Add/Remove Tags",
+    "tag": "Add/Remove Groups",
     "add": "Add",
-    "addTags": "Adds the selected tags to the users",
+    "addTags": "Adds the selected groups to the users",
     "remove": "Remove",
-    "removeTags": "Removes the selected tags from the users",
+    "removeTags": "Removes the selected groups from the users",
     "delete": "Delete Users",
     "deleteUsers": "Delete selected users",
     "confirmUserDeletion": {
@@ -2921,7 +2921,7 @@
       "confirm": "Delete",
       "cancel": "Cancel"
     },
-    "noTags": "No tags yet"
+    "noTags": "No groups yet"
   },
   "Analytics": {
     "title": "Analytics",
@@ -3158,7 +3158,7 @@
         "whatsappId": "WhatsApp ID",
         "teamsId": "Teams ID",
         "assistant": "Assistant",
-        "tags": "Tags",
+        "tags": "Groups",
         "recipients": "Recipients",
         "clicked": "Clicked",
         "clicksTotal": "Clicks",
@@ -3235,7 +3235,7 @@
       "all": "All areas",
       "teams_group": "Teams groups",
       "user": "Users",
-      "tag": "Tags",
+      "tag": "Groups",
       "assistant": "Assistants",
       "automation": "Automations",
       "broadcast": "Messages",
@@ -3255,11 +3255,11 @@
       "user_deleted": "User deleted",
       "user_bulk_updated": "Assistant changed in bulk",
       "user_bulk_deleted": "Users deleted in bulk",
-      "user_tags_updated": "User tags changed",
+      "user_tags_updated": "User groups changed",
       "user_imported": "Users imported",
-      "tag_created": "Tag created",
-      "tag_updated": "Tag edited",
-      "tag_deleted": "Tag deleted",
+      "tag_created": "Group created",
+      "tag_updated": "Group edited",
+      "tag_deleted": "Group deleted",
       "assistant_created": "Assistant created",
       "assistant_updated": "Assistant edited",
       "assistant_deleted": "Assistant deleted",
@@ -3357,7 +3357,7 @@
         "teamsAadObjectId": "Teams identity",
         "teamsFromId": "Teams identity",
         "assistantId": "Assistant",
-        "tagIds": "Tags",
+        "tagIds": "Groups",
         "color": "Color",
         "is_archived": "Archived",
         "description": "Description",
@@ -3378,9 +3378,9 @@
         "status": "Status"
       },
       "tagOps": {
-        "add": "Tags added",
-        "remove": "Tags removed",
-        "set": "Tags replaced"
+        "add": "Groups added",
+        "remove": "Groups removed",
+        "set": "Groups replaced"
       },
       "triggers": {
         "user_created": "User created",
@@ -3541,7 +3541,7 @@
       "whatsappConfigured": "With WhatsApp set up",
       "teamsUsed": "Have used Teams",
       "whatsappUsed": "Have used WhatsApp",
-      "tags": "Tags created",
+      "tags": "Groups created",
       "assistants": "Assistants created",
       "automationsTotal": "Automations created",
       "automationsActive": "Active automations",
@@ -3744,7 +3744,7 @@
       "teams": "Teams AAD Object ID",
       "phone": "Phone",
       "assistant": "Assistant",
-      "tags": "Tags"
+      "tags": "Groups"
     },
     "resultSection": "Import result",
     "result": {
@@ -3771,7 +3771,7 @@
       "noIdentifier": "No email, Teams AAD Object ID, or phone number found",
       "conflict": "Multiple matching users found. Email, phone, or Teams AAD Object ID belong to different users.",
       "missingName": "Missing name",
-      "unknownTags": "Unknown tag(s): {tags}",
+      "unknownTags": "Unknown group(s): {tags}",
       "duplicateUser": "Duplicate row for the same existing user",
       "duplicateEmail": "Duplicate email in import file",
       "duplicateTeams": "Duplicate Teams AAD Object ID in import file",

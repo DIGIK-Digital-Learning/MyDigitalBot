@@ -935,7 +935,7 @@
     "email": "Email",
     "phone": "Nº. Telemóvel",
     "name": "Nome",
-    "tags": "Tags",
+    "tags": "Grupos",
     "noResults": "Sem resultados.",
     "chooseAssistant": "Escolher assistente",
     "add": "Adicionar",
@@ -963,7 +963,7 @@
   "Users": {
     "title": "Utilizadores",
     "searchPlaceholder": "Procurar",
-    "manageTags": "Gerir Tags",
+    "manageTags": "Gerir Grupos",
     "newUser": "Novo utilizador",
     "importCsv": "Importar CSV",
     "pagination": {
@@ -976,7 +976,7 @@
       "name": "Nome",
       "phone": "Nº. Telemóvel",
       "thisWeek": "Esta semana",
-      "tags": "Tags",
+      "tags": "Grupos",
       "assistant": "Assistente"
     },
     "row": {
@@ -1003,8 +1003,8 @@
         "message": "Não foi possível carregar a lista de assistentes."
       },
       "tagsLoadFailed": {
-        "title": "Erro ao carregar tags",
-        "message": "Não foi possível carregar as tags dos utilizadores."
+        "title": "Erro ao carregar grupos",
+        "message": "Não foi possível carregar os grupos dos utilizadores."
       },
       "usersLoadFailed": {
         "title": "Erro ao carregar utilizadores",
@@ -1152,7 +1152,7 @@
     "search": "Procurar…",
     "clear": "Limpar",
     "close": "Fechar",
-    "tags": "Tags",
+    "tags": "Grupos",
     "assistants": "Assistentes",
     "empty": "Sem resultados."
   },
@@ -1175,8 +1175,8 @@
     "email": "E-mail",
     "assistant": "Assistente",
     "chooseAssistant": "Escolher assistente",
-    "tags": "Tags",
-    "noTags": "Sem tags disponíveis.",
+    "tags": "Grupos",
+    "noTags": "Sem grupos disponíveis.",
     "remove": "Remover",
     "add": "Adicionar Novo",
     "delete": "Eliminar",
@@ -1200,26 +1200,26 @@
     "communicationChannels": "Canais de Comunicação"
   },
   "ManageTagsModal": {
-    "nameTaken": "Já existe uma tag com esse nome.",
+    "nameTaken": "Já existe um grupo com esse nome.",
     "saveFailed": "Não foi possível guardar. Tenta outra vez.",
-    "title": "Gerir Tags",
+    "title": "Gerir Grupos",
     "loading": "A carregar…",
-    "none": "Sem tags.",
+    "none": "Sem grupos.",
     "name": "Nome:",
     "placeholder": "Grupo 1",
     "save": "Guardar",
     "add": "Adicionar",
     "cancel": "Cancelar",
     "removeLabel": "Remover {name}",
-    "newLabel": "Nova tag",
-    "listLabel": "Tags",
+    "newLabel": "Novo grupo",
+    "listLabel": "Grupos",
     "search": "Procurar",
     "rename": "Mudar nome",
     "delete": "Eliminar",
     "close": "Fechar",
     "noResults": "Sem resultados.",
-    "confirmDeleteTitle": "Eliminar a tag {name}?",
-    "confirmDeleteMessage": "A tag sai de todos os utilizadores que a têm."
+    "confirmDeleteTitle": "Eliminar o grupo {name}?",
+    "confirmDeleteMessage": "O grupo sai de todos os utilizadores que o têm."
   },
   "Options": {
     "Title": "Definições",
@@ -1627,8 +1627,8 @@
         "message": "Os links rastreados são por pessoa e não podem ir para grupos. Remove-os antes de enviar."
       },
       "noNameVariable": {
-        "title": "Variável Nome",
-        "message": "A variável Nome não tem valor num grupo. Remove-a antes de enviar."
+        "title": "Tag Nome",
+        "message": "A tag Nome não tem valor num grupo. Remove-a antes de enviar."
       },
       "confirmSend": {
         "title": "Enviar para grupos?",
@@ -1663,7 +1663,7 @@
         "saveFailed": "Não foi possível juntar a imagem à mensagem. Tenta outra vez."
       },
       "composer": {
-        "openQuestionHint": "Escreve a pergunta no balão e define a resposta esperada abaixo. Usa o + para imagens, links e variáveis.",
+        "openQuestionHint": "Escreve a pergunta no balão e define a resposta esperada abaixo. Usa o + para imagens, links e tags.",
         "openQuestionBody": "Pergunta aberta",
         "openQuestionPlaceholder": "O que queres perguntar?",
         "expectedAnswer": "Resposta esperada (obrigatória)",
@@ -1671,7 +1671,7 @@
         "expectedAnswerHint": "O contacto recebe o feedback da IA e depois a resposta esperada. Se desligares a avaliação, recebe apenas a resposta esperada.",
         "contact": "Contacto",
         "back": "Mudar o tipo de mensagem",
-        "hint": "Escreve diretamente no balão. Usa o + para juntar imagens, links e variáveis.",
+        "hint": "Escreve diretamente no balão. Usa o + para juntar imagens, links e tags.",
         "placeholder": "Escreve a mensagem aqui...",
         "barHint": "Toca no balão para escrever",
         "add": "Adicionar",
@@ -1687,7 +1687,7 @@
         "linkButtonInText": "{count, plural, one {Aqui não há botões: o link {labels} vai no fim do texto.} other {Aqui não há botões: os links {labels} vão no fim do texto.}}",
         "linkNeedsText": "Escreve algum texto: no WhatsApp, o link vai num botão e a mensagem precisa de texto.",
         "chainStepNeedsText": "Passo {step}: escreve algum texto. No WhatsApp, o link vai num botão e a mensagem precisa de texto.",
-        "variables": "Variáveis",
+        "variables": "Tags",
         "variableName": "Nome",
         "variableCompany": "Empresa",
         "openingTitle": "Mensagem de abertura",
@@ -1699,7 +1699,7 @@
         "openingLoadFailed": "Não foi possível carregar a mensagem de abertura.",
         "retry": "Tentar novamente",
         "quizTitle": "Quiz",
-        "quizHint": "Escreve a pergunta no balão e as opções nos botões. Marca a certa no círculo. Usa o + para imagens, links e variáveis. Quem estiver fora da janela recebe primeiro a abertura.",
+        "quizHint": "Escreve a pergunta no balão e as opções nos botões. Marca a certa no círculo. Usa o + para imagens, links e tags. Quem estiver fora da janela recebe primeiro a abertura.",
         "quizBody": "Pergunta do quiz",
         "quizPlaceholder": "Escreve a pergunta...",
         "quizOption": "Opção {index}",
@@ -1712,7 +1712,7 @@
         "quizFeedbackHint": "Se ficarem vazios, envia-se o texto por omissão. Podes escrever '{{'certa'}}' para incluir a opção certa.",
         "quizValidity": "O quiz aceita respostas durante {days} dias. Só a primeira resposta de cada contacto conta.",
         "surveyTitle": "Sondagem",
-        "surveyHint": "Escreve a pergunta no balão e as opções nos botões. Não há resposta certa: regista-se só a escolha. Usa o + para imagens, links e variáveis.",
+        "surveyHint": "Escreve a pergunta no balão e as opções nos botões. Não há resposta certa: regista-se só a escolha. Usa o + para imagens, links e tags.",
         "surveyBody": "Pergunta da sondagem",
         "surveyPlaceholder": "Escreve a pergunta...",
         "surveyOption": "Opção {index}",
@@ -1732,7 +1732,7 @@
         },
         "filtersLoadFailed": {
           "title": "Erro ao carregar filtros",
-          "message": "Não foi possível carregar as tags ou assistentes. Alguns filtros podem não estar disponíveis."
+          "message": "Não foi possível carregar os grupos ou assistentes. Alguns filtros podem não estar disponíveis."
         },
         "contentMissing": {
           "title": "Conteúdo em falta",
@@ -1782,7 +1782,7 @@
       }
     },
     "composer": {
-      "openQuestionHint": "Escreve a pergunta no balão e define a resposta esperada abaixo. Usa o + para imagens, links e variáveis.",
+      "openQuestionHint": "Escreve a pergunta no balão e define a resposta esperada abaixo. Usa o + para imagens, links e tags.",
       "openQuestionBody": "Pergunta aberta",
       "openQuestionPlaceholder": "O que queres perguntar?",
       "expectedAnswer": "Resposta esperada (obrigatória)",
@@ -1790,7 +1790,7 @@
       "expectedAnswerHint": "O contacto recebe o feedback da IA e depois a resposta esperada. Se desligares a avaliação, recebe apenas a resposta esperada.",
       "contact": "Contacto",
       "back": "Mudar o tipo de mensagem",
-      "hint": "Escreve diretamente no balão. Usa o + para juntar imagens, links e variáveis.",
+      "hint": "Escreve diretamente no balão. Usa o + para juntar imagens, links e tags.",
       "placeholder": "Escreve a mensagem aqui...",
       "barHint": "Toca no balão para escrever",
       "add": "Adicionar",
@@ -1806,7 +1806,7 @@
       "linkButtonInText": "{count, plural, one {Aqui não há botões: o link {labels} vai no fim do texto.} other {Aqui não há botões: os links {labels} vão no fim do texto.}}",
       "linkNeedsText": "Escreve algum texto: no WhatsApp, o link vai num botão e a mensagem precisa de texto.",
       "chainStepNeedsText": "Passo {step}: escreve algum texto. No WhatsApp, o link vai num botão e a mensagem precisa de texto.",
-      "variables": "Variáveis",
+      "variables": "Tags",
       "variableName": "Nome",
       "variableCompany": "Empresa",
       "openingTitle": "Mensagem de abertura",
@@ -1818,7 +1818,7 @@
       "openingLoadFailed": "Não foi possível carregar a mensagem de abertura.",
       "retry": "Tentar novamente",
       "quizTitle": "Quiz",
-      "quizHint": "Escreve a pergunta no balão e as opções nos botões. Marca a certa no círculo. Usa o + para imagens, links e variáveis. Quem estiver fora da janela recebe primeiro a abertura.",
+      "quizHint": "Escreve a pergunta no balão e as opções nos botões. Marca a certa no círculo. Usa o + para imagens, links e tags. Quem estiver fora da janela recebe primeiro a abertura.",
       "quizBody": "Pergunta do quiz",
       "quizPlaceholder": "Escreve a pergunta...",
       "quizOption": "Opção {index}",
@@ -1831,7 +1831,7 @@
       "quizFeedbackHint": "Se ficarem vazios, envia-se o texto por omissão. Podes escrever '{{'certa'}}' para incluir a opção certa.",
       "quizValidity": "O quiz aceita respostas durante {days} dias. Só a primeira resposta de cada contacto conta.",
       "surveyTitle": "Sondagem",
-      "surveyHint": "Escreve a pergunta no balão e as opções nos botões. Não há resposta certa: regista-se só a escolha. Usa o + para imagens, links e variáveis.",
+      "surveyHint": "Escreve a pergunta no balão e as opções nos botões. Não há resposta certa: regista-se só a escolha. Usa o + para imagens, links e tags.",
       "surveyBody": "Pergunta da sondagem",
       "surveyPlaceholder": "Escreve a pergunta...",
       "surveyOption": "Opção {index}",
@@ -1851,7 +1851,7 @@
       },
       "filtersLoadFailed": {
         "title": "Erro ao carregar filtros",
-        "message": "Não foi possível carregar as tags ou assistentes. Alguns filtros podem não estar disponíveis."
+        "message": "Não foi possível carregar os grupos ou assistentes. Alguns filtros podem não estar disponíveis."
       },
       "contentMissing": {
         "title": "Conteúdo em falta",
@@ -2388,7 +2388,7 @@
         "name": "Nome",
         "email": "Email",
         "phone": "Telemóvel",
-        "tags": "Etiquetas",
+        "tags": "Grupos",
         "assistant": "Assistente",
         "channel": "Canal",
         "answer": "Resposta",
@@ -2908,11 +2908,11 @@
     "apply": "Substituir",
     "addAssistantHint": "Junta este assistente aos que os utilizadores já têm",
     "replaceAssistantHint": "Os utilizadores ficam só com este assistente",
-    "tag": "Adicionar/Remover Tags",
+    "tag": "Adicionar/Remover Grupos",
     "add": "Adicionar",
-    "addTags": "Adiciona as tags selecionadas aos users",
+    "addTags": "Adiciona os grupos selecionados aos users",
     "remove": "Remover",
-    "removeTags": "Remover Tags selecionadas aos users",
+    "removeTags": "Remover Grupos selecionados aos users",
     "delete": "Eliminar Utilizadores",
     "deleteUsers": "Eliminar users selecionados",
     "confirmUserDeletion": {
@@ -2921,7 +2921,7 @@
       "confirm": "Eliminar",
       "cancel": "Cancelar"
     },
-    "noTags": "Ainda não há tags"
+    "noTags": "Ainda não há grupos"
   },
   "Analytics": {
     "title": "Métricas",
@@ -3158,7 +3158,7 @@
         "whatsappId": "ID WhatsApp",
         "teamsId": "ID Teams",
         "assistant": "Assistente",
-        "tags": "Etiquetas",
+        "tags": "Grupos",
         "recipients": "Destinatarios",
         "clicked": "Clicaram",
         "clicksTotal": "Cliques",
@@ -3235,7 +3235,7 @@
       "all": "Todas as áreas",
       "teams_group": "Grupos Teams",
       "user": "Colaboradores",
-      "tag": "Tags",
+      "tag": "Grupos",
       "assistant": "Assistentes",
       "automation": "Automações",
       "broadcast": "Mensagens",
@@ -3255,11 +3255,11 @@
       "user_deleted": "Colaborador eliminado",
       "user_bulk_updated": "Assistente alterado em massa",
       "user_bulk_deleted": "Colaboradores eliminados em massa",
-      "user_tags_updated": "Tags de colaboradores alteradas",
+      "user_tags_updated": "Grupos de colaboradores alterados",
       "user_imported": "Colaboradores importados",
-      "tag_created": "Tag criada",
-      "tag_updated": "Tag editada",
-      "tag_deleted": "Tag eliminada",
+      "tag_created": "Grupo criado",
+      "tag_updated": "Grupo editado",
+      "tag_deleted": "Grupo eliminado",
       "assistant_created": "Assistente criado",
       "assistant_updated": "Assistente editado",
       "assistant_deleted": "Assistente eliminado",
@@ -3357,7 +3357,7 @@
         "teamsAadObjectId": "Identificação Teams",
         "teamsFromId": "Identificação Teams",
         "assistantId": "Assistente",
-        "tagIds": "Tags",
+        "tagIds": "Grupos",
         "color": "Cor",
         "is_archived": "Arquivada",
         "description": "Descrição",
@@ -3378,9 +3378,9 @@
         "status": "Estado"
       },
       "tagOps": {
-        "add": "Tags adicionadas",
-        "remove": "Tags removidas",
-        "set": "Tags substituídas"
+        "add": "Grupos adicionados",
+        "remove": "Grupos removidos",
+        "set": "Grupos substituídos"
       },
       "triggers": {
         "user_created": "Colaborador criado",
@@ -3541,7 +3541,7 @@
       "whatsappConfigured": "Com WhatsApp configurado",
       "teamsUsed": "Já utilizaram o Teams",
       "whatsappUsed": "Já utilizaram o WhatsApp",
-      "tags": "Tags criadas",
+      "tags": "Grupos criados",
       "assistants": "Assistentes criados",
       "automationsTotal": "Automações criadas",
       "automationsActive": "Automações ativas",
@@ -3744,7 +3744,7 @@
       "teams": "Teams AAD Object ID",
       "phone": "Telemóvel",
       "assistant": "Assistente",
-      "tags": "Tags"
+      "tags": "Grupos"
     },
     "resultSection": "Resultado da importação",
     "result": {
@@ -3771,7 +3771,7 @@
       "noIdentifier": "Sem email, Teams AAD Object ID nem telemóvel",
       "conflict": "Há vários utilizadores que correspondem: o email, o telemóvel ou o Teams AAD Object ID são de utilizadores diferentes.",
       "missingName": "Falta o nome",
-      "unknownTags": "Tags que não existem: {tags}",
+      "unknownTags": "Grupos que não existem: {tags}",
       "duplicateUser": "Linha repetida para o mesmo utilizador",
       "duplicateEmail": "Email repetido no ficheiro",
       "duplicateTeams": "Teams AAD Object ID repetido no ficheiro",
