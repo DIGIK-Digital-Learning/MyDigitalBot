@@ -431,8 +431,14 @@
 }
 
 /* O indicativo fica com a sua largura; o número ocupa o resto e pode encolher.
-   Sem min-width: 0, o <input> não desce abaixo da largura própria (~20
-   caracteres) e sai do cartão do WhatsApp. */
+   O .formGroup é uma grelha: sem min-width: 0 na própria linha, a grelha não
+   a deixa ficar mais estreita do que indicativo + largura própria do <input>
+   (~20 caracteres), e a caixa sai do cartão do WhatsApp. O min-width: 0 no
+   <input> deixa-o encolher dentro da linha. */
+.phoneRow {
+  min-width: 0;
+}
+
 .phoneRow .phoneCodeSelect {
   flex: 0 0 auto;
 }
