@@ -79,7 +79,6 @@ export default function WhatsAppPhone({
         {isTeams && !compact ? (
           <div className={styles.teamsTabs} aria-hidden="true">
             <span className={styles.teamsTabActive}>{t("teamsChat")}</span>
-            <span>{t("teamsShared")}</span>
           </div>
         ) : null}
 

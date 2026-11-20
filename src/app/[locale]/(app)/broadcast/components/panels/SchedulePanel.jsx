@@ -8,6 +8,8 @@ import {
   timeSlotOf,
   withTimeSlot,
 } from "../../lib/helpers";
+import PillSelect from "@/app/components/PillSelect/PillSelect";
+
 import InfoHint from "../InfoHint";
 
 const TIME_SLOTS = scheduleTimeSlots();
@@ -96,24 +98,27 @@ export default function SchedulePanel({
             <InfoHint text={translation("Broadcast.chooseTime")} />
           </div>
 
-          <select
+          {/*
+            #281: a lista nativa do browser abria quase até ao topo do ecrã.
+            Esta é a lista da app (a do indicativo do telemóvel): abre para
+            baixo quando há espaço, mostra ~7 horas com barra e já vem
+            posicionada na hora escolhida.
+          */}
+          <PillSelect
             id={timeSelectId}
-            className={styles.timeSelect}
+            variant="field"
+            fullWidth
+            menuWidth={140}
             value={currentSlot}
-            onChange={(event) =>
-              setScheduledFor(withTimeSlot(scheduledFor, event.target.value))
+            onChange={(slot) =>
+              setScheduledFor(withTimeSlot(scheduledFor, slot))
             }
-          >
-            {slots.map((slot) => (
-              <option
-                key={slot}
-                value={slot}
-                disabled={withTimeSlot(scheduledFor, slot).getTime() <= now}
-              >
-                {slot}
-              </option>
-            ))}
-          </select>
+            options={slots.map((slot) => ({
+              value: slot,
+              label: slot,
+              disabled: withTimeSlot(scheduledFor, slot).getTime() <= now,
+            }))}
+          />
         </div>
       </div>
 
