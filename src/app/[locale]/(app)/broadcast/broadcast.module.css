@@ -84,6 +84,8 @@
 .leftCol,
 .rightCol {
   display: grid;
+  /* Nada dentro da coluna a pode alargar além da largura dela (#285). */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--gutter-y);
   align-content: start;
   grid-auto-rows: max-content;
@@ -245,25 +247,6 @@
 }
 
 /* #235: a hora escolhe-se numa lista, de 15 em 15 minutos. */
-.timeSelect {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--ui-border);
-  background: #fff;
-  font: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  color: #0f172a;
-  cursor: pointer;
-}
-
-.timeSelect:focus {
-  outline: none;
-  border-color: #1f6fff;
-  box-shadow: 0 0 0 3px rgba(31, 111, 255, 0.12);
-}
-
 /* Ícone «i» com explicação, igual ao da aba Media. */
 .infoHint {
   display: inline-flex;
@@ -464,6 +447,20 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+
+/* #285: o aviso dos Grupos Teams parte em linhas e ocupa o que sobra; os
+   botões ficam com a sua largura numa só linha. Antes, o aviso (nowrap)
+   empurrava o painel para fora do ecrã. */
+.recipientsActionsRow > .subline {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+}
+
+.recipientsActionsRow > button {
+  flex: none;
+  white-space: nowrap;
 }
 
 .searchWrap {
@@ -726,10 +723,42 @@
   background: #fff;
 }
 
+/* Campos dos links rastreados (pesquisa e formulário). Os componentes já
+   usavam styles.input, mas a classe não existia aqui e os campos saíam com o
+   aspeto por omissão do browser. É o mesmo aspeto do «Criar link» da página
+   Links rastreados. */
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #0f1c3f;
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+.input:focus {
+  outline: 2px solid var(--brand-1);
+  outline-offset: 1px;
+  background: #fff;
+}
+
+/* #286: «Cancelar | Adicionar» do formulário do link novo, à direita. */
+.newLinkActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .linkLibraryText {
   display: grid;
   gap: 2px;
   min-width: 0;
+  /* O texto ocupa o espaço que sobra: os botões «Usar» e × ficam sempre
+     encostados à direita, alinhados de link para link. */
+  flex: 1 1 auto;
 }
 
 .linkLibraryUrl {
@@ -1199,6 +1228,16 @@
   grid-area: schedule;
   min-width: 0;
   margin-top: 16px;
+  transition:
+    opacity 0.15s ease,
+    filter 0.15s ease;
+}
+
+/* #282: em «Enviar agora» o calendário vê-se, mas cinzento e inativo. */
+.areaScheduleInactive {
+  opacity: 0.35;
+  filter: grayscale(1);
+  user-select: none;
 }
 
 .areaLinks {
@@ -1213,10 +1252,20 @@
    * telemóvel: o telemóvel mantém os 480px de quando não há calendário e o
    * cartão do calendário estica até ao fim do telemóvel.
    */
+  /*
+   * #282: na pergunta aberta, na sondagem e no quiz, a coluna do telemóvel
+   * traz também o texto de ajuda (por cima) e os campos extra (por baixo).
+   * Com display: contents, cada peça vai para a sua linha da grelha: na linha
+   * do calendário fica só o telemóvel, e o calendário tem a altura dele, como
+   * na mensagem normal. Sem essas peças, as linhas «hint» e «below» ficam
+   * vazias e não ocupam espaço.
+   */
   .composerGridScheduling {
     grid-template-columns: minmax(0, 480px) 290px;
     grid-template-areas:
+      "hint ."
       "phone schedule"
+      "below ."
       "links links"
       "warning warning"
       "tools tools";
@@ -1226,12 +1275,20 @@
   }
 
   .composerGridScheduling .areaPhone {
-    display: flex;
-    flex-direction: column;
+    display: contents;
   }
 
-  .composerGridScheduling .areaPhone .phoneWrap {
-    flex: 1 1 auto;
+  .composerGridScheduling .areaPhone > .composerHint {
+    grid-area: hint;
+  }
+
+  .composerGridScheduling .areaPhone > .phoneWrap {
+    grid-area: phone;
+    min-width: 0;
+  }
+
+  .composerGridScheduling .areaPhone > .quizMeta {
+    grid-area: below;
   }
 
   .composerGridScheduling .areaSchedule {
@@ -1435,6 +1492,9 @@
   display: grid;
   gap: 2px;
   z-index: 5;
+  /* A altura máxima vem do PlusMenu.jsx; o que não couber desliza. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .plusItem {

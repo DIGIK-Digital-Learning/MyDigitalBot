@@ -969,16 +969,14 @@ export default function BroadcastPage() {
    */
   const trackedLinksFull = composerTrackedLinks.length >= MAX_TRACKED_LINKS;
 
-  /* No WhatsApp, o link novo passa a ser o botão. */
-  function addTrackedLink() {
-    if (trackedLinksFull) return;
-
-    const draft = makeTrackedLinkDraft();
-
-    setComposerTrackedLinks((prev) => [
-      ...prev,
-      linkButtonAllowed ? { ...draft, button: true } : draft,
-    ]);
+  /*
+   * #286: um link novo chega já com texto e endereço (do formulário do
+   * painel) e segue o mesmo caminho de um link já usado: o nome curto é
+   * criado a partir do texto e, fora do WhatsApp, o link entra logo no balão.
+   * No WhatsApp passa a ser o botão.
+   */
+  function addTrackedLink({ label, destinationUrl }) {
+    addTrackedLinkFromLibrary({ label, destinationUrl });
   }
 
   /*
@@ -2822,6 +2820,7 @@ export default function BroadcastPage() {
   if (showStartMenu) {
     composer = (
       <>
+        {/* #282: na escolha do tipo de mensagem não há calendário. */}
         <StartMenu
           channel={channel}
           onChoose={setComposeMode}
@@ -2829,9 +2828,6 @@ export default function BroadcastPage() {
           previewTime={previewTime}
           translation={translation}
         />
-        {deliveryMode === "schedule" ? (
-          <div className={styles.inlineToolPanel}>{schedulePanel}</div>
-        ) : null}
       </>
     );
   } else if (isSurveyMode) {

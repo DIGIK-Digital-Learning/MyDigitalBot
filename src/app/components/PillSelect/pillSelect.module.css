@@ -20,6 +20,28 @@
   width: 100%;
   justify-content: space-between;
 }
+/* Caixa fechada com aspeto de campo (usada na hora do agendamento). */
+.trigger.field {
+  height: auto;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--ui-border);
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+}
+.trigger.field:focus-visible {
+  border-color: #1f6fff;
+  box-shadow: 0 0 0 3px rgba(31, 111, 255, 0.12);
+}
+.item:disabled,
+.item:disabled:hover {
+  color: #b6bfcc;
+  background: #fff;
+  cursor: not-allowed;
+}
 .trigger:disabled {
   opacity: 0.6;
   cursor: not-allowed;

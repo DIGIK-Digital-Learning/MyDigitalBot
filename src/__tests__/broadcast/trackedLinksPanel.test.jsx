@@ -124,3 +124,83 @@ describe("TrackedLinksPanel: links já usados", () => {
     expect(screen.queryByText("Broadcast.linkLibrary.title")).toBeNull();
   });
 });
+
+describe("#286: link novo só com texto e endereço", () => {
+  function renderWithAdd() {
+    const addTrackedLink = vi.fn();
+    render(
+      <TrackedLinksPanel
+        trackedLinks={[]}
+        trackedLinksValid
+        addTrackedLink={addTrackedLink}
+        updateTrackedLink={vi.fn()}
+        removeTrackedLink={vi.fn()}
+        translation={translation}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Broadcast.addLink" }));
+    return addTrackedLink;
+  }
+
+  it("o formulário tem só texto e endereço, sem nome curto", () => {
+    renderWithAdd();
+
+    const form = screen.getByTestId("new-link-form");
+    expect(form.querySelectorAll("input")).toHaveLength(2);
+    expect(screen.getByLabelText("Broadcast.label")).toBeTruthy();
+    expect(screen.getByLabelText("Broadcast.destinationUrl")).toBeTruthy();
+    expect(screen.getByText("TrackedLinks.create.urlHelp")).toBeTruthy();
+    expect(screen.queryByText(/\{\{link\./)).toBeNull();
+  });
+
+  it("só deixa adicionar com texto e um endereço http(s)", () => {
+    const addTrackedLink = renderWithAdd();
+    const add = screen.getByRole("button", { name: "Common.add" });
+
+    expect(add).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText("Broadcast.label"), {
+      target: { value: " Aceder à formação " },
+    });
+    fireEvent.change(screen.getByLabelText("Broadcast.destinationUrl"), {
+      target: { value: "exemplo.pt" },
+    });
+    expect(add).toBeDisabled();
+    expect(screen.getByText("Broadcast.destinationUrlInvalid")).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText("Broadcast.destinationUrl"), {
+      target: { value: "https://exemplo.pt/curso" },
+    });
+    fireEvent.click(add);
+
+    expect(addTrackedLink).toHaveBeenCalledWith({
+      label: "Aceder à formação",
+      destinationUrl: "https://exemplo.pt/curso",
+    });
+    expect(screen.queryByTestId("new-link-form")).toBeNull();
+  });
+
+  it("Cancelar fecha o formulário sem adicionar", () => {
+    const addTrackedLink = renderWithAdd();
+
+    fireEvent.click(screen.getByRole("button", { name: "Common.cancel" }));
+
+    expect(screen.queryByTestId("new-link-form")).toBeNull();
+    expect(addTrackedLink).not.toHaveBeenCalled();
+  });
+});
+
+describe("#286: nome curto criado a partir do texto", () => {
+  it("troca os acentos pela letra simples em vez de os apagar", async () => {
+    const { makeTrackedLinkFromLibrary } = await import(
+      "@/app/[locale]/(app)/broadcast/lib/helpers"
+    );
+
+    expect(
+      makeTrackedLinkFromLibrary({
+        label: "Aceder à formação",
+        destinationUrl: "https://x.test",
+      }).key,
+    ).toBe("aceder_a_formacao");
+  });
+});

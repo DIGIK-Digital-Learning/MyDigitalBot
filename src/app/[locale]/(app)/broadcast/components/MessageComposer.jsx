@@ -20,7 +20,10 @@ export default function MessageComposer({
   phone,
   children,
 }) {
-  const scheduling = deliveryMode === "schedule" && Boolean(schedulePanel);
+  // #282: o calendário está sempre à vista. Em «Enviar agora» fica cinzento e
+  // sem dar para mexer; ao carregar em «Agendar» ganha as cores e fica ativo.
+  const hasSchedulePanel = Boolean(schedulePanel);
+  const scheduling = deliveryMode === "schedule" && hasSchedulePanel;
 
   return (
     <div className={styles.panel}>
@@ -56,7 +59,7 @@ export default function MessageComposer({
       <div className={styles.composerBody}>
         <div
           className={`${styles.composerGrid} ${
-            scheduling ? styles.composerGridScheduling : ""
+            hasSchedulePanel ? styles.composerGridScheduling : ""
           }`}
         >
           <div className={styles.areaPhone}>{phone}</div>
@@ -112,11 +115,18 @@ export default function MessageComposer({
             </div>
           </div>
 
-          {scheduling ? (
+          {/*
+            `inert` tira o calendário do clique, do teclado e dos leitores de
+            ecrã enquanto não se escolhe «Agendar»; o cinzento é só do CSS.
+          */}
+          {hasSchedulePanel ? (
             <section
-              className={styles.areaSchedule}
+              className={`${styles.areaSchedule} ${
+                scheduling ? "" : styles.areaScheduleInactive
+              }`}
               aria-label={translation("Broadcast.scheduleBtn")}
               data-testid="schedule-side"
+              inert={!scheduling}
             >
               {schedulePanel}
             </section>

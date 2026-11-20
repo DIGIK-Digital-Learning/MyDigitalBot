@@ -17,6 +17,10 @@ export default function PillSelect({
   fullWidth = false,
   className = "",
   style,
+  // «field» desenha a caixa fechada como um campo de formulário (retângulo
+  // branco) em vez do comprimido azul. A lista aberta é a mesma.
+  variant = "pill",
+  id,
 }) {
   const t = useTranslations("PillSelect");
   const triggerRef = useRef(null);
@@ -97,6 +101,13 @@ export default function PillSelect({
     reposition();
   }, [open, menuWidth, options.length]);
 
+  // Numa lista comprida (as horas), abre já com a opção escolhida à vista.
+  useLayoutEffect(() => {
+    if (!open) return;
+    const active = menuRef.current?.querySelector('[aria-selected="true"]');
+    active?.scrollIntoView?.({ block: "nearest" });
+  }, [open]);
+
   const menuEl = (
     <div
       ref={menuRef}
@@ -111,7 +122,9 @@ export default function PillSelect({
             <button
               key={o.value}
               role="option"
+              type="button"
               aria-selected={active}
+              disabled={o.disabled}
               className={`${styles.item} ${active ? styles.itemActive : ""}`}
               onClick={() => {
                 onChange?.(o.value);
@@ -143,9 +156,12 @@ export default function PillSelect({
     <>
       <button
         ref={triggerRef}
+        id={id}
         type="button"
         disabled={disabled}
-        className={`${styles.trigger} ${fullWidth ? styles.full : ""} ${className}`}
+        className={`${styles.trigger} ${
+          variant === "field" ? styles.field : ""
+        } ${fullWidth ? styles.full : ""} ${className}`}
         style={style}
         aria-haspopup="listbox"
         aria-expanded={open}

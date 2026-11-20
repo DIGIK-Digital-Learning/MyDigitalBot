@@ -624,10 +624,8 @@ describe("BroadcastPage", () => {
 
     /* O link rastreado abre o painel; depois entra no balão como pastilha. */
     pickFromPlusMenu("Broadcast.composer.addLink");
+    /* #286: só texto e endereço; o nome curto e a pastilha vêm sozinhos. */
     fireEvent.click(screen.getByRole("button", { name: "Broadcast.addLink" }));
-    fireEvent.change(screen.getByPlaceholderText("Broadcast.trackedLinkForm.keyPlaceholder"), {
-      target: { value: "curso" },
-    });
     fireEvent.change(screen.getByPlaceholderText("Broadcast.trackedLinkForm.labelPlaceholder"), {
       target: { value: "Curso" },
     });
@@ -635,7 +633,7 @@ describe("BroadcastPage", () => {
       screen.getByPlaceholderText("Broadcast.trackedLinkForm.urlPlaceholder"),
       { target: { value: "https://x.test/curso" } },
     );
-    pickFromPlusMenu("Link: Curso");
+    fireEvent.click(screen.getByRole("button", { name: "Common.add" }));
 
     /* A imagem aparece no topo do balão da pergunta. */
     fireEvent.change(screen.getByTestId("file-input"), {
@@ -877,9 +875,6 @@ describe("BroadcastPage", () => {
       fireEvent.click(
         screen.getByRole("button", { name: "Broadcast.addLink" }),
       );
-      fireEvent.change(screen.getByPlaceholderText("Broadcast.trackedLinkForm.keyPlaceholder"), {
-        target: { value: "guia" },
-      });
       fireEvent.change(screen.getByPlaceholderText("Broadcast.trackedLinkForm.labelPlaceholder"), {
         target: { value: "Guia" },
       });
@@ -887,6 +882,7 @@ describe("BroadcastPage", () => {
         screen.getByPlaceholderText("Broadcast.trackedLinkForm.urlPlaceholder"),
         { target: { value: "https://x.test/guia" } },
       );
+      fireEvent.click(screen.getByRole("button", { name: "Common.add" }));
     }
 
     it("no WhatsApp, um link novo vai no botão e pede texto", async () => {

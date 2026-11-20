@@ -222,28 +222,6 @@ export default function Navbar() {
                 <span>{translation("Nav.assistants")}</span>
               </Link>
 
-              <Link
-                href="/automations"
-                onClick={onNavClick("/automations")}
-                className={`${styles.navItem} ${
-                  isActive("/automations") ? styles.active : ""
-                }`}
-              >
-                <Zap aria-hidden className={styles.icon} />
-                <span>{translation("Nav.automations")}</span>
-              </Link>
-
-              <Link
-                href="/analytics"
-                onClick={onNavClick("/analytics")}
-                className={`${styles.navItem} ${
-                  isActive("/analytics") ? styles.active : ""
-                }`}
-              >
-                <BarChart3 aria-hidden className={styles.icon} />
-                <span>{translation("Nav.analytics")}</span>
-              </Link>
-
               <div className={styles.group}>
                 <button
                   type="button"
@@ -334,6 +312,28 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
+
+              <Link
+                href="/automations"
+                onClick={onNavClick("/automations")}
+                className={`${styles.navItem} ${
+                  isActive("/automations") ? styles.active : ""
+                }`}
+              >
+                <Zap aria-hidden className={styles.icon} />
+                <span>{translation("Nav.automations")}</span>
+              </Link>
+
+              <Link
+                href="/analytics"
+                onClick={onNavClick("/analytics")}
+                className={`${styles.navItem} ${
+                  isActive("/analytics") ? styles.active : ""
+                }`}
+              >
+                <BarChart3 aria-hidden className={styles.icon} />
+                <span>{translation("Nav.analytics")}</span>
+              </Link>
 
               {/* Definições: Organização, Integrações e Histórico de atividade. */}
               <div className={styles.group}>
