@@ -188,11 +188,22 @@ export function uniqueTrackedKey(value, takenKeys = []) {
  * Um link já usado entra no composer como um link novo, com o mesmo nome e
  * destino. No envio recebe tokens novos, um por destinatário, como sempre.
  */
+/*
+ * #286: o nome curto criado a partir do texto troca as letras com acento
+ * pela letra simples («formação» → «formacao»). O sanitizeTrackedKey sozinho
+ * apagava-as («formao»).
+ */
+function withoutAccents(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
+}
+
 export function makeTrackedLinkFromLibrary(item, existingLinks = []) {
   return {
     id: makeId(),
     key: uniqueTrackedKey(
-      item?.key || item?.label,
+      item?.key || withoutAccents(item?.label),
       existingLinks.map((link) => link.key),
     ),
     label: String(item?.label || "").trim(),

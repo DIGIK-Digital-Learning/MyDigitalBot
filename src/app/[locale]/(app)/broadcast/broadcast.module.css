@@ -745,6 +745,13 @@
   background: #fff;
 }
 
+/* #286: «Cancelar | Adicionar» do formulário do link novo, à direita. */
+.newLinkActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .linkLibraryText {
   display: grid;
   gap: 2px;

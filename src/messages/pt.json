@@ -1510,7 +1510,7 @@
       "inUseScheduled": "Este link está numa mensagem agendada. Cancela-a primeiro para o poderes eliminar.",
       "inUseChain": "Este link está numa sequência de mensagens que ainda está a decorrer. Só o podes eliminar quando a sequência terminar.",
       "title": "Links já usados",
-      "search": "Procurar por nome ou URL",
+      "search": "Procurar por nome ou destino",
       "use": "Usar",
       "added": "Adicionado",
       "lastUsed": "Usado a {date, date, short}",
@@ -1519,14 +1519,9 @@
       "retry": "Tentar novamente",
       "noMatches": "Nenhum link corresponde à pesquisa."
     },
-    "key": "Nome curto",
-    "label": "Texto do link",
-    "destinationUrl": "Endereço (URL)",
+    "label": "Nome",
+    "destinationUrl": "Destino (URL)",
     "destinationUrlInvalid": "O destino tem de começar por http:// ou https://",
-    "addPlaceholders": {
-      "first": "Escreve",
-      "second": "na mensagem no sítio onde queres o link."
-    },
     "start": {
       "title": "Como queres começar?",
       "hint": "Escolhe um ponto de partida. Podes voltar aqui a qualquer altura.",
@@ -1927,7 +1922,7 @@
       },
       "invalidLinks": {
         "title": "Links rastreados inválidos",
-        "message": "Completa todos os links rastreados e não repitas nomes curtos."
+        "message": "Completa o nome e o destino do link."
       },
       "chooseDateTime": {
         "title": "Escolhe a data e a hora",
@@ -1967,12 +1962,10 @@
       }
     },
     "trackedLinkForm": {
-      "keyPlaceholder": "formacao",
       "labelPlaceholder": "Aceder à formação",
       "urlPlaceholder": "https://exemplo.pt/curso/123",
-      "placeholder": "Na mensagem:",
       "empty": "Ainda não adicionaste links rastreados.",
-      "invalid": "Completa todos os links rastreados e não repitas nomes curtos."
+      "invalid": "Completa o nome e o destino do link."
     }
   },
   "BroadcastScheduled": {
@@ -2235,7 +2228,7 @@
       "label": "Nome",
       "key": "Nome curto",
       "channel": "Canal",
-      "destination": "Destino",
+      "destination": "Destino (URL)",
       "recipients": "Recipientes",
       "clicked": "Clicado",
       "totalClicks": "Total de cliques",
@@ -2264,7 +2257,7 @@
       "loading": "A carregar os detalhes do link...",
       "trackedLink": "Link Rastreado",
       "key": "nome curto",
-      "destinationUrl": "Endereço (URL)",
+      "destinationUrl": "Destino (URL)",
       "recipients": "Recipientes",
       "clicked": "Clicado",
       "notClicked": "Não clicado",
@@ -2313,7 +2306,7 @@
       "description": "O link fica nesta lista e pronto a usar no Enviar mensagem. Só conta como enviado quando for numa mensagem.",
       "labelField": "Nome",
       "labelPlaceholder": "Ex.: Calendário de formações",
-      "urlField": "Destino",
+      "urlField": "Destino (URL)",
       "urlPlaceholder": "https://",
       "urlHelp": "O endereço da página, a começar por http:// ou https://",
       "save": "Criar link",
@@ -3164,7 +3157,7 @@
         "clicksTotal": "Cliques",
         "clickRate": "Taxa",
         "linkLabel": "Link",
-        "destinationUrl": "Destino"
+        "destinationUrl": "Destino (URL)"
       },
       "dashboardSheet": "Painel",
       "panels": {

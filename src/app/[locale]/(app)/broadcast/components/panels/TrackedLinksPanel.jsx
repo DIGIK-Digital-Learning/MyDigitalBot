@@ -8,7 +8,6 @@ import { MAX_TRACKED_LINKS } from "../../lib/constants";
 import {
   filterTrackedLinkLibrary,
   isSameTrackedLink,
-  sanitizeTrackedKey,
 } from "../../lib/helpers";
 
 /*
@@ -167,6 +166,24 @@ export default function TrackedLinksPanel({
     savedLinks?.used != null &&
     savedLinks.used >= savedLinks.limit;
 
+  /*
+   * #286: o link novo escreve-se num formulário de 2 campos, como o «Criar
+   * link» da página Links rastreados. O nome curto e a marca no texto são
+   * criados ao carregar em «Adicionar».
+   */
+  const [draft, setDraft] = useState(null);
+  const draftLabel = draft?.label.trim() || "";
+  const draftUrl = draft?.destinationUrl.trim() || "";
+  const draftUrlInvalid = Boolean(draftUrl) && !/^https?:\/\//i.test(draftUrl);
+  const canAddDraft = Boolean(draftLabel && draftUrl) && !draftUrlInvalid;
+
+  function submitDraft(event) {
+    event.preventDefault();
+    if (!canAddDraft) return;
+    addTrackedLink({ label: draftLabel, destinationUrl: draftUrl });
+    setDraft(null);
+  }
+
   return (
     <div className={styles.toolPanelCard}>
       <div className={styles.modalSectionHeader}>
@@ -186,8 +203,8 @@ export default function TrackedLinksPanel({
 
           <button
             type="button"
-            onClick={addTrackedLink}
-            disabled={full || savedFull}
+            onClick={() => setDraft({ label: "", destinationUrl: "" })}
+            disabled={full || savedFull || Boolean(draft)}
             className={styles.kbdBtn}
           >
             <Plus size={14} />
@@ -204,14 +221,83 @@ export default function TrackedLinksPanel({
         </div>
       )}
 
-      <div className={styles.modalHelpText}>
-        {translation("Broadcast.addPlaceholders.first")}{" "}
-        {/* #284: o mesmo exemplo do campo «Nome curto» (formacao / training). */}
-        <code>{`{{link.${translation(
-          "Broadcast.trackedLinkForm.keyPlaceholder",
-        )}}}`}</code>{" "}
-        {translation("Broadcast.addPlaceholders.second")}
-      </div>
+      {/*
+        #286: a frase «Escreve {{link.…}} na mensagem» saiu: a marca entra
+        sozinha no texto ao adicionar o link.
+      */}
+      {draft && (
+        <form
+          className={styles.trackedLinkCard}
+          onSubmit={submitDraft}
+          data-testid="new-link-form"
+          aria-labelledby="new-link-title"
+        >
+          {/* O mesmo título da janela «Criar link» da página Links. */}
+          <strong id="new-link-title">
+            {translation("TrackedLinks.create.title")}
+          </strong>
+
+          <div className={styles.fieldWide}>
+            <label className={styles.smallLabel} htmlFor="new-link-label">
+              {translation("Broadcast.label")}
+            </label>
+            <input
+              id="new-link-label"
+              autoFocus
+              value={draft.label}
+              onChange={(e) => setDraft({ ...draft, label: e.target.value })}
+              placeholder={translation(
+                "Broadcast.trackedLinkForm.labelPlaceholder",
+              )}
+              className={styles.input}
+            />
+          </div>
+
+          <div className={styles.fieldWide}>
+            <label className={styles.smallLabel} htmlFor="new-link-url">
+              {translation("Broadcast.destinationUrl")}
+            </label>
+            <input
+              id="new-link-url"
+              type="url"
+              value={draft.destinationUrl}
+              onChange={(e) =>
+                setDraft({ ...draft, destinationUrl: e.target.value })
+              }
+              placeholder={translation(
+                "Broadcast.trackedLinkForm.urlPlaceholder",
+              )}
+              className={styles.input}
+            />
+            {draftUrlInvalid ? (
+              <p className={styles.helpDanger}>
+                {translation("Broadcast.destinationUrlInvalid")}
+              </p>
+            ) : (
+              <p className={styles.modalHelpText}>
+                {translation("TrackedLinks.create.urlHelp")}
+              </p>
+            )}
+          </div>
+
+          <div className={styles.newLinkActions}>
+            <button
+              type="button"
+              className={styles.kbdBtn}
+              onClick={() => setDraft(null)}
+            >
+              {translation("Common.cancel")}
+            </button>
+            <button
+              type="submit"
+              className={styles.kbdBtn}
+              disabled={!canAddDraft}
+            >
+              {translation("Common.add")}
+            </button>
+          </div>
+        </form>
+      )}
 
       {full && (
         <div className={styles.modalHelpText}>
@@ -253,20 +339,6 @@ export default function TrackedLinksPanel({
                 <Trash2 size={14} />
                 <span>{translation("Broadcast.remove")}</span>
               </button>
-            </div>
-
-            <div className={styles.fieldWide}>
-              <label className={styles.smallLabel}>
-                {translation("Broadcast.key")}
-              </label>
-              <input
-                value={link.key}
-                onChange={(e) =>
-                  updateTrackedLink(link.id, "key", e.target.value)
-                }
-                placeholder={translation("Broadcast.trackedLinkForm.keyPlaceholder")}
-                className={styles.input}
-              />
             </div>
 
             <div className={styles.fieldWide}>
@@ -321,17 +393,10 @@ export default function TrackedLinksPanel({
                 </p>
               )}
             </div>
-
-            {sanitizeTrackedKey(link.key) && (
-              <div className={styles.trackedPlaceholder}>
-                {translation("Broadcast.trackedLinkForm.placeholder")}{" "}
-                <code>{`{{link.${sanitizeTrackedKey(link.key)}}}`}</code>
-              </div>
-            )}
           </div>
         ))}
 
-        {trackedLinks.length === 0 && (
+        {trackedLinks.length === 0 && !draft && (
           <div className={styles.emptyMini}>
             {translation("Broadcast.trackedLinkForm.empty")}
           </div>

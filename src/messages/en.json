@@ -1510,7 +1510,7 @@
       "inUseScheduled": "This link is in a scheduled message. Cancel it first so you can delete the link.",
       "inUseChain": "This link is in a message sequence that is still running. You can only delete it once the sequence ends.",
       "title": "Links already used",
-      "search": "Search by name or URL",
+      "search": "Search by name or destination",
       "use": "Use",
       "added": "Added",
       "lastUsed": "Used on {date, date, short}",
@@ -1519,14 +1519,9 @@
       "retry": "Try again",
       "noMatches": "No links match your search."
     },
-    "key": "Short name",
-    "label": "Link text",
-    "destinationUrl": "Address (URL)",
+    "label": "Name",
+    "destinationUrl": "Destination (URL)",
     "destinationUrlInvalid": "The destination must start with http:// or https://",
-    "addPlaceholders": {
-      "first": "Write",
-      "second": "in the message where you want the link."
-    },
     "start": {
       "title": "How do you want to start?",
       "hint": "Choose a starting point. You can come back here at any time.",
@@ -1927,7 +1922,7 @@
       },
       "invalidLinks": {
         "title": "Invalid tracked links",
-        "message": "Please complete all tracked links and avoid duplicate short names."
+        "message": "Please fill in the link name and destination."
       },
       "chooseDateTime": {
         "title": "Choose date and time",
@@ -1967,12 +1962,10 @@
       }
     },
     "trackedLinkForm": {
-      "keyPlaceholder": "training",
       "labelPlaceholder": "Open the training",
       "urlPlaceholder": "https://example.com/course/123",
-      "placeholder": "In the message:",
       "empty": "No tracked links added yet.",
-      "invalid": "Complete every tracked link and avoid duplicate short names."
+      "invalid": "Fill in the link name and destination."
     }
   },
   "BroadcastScheduled": {
@@ -2235,7 +2228,7 @@
       "label": "Name",
       "key": "Short name",
       "channel": "Channel",
-      "destination": "Destination",
+      "destination": "Destination (URL)",
       "recipients": "Recipients",
       "clicked": "Clicked",
       "totalClicks": "Total clicks",
@@ -2264,7 +2257,7 @@
       "loading": "Loading link details...",
       "trackedLink": "Tracked Link",
       "key": "short name",
-      "destinationUrl": "Address (URL)",
+      "destinationUrl": "Destination (URL)",
       "recipients": "Recipients",
       "clicked": "Clicked",
       "notClicked": "Not clicked",
@@ -2313,7 +2306,7 @@
       "description": "The link goes into this list, ready to use in Send message. It only counts as sent once it goes out in a message.",
       "labelField": "Name",
       "labelPlaceholder": "E.g.: Training calendar",
-      "urlField": "Destination",
+      "urlField": "Destination (URL)",
       "urlPlaceholder": "https://",
       "urlHelp": "The page address, starting with http:// or https://",
       "save": "Create link",
@@ -3164,7 +3157,7 @@
         "clicksTotal": "Clicks",
         "clickRate": "Rate",
         "linkLabel": "Link",
-        "destinationUrl": "Destination"
+        "destinationUrl": "Destination (URL)"
       },
       "dashboardSheet": "Dashboard",
       "panels": {
