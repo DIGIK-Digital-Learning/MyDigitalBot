@@ -1,0 +1,442 @@
+/* Base partilhada do site público (revamp 11-2026): cores, contentor,
+   botões, títulos de secção, topo das páginas e CTA final. Cada página só
+   acrescenta o que é dela no seu próprio .module.css. */
+
+.page {
+  --night: #081426;
+  --navy: #0d1b33;
+  --cloud: #f7fbff;
+  --mist: #eef4fa;
+  --ink: #0b1a30;
+  --ink-soft: rgba(11, 26, 48, 0.74);
+  --line: rgba(11, 26, 48, 0.1);
+  --on-dark-soft: rgba(247, 251, 255, 0.76);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --wrap: 1200px;
+  --gutter: clamp(20px, 4vw, 40px);
+  overflow-x: clip;
+  color: var(--ink);
+  background: var(--cloud);
+}
+
+.page a:focus-visible,
+.page button:focus-visible {
+  outline: 3px solid var(--brand-accent);
+  outline-offset: 3px;
+}
+
+.wrap {
+  width: 100%;
+  max-width: calc(var(--wrap) + var(--gutter) * 2);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Botões ---------- */
+.primary,
+.secondary,
+.ghost {
+  display: inline-flex;
+  min-height: 52px;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 750;
+  white-space: nowrap;
+  transition:
+    transform 220ms var(--ease-out),
+    background 200ms ease,
+    border-color 200ms ease;
+}
+
+.primary {
+  color: var(--night);
+  background: var(--brand-accent);
+}
+
+.primary:hover {
+  transform: translateY(-2px);
+  background: var(--brand-accent-hover);
+}
+
+.primary svg,
+.ghost svg {
+  transition: transform 220ms var(--ease-out);
+}
+
+.primary:hover svg,
+.ghost:hover svg {
+  transform: translateX(3px);
+}
+
+.secondary {
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.secondary:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.ghost {
+  color: var(--ink);
+  border: 1px solid rgba(11, 26, 48, 0.18);
+  background: #fff;
+}
+
+.ghost:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--brand-accent-rgb), 0.7);
+}
+
+/* ---------- Secções ---------- */
+.section {
+  padding: clamp(80px, 11vw, 140px) 0;
+}
+
+.sectionWhite {
+  background: #fff;
+}
+
+.sectionDark {
+  color: var(--cloud);
+  background: var(--navy);
+}
+
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 48px;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: clamp(36px, 5vw, 56px);
+}
+
+.sectionTitle {
+  max-width: 18ch;
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(2rem, 3.6vw, 3.1rem);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.sectionText {
+  max-width: 42ch;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 17px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.sectionDark .sectionTitle {
+  color: #fff;
+}
+
+.sectionDark .sectionText {
+  color: var(--on-dark-soft);
+}
+
+.checks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checks li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: rgba(11, 26, 48, 0.86);
+  font-size: 15.5px;
+  line-height: 1.45;
+}
+
+.checks svg {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  color: #1b8ad0;
+}
+
+.sectionDark .checks li {
+  color: rgba(247, 251, 255, 0.88);
+}
+
+.sectionDark .checks svg {
+  color: var(--brand-accent);
+}
+
+/* ---------- Topo das páginas ---------- */
+.pageHero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: clamp(136px, 17vh, 176px) 0 clamp(64px, 8vw, 104px);
+  color: var(--cloud);
+  background:
+    radial-gradient(
+      55% 80% at 85% 20%,
+      rgba(var(--brand-accent-rgb), 0.18),
+      transparent 70%
+    ),
+    radial-gradient(
+      45% 60% at 0% 100%,
+      rgba(48, 169, 224, 0.1),
+      transparent 70%
+    ),
+    var(--night);
+}
+
+.pageHeroSymbol {
+  position: absolute;
+  top: 50%;
+  right: -6%;
+  z-index: -1;
+  width: min(620px, 70vw);
+  height: auto;
+  color: transparent;
+  stroke: rgba(var(--brand-accent-rgb), 0.16);
+  stroke-width: 1.2;
+  transform: translateY(-42%) rotate(-8deg);
+}
+
+.pageHeroSymbol path {
+  vector-effect: non-scaling-stroke;
+}
+
+.pageHeroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+
+.pageHeroCenter {
+  max-width: 860px;
+}
+
+.pageHeroCopy > * {
+  animation: rise 800ms var(--ease-out) both;
+}
+
+.pageHeroCopy > :nth-child(2) {
+  animation-delay: 80ms;
+}
+
+.pageHeroCopy > :nth-child(3) {
+  animation-delay: 150ms;
+}
+
+.pageHeroCopy > :nth-child(4) {
+  animation-delay: 210ms;
+}
+
+.pageHeroTitle {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.4rem, 4.6vw, 4rem);
+  font-weight: 820;
+  line-height: 1.02;
+  letter-spacing: -0.036em;
+  text-wrap: balance;
+}
+
+.pageHeroLead {
+  max-width: 56ch;
+  margin: 24px 0 0;
+  color: var(--on-dark-soft);
+  font-size: clamp(17px, 1.35vw, 19px);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.pageHeroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 34px;
+}
+
+.pageHeroAside {
+  position: relative;
+  min-width: 0;
+  animation: asideIn 1000ms var(--ease-out) 120ms both;
+}
+
+/* ---------- CTA final ---------- */
+.final {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: clamp(96px, 12vw, 160px) 0;
+  color: var(--cloud);
+  background: #04070f;
+}
+
+.finalImage {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: -1;
+  width: min(62%, 1100px);
+  height: 100%;
+  object-fit: cover;
+  object-position: 70% 50%;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 45%);
+  animation: glow 7s ease-in-out infinite alternate;
+}
+
+.finalCopy {
+  max-width: 560px;
+}
+
+.finalTitle {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.2rem, 4.2vw, 3.6rem);
+  font-weight: 820;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.finalText {
+  margin: 22px 0 0;
+  color: var(--on-dark-soft);
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.finalActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 34px;
+}
+
+/* Revelação ao fazer scroll, só onde o browser suporta e sem "reduzir
+   movimento". "forwards" (e não "both"): antes de entrar no ecrã o elemento
+   está visível, por isso nunca fica escondido se a animação não correr. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: rise linear forwards;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes asideIn {
+  from {
+    opacity: 0;
+    transform: translateY(36px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes glow {
+  from {
+    filter: brightness(0.85) saturate(1);
+  }
+
+  to {
+    filter: brightness(1.08) saturate(1.15);
+  }
+}
+
+@media (max-width: 960px) {
+  /* Como na home: título, depois a imagem/formulário, depois o texto. */
+  .pageHeroGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .pageHeroGrid .pageHeroCopy {
+    display: contents;
+  }
+
+  .pageHeroGrid .pageHeroTitle {
+    order: 1;
+  }
+
+  .pageHeroAside {
+    order: 2;
+    margin-top: 28px;
+  }
+
+  .pageHeroGrid .pageHeroCopy > :not(.pageHeroTitle) {
+    order: 3;
+  }
+
+  .pageHeroGrid .pageHeroLead {
+    margin-top: 32px;
+  }
+
+  .finalImage {
+    width: 100%;
+    opacity: 0.45;
+    mask-image: linear-gradient(180deg, transparent 0%, #000 60%);
+  }
+}
+
+@media (max-width: 640px) {
+  .pageHero {
+    padding-top: 120px;
+  }
+
+  .pageHeroActions > a,
+  .finalActions > a {
+    flex: 1 1 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pageHeroCopy > *,
+  .pageHeroAside,
+  .finalImage {
+    animation: none;
+  }
+
+  .primary:hover,
+  .secondary:hover,
+  .ghost:hover {
+    transform: none;
+  }
+}

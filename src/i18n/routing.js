@@ -8,11 +8,16 @@ export const routing = defineRouting({
   // 'always'    = always prefix every locale
   localePrefix: "as-needed",
 
-  // Optional: map pathnames per-locale (keep simple for now)
-  // pathnames: {
-  //   '/users': {
-  //     en: '/users',
-  //     pt: '/users' // or '/utilizadores'
-  //   }
-  // }
+  // Public marketing pages get Portuguese URLs in PT. Code keeps using the
+  // internal (English) paths in <Link href> and usePathname(); next-intl
+  // translates them. Old PT URLs (e.g. /how-it-works) redirect to the PT ones.
+  // Paths not listed here (app, login, legal, /r/...) stay the same.
+  pathnames: {
+    "/": "/",
+    "/solution": { pt: "/solucao", en: "/solution" },
+    "/product": { pt: "/produto", en: "/product" },
+    "/how-it-works": { pt: "/como-funciona", en: "/how-it-works" },
+    "/pricing": { pt: "/precos", en: "/pricing" },
+    "/contact": { pt: "/contacto", en: "/contact" },
+  },
 });

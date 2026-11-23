@@ -265,9 +265,88 @@
 }
 
 .helper {
+  flex: 1 1 260px;
   margin: 0;
   font-size: 13px;
-  color: rgba(var(--ink-rgb), 0.58);
+  line-height: 1.5;
+  color: rgba(var(--ink-rgb), 0.72);
+}
+
+.helperLink {
+  color: inherit;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.nextSteps {
+  display: grid;
+  gap: 10px;
+  max-width: 460px;
+  margin: 20px auto 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+  text-align: left;
+  font-size: 15px;
+  line-height: 1.5;
+  color: rgba(var(--ink-rgb), 0.8);
+}
+
+.nextSteps li {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  counter-increment: step;
+}
+
+.nextSteps li::before {
+  content: counter(step);
+  flex: 0 0 26px;
+  height: 26px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #081426;
+  background: rgba(var(--brand-accent-rgb), 0.22);
+  transform: translateY(-1px);
+}
+
+.planChip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 14px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(var(--brand-accent-rgb), 0.35);
+  background: rgba(var(--brand-accent-rgb), 0.08);
+  font-size: 14px;
+  color: rgba(var(--ink-rgb), 0.86);
+}
+
+.planChipLabel {
+  color: rgba(var(--ink-rgb), 0.66);
+}
+
+.planChipRemove {
+  border: 0;
+  padding: 4px 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  color: rgba(var(--ink-rgb), 0.72);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.planChipRemove:hover {
+  color: rgba(var(--ink-rgb), 1);
 }
 
 .success,

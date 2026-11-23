@@ -1,0 +1,79 @@
+/* Página Contacto (revamp 11-2026): o formulário vive no topo escuro, à
+   direita. Os campos continuam a usar contact.module.css (ContactForm.jsx). */
+
+.formCard {
+  padding: clamp(22px, 3vw, 32px);
+  border-radius: 20px;
+  color: var(--ink);
+  background: #fff;
+  box-shadow: 0 40px 80px -36px rgba(0, 0, 0, 0.6);
+}
+
+.next {
+  margin-top: 40px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.nextTitle {
+  margin: 0 0 16px;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 750;
+}
+
+.steps {
+  display: grid;
+  gap: 12px;
+  max-width: 48ch;
+  margin: 0;
+  padding: 0;
+  counter-reset: step;
+  list-style: none;
+}
+
+.steps li {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  color: var(--on-dark-soft);
+  font-size: 16px;
+  line-height: 1.5;
+  counter-increment: step;
+}
+
+.steps li::before {
+  display: inline-grid;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--night);
+  background: var(--brand-accent);
+  content: counter(step);
+  font-size: 13px;
+  font-weight: 800;
+  transform: translateY(-1px);
+}
+
+.direct {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 28px 0 0;
+  color: var(--on-dark-soft);
+  font-size: 15px;
+}
+
+.direct svg {
+  flex: 0 0 auto;
+  color: var(--brand-accent);
+}
+
+.direct a {
+  color: #fff;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--brand-accent-rgb), 0.8);
+  text-underline-offset: 4px;
+}

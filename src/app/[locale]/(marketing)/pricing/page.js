@@ -1,34 +1,26 @@
-import { useTranslations } from "next-intl";
-import PersistentHeader from "@/app/components/Navbar/MarketingNavbar/PersistentHeader";
-import Footer from "../components/Footer/Footer";
+import { getTranslations } from "next-intl/server";
+import SiteShell from "../components/Site/SiteShell";
+import PageHero from "../components/Site/PageHero";
+import FinalCta from "../components/Site/FinalCta";
 import PricingExplorer from "./PricingExplorer.jsx";
-import SharedHeroNeonBrand from "../components/SharedHeroNeonBrand/SharedHeroNeonBrand";
-import styles from "./pricingPage.module.css";
+import { getPageMetadata } from "@/lib/seo/metadata";
 
-export default function PricingPage() {
-  const t = useTranslations("PricingPage");
+export async function generateMetadata({ params }) {
+  return getPageMetadata({
+    params,
+    namespace: "PricingPage",
+    path: "/pricing",
+  });
+}
+
+export default async function PricingPage() {
+  const t = await getTranslations("PricingPage");
 
   return (
-    <main className={styles.page}>
-      <section className={styles.hero}>
-        <SharedHeroNeonBrand variant="pricing" glowIntensity={0.82} />
-
-        <PersistentHeader reserveSpace />
-
-        <div className={styles.container}>
-          <header className={styles.header}>
-            <p className={styles.eyebrow}>{t("hero.eyebrow")}</p>
-            <h1 className={styles.title}>{t("hero.title")}</h1>
-            <p className={styles.subhead}>{t("hero.subhead")}</p>
-          </header>
-        </div>
-      </section>
-
+    <SiteShell>
+      <PageHero title={t("hero.title")} lead={t("hero.subhead")} />
       <PricingExplorer />
-
-      <div className={styles.footerWrap}>
-        <Footer />
-      </div>
-    </main>
+      <FinalCta />
+    </SiteShell>
   );
 }

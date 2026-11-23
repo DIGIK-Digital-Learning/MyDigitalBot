@@ -42,6 +42,8 @@ export default function MarketingNavbar({ trailing = null }) {
   const headerRef = useRef(null);
   const showDemoCta = usePageDemoCtaVisibility(headerRef);
   const pathname = usePathname();
+  // Na própria página de contacto o botão de demo não leva a lado nenhum.
+  const onContactPage = isNavItemActive(pathname, "/contact");
 
   useEffect(() => {
     let mounted = true;
@@ -82,8 +84,18 @@ export default function MarketingNavbar({ trailing = null }) {
             {/* <span className={styles.brandText}>MyDigitalBot</span> */}
           </LoaderLink>
 
+          {/* Telemóvel: o pedido de demonstração fica sempre à vista na barra;
+              a escolha de língua passa para dentro do menu. */}
           <div className={styles.mobileTrailing}>
-            <LanguageMenu />
+            {isAuthed || onContactPage ? null : (
+              <LoaderLink
+                href="/contact"
+                className={styles.mobileCta}
+                onClick={closeMenu}
+              >
+                {translation("bookShort")}
+              </LoaderLink>
+            )}
             {trailing}
           </div>
 
@@ -146,11 +158,11 @@ export default function MarketingNavbar({ trailing = null }) {
                 <LoaderLink
                   href="/contact"
                   className={`${styles.signupBtn} ${
-                    showDemoCta ? "" : styles.signupBtnHidden
+                    showDemoCta && !onContactPage ? "" : styles.signupBtnHidden
                   }`}
                   onClick={closeMenu}
-                  aria-hidden={!showDemoCta}
-                  tabIndex={showDemoCta ? undefined : -1}
+                  aria-hidden={!showDemoCta || onContactPage}
+                  tabIndex={showDemoCta && !onContactPage ? undefined : -1}
                 >
                   {translation("book")}
                 </LoaderLink>

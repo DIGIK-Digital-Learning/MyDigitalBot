@@ -1,0 +1,145 @@
+/* Página Solução (revamp 11-2026). Base em ../components/Site/site.module.css. */
+
+.areas {
+  display: flex;
+  flex-direction: column;
+}
+
+.area {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(32px, 6vw, 88px);
+  align-items: center;
+  padding: clamp(48px, 6vw, 72px) 0;
+  border-top: 1px solid var(--line);
+}
+
+.area:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+/* Alterna o lado da conversa, para o olhar não seguir sempre a mesma linha. */
+.area:nth-child(even) .areaCopy {
+  order: 2;
+}
+
+.areaIcon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 14px;
+  color: #1467a3;
+  background: rgba(var(--brand-accent-rgb), 0.14);
+}
+
+.areaTitle {
+  margin: 20px 0 0;
+  color: var(--ink);
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.areaText {
+  max-width: 46ch;
+  margin: 14px 0 24px;
+  color: var(--ink-soft);
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+/* Resultado da área: uma frase em destaque, com barra de cor à esquerda. */
+.areaOutcome {
+  max-width: 44ch;
+  margin: 0;
+  padding: 2px 0 2px 18px;
+  border-left: 3px solid var(--brand-accent, #1b8ad0);
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  text-wrap: pretty;
+}
+
+.areaOutcomeLabel {
+  display: block;
+  margin-bottom: 6px;
+  color: #1467a3;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Caixa com uma cena do dia a dia atrás do aparelho. A proporção, o zoom
+   (palco) e a posição do aparelho vêm do page.js (sceneStyles). */
+.areaChat {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(var(--brand-accent-rgb), 0.22);
+  border-radius: 20px;
+  background: var(--mist);
+}
+
+.sceneStage {
+  position: absolute;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.sceneDevice {
+  position: absolute;
+}
+
+/* O ChatDemo traz larguras próprias (ex.: iPhone até 330px); aqui manda a
+   posição medida na cena. */
+.sceneDevice > figure {
+  width: 100%;
+  margin: 0;
+}
+
+.areaChatLabel {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 5;
+  margin: 0;
+  padding: 5px 10px;
+  border-radius: 999px;
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(6px);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+@media (max-width: 960px) {
+  .area {
+    grid-template-columns: 1fr;
+  }
+
+  .area:nth-child(even) .areaCopy {
+    order: 0;
+  }
+}
+
+/* Áreas com cena alternativa (page.js, AREAS[].mobile): até 640px mostra o
+   telemóvel na mão em vez do portátil. O mesmo corte do ChatDemo. */
+.only-narrow {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .only-wide {
+    display: none;
+  }
+
+  .only-narrow {
+    display: block;
+  }
+}

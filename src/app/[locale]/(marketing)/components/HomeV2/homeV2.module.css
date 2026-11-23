@@ -1,0 +1,718 @@
+/* Só o que é da home. Cores, botões, títulos de secção e CTA final vêm de
+   ../Site/site.module.css. */
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: clamp(120px, 14vh, 150px) 0 0;
+  color: var(--cloud);
+  background:
+    radial-gradient(
+      60% 70% at 78% 38%,
+      rgba(var(--brand-accent-rgb), 0.2),
+      transparent 70%
+    ),
+    radial-gradient(
+      50% 60% at 10% 100%,
+      rgba(48, 169, 224, 0.1),
+      transparent 70%
+    ),
+    var(--night);
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+
+.heroTitle {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.5rem, 4.7vw, 4.25rem);
+  font-weight: 820;
+  line-height: 1;
+  letter-spacing: -0.038em;
+  text-wrap: balance;
+}
+
+.heroTitleAccent {
+  display: block;
+  margin-top: 0.08em;
+  color: var(--brand-accent);
+}
+
+.heroLead {
+  max-width: 52ch;
+  margin: 28px 0 0;
+  color: var(--on-dark-soft);
+  font-size: clamp(17px, 1.35vw, 19px);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 36px;
+}
+
+.heroNote {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 22px 0 0;
+  color: rgba(247, 251, 255, 0.62);
+  font-size: 14px;
+}
+
+.heroNote a {
+  color: #fff;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--brand-accent-rgb), 0.8);
+  text-underline-offset: 4px;
+}
+
+.heroNote span + span::before {
+  margin-right: 16px;
+  color: rgba(247, 251, 255, 0.3);
+  content: "·";
+}
+
+/* Entrada do hero: texto primeiro, telemóvel a seguir */
+.heroCopy > * {
+  animation: rise 800ms var(--ease-out) both;
+}
+
+.heroCopy > :nth-child(2) {
+  animation-delay: 90ms;
+}
+
+.heroCopy > :nth-child(3) {
+  animation-delay: 160ms;
+}
+
+.heroCopy > :nth-child(4) {
+  animation-delay: 220ms;
+}
+
+.heroVisual {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  animation: phoneIn 1000ms var(--ease-out) 150ms both;
+}
+
+/* O símbolo da marca, grande e em contorno, por trás do telemóvel */
+.heroSymbol {
+  position: absolute;
+  top: 46%;
+  left: 50%;
+  z-index: -1;
+  width: min(640px, 130%);
+  height: auto;
+  color: transparent;
+  stroke: rgba(var(--brand-accent-rgb), 0.2);
+  stroke-width: 1.2;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 0 18px rgba(var(--brand-accent-rgb), 0.35));
+}
+
+.heroSymbol path {
+  vector-effect: non-scaling-stroke;
+}
+
+.proof {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: clamp(56px, 8vw, 88px) 0 0;
+  padding: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  list-style: none;
+}
+
+.proof li {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 24px 20px 28px 0;
+  color: rgba(247, 251, 255, 0.86);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.proof li + li {
+  padding-left: 20px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.proof svg {
+  flex: 0 0 auto;
+  color: var(--brand-accent);
+}
+
+/* ---------- Como funciona ---------- */
+.how {
+  padding: clamp(80px, 11vw, 140px) 0;
+  background: var(--cloud);
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  counter-reset: step;
+  list-style: none;
+}
+
+.step {
+  position: relative;
+  padding: 28px 32px 0 0;
+  border-top: 2px solid var(--line);
+  counter-increment: step;
+}
+
+.step + .step {
+  padding-left: 32px;
+}
+
+.step::before {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: 56px;
+  height: 2px;
+  background: var(--brand-accent);
+  content: "";
+}
+
+.step + .step::before {
+  left: 32px;
+}
+
+.stepNumber {
+  display: block;
+  margin-bottom: 14px;
+  color: #1b6fa8;
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.stepTitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.35rem;
+  font-weight: 780;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.stepText {
+  max-width: 36ch;
+  margin: 10px 0 0;
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.panel {
+  margin: clamp(48px, 7vw, 80px) 0 0;
+}
+
+.panelFrame {
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--night);
+  box-shadow: 0 40px 80px -40px rgba(8, 20, 38, 0.45);
+  border: 1px solid rgba(8, 20, 38, 0.12);
+}
+
+.panelBar {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  padding: 12px 16px;
+}
+
+.panelBar i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.panelBar span {
+  margin-left: 12px;
+  color: rgba(247, 251, 255, 0.6);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.panelImage {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ---------- Casos de uso ---------- */
+.useCases {
+  padding: clamp(80px, 11vw, 140px) 0;
+  background: #fff;
+}
+
+.cases {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(32px, 6vw, 88px);
+  align-items: start;
+}
+
+.caseTabs {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--line);
+}
+
+.caseItem {
+  position: relative;
+  border-bottom: 1px solid var(--line);
+}
+
+.caseItem::before {
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--brand-accent-rgb), 0.08),
+    transparent 70%
+  );
+  content: "";
+  opacity: 0;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+}
+
+.caseItemActive::before {
+  opacity: 1;
+}
+
+.caseTab {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 6px;
+  padding: 22px 20px;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.caseTabTitle {
+  color: rgba(11, 26, 48, 0.58);
+  font-size: 1.3rem;
+  font-weight: 780;
+  letter-spacing: -0.02em;
+  transition: color 200ms ease;
+}
+
+.caseTab:hover .caseTabTitle,
+.caseItemActive .caseTabTitle {
+  color: var(--ink);
+}
+
+.caseTabText {
+  color: var(--ink-soft);
+  font-size: 15.5px;
+  line-height: 1.5;
+}
+
+.casePanel {
+  position: sticky;
+  top: 110px;
+  padding: clamp(20px, 3vw, 32px);
+  border: 1px solid rgba(var(--brand-accent-rgb), 0.22);
+  border-radius: 20px;
+  background:
+    radial-gradient(
+      80% 60% at 80% 0%,
+      rgba(var(--brand-accent-rgb), 0.18),
+      transparent 70%
+    ),
+    var(--mist);
+}
+
+/* ---------- Comparação ---------- */
+.compare {
+  padding: clamp(80px, 11vw, 140px) 0;
+  color: var(--cloud);
+  background: var(--navy);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+
+.table th,
+.table td {
+  padding: 22px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.45;
+}
+
+.table thead th {
+  padding-top: 0;
+  color: rgba(247, 251, 255, 0.6);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.table thead th:last-child {
+  color: var(--brand-accent);
+}
+
+.table tbody th {
+  width: 22%;
+  color: rgba(247, 251, 255, 0.6);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.table td {
+  color: rgba(247, 251, 255, 0.7);
+}
+
+.table td:last-child {
+  color: #fff;
+  font-weight: 650;
+  background: rgba(var(--brand-accent-rgb), 0.06);
+}
+
+.table td:last-child span {
+  display: inline-flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.table td:last-child svg {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  color: var(--brand-accent);
+}
+
+/* ---------- Porquê ---------- */
+.why {
+  padding: clamp(80px, 11vw, 140px) 0 clamp(56px, 7vw, 88px);
+  background: var(--cloud);
+}
+
+.whyGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(32px, 6vw, 96px);
+  align-items: start;
+}
+
+.whyHeading {
+  position: sticky;
+  top: 120px;
+}
+
+.whyList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.whyItem {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 4px 20px;
+  padding: 28px 0;
+  border-top: 1px solid var(--line);
+}
+
+.whyItem:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.whyIcon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  grid-row: span 2;
+  place-items: center;
+  border-radius: 12px;
+  color: #1467a3;
+  background: rgba(var(--brand-accent-rgb), 0.14);
+}
+
+.whyTitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.25rem;
+  font-weight: 780;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.whyText {
+  max-width: 52ch;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+/* ---------- Preços ---------- */
+.pricing {
+  padding: 0 0 clamp(80px, 11vw, 140px);
+  background: var(--cloud);
+}
+
+.priceBand {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 40px;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(28px, 4vw, 44px);
+  border: 1px solid rgba(var(--brand-accent-rgb), 0.4);
+  border-radius: 20px;
+  background: #fff;
+}
+
+.priceBand > div {
+  flex: 1 1 380px;
+}
+
+.priceTitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.priceText {
+  margin: 10px 0 0;
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.priceText strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes phoneIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px) rotate(2deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 1080px) {
+  .proof {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .proof li:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .proof li:nth-child(n + 3) {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+@media (max-width: 960px) {
+  .heroGrid,
+  .cases,
+  .whyGrid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Telemóvel e tablet: primeiro o impacto (título + conversa a acontecer),
+     depois o texto e os botões. display: contents deixa ordenar os filhos
+     do bloco de texto à volta do telemóvel. */
+  .heroGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .heroCopy {
+    display: contents;
+  }
+
+  .heroTitle {
+    order: 1;
+  }
+
+  .heroVisual {
+    order: 2;
+    margin-top: 28px;
+  }
+
+  .heroLead {
+    order: 3;
+    margin-top: 36px;
+  }
+
+  .heroActions {
+    order: 4;
+  }
+
+  .heroNote {
+    order: 5;
+  }
+
+  .casePanel,
+  .whyHeading {
+    position: static;
+  }
+
+  /* No telemóvel a conversa fica por baixo da lista: só o separador ativo
+     mostra o texto, para a conversa ficar perto. */
+  .caseItem:not(.caseItemActive) .caseTabText {
+    display: none;
+  }
+
+  .caseTab {
+    padding: 16px 14px;
+  }
+
+  .steps {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .step,
+  .step + .step {
+    padding: 24px 0 0;
+  }
+
+  .step + .step::before {
+    left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding-top: 112px;
+  }
+
+  .heroActions > a {
+    flex: 1 1 100%;
+  }
+
+  .proof {
+    grid-template-columns: 1fr;
+  }
+
+  .proof li,
+  .proof li + li,
+  .proof li:nth-child(3) {
+    padding: 16px 0;
+    border-left: 0;
+  }
+
+  .proof li + li {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table,
+  .table tbody,
+  .table tr,
+  .table th,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+
+  .table tr {
+    padding: 18px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .table th,
+  .table td {
+    padding: 4px 0;
+    border: 0;
+  }
+
+  .table tbody th {
+    width: 100%;
+    margin-bottom: 6px;
+  }
+
+  .table td:first-of-type {
+    text-decoration: line-through;
+    text-decoration-color: rgba(247, 251, 255, 0.35);
+  }
+
+  .table td:last-child {
+    margin-top: 6px;
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+
+  .priceBand > a {
+    width: 100%;
+  }
+
+  .casePanel {
+    padding: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroCopy > *,
+  .heroVisual {
+    animation: none;
+  }
+}

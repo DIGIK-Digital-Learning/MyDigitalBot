@@ -1,0 +1,196 @@
+/* Página Como funciona (revamp 11-2026). Base em
+   ../components/Site/site.module.css. As fases são uma sequência real, por
+   isso levam número. */
+
+/* Cabeçalho da secção, centrado por cima das fases */
+.intro {
+  max-width: 720px;
+  margin: 0 auto clamp(48px, 7vw, 88px);
+  text-align: center;
+}
+
+.introText {
+  margin: 16px auto 0;
+}
+
+/* Fases em ziguezague: ilustração de um lado, texto do outro */
+.steps {
+  display: grid;
+  gap: clamp(56px, 8vw, 112px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(32px, 6vw, 88px);
+  align-items: center;
+}
+
+.step:nth-child(even) .stepVisual {
+  order: 2;
+  /* inclinação 3D das cenas virada para o texto */
+  --tilt: 14deg;
+}
+
+.stepVisual {
+  position: relative;
+}
+
+.stepVisual > * {
+  transition: transform 500ms var(--ease-out);
+}
+
+/* Imagem de vidro (fundo escuro): mesma sombra e cantos das cenas (glassScene .stage) */
+.stepImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 28px;
+  box-shadow: 0 30px 60px -30px rgba(8, 20, 38, 0.55);
+}
+
+.step:hover .stepVisual > * {
+  transform: translateY(-6px);
+}
+
+.stepNumber {
+  display: inline-block;
+  margin-bottom: 14px;
+  color: transparent;
+  background: linear-gradient(
+    135deg,
+    var(--brand-accent),
+    rgba(var(--brand-accent-rgb), 0.35)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  font-size: clamp(2.6rem, 5vw, 3.6rem);
+  font-weight: 850;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.stepTitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.stepText {
+  max-width: 46ch;
+  margin: 12px 0 22px;
+  color: var(--ink-soft);
+  font-size: 16.5px;
+  line-height: 1.55;
+}
+
+/* O que fica pronto no fim da fase: mesma linha de destaque da /solucao. */
+.stepOutcome {
+  max-width: 44ch;
+  margin: 0;
+  padding: 2px 0 2px 18px;
+  border-left: 3px solid var(--brand-accent);
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  text-wrap: pretty;
+}
+
+.stepOutcomeLabel {
+  display: block;
+  margin-bottom: 6px;
+  color: #1467a3;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stepVisual > * {
+    transition: none;
+  }
+
+  .step:hover .stepVisual > * {
+    transform: none;
+  }
+}
+
+.bandSection {
+  padding: 0 0 clamp(80px, 10vw, 128px);
+}
+
+.band {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  padding: clamp(28px, 4vw, 44px);
+  border-radius: 20px;
+  color: var(--cloud);
+  background:
+    radial-gradient(
+      70% 90% at 100% 0%,
+      rgba(var(--brand-accent-rgb), 0.24),
+      transparent 70%
+    ),
+    var(--night);
+}
+
+.bandIcon {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 16px;
+  color: var(--night);
+  background: var(--brand-accent);
+}
+
+.bandTitle {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.bandText {
+  max-width: 70ch;
+  margin: 10px 0 0;
+  color: var(--on-dark-soft);
+  font-size: 16.5px;
+  line-height: 1.6;
+}
+
+@media (max-width: 860px) {
+  .step {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  /* Telemóvel: ilustração primeiro, texto depois, em todas as fases */
+  .step:nth-child(even) .stepVisual {
+    order: 0;
+  }
+
+  .stepVisual {
+    max-width: 520px;
+  }
+}
+
+@media (max-width: 640px) {
+  .band {
+    flex-direction: column;
+  }
+}

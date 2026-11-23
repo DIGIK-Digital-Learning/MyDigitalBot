@@ -105,6 +105,9 @@
 }
 
 .navLink {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
   text-decoration: none;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.72);
@@ -135,6 +138,7 @@
 }
 
 .loginLink {
+  white-space: nowrap;
   text-decoration: none;
   font-size: 14px;
   background: rgba(255, 255, 255, 0.09);
@@ -183,7 +187,7 @@
 
 /* Fallback state when the page's own hero CTA (see [data-page-demo-cta]) is
    already visible. Desktop additionally collapses the button's width (see
-   the [min-width: 961px] block below) so the login/language group doesn't
+   the [min-width: 1101px] block below) so the login/language group doesn't
    keep a gap reserved for it in the persistent header bar; on mobile the
    button lives inside the collapsible menu already, so a plain fade/scale
    is enough. */
@@ -231,7 +235,10 @@
 }
 
 /* Desktop */
-@media (min-width: 961px) {
+/* Menu completo só a partir de 1101px: abaixo disso os 4 links + Entrar +
+   Pedir demonstração + idioma não cabem numa linha e "Como funciona"
+   partia em duas. */
+@media (min-width: 1101px) {
   .navbar {
     display: flex;
     align-items: center;
@@ -253,6 +260,7 @@
 
   .navLinks {
     display: flex;
+    align-items: center;
     justify-content: center;
     gap: 4px;
     flex: 1;
@@ -286,11 +294,43 @@
   }
 }
 
+.mobileCta {
+  display: none;
+}
+
 /* Mobile / tablet */
-@media (max-width: 960px) {
+@media (max-width: 1100px) {
   .mobileTrailing {
     display: inline-flex;
     margin-left: auto;
+  }
+
+  .mobileCta {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: 999px;
+    color: #081426;
+    background: var(--brand-accent);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .mobileCta:hover {
+    background: var(--brand-accent-hover);
+  }
+
+  .mobileCta:active {
+    background: var(--brand-accent-active);
+  }
+
+  /* O botão da barra já cobre o pedido de demonstração no telemóvel. */
+  .navActions .signupBtn {
+    display: none;
   }
 
   .menuButton {

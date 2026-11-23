@@ -140,7 +140,6 @@
 
 .heroWord {
   display: inline-block;
-  margin-right: 0.17em;
 }
 
 .heroLine:last-child {
@@ -153,6 +152,37 @@
   color: rgba(247, 251, 255, 0.72);
   font-size: clamp(1rem, 1.5vw, 1.18rem);
   line-height: 1.65;
+}
+
+.heroMaker {
+  position: relative;
+  z-index: 2;
+  margin: 22px auto 0;
+  color: rgba(247, 251, 255, 0.66);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.heroMakerLink {
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--brand-accent-rgb), 0.7);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.2s ease;
+}
+
+.heroMakerLink:hover,
+.heroMakerLink:focus-visible {
+  text-decoration-color: var(--brand-accent);
+}
+
+@media (max-width: 480px) {
+  .heroMakerNote {
+    display: none;
+  }
 }
 
 .actions {

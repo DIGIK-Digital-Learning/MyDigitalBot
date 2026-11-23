@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createContact } from "@/lib/repos/contact.repo";
+import { sendDemoRequestToHubspot } from "@/lib/hubspot";
 
 function isValidEmail(email = "") {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -28,16 +29,41 @@ export async function POST(request) {
       );
     }
 
-    const contact = await createContact({
-      name,
-      email,
-      company: company || null,
-      message,
-      source: "landing_page",
-      status: "new",
-    });
+    // Grava na BD do bot e envia para o HubSpot da DIGIK. Basta um dos dois
+    // correr bem para o pedido não se perder.
+    const [saved, hubspot] = await Promise.allSettled([
+      createContact({
+        name,
+        email,
+        company: company || null,
+        message,
+        source: "landing_page",
+        status: "new",
+      }),
+      sendDemoRequestToHubspot({
+        name,
+        email,
+        company,
+        message,
+        plan: typeof body?.plan === "string" ? body.plan : null,
+        origem: body?.origem && typeof body.origem === "object" ? body.origem : null,
+        pageUri: body?.pageUri,
+        pageName: body?.pageName,
+      }),
+    ]);
 
-    return NextResponse.json({ ok: true, contactId: contact.id });
+    const hubspotOk =
+      hubspot.status === "fulfilled" && hubspot.value?.status === "ok";
+
+    if (saved.status === "rejected") {
+      console.error("[contact-form] erro na BD:", saved.reason);
+      if (!hubspotOk) throw saved.reason;
+    }
+
+    return NextResponse.json({
+      ok: true,
+      contactId: saved.status === "fulfilled" ? saved.value.id : null,
+    });
   } catch (error) {
     console.error("[contact-form] error:", error);
 

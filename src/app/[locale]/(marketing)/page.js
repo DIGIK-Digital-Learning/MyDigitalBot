@@ -1,463 +1,289 @@
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import {
-  BarChart3,
-  Bell,
+  ArrowRight,
   Check,
-  ChevronDown,
-  FileText,
-  MessageCircle,
-  Sparkles,
+  Euro,
+  Languages,
+  MessagesSquare,
+  Smartphone,
+  UsersRound,
 } from "lucide-react";
-import PersistentHeader from "@/app/components/Navbar/MarketingNavbar/PersistentHeader";
 import LoaderLink from "./components/TopLoader/LoaderLink";
-import Footer from "./components/Footer/Footer";
-import LandingExperience from "./components/LandingExperience/LandingExperience";
-import InteractiveAmbientBackground from "./components/InteractiveAmbientBackground/InteractiveAmbientBackground";
-import BeforeAfterComparison from "./components/BeforeAfterComparison/BeforeAfterComparison";
-import FeatureGrid from "./components/FeatureGrid/FeatureGrid";
-import SharedHeroNeonBrand from "./components/SharedHeroNeonBrand/SharedHeroNeonBrand";
-import FinalBrandPattern from "./components/LandingExperience/FinalBrandPattern";
-import heroContent from "./components/Hero/hero.json";
-import pricingContent from "./components/Pricing/pricing.json";
-import styles from "./components/LandingExperience/landingExperience.module.css";
+import HomeJsonLd from "./components/HomeJsonLd/HomeJsonLd";
+import BrandSymbol from "./components/HomeV2/BrandSymbol";
+import ChatDemo from "./components/HomeV2/ChatDemo";
+import UseCases from "./components/HomeV2/UseCases";
+import SiteShell from "./components/Site/SiteShell";
+import FinalCta from "./components/Site/FinalCta";
+import site from "./components/Site/site.module.css";
+import styles from "./components/HomeV2/homeV2.module.css";
+import { formatCount, formatPrice, getPlan } from "./pricing/plans";
+import { digikUrl, getPageMetadata } from "@/lib/seo/metadata";
 
-function AnimatedLine({ children }) {
-  return (
-    <span className={styles.heroLine} aria-hidden="true">
-      {children.split(" ").map((word, index) => (
-        <span
-          className={styles.heroWord}
-          data-hero-word
-          key={`${word}-${index}`}
-        >
-          {word}
-        </span>
-      ))}
-    </span>
-  );
+export async function generateMetadata({ params }) {
+  return getPageMetadata({
+    params,
+    namespace: "LandingPage",
+    path: "/",
+    absoluteTitle: true,
+  });
 }
 
-export default async function LocaleIndex() {
-  const tHero = await getTranslations("LandingPage.Hero");
-  const tBeforeAfter = await getTranslations("LandingPage.BeforeAfter");
-  const tPricing = await getTranslations("LandingPage.Pricing");
-  const tJourney = await getTranslations("LandingPage.Journey");
+const PROOF = [
+  { key: "channels", Icon: MessagesSquare },
+  { key: "noApps", Icon: Smartphone },
+  { key: "languages", Icon: Languages },
+  { key: "setup", Icon: UsersRound },
+];
 
-  const heroCards = heroContent.cards.map((card) => ({
-    ...card,
-    title: tHero(card.titleKey),
-    meta: tHero(card.metaKey),
+const STEP_KEYS = ["setup", "learn", "measure"];
+const COMPARE_ROWS = ["where", "time", "doubts", "data"];
+const CASES = [
+  { id: "microlearning", channel: "teams" },
+  { id: "onboarding", channel: "whatsapp" },
+  { id: "comms", channel: "teams" },
+  { id: "assistant", channel: "whatsapp" },
+];
+const WHY = [
+  { key: "team", Icon: UsersRound },
+  { key: "channels", Icon: MessagesSquare },
+  { key: "language", Icon: Languages },
+  { key: "pricing", Icon: Euro },
+];
+
+export default async function LocaleIndex({ params }) {
+  const { locale } = await params;
+  const t = await getTranslations("HomeV2");
+
+  const freePlan = getPlan("free");
+  const entryPlan = getPlan("team");
+  const freeUsers = formatCount(freePlan.users, locale);
+
+  const chatLabels = t.raw("chatLabels");
+  const cases = CASES.map(({ id, channel }) => ({
+    id,
+    channel,
+    title: t(`cases.items.${id}.title`),
+    text: t(`cases.items.${id}.text`),
+    chat: t.raw(`cases.items.${id}.chat`),
   }));
-
-  const plans = pricingContent.plans.map((plan, index) => ({
-    ...plan,
-    name: tPricing(plan.nameKey),
-    tagline: tPricing(plan.taglineKey),
-    unit: tPricing(plan.unitKey),
-    color: ["#7cc2ff", "#4ab0ff", "#7c5cfc"][index],
-  }));
-
-  const heroTitle = `${tHero(heroContent.titleLines[0])} ${tHero(heroContent.titleLines[1])}`;
 
   return (
-    <main>
-      {/* Rendered outside <LandingExperience> so the persistent header is never
-          nested inside a sticky / overflow-hidden scroll scene. The hero already
-          reserves its own top padding, so no in-flow spacer is needed here. */}
-      <PersistentHeader />
+    <SiteShell>
+      <HomeJsonLd locale={locale} />
 
-      <LandingExperience>
-        <section className={`${styles.scene} ${styles.heroScene}`}>
-          <div className={styles.sceneSticky} data-scene-sticky>
-            <SharedHeroNeonBrand variant="home" glowIntensity={1.05} />
-            <div className={styles.heroInner}>
-              <div className={styles.heroCopy}>
-                <p className={styles.eyebrow} data-hero-intro>
-                  {tJourney("heroEyebrow")}
-                </p>
-                <h1 className={styles.heroTitle} aria-label={heroTitle}>
-                  <AnimatedLine>
-                    {tHero(heroContent.titleLines[0])}
-                  </AnimatedLine>
-                  <AnimatedLine>
-                    {tHero(heroContent.titleLines[1])}
-                  </AnimatedLine>
-                </h1>
-                <p className={styles.heroSubhead} data-hero-intro>
-                  {tHero(heroContent.subheadLines[0])}
-                </p>
-                <div className={styles.actions} data-hero-intro>
-                  <LoaderLink
-                    href={heroContent.primaryCta.href}
-                    className={styles.primaryButton}
-                    data-magnetic
-                    data-page-demo-cta
-                  >
-                    {tHero(heroContent.primaryCta.labelKey)}
-                  </LoaderLink>
-                  <LoaderLink
-                    href={heroContent.secondaryCta.href}
-                    className={styles.secondaryButton}
-                  >
-                    {tHero(heroContent.secondaryCta.labelKey)}
-                  </LoaderLink>
-                </div>
-                <span
-                  className={styles.scrollCue}
-                  data-hero-intro
-                  aria-hidden="true"
-                >
-                  <ChevronDown
-                    className={styles.scrollCueIcon}
-                    size={30}
-                    strokeWidth={1.5}
-                  />
+      <section className={styles.hero}>
+        <div className={site.wrap}>
+          <div className={styles.heroGrid}>
+            <div className={styles.heroCopy}>
+              <h1 className={styles.heroTitle}>
+                {t("hero.titleA")}{" "}
+                <span className={styles.heroTitleAccent}>
+                  {t("hero.titleB")}
                 </span>
+              </h1>
+              <p className={styles.heroLead}>{t("hero.lead")}</p>
+              <div className={styles.heroActions}>
+                <LoaderLink
+                  href="/contact"
+                  className={site.primary}
+                  data-page-demo-cta
+                >
+                  {t("hero.primary")}
+                  <ArrowRight size={17} strokeWidth={2.3} aria-hidden="true" />
+                </LoaderLink>
+                <LoaderLink
+                  href={{ pathname: "/contact", query: { plano: freePlan.id } }}
+                  className={site.secondary}
+                >
+                  {t("hero.secondary")}
+                </LoaderLink>
               </div>
-            </div>
-          </div>
-        </section>
-
-        <section
-          className={`${styles.scene} ${styles.transformScene} ${styles.legacyTransformationScene}`}
-          data-scene="transformation"
-        >
-          <div className={styles.sceneSticky} data-scene-sticky>
-            <div className={styles.sceneInner}>
-              <header className={styles.sectionHeader} data-reveal>
-                <div>
-                  <p className={styles.eyebrow}>
-                    {tJourney("transformationEyebrow")}
-                  </p>
-                  <h2 className={styles.sectionTitle}>
-                    {tBeforeAfter("heading")}
-                  </h2>
-                </div>
-                <p className={styles.sectionText}>
-                  {tBeforeAfter("subheading")}
-                </p>
-              </header>
-
-              <div
-                className={styles.transformStage}
-                data-transform-stage
-                aria-label={tBeforeAfter("story.ariaLabel")}
-              >
-                <div className={styles.stageGlow} data-stage-glow />
-                <div className={styles.stageGrid} aria-hidden="true" />
-
-                <div className={styles.storyStatus} aria-live="polite">
-                  <span data-story-status="noise">
-                    {tBeforeAfter("story.noise")}
-                  </span>
-                  <span data-story-status="gather">
-                    {tBeforeAfter("story.gather")}
-                  </span>
-                  <span data-story-status="result">
-                    {tBeforeAfter("story.result")}
-                  </span>
-                </div>
-
-                <div className={styles.signalField} aria-hidden="true">
-                  <div
-                    className={`${styles.signal} ${styles.signalMessage}`}
-                    data-signal
-                    data-gather-x="255"
-                    data-gather-y="130"
-                  >
-                    <MessageCircle size={17} strokeWidth={1.8} />
-                    <span>{tBeforeAfter("story.signals.messages")}</span>
-                  </div>
-                  <div
-                    className={`${styles.signal} ${styles.signalDocument}`}
-                    data-signal
-                    data-gather-x="-225"
-                    data-gather-y="115"
-                  >
-                    <FileText size={17} strokeWidth={1.8} />
-                    <span>{tBeforeAfter("story.signals.documents")}</span>
-                  </div>
-                  <div
-                    className={`${styles.signal} ${styles.signalAlert}`}
-                    data-signal
-                    data-gather-x="210"
-                    data-gather-y="-105"
-                  >
-                    <Bell size={17} strokeWidth={1.8} />
-                    <span>{tBeforeAfter("story.signals.alerts")}</span>
-                  </div>
-                </div>
-
-                <div className={styles.flowLines} aria-hidden="true">
-                  <i data-flow-line />
-                  <i data-flow-line />
-                  <i data-flow-line />
-                </div>
-
-                <article className={styles.knowledgePlatform} data-platform>
-                  <header className={styles.platformBar}>
-                    <div className={styles.platformBrand}>
-                      <span className={styles.brandMark}>
-                        <Sparkles size={14} strokeWidth={2} />
-                      </span>
-                      <span>{tBeforeAfter("story.platform.name")}</span>
-                    </div>
-                    <span className={styles.liveStatus}>
-                      {tBeforeAfter("story.platform.live")}
-                    </span>
-                  </header>
-
-                  <div className={styles.platformBody}>
-                    <div className={styles.platformRail} aria-hidden="true">
-                      <span className={styles.railActive}>
-                        <Sparkles size={17} />
-                      </span>
-                      <span>
-                        <MessageCircle size={17} />
-                      </span>
-                      <span>
-                        <BarChart3 size={17} />
-                      </span>
-                    </div>
-
-                    <div className={styles.lessonPanel}>
-                      <div className={styles.lessonMeta} data-platform-item>
-                        <span>{tBeforeAfter("story.platform.eyebrow")}</span>
-                        <span>{tBeforeAfter("story.platform.duration")}</span>
-                      </div>
-                      <h3 data-platform-item>
-                        {tBeforeAfter("story.platform.prompt")}
-                      </h3>
-                      <p data-platform-item>
-                        {tBeforeAfter("story.platform.context")}
-                      </p>
-                      <div className={styles.lessonAction} data-platform-item>
-                        <span className={styles.actionCheck}>
-                          <Check size={15} strokeWidth={2.5} />
-                        </span>
-                        <span>{tBeforeAfter("story.platform.action")}</span>
-                      </div>
-                    </div>
-
-                    <aside className={styles.impactPanel} data-platform-item>
-                      <span className={styles.impactLabel}>
-                        {tBeforeAfter("story.platform.impact")}
-                      </span>
-                      <strong>84%</strong>
-                      <span className={styles.impactCaption}>
-                        {tBeforeAfter("story.platform.adoption")}
-                      </span>
-                      <div className={styles.impactBars} aria-hidden="true">
-                        <i />
-                        <i />
-                        <i />
-                        <i />
-                        <i />
-                      </div>
-                    </aside>
-                  </div>
-                </article>
-
-                <div className={styles.storyProgress} aria-hidden="true">
-                  <div className={styles.progressTrack}>
-                    <span data-story-progress />
-                  </div>
-                  <div className={styles.progressLabels}>
-                    <span>{tBeforeAfter("story.steps.chaos")}</span>
-                    <span>{tBeforeAfter("story.steps.organize")}</span>
-                    <span>{tBeforeAfter("story.steps.outcome")}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section
-          className={`${styles.scene} ${styles.productScene}`}
-          data-scene="product"
-        >
-          <div
-            className={`${styles.sceneSticky} ${styles.productStage}`}
-            data-scene-sticky
-          >
-            <header className={styles.productHeader} data-reveal>
-              <p className={styles.eyebrow}>{tJourney("productEyebrow")}</p>
-              <h2 className={styles.sectionTitle}>
-                {tJourney("productTitle")}
-              </h2>
-            </header>
-
-            <div className={styles.actsViewport}>
-              <div className={styles.acts}>
-                {heroCards.map((card, index) => (
-                  <article
-                    className={styles.act}
-                    data-product-act
-                    key={card.id}
-                    style={{
-                      "--act-color": ["#7cc2ff", "#ffd166", "#7c5cfc"][index],
-                    }}
-                  >
-                    <div className={styles.actCopy}>
-                      <span className={styles.actNumber}>
-                        {String(index + 1).padStart(2, "0")} / 03
-                      </span>
-                      <h3 className={styles.actTitle}>{card.title}</h3>
-                      <p className={styles.actMeta}>{card.meta}</p>
-                    </div>
-                    <div
-                      className={`${styles.actMedia} ${card.image ? styles.actPhoto : ""}`}
-                    >
-                      <Image
-                        src={card.image || card.screenshot}
-                        alt={card.title}
-                        fill
-                        sizes="(max-width: 760px) calc(100vw - 40px), (max-width: 1280px) 60vw, 780px"
-                      />
-                      {!card.image && (
-                        <video
-                          data-scene-video
-                          muted
-                          playsInline
-                          loop
-                          preload="metadata"
-                          poster={card.screenshot}
-                          aria-label={card.title}
-                        >
-                          <source src={card.video} type="video/mp4" />
-                        </video>
-                      )}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <FeatureGrid />
-
-        <section className={`${styles.scene} ${styles.transformComparisonScene}`}>
-          <div className={styles.comparisonInner}>
-            <header className={styles.sectionHeader} data-reveal>
-              <div>
-                <p className={styles.eyebrow}>
-                  {tJourney("transformationEyebrow")}
-                </p>
-                <h2 className={styles.sectionTitle}>
-                  {tBeforeAfter("heading")}
-                </h2>
-              </div>
-              <p className={styles.sectionText}>
-                {tBeforeAfter("subheading")}
+              <p className={styles.heroNote}>
+                <span>{t("hero.note", { users: freeUsers })}</span>
+                <span>
+                  {t("hero.maker")}{" "}
+                  <a href={digikUrl(locale)} target="_blank" rel="noopener">
+                    DIGIK
+                  </a>
+                </span>
               </p>
-            </header>
+            </div>
 
-            <BeforeAfterComparison
-              ariaLabel={tBeforeAfter("story.ariaLabel")}
-              before={{
-                label: tBeforeAfter("before.label"),
-                alt: tBeforeAfter("before.alt"),
-              }}
-              after={{
-                label: tBeforeAfter("after.label"),
-                alt: tBeforeAfter("after.alt"),
-              }}
-              beforeBullets={[
-                tBeforeAfter("before.bullets.1"),
-                tBeforeAfter("before.bullets.0"),
-                tBeforeAfter("before.bullets.2"),
-                tBeforeAfter("before.bullets.4"),
-              ]}
-              afterBullets={[
-                tBeforeAfter("after.bullets.0"),
-                tBeforeAfter("after.bullets.1"),
-                tBeforeAfter("after.bullets.2"),
-                tBeforeAfter("after.bullets.4"),
-              ]}
-            />
-          </div>
-        </section>
-
-        <section
-          className={`${styles.scene} ${styles.pricingScene}`}
-          data-scene="pricing"
-        >
-          <div className={styles.pricingStage}>
-            <header className={styles.pricingHeader} data-reveal>
-              <div>
-                <p className={styles.eyebrow}>{tJourney("pricingEyebrow")}</p>
-                <h2 className={styles.sectionTitle}>
-                  {tJourney("pricingTitle")}
-                </h2>
-              </div>
-              <p className={styles.sectionText}>{tPricing("subheading")}</p>
-            </header>
-
-            <div className={styles.pricingGrid}>
-              <ul className={styles.benefits} data-reveal>
-                {pricingContent.benefitsKeys.map((key) => (
-                  <li className={styles.benefit} key={key}>
-                    {tPricing(key)}
-                  </li>
-                ))}
-              </ul>
-
-              <div className={styles.planStack}>
-                {plans.map((plan) => (
-                  <article
-                    className={`${styles.planCard} ${plan.popular ? styles.planCardPopular : ""}`}
-                    data-plan-card
-                    key={plan.id}
-                    style={{ "--plan-color": plan.color }}
-                  >
-                    <span className={styles.planBadge}>{plan.name}</span>
-                    <h3 className={styles.planName}>{plan.name}</h3>
-                    <p className={styles.planPrice}>
-                      {plan.price}
-                      <span className={styles.planUnit}>/ {plan.unit}</span>
-                    </p>
-                    <p className={styles.planTagline}>{plan.tagline}</p>
-                    <LoaderLink href="/pricing" className={styles.compareLink}>
-                      {tPricing("comparison")}
-                    </LoaderLink>
-                  </article>
-                ))}
-              </div>
+            <div className={styles.heroVisual}>
+              <BrandSymbol className={styles.heroSymbol} />
+              <ChatDemo
+                chat={t.raw("heroChat")}
+                labels={chatLabels}
+                variant="phone"
+                channelSwitch
+                initialCount={2}
+              />
             </div>
           </div>
-        </section>
 
-        <section
-          className={`${styles.scene} ${styles.finalScene}`}
-          data-scene="finale"
-        >
-          <div className={styles.finalBackdrop} aria-hidden="true" />
-          <InteractiveAmbientBackground
-            variant="mist"
-            intensity="subtle"
-            interactive={false}
-            className={styles.finalAmbient}
-          />
-          <FinalBrandPattern />
-          <div className={styles.finalContent} data-reveal>
-            <p className={styles.eyebrow}>{tJourney("finalEyebrow")}</p>
-            <h2 className={styles.finalTitle}>{tJourney("finalTitle")}</h2>
-            <p className={styles.finalText}>{tJourney("finalText")}</p>
-            <LoaderLink
-              href="/contact"
-              className={styles.primaryButton}
-              data-magnetic
-            >
-              {tHero(heroContent.primaryCta.labelKey)}
+          <ul className={styles.proof}>
+            {PROOF.map(({ key, Icon }) => (
+              <li key={key}>
+                <Icon size={20} strokeWidth={1.9} aria-hidden="true" />
+                {t(`proof.${key}`)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className={site.section} aria-labelledby="home-how">
+        <div className={site.wrap}>
+          <header className={`${site.sectionHead} ${site.reveal}`}>
+            <h2 className={site.sectionTitle} id="home-how">
+              {t("how.title")}
+            </h2>
+            <p className={site.sectionText}>{t("how.text")}</p>
+          </header>
+
+          <ol className={styles.steps}>
+            {STEP_KEYS.map((key, index) => (
+              <li className={`${styles.step} ${site.reveal}`} key={key}>
+                <span className={styles.stepNumber} aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h3 className={styles.stepTitle}>
+                  {t(`how.steps.${key}.title`)}
+                </h3>
+                <p className={styles.stepText}>{t(`how.steps.${key}.text`)}</p>
+              </li>
+            ))}
+          </ol>
+
+          <figure className={`${styles.panel} ${site.reveal}`}>
+            <div className={styles.panelFrame}>
+              <div className={styles.panelBar} aria-hidden="true">
+                <i />
+                <i />
+                <i />
+                <span>{t("how.panelCaption")}</span>
+              </div>
+              <Image
+                className={styles.panelImage}
+                src="/images/dashboard/metricas-home-hd.webp"
+                alt={t("how.panelAlt")}
+                width={2848}
+                height={1854}
+                quality={95}
+                sizes="(max-width: 1280px) calc(100vw - 40px), 1200px"
+              />
+            </div>
+          </figure>
+        </div>
+      </section>
+
+      <section
+        className={`${site.section} ${site.sectionWhite}`}
+        aria-labelledby="home-cases"
+      >
+        <div className={site.wrap}>
+          <header className={`${site.sectionHead} ${site.reveal}`}>
+            <h2 className={site.sectionTitle} id="home-cases">
+              {t("cases.title")}
+            </h2>
+            <p className={site.sectionText}>{t("cases.text")}</p>
+          </header>
+          <UseCases cases={cases} chatLabels={chatLabels} />
+        </div>
+      </section>
+
+      <section
+        className={`${site.section} ${site.sectionDark}`}
+        aria-labelledby="home-compare"
+      >
+        <div className={site.wrap}>
+          <header className={`${site.sectionHead} ${site.reveal}`}>
+            <h2 className={site.sectionTitle} id="home-compare">
+              {t("compare.title")}
+            </h2>
+            <p className={site.sectionText}>{t("compare.text")}</p>
+          </header>
+
+          <table className={`${styles.table} ${site.reveal}`}>
+            <thead>
+              <tr>
+                <th scope="col">
+                  <span className={site.srOnly}>{t("compare.colLabel")}</span>
+                </th>
+                <th scope="col">{t("compare.colA")}</th>
+                <th scope="col">{t("compare.colB")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {COMPARE_ROWS.map((row) => (
+                <tr key={row}>
+                  <th scope="row">{t(`compare.rows.${row}.label`)}</th>
+                  <td>{t(`compare.rows.${row}.a`)}</td>
+                  <td>
+                    <span>
+                      <Check size={16} strokeWidth={2.6} aria-hidden="true" />
+                      {t(`compare.rows.${row}.b`)}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className={styles.why} aria-labelledby="home-why">
+        <div className={`${site.wrap} ${styles.whyGrid}`}>
+          <h2
+            className={`${site.sectionTitle} ${styles.whyHeading}`}
+            id="home-why"
+          >
+            {t("why.title")}
+          </h2>
+          <ul className={styles.whyList}>
+            {WHY.map(({ key, Icon }) => (
+              <li className={`${styles.whyItem} ${site.reveal}`} key={key}>
+                <span className={styles.whyIcon} aria-hidden="true">
+                  <Icon size={21} strokeWidth={1.9} />
+                </span>
+                <h3 className={styles.whyTitle}>
+                  {t(`why.items.${key}.title`)}
+                </h3>
+                <p className={styles.whyText}>
+                  {t(`why.items.${key}.text`, { users: freeUsers })}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className={styles.pricing} aria-labelledby="home-pricing">
+        <div className={site.wrap}>
+          <div className={`${styles.priceBand} ${site.reveal}`}>
+            <div>
+              <h2 className={styles.priceTitle} id="home-pricing">
+                {t("pricing.title")}
+              </h2>
+              <p className={styles.priceText}>
+                {t("pricing.text", {
+                  freeUsers,
+                  price: formatPrice(entryPlan.price, locale),
+                  users: formatCount(entryPlan.users, locale),
+                })}
+              </p>
+            </div>
+            <LoaderLink href="/pricing" className={site.ghost}>
+              {t("pricing.cta")}
+              <ArrowRight size={17} strokeWidth={2.3} aria-hidden="true" />
             </LoaderLink>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <Footer />
-      </LandingExperience>
-    </main>
+      <FinalCta />
+    </SiteShell>
   );
 }

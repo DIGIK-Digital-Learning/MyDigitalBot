@@ -1,0 +1,1027 @@
+/* Conversa de exemplo (ChatDemo.jsx). Duas peles: WhatsApp e Teams. As cores
+   de cada app só aparecem dentro do ecrã, para a conversa ser reconhecível. */
+
+.root {
+  --wa-bar: #008069;
+  --wa-bg: #efeae2;
+  --wa-out: #d9fdd3;
+  --wa-link: #027eb5;
+  --teams-bar: #4f52b2;
+  --teams-bg: #f5f5f5;
+  --teams-out: #e8ebfa;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  margin: 0;
+}
+
+/* Interruptor WhatsApp / Teams */
+.switch {
+  display: inline-flex;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.switchButton {
+  min-height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  color: rgba(247, 251, 255, 0.72);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    color 200ms ease,
+    background 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.switchButton:hover {
+  color: #fff;
+}
+
+.switchButton[aria-pressed="true"] {
+  color: #081426;
+  background: #fff;
+}
+
+.switchButton:focus-visible {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 2px;
+}
+
+/* Moldura. A conversa é uma animação, não uma app: o cursor não mexe nela
+   (nem scroll com a roda, nem seleção de texto). O interruptor WhatsApp/Teams
+   fica fora da moldura e continua a funcionar. */
+.device {
+  position: relative;
+  width: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Molduras oficiais da Apple (Apple Design Resources, Product Bezels):
+   iPhone 18, MacBook Pro M5, iPad Pro M5 13" e iMac M4. Cada PNG tem o ecrã
+   transparente; o ecrã do site fica por baixo da moldura, nas posições
+   medidas no PNG original (em % para escalar a qualquer tamanho).
+   O ecrã é absoluto, por isso a largura vem da figura e não do conteúdo. */
+.phone {
+  width: min(330px, calc(100vw - 48px));
+  margin-inline: auto;
+}
+
+.laptop,
+.tablet,
+.desktop {
+  width: 100%;
+}
+
+.phone .device,
+.watch .device,
+.laptop .device,
+.tablet .device,
+.desktop .device {
+  filter: drop-shadow(0 24px 32px rgba(8, 20, 38, 0.35));
+}
+
+.phone .device::after,
+.watch .device::after,
+.laptop .device::after,
+.tablet .device::after,
+.desktop .device::after {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: var(--bezel) center / 100% 100% no-repeat;
+  content: "";
+  pointer-events: none;
+}
+
+/* iPhone 18: PNG 1350x2760, ecrã 72,69 / 1206x2622 */
+.phone .device {
+  --bezel: url("/images/devices/iphone-18.webp");
+  aspect-ratio: 1350 / 2760;
+  filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.55));
+}
+
+/* MacBook Pro M5 14": PNG 3860x2540, ecrã 418,288 / 3024x1964 */
+.laptop .device {
+  --bezel: url("/images/devices/macbook-pro-m5.webp");
+  aspect-ratio: 3860 / 2540;
+}
+
+/* iPad Pro M5 13" (horizontal): PNG 3000x2300, ecrã 124,118 / 2752x2064 */
+.tablet .device {
+  --bezel: url("/images/devices/ipad-pro-m5.webp");
+  aspect-ratio: 3000 / 2300;
+}
+
+/* Apple Watch Ultra 4 49mm (titânio preto): PNG 620x940, ecrã 99,213 / 422x514 */
+.watch {
+  width: min(290px, 100%);
+  margin-inline: auto;
+}
+
+.watch .device {
+  --bezel: url("/images/devices/apple-watch-ultra-4.webp");
+  aspect-ratio: 620 / 940;
+}
+
+/* iMac M4 24": PNG 4760x4050, ecrã 140,150 / 4480x2520 */
+.desktop .device {
+  --bezel: url("/images/devices/imac-m4.webp");
+  aspect-ratio: 4760 / 4050;
+}
+
+.card .device {
+  overflow: hidden;
+  border: 1px solid rgba(8, 20, 38, 0.1);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.screen {
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  background: var(--wa-bg);
+  transition: background 400ms ease;
+}
+
+/* Posição e forma do ecrã: tiradas do PNG de cada moldura
+   (scratchpad tools/screen_masks.py). A máscara *-screen.png é a forma exata
+   do ecrã, cantos incluídos, com 3px a mais para ficar por baixo da moldura. */
+.phone .screen,
+.laptop .screen,
+.tablet .screen,
+.desktop .screen,
+.watch .screen {
+  position: absolute;
+  mask: var(--screen-mask) center / 100% 100% no-repeat;
+}
+
+.phone .screen {
+  --screen-mask: url("/images/devices/iphone-18-screen.png");
+  top: 2.391%;
+  left: 5.111%;
+  width: 89.778%;
+  height: 95.217%;
+}
+
+.watch .screen,
+.watch.teams .screen {
+  --screen-mask: url("/images/devices/apple-watch-ultra-4-screen.png");
+  top: 22.34%;
+  left: 15.484%;
+  width: 69.032%;
+  height: 55.319%;
+  background: #000;
+}
+
+.laptop .screen {
+  --screen-mask: url("/images/devices/macbook-pro-m5-screen.png");
+  top: 11.22%;
+  left: 10.751%;
+  width: 78.497%;
+  height: 77.559%;
+}
+
+.tablet .screen {
+  --screen-mask: url("/images/devices/ipad-pro-m5-screen.png");
+  top: 5%;
+  left: 4.033%;
+  width: 91.933%;
+  height: 90%;
+}
+
+.desktop .screen {
+  --screen-mask: url("/images/devices/imac-m4-screen.png");
+  top: 3.63%;
+  left: 2.878%;
+  width: 94.244%;
+  height: 62.37%;
+}
+
+/* Modo "bare": sem moldura. A figura ocupa a caixa que lhe derem (o ecrã
+   verde da foto) e o ecrã tem a forma desse verde (--bare-mask). */
+.root.bare {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+.root.bare .device {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  filter: none;
+}
+
+.root.bare .device::after {
+  content: none;
+}
+
+.root.bare .screen {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  mask: var(--bare-mask) center / 100% 100% no-repeat;
+}
+
+/* Interface da app. Nos aparelhos grandes tem o tamanho "real" e o
+   ChatDemo.jsx reduz à escala do ecrã. */
+.ui {
+  display: flex;
+  width: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.laptop .ui,
+.tablet .ui,
+.desktop .ui,
+.watch .ui,
+.bare .ui {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+
+.app {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.pane {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+/* Barra de menus do macOS (o notch do MacBook fica a meio) */
+.menuBar {
+  display: flex;
+  height: 24px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  color: #fff;
+  background: #1b2333;
+  font-size: 11.5px;
+}
+
+.menuBar strong {
+  font-weight: 700;
+}
+
+/* Teams novo (tema claro) em portátil/tablet/iMac: barra de topo com
+   pesquisa, barra lateral com etiquetas e o Chat ativo a roxo, cabeçalho da
+   conversa branco. Cores do Teams: roxo #5b5fc7, cinzentos #616161/#424242. */
+.teamsTop {
+  display: grid;
+  height: 34px;
+  flex: 0 0 auto;
+  grid-template-columns: 1fr minmax(0, 2.2fr) 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 0 10px;
+  color: #424242;
+  background: #ebebeb;
+}
+
+.teamsTopLeft,
+.teamsTopRight {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.teamsTopRight {
+  justify-content: flex-end;
+}
+
+.teamsTopIcon {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
+
+.trafficLights {
+  display: flex;
+  gap: 6px;
+  margin-right: 6px;
+}
+
+.trafficLights i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff5f57;
+}
+
+.trafficLights i:nth-child(2) {
+  background: #febc2e;
+}
+
+.trafficLights i:nth-child(3) {
+  background: #28c840;
+}
+
+.teamsSearch {
+  display: flex;
+  height: 24px;
+  gap: 6px;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
+  color: #707070;
+  background: #fff;
+  font-size: 11.5px;
+}
+
+.teamsMe {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c7b39b, #7d6450);
+  box-shadow:
+    0 0 0 1.5px #ebebeb,
+    2px 2px 0 0 #13a10e;
+}
+
+.rail {
+  display: flex;
+  width: 48px;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+  padding-top: 8px;
+  color: #616161;
+  background: #ebebeb;
+}
+
+.railItem {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+.railIcon {
+  width: 20px;
+  height: 20px;
+}
+
+.railActive {
+  color: #5b5fc7;
+}
+
+.railActive::before {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: #5b5fc7;
+  content: "";
+}
+
+.railApps {
+  margin-top: auto;
+  margin-bottom: 6px;
+}
+
+.laptop.teams .pane,
+.tablet.teams .pane,
+.desktop.teams .pane {
+  border-top-left-radius: 8px;
+  overflow: hidden;
+  background: var(--teams-bg);
+  box-shadow: -1px 0 0 #e0e0e0;
+}
+
+.laptop.teams .bar,
+.tablet.teams .bar,
+.desktop.teams .bar {
+  padding: 10px 14px;
+  border-bottom: 1px solid #e0e0e0;
+  color: #242424;
+  background: #fff;
+}
+
+.laptop.teams .who small,
+.tablet.teams .who small,
+.desktop.teams .who small {
+  color: #616161;
+}
+
+.laptop.teams .barIcons,
+.tablet.teams .barIcons,
+.desktop.teams .barIcons {
+  color: #424242;
+}
+
+.laptop .msg,
+.tablet .msg,
+.desktop .msg {
+  max-width: 64%;
+}
+
+/* Teams móvel (tema claro): cabeçalho branco com seta para trás, texto
+   escuro também na barra de estado do iOS. */
+.phone.teams .statusBar {
+  color: #242424;
+}
+
+.phone.teams .bar {
+  border-bottom: 1px solid #e0e0e0;
+  color: #242424;
+  background: #fff;
+}
+
+.phone.teams .who small {
+  color: #616161;
+}
+
+.phone.teams .barIcons {
+  color: #424242;
+}
+
+/* watchOS: fundo preto, sem barra da app nem caixa de escrever, nome da
+   app a cores à esquerda e hora à direita, bolhas cinzentas. */
+.watchBar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 26px 4px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.watchBar strong {
+  color: #25d366;
+  font-weight: 700;
+}
+
+.teams .watchBar strong {
+  color: #9ea2ff;
+}
+
+.watch .bar,
+.watch .composer,
+.watch .day,
+.watch .meta,
+.watch .sender {
+  display: none;
+}
+
+/* A conversa sobe por baixo do nome da app: em vez de cortar a linha a
+   meio, esbate-se no topo e no fundo, como no watchOS. */
+.watch .body {
+  gap: 6px;
+  padding: 14px 8px 28px;
+  mask-image: linear-gradient(
+    180deg,
+    transparent 0,
+    #000 12px,
+    #000 calc(100% - 22px),
+    transparent 100%
+  );
+}
+
+.watch .msg {
+  max-width: 100%;
+}
+
+.watch .bubble,
+.watch.teams .bubble,
+.watch .typingBubble {
+  padding: 8px 11px;
+  border-radius: 16px;
+  color: #fff;
+  background: #262629;
+  box-shadow: none;
+  font-size: 14.5px;
+  line-height: 1.3;
+}
+
+.watch .user .bubble,
+.watch.teams .user .bubble {
+  background: var(--wa-bar);
+}
+
+.watch.teams .user .bubble {
+  background: var(--teams-bar);
+}
+
+.watch .option,
+.watch.teams .option {
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: #262629;
+  box-shadow: none;
+  font-size: 14px;
+}
+
+.watch .system {
+  font-size: 11.5px;
+}
+
+/* Barra de estado do iOS, dos dois lados da Dynamic Island */
+.statusBar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  height: 40px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 26px 0 30px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+}
+
+.statusIcons {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+/* No iPad a barra de estado é mais baixa e fica por cima da barra da app */
+.tablet .statusBar {
+  position: static;
+  height: 22px;
+  flex: 0 0 auto;
+  padding: 0 18px;
+  background: var(--wa-bar);
+  font-size: 11.5px;
+}
+
+.tablet.teams .statusBar {
+  background: var(--teams-bar);
+}
+
+.card .screen {
+  height: 460px;
+}
+
+.teams .screen {
+  background: var(--teams-bg);
+}
+
+/* Barra de topo */
+.bar {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 14px 12px;
+  color: #fff;
+  background: var(--wa-bar);
+  transition: background 400ms ease;
+}
+
+.phone .bar {
+  padding-top: 52px;
+}
+
+.teams .bar {
+  background: var(--teams-bar);
+}
+
+.avatar {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  color: #4ab0ff;
+  background: #0b1a30;
+}
+
+.teams .avatar {
+  border-radius: 9px;
+}
+
+.avatarSymbol {
+  width: 24px;
+  height: auto;
+  margin-top: 2px;
+  overflow: visible;
+}
+
+.avatarEyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: blink 5.5s infinite;
+}
+
+.avatarTyping .avatarEyes {
+  animation: look 900ms ease-in-out infinite alternate;
+}
+
+.avatarHappy .avatarSymbol {
+  animation: hop 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.who {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.who strong {
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.who small {
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.barIcons {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  opacity: 0.92;
+}
+
+/* Conversa */
+.body {
+  position: relative; /* referência do offsetTop das mensagens (scroll) */
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: hidden; /* o scroll é só do código (scrollTo) */
+  padding: 12px 12px 16px;
+}
+
+.day {
+  align-self: center;
+  margin: 2px 0 4px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  color: #54656f;
+  background: rgba(255, 255, 255, 0.86);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.teams .day {
+  background: transparent;
+  color: #616161;
+}
+
+.msg {
+  display: flex;
+  max-width: 86%;
+  flex-direction: column;
+  gap: 6px;
+  animation: msgIn 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.bot {
+  align-self: flex-start;
+}
+
+.user {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.bubble {
+  position: relative;
+  padding: 7px 10px 6px;
+  border-radius: 10px;
+  color: #111b21;
+  background: #fff;
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+  font-size: 14px;
+  line-height: 1.38;
+}
+
+.bot .bubble {
+  border-top-left-radius: 3px;
+}
+
+.user .bubble {
+  border-top-right-radius: 3px;
+  background: var(--wa-out);
+}
+
+.teams .bubble {
+  padding: 9px 12px;
+  border-radius: 6px;
+  color: #242424;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.teams .user .bubble {
+  background: var(--teams-out);
+}
+
+.bubble p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.sender {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  margin-bottom: 3px;
+  color: #424242;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sender time {
+  color: #707070;
+  font-weight: 400;
+}
+
+.meta {
+  display: flex;
+  float: right;
+  gap: 3px;
+  align-items: center;
+  margin: 6px 0 -2px 10px;
+  color: #667781;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.user .meta svg {
+  color: #53bdeb;
+}
+
+.source {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  color: #0b4f7a;
+  background: #e8f3fb;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Botões de resposta (como as respostas rápidas das apps) */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.option {
+  padding: 9px 12px;
+  border-radius: 10px;
+  color: var(--wa-link);
+  background: #fff;
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+  transition:
+    opacity 300ms ease,
+    background 300ms ease,
+    color 300ms ease;
+}
+
+.teams .option {
+  border: 1px solid #d1d1d1;
+  border-radius: 6px;
+  color: #4f52b2;
+  box-shadow: none;
+}
+
+.optionsLive .option {
+  animation: optionPulse 1600ms ease-in-out 500ms 2;
+}
+
+.system {
+  display: inline-flex;
+  align-self: center;
+  gap: 6px;
+  align-items: center;
+  margin: 6px 0 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  color: #0b4f2f;
+  background: #d7f5e3;
+  font-size: 12px;
+  font-weight: 700;
+  animation: msgIn 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.typingBubble {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border-top-left-radius: 3px;
+  background: #fff;
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+}
+
+.typingBubble i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #8696a0;
+  animation: dot 1s ease-in-out infinite;
+}
+
+.typingBubble i:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+.typingBubble i:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+/* Caixa de escrever */
+.composer {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px 12px;
+  color: #54656f;
+}
+
+.phone .composer {
+  padding-bottom: 20px;
+}
+
+.input {
+  flex: 1 1 auto;
+  padding: 10px 14px;
+  border-radius: 999px;
+  color: #8696a0;
+  background: #fff;
+  font-size: 14px;
+}
+
+.teams .composer {
+  border-top: 1px solid #e0e0e0;
+  background: #fff;
+}
+
+.teams .input {
+  border-radius: 4px;
+  background: transparent;
+  padding-left: 4px;
+}
+
+.mic {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--wa-bar);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@keyframes msgIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+    filter: blur(3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes optionPulse {
+  0%,
+  100% {
+    box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+  }
+
+  50% {
+    box-shadow:
+      0 1px 0.5px rgba(11, 20, 26, 0.13),
+      0 0 0 3px rgba(2, 126, 181, 0.18);
+  }
+}
+
+@keyframes blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  95% {
+    transform: scaleY(0.15);
+  }
+}
+
+@keyframes look {
+  from {
+    transform: translateX(-6%);
+  }
+
+  to {
+    transform: translateX(6%);
+  }
+}
+
+@keyframes hop {
+  0% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-4px) rotate(-6deg);
+  }
+
+  100% {
+    transform: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .phone {
+    width: min(310px, calc(100vw - 48px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msg,
+  .system,
+  .avatarEyes,
+  .avatarHappy .avatarSymbol,
+  .optionsLive .option,
+  .typingBubble i {
+    animation: none;
+  }
+}

@@ -1,7 +1,6 @@
 {
   "brand": "MyDigitalBot",
   "socials": [
-    { "href": "https://x.com", "labelKey": "socials.x", "icon": "x" },
     {
       "href": "https://www.linkedin.com/company/digik",
       "labelKey": "socials.linkedin",
@@ -17,12 +16,29 @@
     {
       "titleKey": "cols.product",
       "links": [
-        { "labelKey": "links.payments", "href": "#" },
-        { "labelKey": "links.auth", "href": "#" },
-        { "labelKey": "links.crm", "href": "#" },
-        { "labelKey": "links.email", "href": "#" },
-        { "labelKey": "links.help", "href": "#" },
-        { "labelKey": "links.pricing", "href": "#" }
+        { "labelKey": "links.solution", "href": "/solution" },
+        { "labelKey": "links.product", "href": "/product" },
+        { "labelKey": "links.howItWorks", "href": "/how-it-works" },
+        { "labelKey": "links.pricing", "href": "/pricing" },
+        { "labelKey": "links.demo", "href": "/contact" },
+        { "labelKey": "links.login", "href": "/login" }
+      ]
+    },
+    {
+      "titleKey": "cols.company",
+      "links": [
+        {
+          "labelKey": "links.digik",
+          "href": "digik",
+          "external": true,
+          "icon": "company"
+        },
+        {
+          "labelKey": "links.email",
+          "href": "mailto:geral@digik.pt",
+          "external": true,
+          "icon": "email"
+        }
       ]
     },
     {
@@ -40,6 +56,5 @@
         }
       ]
     }
-  ],
-  "badgesKeys": ["badges.gdpr", "badges.status"]
+  ]
 }

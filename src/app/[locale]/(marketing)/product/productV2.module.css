@@ -1,0 +1,251 @@
+/* Página Produto (revamp 11-2026). Base em ../components/Site/site.module.css. */
+
+.heroShot {
+  overflow: hidden;
+  border-radius: 20px;
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.6);
+}
+
+.heroShot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Grelha 2x2: texto em cima, imagem em baixo na proporção original, para
+   nunca cortar o produto (antes a altura vinha do texto e a imagem era
+   cortada com object-fit: cover). */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.feature {
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.featureCopy {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  padding: clamp(24px, 3vw, 32px);
+}
+
+.featureTitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.35rem;
+  font-weight: 790;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.featureText {
+  margin: 10px 0 20px;
+  color: var(--ink-soft);
+  font-size: 15.5px;
+  line-height: 1.55;
+}
+
+.featureImage {
+  overflow: hidden;
+  flex: 0 0 auto;
+  border-top: 1px solid var(--line);
+  background: var(--mist);
+}
+
+.featureImage img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 700ms var(--ease-out);
+}
+
+.feature:hover .featureImage img {
+  transform: scale(1.03);
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+
+.dashboardText {
+  margin: 18px 0 28px;
+}
+
+.dashboardFigure {
+  position: relative;
+  margin: 0;
+}
+
+.dashboardShot {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+}
+
+.dashboardShot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Notas sobre o print: em vez de uma lista ao lado, cada métrica é apontada
+   no próprio painel. Posição em --x/--y (ver DASHBOARD_NOTES em page.js). */
+.dashboardNotes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.dashboardNote {
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 13px 8px 10px;
+  border: 1px solid rgba(var(--brand-accent-rgb), 0.55);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(var(--ink-rgb), 0.92);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+  font-size: clamp(11px, 0.95vw, 13px);
+  font-weight: 650;
+  line-height: 1.25;
+  white-space: nowrap;
+  transform: translateY(-50%);
+}
+
+.dashboardNote::before {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand-accent);
+  box-shadow: 0 0 0 4px rgba(var(--brand-accent-rgb), 0.25);
+  content: "";
+}
+
+.trust {
+  padding: clamp(64px, 8vw, 104px) 0 clamp(80px, 10vw, 128px);
+}
+
+.trustBand {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px 48px;
+  align-items: center;
+  padding: clamp(28px, 4vw, 44px);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: #fff;
+}
+
+.trustTitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.trustText {
+  margin: 10px 0 0;
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.trustLinks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trustLinks li + li {
+  border-top: 1px solid var(--line);
+}
+
+.trustLinks a {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 700;
+  transition: color 180ms ease;
+}
+
+.trustLinks a:hover {
+  color: #1467a3;
+}
+
+.trustLinks svg {
+  transition: transform 220ms var(--ease-out);
+}
+
+.trustLinks a:hover svg {
+  transform: translate(2px, -2px);
+}
+
+@media (max-width: 960px) {
+  .dashboard,
+  .trustBand {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .bento {
+    grid-template-columns: 1fr;
+  }
+
+  /* No telemóvel o print é pequeno demais para notas por cima: passam para
+     baixo, como etiquetas. */
+  .dashboardNotes {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .dashboardNote {
+    position: static;
+    gap: 7px;
+    padding: 6px 11px 6px 9px;
+    font-size: 12px;
+    white-space: normal;
+    transform: none;
+  }
+
+  .dashboardNote::before {
+    width: 6px;
+    height: 6px;
+    box-shadow: 0 0 0 3px rgba(var(--brand-accent-rgb), 0.25);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featureImage img,
+  .trustLinks svg {
+    transition: none;
+  }
+}

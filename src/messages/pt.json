@@ -6,7 +6,7 @@
         "line2": "Feedback imediato. Impacto real."
       },
       "subhead": {
-        "line1": "Microdoses nos canais onde as equipas já trabalham",
+        "line1": "Formação, comunicação interna e assistentes com IA no Microsoft Teams e no WhatsApp, onde as suas equipas já trabalham.",
         "line2": "nos canais onde as equipas já trabalham."
       },
       "cta": {
@@ -48,7 +48,12 @@
         "login": "Entrar",
         "book": "Pedir demonstração",
         "dashboard": "Ir para o painel",
-        "how-it-works": "Como funciona"
+        "how-it-works": "Como funciona",
+        "bookShort": "Pedir demo"
+      },
+      "maker": {
+        "prefix": "Um produto",
+        "note": "formação digital para empresas"
       }
     },
 
@@ -99,8 +104,8 @@
     "Pricing": {
       "eyebrow": "PREÇOS",
       "heading": "Escolhe o plano ideal",
-      "subheading": "Começa com um piloto e escala por equipas - sem fricção e com impacto mensurável.",
-      "comparison": "Ver todas as comparações",
+      "subheading": "Comece grátis com 3 pessoas e cresça ao ritmo das suas equipas. Os planos dependem do número de colaboradores.",
+      "comparison": "Ver todos os planos",
       "unit": { "month": "mês" },
       "benefits": {
         "0": "Alta adesão (sem novas apps).",
@@ -110,7 +115,10 @@
         "4": "Sem LMS complexo nem infraestruturas pesadas."
       },
       "plans": {
-        "popular": { "name": "Starter", "tagline": "Para validar com 1 equipa" },
+        "popular": {
+          "name": "Starter",
+          "tagline": "Para validar com 1 equipa"
+        },
         "pro": {
           "name": "Growth",
           "tagline": "Para escalar por equipas e áreas"
@@ -189,26 +197,33 @@
       "finalText": "Descubra a configuração certa para a sua equipa e transforme cada conversa numa oportunidade de aprendizagem."
     },
     "Footer": {
-      "socials": { "x": "X", "linkedin": "LinkedIn", "youtube": "YouTube" },
-      "cols": { "product": "Produto", "legal": "Legal" },
+      "socials": { "linkedin": "LinkedIn", "youtube": "YouTube" },
+      "cols": { "product": "Produto", "company": "Empresa", "legal": "Legal" },
       "links": {
-        "payments": "Integrações",
-        "auth": "Segurança",
-        "crm": "IA Coach",
-        "email": "Métricas",
-        "help": "Ajuda",
+        "solution": "Solução",
+        "product": "Produto",
+        "howItWorks": "Como funciona",
         "pricing": "Preços",
+        "demo": "Pedir demonstração",
+        "login": "Entrar",
+        "digik": "DIGIK - Digital Learning",
+        "email": "geral@digik.pt",
         "terms": "Termos de Utilização",
         "dpa": "Acordo de Tratamento de Dados",
         "privacy": "Política de Privacidade",
         "security": "Segurança & Fornecedores"
       },
-      "badges": { "gdpr": "Conforme RGPD", "status": "Estado" }
+      "badges": { "gdpr": "Conforme RGPD" },
+      "maker": {
+        "prefix": "Um produto"
+      },
+      "tagline": "Formação, comunicação interna e assistentes com IA no Microsoft Teams e no WhatsApp.",
+      "cta": "Pedir demonstração"
     },
     "Contact": {
       "eyebrow": "Contacto",
-      "title": "Diz-nos o que precisas",
-      "subhead": "Partilha um pouco sobre a tua empresa e sobre o que queres criar. Vamos responder-te com o melhor próximo passo.",
+      "title": "Peça uma demonstração",
+      "subhead": "Mostramos o MyDigitalBot a funcionar no Microsoft Teams e no WhatsApp, com um exemplo próximo do dia a dia da sua equipa.",
       "backHome": "Voltar à página inicial",
       "info": {
         "eyebrow": "Vamos falar",
@@ -221,26 +236,383 @@
         }
       },
       "form": {
-        "eyebrow": "Começa aqui",
-        "title": "Envia-nos uma mensagem",
-        "subhead": "Percebe que canais fazem mais sentido para a tua equipa",
-        "secondSubhead": "Partilha um pouco sobre a tua empresa e sobre o que queres criar. Vamos responder-te com o melhor próximo passo.",
+        "title": "Como funciona o pedido",
         "name": "Nome",
-        "namePlaceholder": "O teu nome",
+        "namePlaceholder": "O seu nome",
         "email": "Email profissional",
-        "emailPlaceholder": "nome@empresa.com",
+        "emailPlaceholder": "nome@empresa.pt",
         "company": "Empresa",
-        "companyPlaceholder": "A tua empresa",
+        "companyPlaceholder": "Nome da empresa",
         "message": "Mensagem",
-        "messagePlaceholder": "Diz-nos o que precisas, que canais queres usar ou que tipo de solução procuras.",
-        "submit": "Enviar mensagem",
-        "sending": "A enviar...",
-        "helper": "Mais tarde podes ligar isto ao email, Supabase ou ao teu CRM.",
-        "success": "Obrigado - a tua mensagem foi enviada com sucesso.",
+        "messagePlaceholder": "Quantas pessoas quer envolver, em que canais (Teams, WhatsApp) e para quê: formação, onboarding, comunicação interna…",
+        "submit": "Pedir demonstração",
+        "sending": "A enviar…",
+        "success": "Obrigado! Recebemos o seu pedido e vamos responder por email.",
         "errors": {
-          "generic": "Algo correu mal. Tenta novamente."
+          "generic": "Não foi possível enviar. Tente novamente ou escreva para geral@digik.pt."
+        },
+        "steps": {
+          "one": "Deixe o seu contacto e diga-nos o que procura.",
+          "two": "A equipa da DIGIK responde por email com o próximo passo.",
+          "three": "Marcamos uma demonstração com um caso da sua empresa."
+        },
+        "consent": "Ao enviar, aceita que a DIGIK use estes dados para responder ao seu pedido. Saiba mais na <privacy>Política de Privacidade</privacy>.",
+        "planLabel": "Plano escolhido:",
+        "planUsers": "até {users} colaboradores",
+        "planPrice": "{price}/mês",
+        "planFree": "grátis",
+        "planRemove": "Tirar plano",
+        "planMessage": "Tenho interesse no plano {plan} (até {users} colaboradores)."
+      },
+      "metadata": {
+        "title": "Pedir demonstração",
+        "description": "Peça uma demonstração do MyDigitalBot no Microsoft Teams e no WhatsApp. Diga-nos o que procura e respondemos com o próximo passo."
+      }
+    },
+    "metadata": {
+      "title": "MyDigitalBot | Microlearning no Microsoft Teams e no WhatsApp",
+      "description": "Formação, comunicação interna e assistentes com IA no Microsoft Teams e no WhatsApp, onde as equipas já trabalham. Um produto DIGIK."
+    }
+  },
+  "HomeV2": {
+    "hero": {
+      "titleA": "A formação chega ao WhatsApp e ao Teams.",
+      "titleB": "E é mesmo feita.",
+      "lead": "Lições de 2 minutos, perguntas e um assistente com IA, no chat que a equipa já usa. Sem apps novas nem logins. E um painel para o RH ver a adesão de cada equipa.",
+      "primary": "Pedir demonstração",
+      "secondary": "Experimentar grátis",
+      "note": "Grátis até {users} colaboradores",
+      "maker": "Um produto"
+    },
+    "chatLabels": {
+      "switch": "Ver o exemplo em",
+      "channels": {
+        "whatsapp": "WhatsApp",
+        "teams": "Teams"
+      },
+      "whatsappStatus": "online",
+      "teamsStatus": "Disponível",
+      "typing": "a escrever…",
+      "today": "Hoje",
+      "whatsappInput": "Mensagem",
+      "teamsInput": "Escreva uma mensagem",
+      "teamsRail": {
+        "search": "Pesquisar"
+      },
+      "caption": "Exemplo de conversa com o MyDigitalBot:"
+    },
+    "heroChat": {
+      "contact": "MyDigitalBot",
+      "messages": [
+        {
+          "from": "bot",
+          "time": "09:00",
+          "text": "Bom dia, Sofia! Dia 3 de 7 do seu onboarding: segurança da informação. São 2 minutos."
+        },
+        {
+          "from": "bot",
+          "time": "09:00",
+          "text": "Recebe um email do «IT» a pedir a sua password com urgência. O que faz?"
+        },
+        {
+          "from": "user",
+          "time": "09:02",
+          "text": "Reporto pelo canal oficial"
+        },
+        {
+          "from": "bot",
+          "time": "09:02",
+          "text": "Certo. O IT nunca pede passwords por email. Na dúvida, não clique em links e reporte sempre."
+        },
+        {
+          "from": "system",
+          "text": "Dia 3 concluído · Amanhã: passwords fortes"
+        }
+      ]
+    },
+    "proof": {
+      "channels": "Microsoft Teams e WhatsApp",
+      "noApps": "Sem apps novas nem logins",
+      "languages": "Em português de Portugal e inglês",
+      "setup": "Implementação acompanhada pela DIGIK"
+    },
+    "how": {
+      "title": "Do conteúdo ao resultado, em três passos",
+      "text": "A DIGIK configura tudo consigo. A sua equipa só precisa do telemóvel ou do Teams que já usa.",
+      "steps": {
+        "setup": {
+          "title": "Configuramos consigo",
+          "text": "Ligamos o Teams ou o WhatsApp, criamos os grupos e definimos os objetivos com a sua equipa."
+        },
+        "learn": {
+          "title": "A equipa aprende no chat",
+          "text": "Mensagens curtas com perguntas, lembretes e um assistente com IA que responde com base nos documentos da organização."
+        },
+        "measure": {
+          "title": "Vê o que está a resultar",
+          "text": "Um painel com mensagens entregues e lidas, canais, automações e links mais clicados, para ajustar os conteúdos com dados e não por palpite."
+        }
+      },
+      "panelCaption": "Painel do MyDigitalBot",
+      "panelAlt": "Métricas do MyDigitalBot: utilizadores, assistentes, mensagens entregues e lidas, e automações"
+    },
+    "cases": {
+      "title": "Um bot, quatro usos na sua organização",
+      "text": "Comece por um e junte os outros quando fizer sentido.",
+      "items": {
+        "microlearning": {
+          "title": "Formação contínua",
+          "text": "Conteúdos em doses curtas, com perguntas que fixam o que importa.",
+          "bullets": [
+            "Pílulas diárias de 2 a 3 minutos",
+            "Perguntas com feedback imediato",
+            "Reforço regular do que foi aprendido"
+          ],
+          "chat": {
+            "contact": "MyDigitalBot",
+            "messages": [
+              {
+                "from": "bot",
+                "time": "10:30",
+                "text": "Pílula de hoje: atendimento ao cliente. Um cliente diz que a encomenda chegou danificada. Qual é o primeiro passo?"
+              },
+              {
+                "from": "user",
+                "time": "10:31",
+                "text": "Peço desculpa e registo o caso"
+              },
+              {
+                "from": "bot",
+                "time": "10:31",
+                "text": "Isso mesmo. Primeiro reconhecer, depois resolver. Amanhã: como propor uma solução ao cliente."
+              },
+              {
+                "from": "system",
+                "text": "Pílula concluída · Até amanhã!"
+              }
+            ]
+          }
+        },
+        "onboarding": {
+          "title": "RH e onboarding",
+          "text": "Acompanhe cada pessoa desde o primeiro dia, sem depender de reuniões.",
+          "bullets": [
+            "Guias de integração passo a passo",
+            "Onboarding automático, para 5 ou 500 pessoas",
+            "Contacto contínuo nas primeiras semanas"
+          ],
+          "chat": {
+            "contact": "MyDigitalBot",
+            "messages": [
+              {
+                "from": "bot",
+                "time": "08:45",
+                "text": "Bem-vindo à equipa, Tiago! Nas próximas duas semanas recebe aqui uma mensagem por dia para conhecer a casa."
+              },
+              {
+                "from": "bot",
+                "time": "08:45",
+                "text": "Hoje: onde pedir férias e quem é o seu contacto no RH."
+              },
+              {
+                "from": "user",
+                "time": "08:47",
+                "text": "Onde marco as férias?"
+              },
+              {
+                "from": "bot",
+                "time": "08:47",
+                "text": "No portal do colaborador, em Pedidos › Férias. O seu contacto no RH é a Marta Lopes."
+              }
+            ]
+          }
+        },
+        "comms": {
+          "title": "Comunicação interna",
+          "text": "Mensagens que chegam a todos, com resposta e espaço para dúvidas.",
+          "bullets": [
+            "Campanhas por equipa ou função",
+            "Mensagens personalizadas",
+            "Feedback das equipas em tempo real"
+          ],
+          "chat": {
+            "contact": "MyDigitalBot",
+            "messages": [
+              {
+                "from": "bot",
+                "time": "14:00",
+                "text": "Nova política de teletrabalho em vigor a 1 de dezembro. Em resumo: até 2 dias por semana, combinados com a chefia e pedidos no portal."
+              },
+              {
+                "from": "user",
+                "time": "14:01",
+                "text": "Até quando tenho de fazer o pedido?"
+              },
+              {
+                "from": "bot",
+                "time": "14:01",
+                "text": "Até sexta-feira da semana anterior, no portal. A chefia aprova em 2 dias úteis."
+              },
+              {
+                "from": "user",
+                "time": "14:02",
+                "text": "Ok, percebido. Obrigado!"
+              },
+              {
+                "from": "system",
+                "text": "Leitura confirmada · O RH vê no painel"
+              }
+            ]
+          }
+        },
+        "assistant": {
+          "title": "Assistente com IA",
+          "text": "Respostas imediatas às perguntas de sempre, com base nos documentos da organização.",
+          "bullets": [
+            "Disponível a qualquer hora",
+            "Respostas baseadas nos documentos internos",
+            "Menos perguntas repetidas ao RH e ao suporte"
+          ],
+          "chat": {
+            "contact": "MyDigitalBot",
+            "messages": [
+              {
+                "from": "user",
+                "time": "21:14",
+                "text": "Quantos dias de férias tenho este ano?"
+              },
+              {
+                "from": "bot",
+                "time": "21:14",
+                "text": "Segundo o regulamento interno, tem 23 dias úteis este ano: 22 dias base e mais 1 pela antiguidade.",
+                "source": "Regulamento_Interno_2026.pdf"
+              },
+              {
+                "from": "user",
+                "time": "21:15",
+                "text": "E até quando tenho de os marcar?"
+              },
+              {
+                "from": "bot",
+                "time": "21:15",
+                "text": "Até 31 de março, no portal do colaborador. Quer que lhe lembre no dia 15?"
+              }
+            ]
+          }
         }
       }
+    },
+    "compare": {
+      "title": "Porque é que a formação no chat é mesmo feita",
+      "text": "Não é mais uma plataforma para abrir. É o chat onde a equipa já passa o dia.",
+      "colLabel": "Comparação",
+      "colA": "E-learning tradicional",
+      "colB": "MyDigitalBot",
+      "rows": {
+        "where": {
+          "label": "Onde acontece",
+          "a": "Numa plataforma à parte, com login",
+          "b": "No Teams ou no WhatsApp"
+        },
+        "time": {
+          "label": "Tempo",
+          "a": "Cursos de 30 a 60 minutos",
+          "b": "2 a 3 minutos por dia"
+        },
+        "doubts": {
+          "label": "Dúvidas",
+          "a": "Ficam para depois",
+          "b": "O assistente responde na hora"
+        },
+        "data": {
+          "label": "O que o RH vê",
+          "a": "Quem concluiu",
+          "b": "Atividade, conversas e adesão por canal"
+        }
+      }
+    },
+    "why": {
+      "title": "Porquê o MyDigitalBot",
+      "items": {
+        "team": {
+          "title": "Não fica sozinho com a ferramenta",
+          "text": "A equipa DIGIK configura, testa e acompanha a utilização consigo, do arranque à melhoria contínua."
+        },
+        "channels": {
+          "title": "WhatsApp e Teams, os canais que já usam",
+          "text": "Funciona no WhatsApp e no Microsoft Teams. Para o Teams, a sua organização precisa de uma conta Microsoft 365 empresarial."
+        },
+        "language": {
+          "title": "Feito em Portugal, em português",
+          "text": "Conteúdos, assistentes e apoio em português de Portugal, e em inglês quando a equipa precisa."
+        },
+        "pricing": {
+          "title": "Preços à vista",
+          "text": "Planos por número de colaboradores, publicados no site. Comece grátis com {users} pessoas."
+        }
+      }
+    },
+    "pricing": {
+      "title": "Comece grátis. Cresça quando fizer sentido.",
+      "text": "Gratuito até {freeUsers} colaboradores. Planos pagos a partir de {price} por mês, para até {users} colaboradores.",
+      "cta": "Ver planos e preços"
+    },
+    "final": {
+      "title": "Veja o MyDigitalBot com os conteúdos da sua equipa",
+      "text": "Numa demonstração mostramos o bot no Teams ou no WhatsApp, com um exemplo do seu setor, e respondemos às suas perguntas.",
+      "primary": "Pedir demonstração",
+      "secondary": "Ver como funciona",
+      "pricing": "Ver preços",
+      "product": "Ver o produto"
+    }
+  },
+  "Pages": {
+    "solution": {
+      "title": "Um bot para formar, informar e apoiar as suas equipas",
+      "lead": "Formação, onboarding, comunicação interna e respostas com IA, no Teams e no WhatsApp. Comece por uma área e junte as outras quando fizer sentido.",
+      "primary": "Pedir demonstração",
+      "secondary": "Ver preços",
+      "example": "Exemplo de conversa",
+      "outcomeLabel": "O que muda"
+    },
+    "product": {
+      "title": "Mensagens, assistentes com IA e relatórios, numa só plataforma",
+      "heroAlt": "O MyDigitalBot num portátil e num telemóvel, com conversas e o painel de gestão",
+      "featuresTitle": "O que vem com o MyDigitalBot",
+      "featuresText": "Tudo o que precisa para chegar às equipas no chat e perceber o que está a resultar.",
+      "alts": {
+        "messages": "Ecrã de envio do MyDigitalBot: mensagem para Teams ou WhatsApp e lista de colaboradores",
+        "assistants": "Lista de assistentes do MyDigitalBot e configuração de um assistente com IA",
+        "knowledge": "Conversa no telemóvel com respostas baseadas em documentos internos",
+        "channels": "Canais Teams e WhatsApp ligados no MyDigitalBot"
+      },
+      "dashboard": {
+        "title": "Veja o que está a resultar",
+        "text": "O painel mostra a adesão e a atividade das equipas sem ter de abrir conversa a conversa.",
+        "notes": [
+          "Quem já tem assistente",
+          "Entregues, lidas e falhadas, por canal",
+          "Envios automáticos",
+          "Links mais clicados"
+        ],
+        "alt": "Métricas do MyDigitalBot: utilizadores, assistentes, mensagens entregues e lidas, e automações"
+      },
+      "trust": {
+        "title": "Regras claras para os dados da sua equipa",
+        "text": "Os documentos de RGPD estão publicados, para a sua equipa jurídica rever antes de começar.",
+        "dpa": "Acordo de tratamento de dados",
+        "privacy": "Política de privacidade",
+        "security": "Segurança e fornecedores"
+      }
+    },
+    "how": {
+      "outcomeLabel": "Resultado",
+      "stepsTitle": "Cinco fases, com a equipa DIGIK ao lado",
+      "stepsText": "Não recebe só um acesso. Configuramos, testamos e acompanhamos consigo."
+    },
+    "contact": {
+      "direct": "Prefere escrever-nos?",
+      "email": "geral@digik.pt"
     }
   },
 
@@ -255,13 +627,14 @@
 
     "overview": {
       "eyebrow": "Explore as nossas soluções",
-      "title": "Como o MyDigitalBot se adapta aos desafios da sua organização",
+      "title": "Quatro áreas onde o MyDigitalBot ajuda",
       "subtitle": "Descubra como aplicar comunicação inteligente, automação e assistentes AI em diferentes áreas dentro dos canais que as equipas já usam."
     },
     "cards": {
       "microlearning": {
         "title": "Formação & Microlearning",
         "description": "Transforme conteúdos formativos em experiências contínuas dentro do fluxo de trabalho.",
+        "outcome": "2 a 3 minutos por dia, no canal que a equipa já usa, e a formação entra na rotina.",
         "bullets": {
           "0": "Envio de conteúdos via Teams",
           "1": "Acesso direto a cursos e materiais",
@@ -271,6 +644,7 @@
       "internalCommunication": {
         "title": "Comunicação Interna",
         "description": "Estruture e amplie a comunicação com as equipas em tempo real.",
+        "outcome": "As mensagens chegam onde as equipas já estão, e as respostas e dúvidas voltam pelo mesmo canal.",
         "bullets": {
           "0": "Campanhas internas segmentadas",
           "1": "Mensagens personalizadas por equipa",
@@ -280,6 +654,7 @@
       "automatedSupport": {
         "title": "Suporte Automatizado",
         "description": "Reduza o esforço do suporte com assistentes inteligentes prontos a responder.",
+        "outcome": "As perguntas de sempre têm resposta a qualquer hora, com base nos documentos internos, e o RH ganha tempo para o resto.",
         "bullets": {
           "0": "Respostas rápidas a dúvidas comuns",
           "1": "Acesso imediato a informação relevante",
@@ -289,12 +664,17 @@
       "onboarding": {
         "title": "RH & Onboarding",
         "description": "Apoie colaboradores desde o primeiro dia com comunicação orientada.",
+        "outcome": "Cada pessoa nova tem o mesmo acompanhamento, sejam 5 ou 500, sem marcar reuniões.",
         "bullets": {
           "0": "Guias de integração passo a passo",
           "1": "Onboarding automatizado e escalável",
           "2": "Comunicação contínua ao longo da jornada"
         }
       }
+    },
+    "metadata": {
+      "title": "Soluções para formação, onboarding e comunicação interna",
+      "description": "Como as empresas usam o MyDigitalBot no Microsoft Teams e no WhatsApp para formação, onboarding, comunicação interna e suporte."
     }
   },
 
@@ -318,10 +698,9 @@
         "title": "Mensagens que geram interação",
         "description": "Envie comunicações que não ficam sem resposta. Cada mensagem pode transformar-se numa conversa com contexto e continuidade.",
         "checks": {
-          "0": "Envio de campanhas e notificações",
-          "1": "Comunicação direta via Teams ou WhatsApp",
-          "2": "Interação bidirecional com utilizadores",
-          "3": "Contexto associado a cada mensagem"
+          "0": "Campanhas e notificações, enviadas logo ou agendadas",
+          "1": "Resposta nos dois sentidos, no Teams ou no WhatsApp",
+          "2": "Cada mensagem guarda o contexto da conversa"
         },
         "alt": "Mockup de mensagens no MyDigitalBot"
       },
@@ -330,196 +709,125 @@
         "title": "Assistentes inteligentes à medida da sua organização",
         "description": "Crie assistentes configuráveis por tema, como RH, formação ou suporte.",
         "checks": {
-          "0": "Assistentes configuráveis por tema",
-          "1": "Respostas automáticas e contextualizadas",
-          "2": "Integração com documentos e conhecimento interno",
-          "3": "Aprendizagem contínua com base nas interações"
+          "0": "Um assistente por tema: RH, formação, suporte",
+          "1": "Respostas com base nos documentos internos",
+          "2": "Ajustado ao longo do tempo, com base nas interações"
         },
         "alt": "Mockup de assistentes inteligentes no MyDigitalBot"
       },
 
       "knowledge": {
         "title": "Conhecimento acessível no momento certo",
-        "description": "FAQs, documentos e conteúdos internos sempre disponíveis para os utilizadores.",
-        "checks": {
-          "0": "Acesso imediato via chat",
-          "1": "Suporte contextual ao utilizador",
-          "2": "Redução de dependência de suporte humano"
-        },
+        "description": "FAQs, documentos e conteúdos internos à distância de uma pergunta no chat, a qualquer hora.",
         "alt": "Mockup de conhecimento interno no MyDigitalBot"
       },
 
       "channels": {
         "title": "Onde os utilizadores já estão",
-        "description": "Leve a comunicação e os assistentes para os canais que as equipas já usam.",
-        "checks": {
-          "0": "Microsoft Teams",
-          "1": "WhatsApp",
-          "2": "Outros canais integráveis",
-          "3": "Sem necessidade de novas apps"
-        },
+        "description": "Teams e WhatsApp, os canais que as equipas já usam. Ninguém precisa de instalar uma app nova.",
         "alt": "Mockup de integração com canais como Teams e WhatsApp"
       }
+    },
+    "metadata": {
+      "title": "Mensagens, microlearning e assistentes com IA",
+      "description": "Mensagens, microlearning, assistentes com IA e métricas numa só plataforma, diretamente no Microsoft Teams e no WhatsApp."
     }
   },
 
   "PricingPage": {
     "hero": {
-      "eyebrow": "Preços",
-      "title": "Escolhe a configuração que acompanha a tua fase de crescimento",
-      "subhead": "Esta página foi pensada como um explorador de preços guiado em vez de uma tabela simples, para ajudar o visitante a perceber o que muda de plano para plano."
+      "title": "Planos pelo tamanho da sua equipa",
+      "subhead": "Escolha pelo número de colaboradores que vão usar o MyDigitalBot no Microsoft Teams e no WhatsApp. Pode começar grátis com 3 pessoas."
     },
     "explorer": {
-      "eyebrow": "Explorador de planos",
-      "title": "Começa pela fase em que estás",
-      "subhead": "Escolhe a opção que mais se aproxima da tua equipa atual. Depois podes trocar todo este texto fictício por informação real.",
-      "bestFor": "Melhor para",
-      "outcomes": "O que inclui",
-      "secondaryCta": "Falar connosco"
+      "title": "Escolha o seu plano",
+      "note": "Preços mensais, com IVA incluído (23%)."
     },
-    "billing": {
-      "monthly": "Mensal",
-      "yearly": "Anual",
-      "save": "Poupa 20%",
-      "unit": "/mês"
-    },
-    "metrics": {
-      "assistants": "Assistentes",
-      "messages": "Mensagens",
-      "channels": "Canais",
-      "users": "Utilizadores"
-    },
+    "featuredBadge": "Bom ponto de partida",
+    "usersUpTo": "Até <strong>{users}</strong> colaboradores",
+    "usersPlain": "Até {users} colaboradores",
+    "perMonth": "/mês",
+    "perUser": "Equivale a <strong>{price}</strong> por colaborador",
+    "flatNote": "Preço fixo para a equipa toda, IVA incluído",
+    "choose": "Escolher {plan}",
     "plans": {
-      "starter": {
-        "name": "Starter",
-        "badge": "Início simples",
-        "tagline": "Para equipas pequenas a testar os primeiros fluxos com assistentes.",
-        "summary": "Um ponto de entrada mais leve com o essencial para lançar, validar e perceber o que os utilizadores realmente precisam.",
-        "idealFor": "Equipas que querem um piloto simples com poucos utilizadores e um âmbito muito claro.",
-        "cta": "Começar com Starter",
-        "highlights": [
-          "Lançar um assistente rapidamente",
-          "Cobrir uma equipa pequena ou grupo piloto",
-          "Validar casos de uso antes de escalar"
-        ],
-        "included": [
-          "Configuração base do assistente",
-          "Analytics essenciais",
-          "Suporte por email",
-          "Ligações simples a canais"
-        ]
+      "free": {
+        "name": "Gratuito",
+        "tagline": "Para experimentar com uma equipa pequena."
       },
-      "growth": {
-        "name": "Growth",
-        "badge": "Melhor escolha",
-        "tagline": "Para empresas que estão a transformar um caso de uso num produto interno real.",
-        "summary": "Este é o plano principal para equipas que já veem valor e agora querem mais automação, mais alcance e mais espaço para crescer.",
-        "idealFor": "Equipas que querem uma operação mais forte e esperam mais utilizadores, mensagens e fluxos.",
-        "cta": "Escolher Growth",
-        "highlights": [
-          "Expandir para mais assistentes e canais",
-          "Adicionar automações e reporting melhores",
-          "Apoiar mais equipas com menos trabalho manual"
-        ],
-        "included": [
-          "Tudo do Starter",
-          "Limites mais altos",
-          "Melhores opções de automação",
-          "Suporte prioritário"
-        ]
+      "team": {
+        "name": "Equipa",
+        "tagline": "Para uma equipa ou um primeiro piloto."
       },
-      "scale": {
-        "name": "Scale",
-        "badge": "Personalizado",
-        "tagline": "Para rollouts maiores, governação avançada e configurações à medida.",
-        "summary": "Pensado para empresas que precisam de mais controlo, mais integrações e preços adaptados à sua estrutura e volume.",
-        "idealFor": "Organizações com várias equipas, mais stakeholders e necessidade de limites ou rollout personalizados.",
-        "cta": "Contactar vendas",
-        "highlights": [
-          "Rollout e governação personalizados",
-          "Canais e integrações avançadas",
-          "Limites flexíveis e suporte ajustado"
-        ],
-        "included": [
-          "Tudo do Growth",
-          "Caminho de implementação personalizado",
-          "Permissões e governação avançadas",
-          "Apoio dedicado ao planeamento"
-        ]
+      "business": {
+        "name": "Empresa",
+        "tagline": "Para várias equipas ou áreas."
+      },
+      "organization": {
+        "name": "Organização",
+        "tagline": "Para levar a toda a organização."
+      },
+      "enterprise": {
+        "name": "Grupo",
+        "tagline": "Para grupos e grandes operações."
       }
     },
     "included": {
-      "eyebrow": "Incluído",
-      "title": "O que vem com este plano"
-    },
-    "billingInfo": {
-      "eyebrow": "Faturação",
-      "title": "Lógica de faturação fictícia",
-      "text": "Para já este conteúdo é apenas ilustrativo. Mais tarde podes trocar por regras reais de faturação, descontos anuais, detalhes de uso e preços de add-ons."
-    },
-    "bands": {
-      "feature": "Área",
-      "setup": {
-        "title": "Setup e rollout",
-        "description": "Usa estas linhas para explicar diferenças de onboarding, implementação e configuração.",
-        "rows": [
-          "Configuração inicial",
-          "Branding personalizado",
-          "Ajuda na migração"
-        ]
-      },
-      "automation": {
-        "title": "Automação e IA",
-        "description": "Usa esta área para mostrar o que fica mais forte à medida que o plano cresce.",
-        "rows": [
-          "Fluxos automáticos",
-          "Reporting de utilização",
-          "Lógica avançada"
-        ]
-      },
-      "governance": {
-        "title": "Governação e controlo",
-        "description": "Isto será útil quando adicionares permissões, auditoria ou requisitos enterprise.",
-        "rows": [
-          "Papéis e permissões",
-          "Fluxos de aprovação",
-          "Controlos enterprise"
-        ]
+      "title": "Em todos os planos",
+      "items": {
+        "channels": "WhatsApp e Microsoft Teams (com o Microsoft 365 da sua organização)",
+        "messages": "Até {messages} mensagens por colaborador e por dia, em cada canal",
+        "assistants": "Assistentes com IA",
+        "metrics": "Métricas por equipa"
       }
     },
-    "states": {
-      "included": "Incluído",
-      "limited": "Limitado",
-      "custom": "Personalizado"
+    "freeBand": {
+      "text": "Até {users} colaboradores e {messages} mensagens por dia, em cada canal. Para experimentar antes de escolher.",
+      "cta": "Experimentar grátis"
+    },
+    "customBand": {
+      "title": "Mais de {users} colaboradores?",
+      "text": "Fazemos uma proposta à medida da sua organização.",
+      "cta": "Falar com a equipa"
     },
     "faq": {
-      "eyebrow": "Perguntas",
-      "title": "FAQs de preços",
-      "items": [
-        {
-          "question": "Posso mudar de plano mais tarde?",
-          "answer": "Sim. Este texto é fictício, mas esta área é ideal para explicar upgrades, downgrades e mudanças entre planos."
+      "title": "Perguntas sobre preços",
+      "items": {
+        "users": {
+          "question": "Como se contam os colaboradores?",
+          "answer": "Conta cada pessoa que recebe mensagens do MyDigitalBot, no Microsoft Teams ou no WhatsApp. Escolha o plano pelo número de pessoas que quer envolver."
         },
-        {
-          "question": "Existem custos de setup?",
-          "answer": "Aqui podes explicar mais tarde custos de setup, onboarding ou implementação."
+        "free": {
+          "question": "O que inclui o plano Gratuito?",
+          "answer": "Até {freeUsers} colaboradores e {freeMessages} mensagens por colaborador e por dia, em cada canal. Serve para experimentar o MyDigitalBot com a sua equipa antes de escolher um plano pago."
         },
-        {
-          "question": "Têm faturação anual?",
-          "answer": "Sim. Esta secção pode depois explicar descontos anuais, termos de faturação e lógica contratual."
+        "limits": {
+          "question": "Há limite de mensagens?",
+          "answer": "Sim. Nos planos pagos, cada colaborador pode receber até {messages} mensagens por dia em cada canal."
         },
-        {
-          "question": "E se eu precisar de algo personalizado?",
-          "answer": "Usa esta resposta para explicar pedidos enterprise, integrações personalizadas ou necessidades especiais de rollout."
+        "teams": {
+          "question": "O que preciso para usar o Microsoft Teams?",
+          "answer": "Uma conta Microsoft 365 empresarial da sua organização (planos Business ou Enterprise), com o Teams. O MyDigitalBot não inclui licenças da Microsoft. No WhatsApp basta o número de telemóvel de cada colaborador."
+        },
+        "vat": {
+          "question": "Os preços incluem IVA?",
+          "answer": "Sim. Os valores são mensais e já incluem IVA à taxa de 23%."
+        },
+        "bigger": {
+          "question": "E se tivermos mais de {users} colaboradores?",
+          "answer": "Fale connosco. Preparamos uma proposta à medida do número de pessoas, dos canais e da forma como quer implementar."
         }
-      ]
+      }
     },
     "finalCta": {
-      "eyebrow": "Ainda tens dúvidas?",
-      "title": "Vamos encontrar o plano certo contigo",
-      "text": "Mantém esta secção como fecho da página com um CTA direto e uma opção secundária mais leve.",
-      "primary": "Marcar uma conversa",
-      "secondary": "Voltar à homepage"
+      "title": "Não sabe que plano escolher?",
+      "text": "Diga-nos quantas pessoas quer envolver e em que canais. Ajudamos a escolher e mostramos o MyDigitalBot a funcionar.",
+      "primary": "Pedir demonstração",
+      "secondary": "Ver como funciona"
+    },
+    "metadata": {
+      "title": "Preços e planos",
+      "description": "Planos do MyDigitalBot por número de colaboradores: grátis até 3 pessoas e a partir de 299 € por mês para 100 colaboradores. IVA (23%) incluído."
     }
   },
 
@@ -540,6 +848,7 @@
       "initialSetup": {
         "title": "Configuração Inicial",
         "description": "Começamos por configurar o MyDigitalBot de acordo com a sua organização, definindo canais, utilizadores e objetivos principais.",
+        "outcome": "Teams e WhatsApp ligados, utilizadores e grupos criados, objetivos definidos.",
         "bullets": {
           "0": "Ligação aos canais, como Teams e WhatsApp",
           "1": "Criação de utilizadores e grupos",
@@ -550,6 +859,7 @@
       "communicationStructure": {
         "title": "Estruturação da Comunicação",
         "description": "Organizamos a forma como a comunicação é feita, garantindo clareza, consistência e contexto.",
+        "outcome": "Um plano de comunicação, com tipos de mensagem e públicos definidos.",
         "bullets": {
           "0": "Definição de tipos de mensagens",
           "1": "Planeamento de comunicações",
@@ -560,6 +870,7 @@
       "aiAssistants": {
         "title": "Configuração dos Assistentes AI",
         "description": "Criamos assistentes inteligentes adaptados às necessidades da sua organização e aos temas mais relevantes.",
+        "outcome": "Assistentes por área, com o tom da organização e as respostas às perguntas frequentes.",
         "bullets": {
           "0": "Assistentes por área, como RH, formação ou suporte",
           "1": "Definição de comportamento e linguagem",
@@ -571,6 +882,7 @@
       "testingLaunch": {
         "title": "Testes e Lançamento",
         "description": "Validamos os fluxos principais com a equipa, ajustamos detalhes e preparamos a utilização real no dia a dia.",
+        "outcome": "O bot testado com um grupo piloto e pronto para toda a equipa.",
         "bullets": {
           "0": "Testes com utilizadores-piloto",
           "1": "Validação dos canais e mensagens",
@@ -581,6 +893,7 @@
       "optimization": {
         "title": "Acompanhamento e Otimização",
         "description": "Depois do lançamento, acompanhamos a utilização para melhorar mensagens, assistentes e resultados.",
+        "outcome": "Conteúdos e assistentes cada vez mais afinados, com base na utilização real.",
         "bullets": {
           "0": "Análise de utilização e adesão",
           "1": "Melhoria contínua dos conteúdos",
@@ -594,6 +907,10 @@
       "text": "O MyDigitalBot foi concebido para funcionar com os sistemas e canais que já utiliza, sem necessidade de implementações complexas ou mudanças nos processos existentes.",
       "button": "Agendar demonstração",
       "alt": "Integrações simples com canais e sistemas existentes"
+    },
+    "metadata": {
+      "title": "Como funciona a implementação",
+      "description": "Como implementamos o MyDigitalBot na sua organização, da configuração inicial ao acompanhamento, sem complexidade técnica."
     }
   },
 
@@ -923,6 +1240,14 @@
             }
           }
         }
+      }
+    },
+    "metadata": {
+      "descriptions": {
+        "terms-of-service": "Termos de utilização da plataforma MyDigitalBot.",
+        "data-processing-agreement": "Acordo de tratamento de dados (DPA) aplicável às entidades clientes que utilizam o MyDigitalBot.",
+        "privacy-policy": "Como o MyDigitalBot trata e protege os dados pessoais.",
+        "security-providers": "Segurança da plataforma MyDigitalBot e fornecedores envolvidos na prestação do serviço."
       }
     }
   },
