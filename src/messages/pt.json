@@ -3787,5 +3787,15 @@
     "continue": "Continuar",
     "retry": "Tentar novamente",
     "footnote": "Esta página pode fechar automaticamente ao concluir o redirecionamento."
+  },
+  "ViewAs": {
+    "label": "Ver como",
+    "banner": "Estás a ver a app como {type}.",
+    "back": "Voltar a Administrador",
+    "types": {
+      "admin": "Administrador",
+      "editor": "Editor",
+      "viewer": "Leitor"
+    }
   }
 }

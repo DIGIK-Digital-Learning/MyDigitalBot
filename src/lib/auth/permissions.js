@@ -214,6 +214,17 @@ export function accessAllows(access, required = ADMIN_ONLY) {
   return wanted.some((permission) => has.has(permission));
 }
 
+/*
+ * «Ver como» (como o «Experimentar como» dos planos): um Administrador vê a
+ * app com as permissões de outro tipo. Fica num cookie e só tira
+ * permissões: quem não é Administrador ignora-o.
+ */
+export const VIEW_AS_COOKIE = "mdb_view_as";
+export const VIEW_AS_TYPES = Object.freeze([
+  SYSTEM_USER_TYPES.EDITOR,
+  SYSTEM_USER_TYPES.VIEWER,
+]);
+
 /* A permissão de envio de um canal; se o canal não for válido, qualquer uma. */
 export function sendPermissionFor(channel) {
   if (channel === "whatsapp") return P.SEND_WHATSAPP;

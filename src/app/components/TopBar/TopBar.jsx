@@ -6,6 +6,7 @@ import useOrganization from "@/app/hooks/useOrganization";
 import { getOrganizationLogoUrl } from "@/lib/helpers/organizationLogo.helpers";
 import styles from "./topbar.module.css";
 import LanguageSwitch from "./LanguageSwitch";
+import { ViewAsSwitch } from "../ViewAs/ViewAs";
 import { Menu, X } from "lucide-react";
 import { useMobileNav } from "../MobileNav/MobileNavContext";
 import { saveOrganizationLocale } from "@/lib/organizations/organizations.api";
@@ -36,7 +37,7 @@ export default function TopBar() {
 
         {/* RIGHT SIDE (pushes to the far right) */}
         <div className={styles.right}>
-          {/* put other right-side controls here later if you want */}
+          <ViewAsSwitch />
           <LanguageSwitch
             onChoose={(locale) => {
               if (org?.id) saveOrganizationLocale(org.id, locale);

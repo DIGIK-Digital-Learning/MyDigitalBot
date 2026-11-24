@@ -3787,5 +3787,15 @@
     "continue": "Continue",
     "retry": "Try again",
     "footnote": "This page may close automatically once the redirect is done."
+  },
+  "ViewAs": {
+    "label": "View as",
+    "banner": "You are viewing the app as {type}.",
+    "back": "Back to Administrator",
+    "types": {
+      "admin": "Administrator",
+      "editor": "Editor",
+      "viewer": "Viewer"
+    }
   }
 }

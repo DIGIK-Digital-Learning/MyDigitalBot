@@ -4,6 +4,7 @@ import GlobalLoadingOverlay from "../../LoadingScreen/GlobalLoadingOverlay";
 import Navbar from "../../components/Navbar/Navbar";
 import TopBar from "../../components/TopBar/TopBar";
 import AdminPlanBanner from "../../components/AdminPlanBanner/AdminPlanBanner";
+import { ViewAsBanner } from "../../components/ViewAs/ViewAs";
 import DemoPlanBanner from "../../components/DemoPlanBanner/DemoPlanBanner";
 import { MobileNavProvider } from "@/app/components/MobileNav/MobileNavContext";
 import { getCurrentSession } from "@/lib/auth/session";
@@ -46,6 +47,7 @@ export default async function AppLayout({ children, params }) {
         <Navbar />
         <div className="main-col">
           <AdminPlanBanner />
+          <ViewAsBanner />
           <DemoPlanBanner />
           <div className="page-content">
             <GlobalLoadingOverlay />

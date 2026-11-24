@@ -1,13 +1,65 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 
 import createSupabaseServerClient from "@/utils/supabase/server";
 import { getSupabaseAdminClient } from "@/lib/db/admin";
 import {
   ADMIN_ONLY,
+  VIEW_AS_COOKIE,
+  VIEW_AS_TYPES,
   accessAllows,
   resolveAccess,
 } from "@/lib/auth/permissions";
+
+/* O tipo escolhido em «Ver como», ou null (fora de um pedido também). */
+async function readViewAsCookie() {
+  try {
+    const store = await cookies();
+    const value = store.get(VIEW_AS_COOKIE)?.value ?? null;
+    return VIEW_AS_TYPES.includes(value) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+/*
+ * «Ver como» (#247): um Administrador que escolheu ver a app como outro tipo
+ * passa a ter só as permissões desse tipo. Só tira: para quem não é
+ * Administrador, o cookie não conta.
+ */
+async function applyViewAs(admin, access) {
+  if (!access?.isAdmin) return access;
+
+  const typeKey = await readViewAsCookie();
+  if (!typeKey) return access;
+
+  const { data: type, error } = await admin
+    .from("user_type")
+    .select("id, key, permissions")
+    .eq("is_system", true)
+    .eq("key", typeKey)
+    .maybeSingle();
+
+  if (error) {
+    if (MISSING_TABLE_CODES.has(error.code)) return access;
+    throw error;
+  }
+
+  if (!type) return access;
+
+  return {
+    ...resolveAccess({
+      member: {
+        typeKey: type.key,
+        userTypeId: type.id,
+        permissions: type.permissions || [],
+      },
+    }),
+    isOwner: access.isOwner,
+    viewingAs: type.key,
+  };
+}
 
 export function jsonError(message, status = 400, extra = {}) {
   return NextResponse.json(
@@ -133,7 +185,8 @@ async function loadMembership(admin, orgId, authUserId) {
  * declarada, só Administradores: uma rota esquecida fica fechada.
  * As permissões confirmam-se em cada pedido, não ficam na sessão.
  */
-async function authorizeOrgMember(auth, orgId, permission = ADMIN_ONLY) {
+async function authorizeOrgMember(auth, orgId, options = {}) {
+  const permission = options.permission ?? ADMIN_ONLY;
   const parsedOrgId = parsePositiveInt(orgId);
 
   if (!parsedOrgId) {
@@ -167,9 +220,24 @@ async function authorizeOrgMember(auth, orgId, permission = ADMIN_ONLY) {
     };
   }
 
-  const access = org
+  const realAccess = org
     ? resolveAccess({ isOwner: org.owner_user_id === auth.user.id, member })
     : null;
+
+  /*
+   * `realAccess: true` decide pelo tipo verdadeiro, sem o «Ver como»: é o
+   * que deixa um Administrador a ver como Leitor voltar atrás.
+   */
+  let access = realAccess;
+
+  if (realAccess && !options.realAccess) {
+    try {
+      access = await applyViewAs(auth.admin, realAccess);
+    } catch (error) {
+      console.error("[Auth] view-as lookup failed", error);
+      return { error: jsonError("Authorization check failed", 500) };
+    }
+  }
 
   if (!access || !accessAllows(access, permission)) {
     return {
@@ -182,6 +250,7 @@ async function authorizeOrgMember(auth, orgId, permission = ADMIN_ONLY) {
     org,
     orgId: parsedOrgId,
     access,
+    realAccess,
   };
 }
 
@@ -220,7 +289,10 @@ export async function getCurrentMembership(auth, columns = "id") {
 
   return {
     org: orgFields,
-    access: resolveAccess({ isOwner: ownerUserId === auth.user.id, member }),
+    access: await applyViewAs(
+      auth.admin,
+      resolveAccess({ isOwner: ownerUserId === auth.user.id, member }),
+    ),
   };
 }
 
@@ -228,6 +300,7 @@ export async function getCurrentMembership(auth, columns = "id") {
  * `options.permission`: a permissão do catálogo (`PERMISSIONS`), uma lista
  * (basta uma), `ANY_MEMBER`, ou nada (só Administradores).
  * `options.auth`: a sessão já validada, para não a pedir outra vez.
+ * `options.realAccess`: decidir pelo tipo verdadeiro, ignorando o «Ver como».
  */
 export async function requireOwnedOrg(orgId, options = {}) {
   const auth = options.auth || (await requireUser());
@@ -236,7 +309,7 @@ export async function requireOwnedOrg(orgId, options = {}) {
     return auth;
   }
 
-  return authorizeOrgMember(auth, orgId, options.permission);
+  return authorizeOrgMember(auth, orgId, options);
 }
 
 /* =========================================================

@@ -1,12 +1,23 @@
 import fs from "node:fs";
 import path from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 /*
  * #247 (1/4): vários utilizadores por organização. Os membros entram pelo
  * tipo de utilizador; o dono é sempre Administrador; uma rota sem permissão
  * declarada fica só para Administradores.
  */
+
+const cookieJar = vi.hoisted(() => ({ viewAs: null }));
+
+vi.mock("next/headers", () => ({
+  cookies: async () => ({
+    get: (name) =>
+      name === "mdb_view_as" && cookieJar.viewAs
+        ? { value: cookieJar.viewAs }
+        : undefined,
+  }),
+}));
 
 vi.mock("@/utils/supabase/server", () => ({ default: vi.fn() }));
 vi.mock("@/lib/db/admin", () => ({ getSupabaseAdminClient: vi.fn() }));
@@ -65,6 +76,14 @@ function fakeAdmin({ orgs = [], members = [], missingTable = false } = {}) {
                   member.organization_id === filters.organization_id),
             );
             return { data: row ?? null, error: null };
+          }
+
+          if (table === "user_type") {
+            const permissions = SYSTEM_TYPE_PERMISSIONS[filters.key];
+            return {
+              data: permissions ? { id: 50, key: filters.key, permissions } : null,
+              error: null,
+            };
           }
 
           throw new Error(`tabela inesperada: ${table}`);
@@ -235,6 +254,53 @@ describe("guard requireOwnedOrg com membros", () => {
 
     expect(result.access).toMatchObject({ isAdmin: false, typeKey: "viewer" });
     expect(result.orgId).toBe(1);
+  });
+});
+
+describe("«Ver como» (como o «Experimentar como» dos planos)", () => {
+  afterEach(() => {
+    cookieJar.viewAs = null;
+  });
+
+  it("o Administrador a ver como Leitor fica só com o que o Leitor pode", async () => {
+    cookieJar.viewAs = "viewer";
+
+    expect(await statusFor("dono-1", 1, PERMISSIONS.ANALYTICS_VIEW)).toBe(200);
+    expect(await statusFor("dono-1", 1, PERMISSIONS.USERS_EDIT)).toBe(403);
+    expect(await statusFor("dono-1", 1)).toBe(403);
+  });
+
+  it("decidir pelo tipo verdadeiro deixa-o voltar a Administrador", async () => {
+    cookieJar.viewAs = "viewer";
+
+    const result = await requireOwnedOrg(1, {
+      auth: authAs("dono-1"),
+      realAccess: true,
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.realAccess.isAdmin).toBe(true);
+  });
+
+  it("só tira permissões: um Leitor com o cookie de Editor continua Leitor", async () => {
+    cookieJar.viewAs = "editor";
+
+    expect(await statusFor("leitor-1", 1, PERMISSIONS.USERS_EDIT)).toBe(403);
+  });
+
+  it("um valor estranho no cookie é ignorado", async () => {
+    cookieJar.viewAs = "admin";
+    expect(await statusFor("editor-1", 1)).toBe(403);
+
+    cookieJar.viewAs = "qualquer";
+    expect(await statusFor("dono-1", 1)).toBe(200);
+  });
+
+  it("a ver como Editor, a DIGIK deixa de ser administradora da plataforma", async () => {
+    cookieJar.viewAs = "editor";
+
+    const { access } = await getCurrentMembership(authAs("dono-1"));
+    expect(access).toMatchObject({ isAdmin: false, viewingAs: "editor" });
   });
 });
 
