@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Trash2, X } from "lucide-react";
 import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import { LINK_BUTTON_BODY_MAX_LENGTH } from "@/lib/whatsapp/linkButton";
@@ -152,6 +152,7 @@ export default function TrackedLinksPanel({
   onDeleteLibraryLink = null,
   savedLinks = null,
   bubbleLinkIds = [],
+  onDraftChange = null,
   translation,
 }) {
   /* Um só link por mensagem: para trocar, tira-se o atual. */
@@ -176,6 +177,16 @@ export default function TrackedLinksPanel({
   const draftUrl = draft?.destinationUrl.trim() || "";
   const draftUrlInvalid = Boolean(draftUrl) && !/^https?:\/\//i.test(draftUrl);
   const canAddDraft = Boolean(draftLabel && draftUrl) && !draftUrlInvalid;
+
+  /*
+   * O nome que se está a escrever aparece logo no telemóvel (botão no
+   * WhatsApp, fim do texto no Teams). Ao fechar o painel, o rascunho sai.
+   */
+  useEffect(() => {
+    onDraftChange?.(draftLabel || null);
+  }, [draftLabel, onDraftChange]);
+
+  useEffect(() => () => onDraftChange?.(null), [onDraftChange]);
 
   function submitDraft(event) {
     event.preventDefault();

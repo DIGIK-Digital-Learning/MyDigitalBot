@@ -10,6 +10,7 @@ import { ImageSuggestBubble } from "./ImageSuggestInPhone";
 import MessageLimitsRow from "./MessageLimitsRow";
 import LinkButtonPreview, {
   LinkBubblesPreview,
+  LinkDraftChip,
   LinksInTextNote,
 } from "./LinkButtonPreview";
 import { PlusMenuBar } from "./PlusMenu";
@@ -66,6 +67,8 @@ export default function PhoneComposer({
               ariaLabel={translation("Broadcast.message")}
             />
           </div>
+
+          <LinkDraftChip label={tools.linkPreview?.draftChip} />
 
           {/* Ficheiros e caracteres da mensagem dentro do plano (#187). */}
           <MessageLimitsRow
