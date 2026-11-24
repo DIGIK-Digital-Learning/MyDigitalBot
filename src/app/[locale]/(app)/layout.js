@@ -5,6 +5,7 @@ import Navbar from "../../components/Navbar/Navbar";
 import TopBar from "../../components/TopBar/TopBar";
 import AdminPlanBanner from "../../components/AdminPlanBanner/AdminPlanBanner";
 import { ViewAsBanner } from "../../components/ViewAs/ViewAs";
+import { PermissionsProvider } from "@/app/PermissionsContext";
 import DemoPlanBanner from "../../components/DemoPlanBanner/DemoPlanBanner";
 import { MobileNavProvider } from "@/app/components/MobileNav/MobileNavContext";
 import { getCurrentSession } from "@/lib/auth/session";
@@ -41,20 +42,22 @@ export default async function AppLayout({ children, params }) {
 
   return (
     <MobileNavProvider>
-      <RouteLoader />
-      <TopBar />
-      <div className="app-shell">
-        <Navbar />
-        <div className="main-col">
-          <AdminPlanBanner />
-          <ViewAsBanner />
-          <DemoPlanBanner />
-          <div className="page-content">
-            <GlobalLoadingOverlay />
-            <main className="app-main">{children}</main>
+      <PermissionsProvider>
+        <RouteLoader />
+        <TopBar />
+        <div className="app-shell">
+          <Navbar />
+          <div className="main-col">
+            <AdminPlanBanner />
+            <ViewAsBanner />
+            <DemoPlanBanner />
+            <div className="page-content">
+              <GlobalLoadingOverlay />
+              <main className="app-main">{children}</main>
+            </div>
           </div>
         </div>
-      </div>
+      </PermissionsProvider>
     </MobileNavProvider>
   );
 }

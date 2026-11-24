@@ -11,18 +11,12 @@ vi.mock("@/lib/auth/guards", async (importOriginal) => ({
 vi.mock("@/utils/supabase/server", () => ({ default: vi.fn() }));
 vi.mock("@/lib/db/admin", () => ({ getSupabaseAdminClient: vi.fn() }));
 
-import { GET, POST } from "@/app/api/organizations/view-as/route";
+import { POST } from "@/app/api/organizations/view-as/route";
 import { resolveAccess } from "@/lib/auth/permissions";
 
 const ADMIN = resolveAccess({ isOwner: true });
-const VIEWER = resolveAccess({
-  member: { typeKey: "viewer", permissions: ["analytics.view"] },
-});
 
 const post = (body) => ({ json: async () => body });
-const get = (orgId) => ({
-  nextUrl: new URL(`http://x/api/organizations/view-as?orgId=${orgId}`),
-});
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -70,37 +64,5 @@ describe("POST /api/organizations/view-as", () => {
     });
 
     expect((await POST(post({ orgId: 1, typeKey: "viewer" }))).status).toBe(403);
-  });
-});
-
-describe("GET /api/organizations/view-as", () => {
-  it("o Administrador a ver como Leitor pode trocar e sabe como está", async () => {
-    mocks.requireOwnedOrg.mockResolvedValue({
-      orgId: 1,
-      realAccess: ADMIN,
-      access: { ...VIEWER, viewingAs: "viewer" },
-    });
-
-    const body = await (await GET(get(1))).json();
-
-    expect(body).toEqual({
-      canSwitch: true,
-      viewAs: "viewer",
-      types: ["editor", "viewer"],
-    });
-  });
-
-  it("um Leitor de verdade não vê o seletor", async () => {
-    mocks.requireOwnedOrg.mockResolvedValue({
-      orgId: 1,
-      realAccess: VIEWER,
-      access: VIEWER,
-    });
-
-    expect(await (await GET(get(1))).json()).toEqual({
-      canSwitch: false,
-      viewAs: null,
-      types: [],
-    });
   });
 });

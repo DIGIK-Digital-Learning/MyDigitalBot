@@ -178,3 +178,14 @@ option {
     transform: translateY(0) scale(1);
   }
 }
+
+/*
+ * Controlo que o tipo de utilizador não permite (#247): fica à vista, mas
+ * cinzento como os dias passados do calendário. A razão aparece ao passar o
+ * rato (title).
+ */
+[data-permission-denied] {
+  opacity: 0.45 !important;
+  filter: grayscale(1);
+  cursor: not-allowed !important;
+}

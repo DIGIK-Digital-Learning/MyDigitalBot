@@ -1,11 +1,14 @@
 /* Chamadas HTTP da organização, para os ecrãs. */
 
-/** «Ver como» (#247): `{ canSwitch, viewAs, types }`. */
-export async function fetchViewAs(orgId) {
+/**
+ * O que quem tem a sessão pode fazer (#247):
+ * `{ typeKey, isAdmin, permissions, viewAs, canSwitch, viewAsTypes }`.
+ */
+export async function fetchAccess(orgId) {
   const response = await fetch(
-    `/api/organizations/view-as?orgId=${encodeURIComponent(orgId)}`,
+    `/api/organizations/access?orgId=${encodeURIComponent(orgId)}`,
   );
-  if (!response.ok) throw new Error(`view-as ${response.status}`);
+  if (!response.ok) throw new Error(`access ${response.status}`);
   return response.json();
 }
 

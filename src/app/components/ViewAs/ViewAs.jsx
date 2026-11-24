@@ -3,19 +3,20 @@
 import { useTranslations } from "next-intl";
 
 import { useAlert } from "@/app/components/Alert/AlertProvider";
-import useViewAs from "@/app/hooks/useViewAs";
+import usePermissions from "@/app/PermissionsContext";
 
 import bannerStyles from "../AdminPlanBanner/AdminPlanBanner.module.css";
 import styles from "./ViewAs.module.css";
 
 /* Erros da troca: o mesmo aviso do resto da app. */
-function useChoose(choose) {
+function useChoose() {
   const translation = useTranslations();
   const showAlert = useAlert();
+  const { chooseViewAs } = usePermissions();
 
   return async (typeKey) => {
     try {
-      await choose(typeKey);
+      await chooseViewAs(typeKey);
     } catch (error) {
       await showAlert({
         title: translation("Common.error"),
@@ -33,8 +34,8 @@ function useChoose(choose) {
  */
 export function ViewAsSwitch() {
   const translation = useTranslations("ViewAs");
-  const { canSwitch, viewAs, types, busy, choose } = useViewAs();
-  const onChoose = useChoose(choose);
+  const { canSwitch, viewAs, viewAsTypes, busy } = usePermissions();
+  const onChoose = useChoose();
 
   if (!canSwitch) return null;
 
@@ -49,7 +50,7 @@ export function ViewAsSwitch() {
         data-testid="view-as-select"
       >
         <option value="">{translation("types.admin")}</option>
-        {types.map((key) => (
+        {viewAsTypes.map((key) => (
           <option key={key} value={key}>
             {translation(`types.${key}`)}
           </option>
@@ -62,8 +63,8 @@ export function ViewAsSwitch() {
 /* Faixa «Estás a ver a app como Leitor» com «Voltar a Administrador». */
 export function ViewAsBanner() {
   const translation = useTranslations("ViewAs");
-  const { canSwitch, viewAs, busy, choose } = useViewAs();
-  const onChoose = useChoose(choose);
+  const { canSwitch, viewAs, busy } = usePermissions();
+  const onChoose = useChoose();
 
   if (!canSwitch || !viewAs) return null;
 

@@ -3797,5 +3797,12 @@
       "editor": "Editor",
       "viewer": "Leitor"
     }
+  },
+  "Permissions": {
+    "denied": "O teu tipo de utilizador não permite fazer isto.",
+    "noPage": {
+      "title": "Sem acesso a esta página",
+      "description": "O teu tipo de utilizador não tem acesso a esta página. Se precisares, pede a um Administrador da tua organização."
+    }
   }
 }
