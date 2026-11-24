@@ -84,6 +84,23 @@ export function LinkBubblesPreview({
   ));
 }
 
+/*
+ * Onde não há botões (Teams, quiz), o link entra no texto como a pastilha
+ * «Link: nome». Enquanto se escreve o nome no «Criar link», a pastilha
+ * aparece já no fim do balão, para se ver como fica.
+ */
+export function LinkDraftChip({ label }) {
+  if (!label) return null;
+
+  return (
+    <div className={styles.linkDraftChipRow}>
+      <span className={styles.tokenChip} data-testid="link-draft-chip">
+        Link: {label}
+      </span>
+    </div>
+  );
+}
+
 /* Onde não há botões (Teams), os links seguem no fim do texto. */
 export function LinksInTextNote({ labels = [], translation }) {
   if (!labels.length) return null;

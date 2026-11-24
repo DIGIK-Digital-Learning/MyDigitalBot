@@ -1384,6 +1384,12 @@
   box-shadow: 0 0 0 1px var(--phone-accent, #00695c);
 }
 
+/* Pastilha «Link: nome» do link a ser escrito no «Criar link» (Teams, quiz). */
+.linkDraftChipRow {
+  margin-top: 6px;
+  opacity: 0.75;
+}
+
 .bubbleImages {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));

@@ -1389,15 +1389,17 @@ export default function BroadcastPage() {
             text: bubble.text,
           }))
       : [],
-    inTextLabels: [
-      ...(isWhatsapp
-        ? []
-        : allBubbles.map((bubble) => String(bubble.link.label).trim())),
-      /* Sem botão (Teams, quiz), o link a ser escrito vai no texto. */
-      ...(linkDraftLabel && !trackedLinksFull && !linkButtonAllowed
-        ? [linkDraftLabel]
-        : []),
-    ],
+    inTextLabels: isWhatsapp
+      ? []
+      : allBubbles.map((bubble) => String(bubble.link.label).trim()),
+    /*
+     * Sem botão (Teams, quiz), o link entra no texto como a pastilha
+     * «Link: nome»: o que se está a escrever aparece já assim no balão.
+     */
+    draftChip:
+      linkDraftLabel && !trackedLinksFull && !linkButtonAllowed
+        ? linkDraftLabel
+        : null,
   };
 
   /*

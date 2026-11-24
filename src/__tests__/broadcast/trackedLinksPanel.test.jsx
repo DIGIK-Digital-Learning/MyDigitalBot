@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import TrackedLinksPanel from "@/app/[locale]/(app)/broadcast/components/panels/TrackedLinksPanel";
+import { LinkDraftChip } from "@/app/[locale]/(app)/broadcast/components/LinkButtonPreview";
 
 const translation = (key) => key;
 
@@ -230,6 +231,21 @@ describe("Criar link: o nome aparece no telemóvel enquanto se escreve", () => {
     onDraftChange.mockClear();
     unmount();
     expect(onDraftChange).toHaveBeenCalledWith(null);
+  });
+});
+
+describe("LinkDraftChip: pastilha do link a ser escrito (Teams, quiz)", () => {
+  it("mostra «Link: nome» com o mesmo estilo das pastilhas do texto", () => {
+    render(<LinkDraftChip label="Inquérito de satisfação" />);
+
+    const chip = screen.getByTestId("link-draft-chip");
+    expect(chip.textContent).toBe("Link: Inquérito de satisfação");
+  });
+
+  it("não mostra nada sem nome", () => {
+    render(<LinkDraftChip label={null} />);
+
+    expect(screen.queryByTestId("link-draft-chip")).toBeNull();
   });
 });
 
