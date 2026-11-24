@@ -8,6 +8,7 @@ import DemoPlanBanner from "../../components/DemoPlanBanner/DemoPlanBanner";
 import { MobileNavProvider } from "@/app/components/MobileNav/MobileNavContext";
 import { getCurrentSession } from "@/lib/auth/session";
 import { getOrganizationMetadata } from "@/lib/helpers/organizationBranding.helpers";
+import { fetchCurrentOrganization } from "@/lib/helpers/currentOrganization";
 import { routing } from "@/i18n/routing";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -15,11 +16,11 @@ export async function generateMetadata() {
   const { supabase, user } = await getCurrentSession();
   if (!user) return {};
 
-  const { data: org, error } = await supabase
-    .from("organization")
-    .select("name, favicon_url")
-    .eq("owner_user_id", user.id)
-    .maybeSingle();
+  const { data: org, error } = await fetchCurrentOrganization(
+    supabase,
+    user.id,
+    "name, favicon_url",
+  );
 
   if (error) {
     console.error("[AppLayout] organization branding lookup failed", error);

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getOrgAuditLog } from "@/lib/repos/auditLog.repo";
 import { parseAuditLogQuery } from "@/lib/audit/auditLogQuery";
 import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -29,7 +30,7 @@ export async function GET(req) {
       return NextResponse.json({ error: parsed.error }, { status: 400 });
     }
 
-    const orgAuth = await requireOwnedOrg(rawOrgId);
+    const orgAuth = await requireOwnedOrg(rawOrgId, { permission: PERMISSIONS.SETTINGS_AUDIT_VIEW });
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {

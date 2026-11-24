@@ -5,6 +5,7 @@ import {
   handleApiError,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 
 
@@ -13,7 +14,7 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
 
     const orgId = Number(searchParams.get("orgId"));
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.AUTOMATIONS_VIEW });
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {

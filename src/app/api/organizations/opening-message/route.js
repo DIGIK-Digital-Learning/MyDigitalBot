@@ -18,6 +18,7 @@ import {
   parsePositiveInt,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -43,7 +44,7 @@ export async function GET(req) {
       return NextResponse.json({ error: "Missing orgId" }, { status: 400 });
     }
 
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: [PERMISSIONS.SETTINGS_INTEGRATIONS, PERMISSIONS.SEND_WHATSAPP] });
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {
@@ -69,7 +70,7 @@ export async function PUT(req) {
       return NextResponse.json({ error: "body is required" }, { status: 400 });
     }
 
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.SETTINGS_INTEGRATIONS });
     if (orgAuth.error) return orgAuth.error;
 
     const clean = sanitizeOpeningBody(body.body);

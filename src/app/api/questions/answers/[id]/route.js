@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { updateQuestionAnswerAdminVerdict } from "@/lib/repos/questions.repo";
 import { VERDICTS } from "@/lib/services/questions/questionReports";
 import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 /**
  * Correção manual do veredicto de uma resposta a pergunta aberta. Um valor
@@ -14,7 +15,7 @@ export async function PATCH(req, { params }) {
     const answerId = Number(id);
     const body = await req.json().catch(() => ({}));
 
-    const orgAuth = await requireOwnedOrg(body?.orgId);
+    const orgAuth = await requireOwnedOrg(body?.orgId, { permission: PERMISSIONS.QUESTIONS_REVIEW });
     if (orgAuth.error) return orgAuth.error;
 
     if (!Number.isInteger(answerId) || answerId <= 0) {

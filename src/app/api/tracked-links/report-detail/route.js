@@ -2,6 +2,7 @@ import { withSessionReadAccess } from "@/lib/db/readAccess";
 import { NextResponse } from "next/server";
 import { getTrackedLinkReportDetail } from "@/lib/repos/trackedLinks.repo";
 import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 export async function GET(req) {
   try {
@@ -9,7 +10,7 @@ export async function GET(req) {
     const orgId = Number(searchParams.get("orgId"));
     const sendGroupId = String(searchParams.get("sendGroupId") || "").trim();
 
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.LINKS_VIEW });
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {

@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { handleApiError, requireOrgForTeamsGroup } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 import {
   getTeamsGroupDetail,
   updateTeamsGroupSettings,
@@ -16,7 +17,7 @@ export async function GET(_req, { params }) {
   try {
     const { groupId } = await params;
 
-    const orgAuth = await requireOrgForTeamsGroup(groupId);
+    const orgAuth = await requireOrgForTeamsGroup(groupId, { permission: PERMISSIONS.TEAMS_GROUPS_VIEW });
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {
@@ -38,7 +39,7 @@ export async function PATCH(req, { params }) {
   try {
     const { groupId } = await params;
 
-    const orgAuth = await requireOrgForTeamsGroup(groupId);
+    const orgAuth = await requireOrgForTeamsGroup(groupId, { permission: PERMISSIONS.TEAMS_GROUPS_EDIT });
     if (orgAuth.error) return orgAuth.error;
 
     const body = await req.json().catch(() => ({}));

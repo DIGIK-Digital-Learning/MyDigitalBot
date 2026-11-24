@@ -3,6 +3,11 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
 
 import createSupabaseServerClient from "@/utils/supabase/server";
 import { getSupabaseAdminClient } from "@/lib/db/admin";
+import {
+  ADMIN_ONLY,
+  accessAllows,
+  resolveAccess,
+} from "@/lib/auth/permissions";
 
 export function jsonError(message, status = 400, extra = {}) {
   return NextResponse.json(
@@ -88,7 +93,47 @@ export async function requireUser() {
    ORGANIZATION
    ========================================================= */
 
-async function authorizeOwnedOrg(auth, orgId) {
+/*
+ * A linha de membro de quem faz o pedido nesta organização, com o tipo de
+ * utilizador (#247). null se não for membro.
+ */
+const MISSING_TABLE_CODES = new Set(["42P01", "PGRST205"]);
+
+async function loadMembership(admin, orgId, authUserId) {
+  const { data, error } = await admin
+    .from("organization_member")
+    .select("organization_id, user_type_id, user_type ( key, permissions )")
+    .eq("organization_id", orgId)
+    .eq("auth_user_id", authUserId)
+    .maybeSingle();
+
+  if (error) {
+    /*
+     * Se o código for publicado antes da migração, a tabela ainda não
+     * existe: o dono continua a entrar como dono, em vez de ninguém entrar.
+     */
+    if (MISSING_TABLE_CODES.has(error.code)) return null;
+    throw error;
+  }
+
+  if (!data) return null;
+
+  const type = Array.isArray(data.user_type) ? data.user_type[0] : data.user_type;
+
+  return {
+    userTypeId: data.user_type_id,
+    typeKey: type?.key ?? null,
+    permissions: type?.permissions ?? [],
+  };
+}
+
+/*
+ * Quem pode entrar: o dono (sempre Administrador) e os membros da
+ * organização cujo tipo tenha a permissão pedida (#247). Sem permissão
+ * declarada, só Administradores: uma rota esquecida fica fechada.
+ * As permissões confirmam-se em cada pedido, não ficam na sessão.
+ */
+async function authorizeOrgMember(auth, orgId, permission = ADMIN_ONLY) {
   const parsedOrgId = parsePositiveInt(orgId);
 
   if (!parsedOrgId) {
@@ -97,13 +142,24 @@ async function authorizeOwnedOrg(auth, orgId) {
     };
   }
 
-  const { data: org, error } = await auth.admin
-    .from("organization")
-    .select("id, owner_user_id")
-    .eq("id", parsedOrgId)
-    .maybeSingle();
+  let org;
+  let member;
 
-  if (error) {
+  try {
+    const [orgResult, membership] = await Promise.all([
+      auth.admin
+        .from("organization")
+        .select("id, owner_user_id")
+        .eq("id", parsedOrgId)
+        .maybeSingle(),
+      loadMembership(auth.admin, parsedOrgId, auth.user.id),
+    ]);
+
+    if (orgResult.error) throw orgResult.error;
+
+    org = orgResult.data;
+    member = membership;
+  } catch (error) {
     console.error("[Auth] organization lookup failed", error);
 
     return {
@@ -111,7 +167,11 @@ async function authorizeOwnedOrg(auth, orgId) {
     };
   }
 
-  if (!org || org.owner_user_id !== auth.user.id) {
+  const access = org
+    ? resolveAccess({ isOwner: org.owner_user_id === auth.user.id, member })
+    : null;
+
+  if (!access || !accessAllows(access, permission)) {
     return {
       error: jsonError("Forbidden", 403),
     };
@@ -121,24 +181,69 @@ async function authorizeOwnedOrg(auth, orgId) {
     ...auth,
     org,
     orgId: parsedOrgId,
+    access,
   };
 }
 
-export async function requireOwnedOrg(orgId, existingAuth = null) {
-  const auth = existingAuth || (await requireUser());
+/*
+ * A organização de quem tem a sessão, sem saber o id: a da linha de membro
+ * (uma conta, uma organização) ou, sem ela, a de que é dono. `access` diz o
+ * tipo de utilizador. `columns` são as colunas da organização a ler.
+ */
+export async function getCurrentMembership(auth, columns = "id") {
+  const { data: memberRow, error: memberError } = await auth.admin
+    .from("organization_member")
+    .select("organization_id")
+    .eq("auth_user_id", auth.user.id)
+    .maybeSingle();
+
+  if (memberError && !MISSING_TABLE_CODES.has(memberError.code)) {
+    throw memberError;
+  }
+
+  const select = `${columns}, owner_user_id`;
+  let query = auth.admin.from("organization").select(select);
+
+  query = memberRow?.organization_id
+    ? query.eq("id", memberRow.organization_id)
+    : query.eq("owner_user_id", auth.user.id).order("id").limit(1);
+
+  const { data: org, error } = await query.maybeSingle();
+  if (error) throw error;
+  if (!org) return { org: null, access: null };
+
+  const member = memberRow
+    ? await loadMembership(auth.admin, org.id, auth.user.id)
+    : null;
+
+  const { owner_user_id: ownerUserId, ...orgFields } = org;
+
+  return {
+    org: orgFields,
+    access: resolveAccess({ isOwner: ownerUserId === auth.user.id, member }),
+  };
+}
+
+/*
+ * `options.permission`: a permissão do catálogo (`PERMISSIONS`), uma lista
+ * (basta uma), `ANY_MEMBER`, ou nada (só Administradores).
+ * `options.auth`: a sessão já validada, para não a pedir outra vez.
+ */
+export async function requireOwnedOrg(orgId, options = {}) {
+  const auth = options.auth || (await requireUser());
 
   if (auth.error) {
     return auth;
   }
 
-  return authorizeOwnedOrg(auth, orgId);
+  return authorizeOrgMember(auth, orgId, options.permission);
 }
 
 /* =========================================================
    USER
    ========================================================= */
 
-export async function requireOrgForUser(userId) {
+export async function requireOrgForUser(userId, options = {}) {
   const parsedUserId = parsePositiveInt(userId);
 
   if (!parsedUserId) {
@@ -173,7 +278,7 @@ export async function requireOrgForUser(userId) {
     };
   }
 
-  const orgAuth = await requireOwnedOrg(row.organization_id, auth);
+  const orgAuth = await requireOwnedOrg(row.organization_id, { ...options, auth });
 
   if (orgAuth.error) {
     return orgAuth;
@@ -190,7 +295,7 @@ export async function requireOrgForUser(userId) {
    ASSISTANT
    ========================================================= */
 
-export async function requireOrgForAssistant(assistantId) {
+export async function requireOrgForAssistant(assistantId, options = {}) {
   const parsedAssistantId = parsePositiveInt(assistantId);
 
   if (!parsedAssistantId) {
@@ -225,7 +330,7 @@ export async function requireOrgForAssistant(assistantId) {
     };
   }
 
-  const orgAuth = await requireOwnedOrg(assistant.organization_id, auth);
+  const orgAuth = await requireOwnedOrg(assistant.organization_id, { ...options, auth });
 
   if (orgAuth.error) {
     return orgAuth;
@@ -242,7 +347,7 @@ export async function requireOrgForAssistant(assistantId) {
    TAG
    ========================================================= */
 
-export async function requireOrgForTag(tagId) {
+export async function requireOrgForTag(tagId, options = {}) {
   const parsedTagId = parsePositiveInt(tagId);
 
   if (!parsedTagId) {
@@ -277,7 +382,7 @@ export async function requireOrgForTag(tagId) {
     };
   }
 
-  const orgAuth = await requireOwnedOrg(tag.org_id, auth);
+  const orgAuth = await requireOwnedOrg(tag.org_id, { ...options, auth });
 
   if (orgAuth.error) {
     return orgAuth;
@@ -294,7 +399,7 @@ export async function requireOrgForTag(tagId) {
    SCHEDULED BROADCAST
    ========================================================= */
 
-export async function requireOrgForScheduledBroadcast(id) {
+export async function requireOrgForScheduledBroadcast(id, options = {}) {
   const broadcastId = typeof id === "string" ? id.trim() : "";
 
   const isValidUuid =
@@ -336,7 +441,7 @@ export async function requireOrgForScheduledBroadcast(id) {
     };
   }
 
-  const orgAuth = await requireOwnedOrg(broadcast.organization_id, auth);
+  const orgAuth = await requireOwnedOrg(broadcast.organization_id, { ...options, auth });
 
   if (orgAuth.error) {
     return orgAuth;
@@ -353,7 +458,7 @@ export async function requireOrgForScheduledBroadcast(id) {
    THREAD
    ========================================================= */
 
-export async function requireOrgForThread(threadId) {
+export async function requireOrgForThread(threadId, options = {}) {
   const parsedThreadId = parsePositiveInt(threadId);
 
   if (!parsedThreadId) {
@@ -465,7 +570,7 @@ export async function requireOrgForThread(threadId) {
     };
   }
 
-  const orgAuth = await requireOwnedOrg(orgId, auth);
+  const orgAuth = await requireOwnedOrg(orgId, { ...options, auth });
 
   if (orgAuth.error) {
     return orgAuth;
@@ -482,7 +587,7 @@ export async function requireOrgForThread(threadId) {
    AUTOMATION RULE
    ========================================================= */
 
-export async function requireOrgForAutomationRule(id) {
+export async function requireOrgForAutomationRule(id, options = {}) {
   if (!id || typeof id !== "string") {
     return {
       error: jsonError("Invalid automation rule id", 400),
@@ -515,7 +620,7 @@ export async function requireOrgForAutomationRule(id) {
     };
   }
 
-  const orgAuth = await requireOwnedOrg(rule.organization_id, auth);
+  const orgAuth = await requireOwnedOrg(rule.organization_id, { ...options, auth });
 
   if (orgAuth.error) {
     return orgAuth;
@@ -536,7 +641,7 @@ const TEAMS_GROUP_COLUMNS =
   "id, organization_id, assistant_id, name, conversation_id, conversation_type, service_url, tenant_id, team_id, channel_id, is_active, created_at, last_seen_at";
 
 /* Grupo do Teams onde o bot está instalado (#165). */
-export async function requireOrgForTeamsGroup(groupId) {
+export async function requireOrgForTeamsGroup(groupId, options = {}) {
   const parsedGroupId = parsePositiveInt(groupId);
 
   if (!parsedGroupId) {
@@ -572,7 +677,7 @@ export async function requireOrgForTeamsGroup(groupId) {
     };
   }
 
-  const orgAuth = await requireOwnedOrg(group.organization_id, auth);
+  const orgAuth = await requireOwnedOrg(group.organization_id, { ...options, auth });
 
   if (orgAuth.error) {
     return orgAuth;

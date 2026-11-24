@@ -6,6 +6,7 @@ import {
   requireOrgForAssistant,
   requireOrgForThread,
 } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 import {
   createConversation,
@@ -22,7 +23,7 @@ export async function POST(req, { params }) {
      * AUTHORIZE ASSISTANT
      * =========================================================
      */
-    const orgAuth = await requireOrgForAssistant(assistantId);
+    const orgAuth = await requireOrgForAssistant(assistantId, { permission: PERMISSIONS.ASSISTANTS_TEST });
 
     if (orgAuth.error) {
       return orgAuth.error;
@@ -147,7 +148,7 @@ export async function POST(req, { params }) {
       const possibleDbThreadId = Number(incomingThreadId);
 
       if (Number.isInteger(possibleDbThreadId) && possibleDbThreadId > 0) {
-        const threadAuth = await requireOrgForThread(possibleDbThreadId);
+        const threadAuth = await requireOrgForThread(possibleDbThreadId, { permission: PERMISSIONS.ASSISTANTS_TEST });
 
         if (threadAuth.error) {
           return threadAuth.error;

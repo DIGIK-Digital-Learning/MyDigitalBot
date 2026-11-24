@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { requireOwnedOrg, handleApiError } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 import { checkPlanActive } from "@/lib/services/plans/planLimits";
 import { runInactivityScan } from "@/lib/services/automations/inactivityScan";
 
 export async function POST(req) {
   try {
     const body = await req.json();
-    const orgAuth = await requireOwnedOrg(body.organizationId);
+    const orgAuth = await requireOwnedOrg(body.organizationId, { permission: PERMISSIONS.AUTOMATIONS_RUN });
     if (orgAuth.error) return orgAuth.error;
 
     /* A Demo terminou (#209): ver continua, criar e enviar não. */

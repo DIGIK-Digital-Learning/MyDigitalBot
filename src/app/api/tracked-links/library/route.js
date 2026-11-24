@@ -8,6 +8,7 @@ import {
   parsePositiveInt,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 import { listReusableTrackedLinks } from "@/lib/services/broadcast/trackedLinks";
 import { deleteSavedTrackedLink } from "@/lib/repos/trackedLinkSaved.repo";
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
@@ -37,7 +38,7 @@ export async function GET(request) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: [PERMISSIONS.LINKS_VIEW, PERMISSIONS.LINKS_CREATE] });
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {
@@ -88,7 +89,7 @@ export async function POST(request) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.LINKS_CREATE });
     if (orgAuth.error) return orgAuth.error;
 
     const saved = await saveTrackedLinksWithinPlan(orgAuth.orgId, [
@@ -136,7 +137,7 @@ export async function DELETE(request) {
       return NextResponse.json({ error: "Invalid link" }, { status: 400 });
     }
 
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.LINKS_CREATE });
     if (orgAuth.error) return orgAuth.error;
 
     const result = await deleteSavedTrackedLink(orgAuth.orgId, id);

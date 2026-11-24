@@ -11,6 +11,7 @@ import {
   parsePositiveInt,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 const ALLOWED_CHANNELS = new Set(["whatsapp"]);
 
@@ -73,7 +74,7 @@ export async function GET(req) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: [PERMISSIONS.SETTINGS_INTEGRATIONS, PERMISSIONS.SEND_WHATSAPP, PERMISSIONS.SEND_TEAMS] });
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {
@@ -152,7 +153,7 @@ export async function PATCH(req) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.SETTINGS_INTEGRATIONS });
     if (orgAuth.error) return orgAuth.error;
 
     const feature = await setReadChainsEnabled({

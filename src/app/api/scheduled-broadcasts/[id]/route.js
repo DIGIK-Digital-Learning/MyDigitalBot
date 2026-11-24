@@ -10,6 +10,7 @@ import {
   handleApiError,
   requireOrgForScheduledBroadcast,
 } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 import { buildScheduledPayload } from "@/lib/services/broadcast/scheduledPayload";
 import { refundScheduledSend } from "@/lib/repos/adminDailySends.repo";
 import { dailySendsDayStart } from "@/lib/plans/dailySends";
@@ -97,7 +98,7 @@ export async function PATCH(req, { params }) {
     }
 
     const orgAuth =
-      await requireOrgForScheduledBroadcast(id);
+      await requireOrgForScheduledBroadcast(id, { permission: PERMISSIONS.SCHEDULED_EDIT });
 
     if (orgAuth.error) return orgAuth.error;
 
@@ -261,7 +262,7 @@ export async function DELETE(_req, { params }) {
     const { id } = await params;
 
     const orgAuth =
-      await requireOrgForScheduledBroadcast(id);
+      await requireOrgForScheduledBroadcast(id, { permission: PERMISSIONS.SCHEDULED_EDIT });
 
     if (orgAuth.error) return orgAuth.error;
 
