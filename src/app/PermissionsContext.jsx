@@ -42,7 +42,7 @@ const PermissionsContext = createContext(null);
 export function PermissionsProvider({ children }) {
   const translation = useTranslations("Permissions");
   const { user } = useAuth();
-  const { org } = useOrganization(user);
+  const { org, loading: orgLoading } = useOrganization(user);
   const orgId = org?.id ?? null;
   const [state, setState] = useState(EMPTY);
   const [busy, setBusy] = useState(false);
@@ -101,8 +101,16 @@ export function PermissionsProvider({ children }) {
   );
 
   const value = useMemo(
-    () => ({ ...state, busy, can, lock, chooseViewAs }),
-    [state, busy, can, lock, chooseViewAs],
+    () => ({
+      ...state,
+      /* Já se sabe o que a pessoa pode ver (as páginas esperam por isto). */
+      ready: !orgLoading && (!orgId || state.loaded),
+      busy,
+      can,
+      lock,
+      chooseViewAs,
+    }),
+    [state, orgLoading, orgId, busy, can, lock, chooseViewAs],
   );
 
   return (
@@ -115,6 +123,7 @@ export function PermissionsProvider({ children }) {
 /* Fora do provider (testes, páginas públicas), tudo é permitido. */
 const ALLOW_ALL = {
   ...EMPTY,
+  ready: true,
   busy: false,
   can: () => true,
   lock: () => null,

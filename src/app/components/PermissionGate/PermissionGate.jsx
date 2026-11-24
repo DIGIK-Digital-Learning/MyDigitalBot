@@ -14,8 +14,10 @@ import styles from "./PermissionGate.module.css";
  */
 export default function PermissionGate({ permission, children }) {
   const translation = useTranslations("Permissions");
-  const { can } = usePermissions();
+  const { can, ready } = usePermissions();
 
+  /* Sem isto a página montava e pedia dados que o servidor ia recusar. */
+  if (!ready) return null;
   if (can(permission)) return children;
 
   return (
