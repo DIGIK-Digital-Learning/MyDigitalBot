@@ -54,7 +54,12 @@ import SendingBanner from "./components/SendingBanner";
 import useSendProgress from "./hooks/useSendProgress";
 import MediaPickerModal from "./components/MediaPickerModal";
 
-import { COMPANY_KEYS, MAX_TRACKED_LINKS, NAME_KEYS } from "./lib/constants";
+import {
+  COMPANY_KEYS,
+  LINK_DRAFT_ID,
+  MAX_TRACKED_LINKS,
+  NAME_KEYS,
+} from "./lib/constants";
 import useTextSuggestion from "./lib/useTextSuggestion";
 import useImageSuggestion from "./hooks/useImageSuggestion";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
@@ -1316,6 +1321,9 @@ export default function BroadcastPage() {
     },
   });
 
+  /* Nome do link a ser escrito no «Criar link», só para a pré-visualização. */
+  const [linkDraftLabel, setLinkDraftLabel] = useState(null);
+
   /* Links já usados noutros envios, carregados quando o painel abre. */
   const trackedLinkLibrary = useTrackedLinkLibrary({
     orgId: org?.id,
@@ -1335,16 +1343,39 @@ export default function BroadcastPage() {
    * mensagem não leva o botão e o link segue num balão à parte. No Teams
    * não há botões: avisa que o link vai no fim do texto.
    */
+  /*
+   * O link que se está a escrever no «Criar link» entra na pré-visualização
+   * como se já tivesse sido adicionado, para se ver o nome a aparecer no
+   * botão (WhatsApp) ou no fim do texto (Teams). Não tem o x de tirar.
+   */
+  const previewTrackedLinks =
+    linkDraftLabel && !trackedLinksFull
+      ? [
+          ...composerTrackedLinks,
+          {
+            id: LINK_DRAFT_ID,
+            key: LINK_DRAFT_ID,
+            label: linkDraftLabel,
+            destinationUrl: "",
+            button: linkButtonAllowed,
+          },
+        ]
+      : composerTrackedLinks;
+  const removableLinkId = (link) =>
+    link.id === LINK_DRAFT_ID ? null : link.id;
+
   const buttonCanGo = linkButtonAllowed && imageFiles.length === 0;
   const buttonChoice = buttonCanGo
-    ? chooseButtonLink(activeBody, composerTrackedLinks)
+    ? chooseButtonLink(activeBody, previewTrackedLinks)
     : null;
-  const allBubbles = buttonLinkBubbles(composerTrackedLinks);
+  const allBubbles = buttonLinkBubbles(previewTrackedLinks);
 
   const linkPreview = {
     button: buttonChoice
       ? {
-          id: buttonChoice.link.button ? buttonChoice.link.id : null,
+          id: buttonChoice.link.button
+            ? removableLinkId(buttonChoice.link)
+            : null,
           buttonText: buttonChoice.buttonText,
         }
       : null,
@@ -1352,7 +1383,8 @@ export default function BroadcastPage() {
       ? allBubbles
           .filter((bubble) => bubble.link !== buttonChoice?.link)
           .map((bubble) => ({
-            id: bubble.link.id,
+            id: removableLinkId(bubble.link),
+            key: bubble.link.id,
             buttonText: bubble.buttonText,
             text: bubble.text,
           }))
@@ -1360,6 +1392,14 @@ export default function BroadcastPage() {
     inTextLabels: isWhatsapp
       ? []
       : allBubbles.map((bubble) => String(bubble.link.label).trim()),
+    /*
+     * Sem botão (Teams, quiz), o link entra no texto como a pastilha
+     * «Link: nome»: o que se está a escrever aparece já assim no balão.
+     */
+    draftChip:
+      linkDraftLabel && !trackedLinksFull && !linkButtonAllowed
+        ? linkDraftLabel
+        : null,
   };
 
   /*
@@ -2811,6 +2851,7 @@ export default function BroadcastPage() {
             : null
         }
         bubbleLinkIds={linkPreview.bubbles.map((bubble) => bubble.id)}
+        onDraftChange={setLinkDraftLabel}
         translation={translation}
       />
     ) : null;

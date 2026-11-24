@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import TrackedLinksPanel from "@/app/[locale]/(app)/broadcast/components/panels/TrackedLinksPanel";
+import { LinkDraftChip } from "@/app/[locale]/(app)/broadcast/components/LinkButtonPreview";
 
 const translation = (key) => key;
 
@@ -187,6 +188,64 @@ describe("#286: link novo só com texto e endereço", () => {
 
     expect(screen.queryByTestId("new-link-form")).toBeNull();
     expect(addTrackedLink).not.toHaveBeenCalled();
+  });
+});
+
+describe("Criar link: o nome aparece no telemóvel enquanto se escreve", () => {
+  function renderWithDraft() {
+    const onDraftChange = vi.fn();
+    const view = render(
+      <TrackedLinksPanel
+        trackedLinks={[]}
+        trackedLinksValid
+        addTrackedLink={vi.fn()}
+        updateTrackedLink={vi.fn()}
+        removeTrackedLink={vi.fn()}
+        onDraftChange={onDraftChange}
+        translation={translation}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Broadcast.addLink" }));
+    return { onDraftChange, ...view };
+  }
+
+  it("passa o nome escrito, sem espaços à volta", () => {
+    const { onDraftChange } = renderWithDraft();
+
+    fireEvent.change(screen.getByLabelText("Broadcast.label"), {
+      target: { value: " Ver curso " },
+    });
+
+    expect(onDraftChange).toHaveBeenLastCalledWith("Ver curso");
+  });
+
+  it("limpa a pré-visualização ao cancelar e ao fechar o painel", () => {
+    const { onDraftChange, unmount } = renderWithDraft();
+
+    fireEvent.change(screen.getByLabelText("Broadcast.label"), {
+      target: { value: "Ver curso" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Common.cancel" }));
+    expect(onDraftChange).toHaveBeenLastCalledWith(null);
+
+    onDraftChange.mockClear();
+    unmount();
+    expect(onDraftChange).toHaveBeenCalledWith(null);
+  });
+});
+
+describe("LinkDraftChip: pastilha do link a ser escrito (Teams, quiz)", () => {
+  it("mostra «Link: nome» com o mesmo estilo das pastilhas do texto", () => {
+    render(<LinkDraftChip label="Inquérito de satisfação" />);
+
+    const chip = screen.getByTestId("link-draft-chip");
+    expect(chip.textContent).toBe("Link: Inquérito de satisfação");
+  });
+
+  it("não mostra nada sem nome", () => {
+    render(<LinkDraftChip label={null} />);
+
+    expect(screen.queryByTestId("link-draft-chip")).toBeNull();
   });
 });
 

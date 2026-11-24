@@ -8,7 +8,10 @@ import styles from "../broadcast.module.css";
 import { BubbleImages, FileBubbles } from "./ComposerAttachments";
 import { ImageSuggestBubble } from "./ImageSuggestInPhone";
 import MessageLimitsRow from "./MessageLimitsRow";
-import LinkButtonPreview, { LinkBubblesPreview } from "./LinkButtonPreview";
+import LinkButtonPreview, {
+  LinkBubblesPreview,
+  LinkDraftChip,
+} from "./LinkButtonPreview";
 import { PlusMenuBar } from "./PlusMenu";
 import { SuggestBubble } from "./SuggestInPhone";
 import TokenTextEditor from "./TokenTextEditor";
@@ -83,6 +86,8 @@ export default function QuestionPhone({
               ariaLabel={bodyLabel}
             />
           </div>
+
+          <LinkDraftChip label={tools?.linkPreview?.draftChip} />
 
           {/*
             Ficheiros da pergunta dentro do plano (#187). Os caracteres não:
