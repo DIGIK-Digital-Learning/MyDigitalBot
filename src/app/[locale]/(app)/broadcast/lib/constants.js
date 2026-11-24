@@ -13,6 +13,9 @@ export const NAME_KEYS = [
  */
 export const MAX_TRACKED_LINKS = 1;
 
+/* Id do link a ser escrito no «Criar link», só na pré-visualização. */
+export const LINK_DRAFT_ID = "__link-draft__";
+
 export const COMPANY_KEYS = [
   "empresa",
   "company",

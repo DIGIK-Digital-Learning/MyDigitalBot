@@ -190,6 +190,49 @@ describe("#286: link novo só com texto e endereço", () => {
   });
 });
 
+describe("Criar link: o nome aparece no telemóvel enquanto se escreve", () => {
+  function renderWithDraft() {
+    const onDraftChange = vi.fn();
+    const view = render(
+      <TrackedLinksPanel
+        trackedLinks={[]}
+        trackedLinksValid
+        addTrackedLink={vi.fn()}
+        updateTrackedLink={vi.fn()}
+        removeTrackedLink={vi.fn()}
+        onDraftChange={onDraftChange}
+        translation={translation}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Broadcast.addLink" }));
+    return { onDraftChange, ...view };
+  }
+
+  it("passa o nome escrito, sem espaços à volta", () => {
+    const { onDraftChange } = renderWithDraft();
+
+    fireEvent.change(screen.getByLabelText("Broadcast.label"), {
+      target: { value: " Ver curso " },
+    });
+
+    expect(onDraftChange).toHaveBeenLastCalledWith("Ver curso");
+  });
+
+  it("limpa a pré-visualização ao cancelar e ao fechar o painel", () => {
+    const { onDraftChange, unmount } = renderWithDraft();
+
+    fireEvent.change(screen.getByLabelText("Broadcast.label"), {
+      target: { value: "Ver curso" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Common.cancel" }));
+    expect(onDraftChange).toHaveBeenLastCalledWith(null);
+
+    onDraftChange.mockClear();
+    unmount();
+    expect(onDraftChange).toHaveBeenCalledWith(null);
+  });
+});
+
 describe("#286: nome curto criado a partir do texto", () => {
   it("troca os acentos pela letra simples em vez de os apagar", async () => {
     const { makeTrackedLinkFromLibrary } = await import(

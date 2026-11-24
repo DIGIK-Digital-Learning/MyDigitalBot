@@ -69,7 +69,7 @@ export function LinkBubblesPreview({
 }) {
   return bubbles.map((bubble) => (
     <div
-      key={bubble.id}
+      key={bubble.key || bubble.id}
       className={styles.linkButtonGroup}
       data-testid="link-bubble-preview"
     >
