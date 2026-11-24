@@ -31,7 +31,38 @@ export default function ResetConfirmPage() {
     let unsub = () => {};
 
     (async () => {
-      // Supabase parses #access_token when detectSessionInUrl: true
+      /*
+       * Os links dos emails (recuperar a palavra-passe e convite para a
+       * Equipa, #247) trazem a sessão depois do #. O createBrowserClient do
+       * @supabase/ssr força o modo PKCE e ignora esse formato, por isso a
+       * página ficava presa em «A preparar sessão…». Lemos os tokens aqui e
+       * tiramo-los do endereço logo a seguir.
+       */
+      const hash = new URLSearchParams(window.location.hash.slice(1));
+      const accessToken = hash.get("access_token");
+      const refreshToken = hash.get("refresh_token");
+      if (accessToken && refreshToken) {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        window.history.replaceState(
+          window.history.state,
+          "",
+          window.location.pathname + window.location.search,
+        );
+        if (error) {
+          setMsg(t("Auth.resetConfirm.invalid"));
+          return;
+        }
+        setReady(true);
+        return;
+      }
+      if (hash.get("error_description")) {
+        setMsg(t("Auth.resetConfirm.invalid"));
+        return;
+      }
+
       const {
         data: { session },
       } = await supabase.auth.getSession();
