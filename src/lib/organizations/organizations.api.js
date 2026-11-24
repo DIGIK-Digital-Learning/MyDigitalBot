@@ -41,3 +41,46 @@ export async function saveOrganizationLocale(orgId, locale) {
     /* Sem rede: fica para o próximo clique. */
   }
 }
+
+/*
+ * Definições → Equipa (#247). Os erros trazem o código do servidor em
+ * `error.code` (TEAM_LIMIT_REACHED, IN_OTHER_ORGANIZATION…) para o ecrã
+ * mostrar a frase certa.
+ */
+async function teamRequest(url, options) {
+  const response = await fetch(url, options);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(data.error || `team ${response.status}`);
+    error.code = data.error || null;
+    throw error;
+  }
+  return data;
+}
+
+export function fetchTeam(orgId) {
+  return teamRequest(`/api/organizations/team?orgId=${encodeURIComponent(orgId)}`);
+}
+
+export function inviteTeamMember(orgId, { email, typeKey, locale }) {
+  return teamRequest("/api/organizations/team", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orgId, email, typeKey, locale }),
+  });
+}
+
+export function changeTeamMemberType(orgId, memberId, typeKey) {
+  return teamRequest("/api/organizations/team", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orgId, memberId, typeKey }),
+  });
+}
+
+export function removeTeamMember(orgId, memberId) {
+  return teamRequest(
+    `/api/organizations/team?orgId=${encodeURIComponent(orgId)}&memberId=${encodeURIComponent(memberId)}`,
+    { method: "DELETE" },
+  );
+}

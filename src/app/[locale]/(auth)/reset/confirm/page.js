@@ -91,7 +91,12 @@ export default function ResetConfirmPage() {
     <main className={styles.page}>
       <h1 className={styles.brand}>MyDigitalBot</h1>
       <form onSubmit={handleSubmit} className={styles.card}>
-        <h1 className={styles.title}>{t("Auth.resetConfirm.title")}</h1>
+        <h1 className={styles.title}>
+          {/* Quem chega por um convite para a Equipa (#247) escolhe a primeira palavra-passe. */}
+          {searchParams.get("invite") === "1"
+            ? t("Auth.resetConfirm.inviteTitle")
+            : t("Auth.resetConfirm.title")}
+        </h1>
         <label className={styles.label}>
           {t("Auth.resetConfirm.newPassword")}
         </label>

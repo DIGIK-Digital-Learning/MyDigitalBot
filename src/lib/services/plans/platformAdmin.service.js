@@ -8,7 +8,9 @@ import {
   updatePlan,
 } from "@/lib/repos/plans.repo";
 import { platformAdminOrgIds } from "@/lib/auth/platformAdmin";
-import { countUsersByOrg } from "@/lib/repos/user.repo";
+/* Colaboradores + contas da Equipa: partilham os lugares do plano (#247). */
+import { countSeatsByOrg } from "@/lib/repos/user.repo";
+import { countMembers } from "@/lib/repos/organizationMembers.repo";
 import { countAssistantsByOrg } from "@/lib/repos/assistants.repo";
 import { countAutomationRulesByOrg } from "@/lib/repos/automationRules.repo";
 import { countManualQueuedBroadcasts } from "@/lib/repos/scheduledBroadcasts.repo";
@@ -60,13 +62,15 @@ function toPlanView(row, orgCount = 0) {
 async function organizationUsage(orgId, now) {
   const [
     users,
+    teamMembers,
     assistants,
     automations,
     scheduledMessages,
     dailySends,
     trackedLinks,
   ] = await Promise.all([
-    countUsersByOrg(orgId),
+    countSeatsByOrg(orgId),
+    countMembers(orgId),
     countAssistantsByOrg(orgId),
     countAutomationRulesByOrg(orgId),
     countManualQueuedBroadcasts(orgId),
@@ -76,6 +80,7 @@ async function organizationUsage(orgId, now) {
 
   return {
     users,
+    teamMembers,
     assistants,
     automations,
     scheduledMessages,

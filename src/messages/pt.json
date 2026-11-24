@@ -2857,7 +2857,8 @@
       "updating": "A atualizar…",
       "updated": "Palavra-passe atualizada! A redirecionar…",
       "passwordPolicy": "A palavra-passe tem de ter pelo menos 8 caracteres e incluir uma letra maiúscula, uma letra minúscula e um caráter especial.",
-      "genericError": "Não foi possível atualizar a palavra-passe. Tenta novamente."
+      "genericError": "Não foi possível atualizar a palavra-passe. Tenta novamente.",
+      "inviteTitle": "Bem-vindo! Escolhe a tua palavra-passe"
     }
   },
   "Alert": {
@@ -3236,7 +3237,8 @@
       "template": "Templates",
       "media": "Multimédia",
       "tracked_link": "Links rastreados",
-      "organization": "Organização"
+      "organization": "Organização",
+      "team_member": "Equipa"
     },
     "Channels": {
       "whatsapp": "WhatsApp",
@@ -3284,7 +3286,10 @@
       "teams_group_updated": "Grupo Teams editado",
       "unknown": "Ação desconhecida",
       "organization_plan_extended": "Plano prolongado",
-      "organization_plan_end_changed": "Fim do plano alterado"
+      "organization_plan_end_changed": "Fim do plano alterado",
+      "team_member_invited": "Pessoa convidada para a Equipa",
+      "team_member_type_changed": "Tipo de utilizador mudado",
+      "team_member_removed": "Pessoa removida da Equipa"
     },
     "Table": {
       "when": "Quando",
@@ -3500,6 +3505,7 @@
     },
     "tabs": {
       "organization": "Organização",
+      "team": "Equipa",
       "integrations": "Integrações",
       "activity": "Histórico de atividade"
     }
@@ -3618,7 +3624,7 @@
       "messageFilesLabel": "Ficheiros da mensagem",
       "messageFilesHint": "Cada mensagem pode levar até este número de ficheiros.",
       "usersLabel": "Utilizadores",
-      "usersHint": "Conta todos os utilizadores da conta.",
+      "usersHint": "Conta os colaboradores e as contas da Equipa: partilham os mesmos lugares do plano.",
       "filesLabel": "Ficheiros do assistente",
       "filesHint": "Cada assistente pode ter até este número de ficheiros na coleção.",
       "assistantsLabel": "Assistentes",
@@ -3696,6 +3702,7 @@
     "limits": {
       "durationDays": "Duração (dias)",
       "users": "Utilizadores",
+      "teamMembers": "Contas na app",
       "assistants": "Assistentes",
       "assistantInstructionChars": "Caracteres das instruções",
       "filesPerAssistant": "Ficheiros por assistente",
@@ -3803,6 +3810,70 @@
     "noPage": {
       "title": "Sem acesso a esta página",
       "description": "O teu tipo de utilizador não tem acesso a esta página. Se precisares, pede a um Administrador da tua organização."
+    }
+  },
+  "Team": {
+    "title": "Equipa",
+    "description": "As pessoas que entram na app da tua organização. Cada conta ocupa também um lugar de colaborador do plano.",
+    "owner": "Dono",
+    "you": "Tu",
+    "ownerLocked": "O dono da organização é sempre Administrador.",
+    "selfLocked": "Não podes mudar nem remover a tua própria conta.",
+    "types": {
+      "admin": "Administrador",
+      "editor": "Editor",
+      "viewer": "Leitor"
+    },
+    "usage": {
+      "accounts": "Contas",
+      "accountsHint": "Contas que entram na app, incluindo o dono. O máximo depende do plano.",
+      "seats": "Lugares",
+      "seatsHint": "Colaboradores mais contas da Equipa: partilham os mesmos lugares do plano."
+    },
+    "invite": {
+      "email": "Email",
+      "emailPlaceholder": "nome@empresa.pt",
+      "type": "Tipo de utilizador",
+      "button": "Convidar",
+      "sending": "A convidar…",
+      "help": "A pessoa recebe um email com um link para escolher a palavra-passe e entrar. Cada pessoa só pode estar numa organização.",
+      "sentTitle": "Convite enviado",
+      "sent": "Enviámos o convite para {email}.",
+      "added": "{email} já tinha conta e entrou na Equipa. Pode entrar com a palavra-passe que já tem.",
+      "errorTitle": "Não foi possível convidar"
+    },
+    "table": {
+      "email": "Email",
+      "type": "Tipo",
+      "status": "Estado",
+      "lastSignIn": "Última entrada",
+      "actions": "Ações"
+    },
+    "status": {
+      "pending": "Convite enviado",
+      "active": "Ativo"
+    },
+    "remove": {
+      "action": "Remover",
+      "title": "Remover {email} da Equipa?",
+      "message": "A conta é apagada e a pessoa deixa de entrar na app. Podes voltar a convidá-la mais tarde.",
+      "confirm": "Remover",
+      "cancel": "Cancelar"
+    },
+    "errors": {
+      "title": "Não foi possível guardar",
+      "load": "Não foi possível carregar a Equipa.",
+      "generic": "Algo correu mal. Tenta novamente.",
+      "INVALID_EMAIL": "Escreve um email válido.",
+      "INVALID_TYPE": "Escolhe um tipo de utilizador.",
+      "ALREADY_MEMBER": "Essa pessoa já está na tua Equipa.",
+      "IN_OTHER_ORGANIZATION": "Esse email já pertence a outra organização. Cada pessoa só pode estar numa.",
+      "TEAM_LIMIT_REACHED": "Chegaste ao máximo de contas do teu plano. Remove uma conta ou muda de plano.",
+      "USER_LIMIT_REACHED": "Não há lugares livres no teu plano: as contas da Equipa contam como colaboradores.",
+      "OWNER_LOCKED": "O dono da organização é sempre Administrador.",
+      "CANNOT_CHANGE_SELF": "Não podes mudar nem remover a tua própria conta.",
+      "NOT_FOUND": "Essa conta já não está na Equipa.",
+      "INVITE_FAILED": "Não foi possível enviar o convite. Tenta novamente."
     }
   }
 }
