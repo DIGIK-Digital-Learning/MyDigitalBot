@@ -35,7 +35,8 @@
 
 .email {
   font-weight: 600;
-  word-break: break-all;
+  /* O email inteiro numa linha; numa janela estreita a tabela desliza. */
+  white-space: nowrap;
 }
 
 .badge,
