@@ -73,7 +73,7 @@ describe("GET /api/tracked-links/library", () => {
     const response = await GET(request(7));
 
     expect(response.status).toBe(200);
-    expect(mocks.requireOwnedOrg).toHaveBeenCalledWith(7);
+    expect(mocks.requireOwnedOrg).toHaveBeenCalledWith(7, expect.objectContaining({ permission: expect.anything() }));
     expect(mocks.listReusableTrackedLinks).toHaveBeenCalledWith(7);
     expect(await response.json()).toEqual({ items });
   });

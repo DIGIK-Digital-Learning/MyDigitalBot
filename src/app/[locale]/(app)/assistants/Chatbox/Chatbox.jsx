@@ -5,9 +5,12 @@ import styles from "./chatbox.module.css";
 import ui from "../assistants.module.css";
 import { useTranslations } from "next-intl";
 import { useAlert } from "@/app/components/Alert/AlertProvider";
+import usePermissions from "@/app/PermissionsContext";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 export default function ChatSandbox({ assistant }) {
   const translation = useTranslations();
+  const { can, lock } = usePermissions();
   const showAlert = useAlert();
   const [conversationId, setConversationId] = useState("");
   const [messages, setMessages] = useState([]);
@@ -145,6 +148,8 @@ export default function ChatSandbox({ assistant }) {
                   type="button"
                   className={styles.example}
                   onClick={() => sendMessage(example)}
+                  disabled={!can(PERMISSIONS.ASSISTANTS_TEST)}
+                  {...lock(PERMISSIONS.ASSISTANTS_TEST)}
                 >
                   {example}
                 </button>
@@ -165,12 +170,15 @@ export default function ChatSandbox({ assistant }) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={translation("Chatbox.placeholder")}
+          disabled={!can(PERMISSIONS.ASSISTANTS_TEST)}
+          {...lock(PERMISSIONS.ASSISTANTS_TEST)}
         />
         {/* 👇 same pill style as "Criar e Associar" */}
         <button
           type="submit"
           className={`${ui.ctaPrimary} ${styles.sendBtn}`}
-          disabled={isSending || !input.trim()}
+          disabled={isSending || !input.trim() || !can(PERMISSIONS.ASSISTANTS_TEST)}
+          {...lock(PERMISSIONS.ASSISTANTS_TEST)}
         >
           {translation("Chatbox.send")}
         </button>

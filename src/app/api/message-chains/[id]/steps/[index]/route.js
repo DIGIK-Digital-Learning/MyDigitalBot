@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import {
@@ -21,7 +22,7 @@ export async function DELETE(req, { params }) {
     }
 
     const { searchParams } = new URL(req.url);
-    const orgAuth = await requireOwnedOrg(searchParams.get("orgId"));
+    const orgAuth = await requireOwnedOrg(searchParams.get("orgId"), { permission: PERMISSIONS.SCHEDULED_EDIT });
     if (orgAuth.error) return orgAuth.error;
 
     const result = await removeChainStep(orgAuth.orgId, id, stepIndex);
@@ -64,7 +65,7 @@ export async function PATCH(req, { params }) {
       return NextResponse.json({ error: "Invalid message" }, { status: 400 });
     }
 
-    const orgAuth = await requireOwnedOrg(body.orgId);
+    const orgAuth = await requireOwnedOrg(body.orgId, { permission: PERMISSIONS.SCHEDULED_EDIT });
     if (orgAuth.error) return orgAuth.error;
 
     const result = await editChainStep(

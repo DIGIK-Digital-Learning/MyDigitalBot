@@ -17,6 +17,7 @@ import {
   requireOrgForTag,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 const ALLOWED_TAG_PATCH_FIELDS = [
   "name",
@@ -101,7 +102,7 @@ export async function GET(req) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(rawOrgId);
+    const orgAuth = await requireOwnedOrg(rawOrgId, { permission: [PERMISSIONS.USERS_VIEW, PERMISSIONS.SEND_WHATSAPP, PERMISSIONS.SEND_TEAMS, PERMISSIONS.AUTOMATIONS_EDIT] });
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {
@@ -175,7 +176,7 @@ export async function POST(req) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.USERS_GROUPS });
     if (orgAuth.error) return orgAuth.error;
 
     const tag = await createTag(orgAuth.admin, {
@@ -229,7 +230,7 @@ export async function PATCH(req) {
 
     const { id, ...fields } = body;
 
-    const orgAuth = await requireOrgForTag(id);
+    const orgAuth = await requireOrgForTag(id, { permission: PERMISSIONS.USERS_GROUPS });
     if (orgAuth.error) return orgAuth.error;
 
     const patch = cleanPatch(
@@ -333,7 +334,7 @@ export async function DELETE(req) {
       );
     }
 
-    const orgAuth = await requireOrgForTag(rawId);
+    const orgAuth = await requireOrgForTag(rawId, { permission: PERMISSIONS.USERS_GROUPS });
     if (orgAuth.error) return orgAuth.error;
 
     await deleteTag(

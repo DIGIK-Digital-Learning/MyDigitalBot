@@ -5,6 +5,7 @@ import {
   parsePositiveInt,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
+import { ANY_MEMBER } from "@/lib/auth/permissions";
 import { getOrgLimits } from "@/lib/services/plans/planLimits";
 import { countAssistantsByOrg } from "@/lib/repos/assistants.repo";
 import { countUsersByOrg } from "@/lib/repos/user.repo";
@@ -31,7 +32,7 @@ export async function GET(req) {
       return NextResponse.json({ error: "Invalid organization id" }, { status: 400 });
     }
 
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: ANY_MEMBER });
     if (orgAuth.error) return orgAuth.error;
 
     /*

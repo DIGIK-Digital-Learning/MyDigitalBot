@@ -3787,5 +3787,22 @@
     "continue": "Continue",
     "retry": "Try again",
     "footnote": "This page may close automatically once the redirect is done."
+  },
+  "ViewAs": {
+    "label": "View as",
+    "banner": "You are viewing the app as {type}.",
+    "back": "Back to Administrator",
+    "types": {
+      "admin": "Administrator",
+      "editor": "Editor",
+      "viewer": "Viewer"
+    }
+  },
+  "Permissions": {
+    "denied": "Your user type does not allow this.",
+    "noPage": {
+      "title": "No access to this page",
+      "description": "Your user type does not have access to this page. If you need it, ask an Administrator of your organization."
+    }
   }
 }

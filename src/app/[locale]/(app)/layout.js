@@ -4,10 +4,13 @@ import GlobalLoadingOverlay from "../../LoadingScreen/GlobalLoadingOverlay";
 import Navbar from "../../components/Navbar/Navbar";
 import TopBar from "../../components/TopBar/TopBar";
 import AdminPlanBanner from "../../components/AdminPlanBanner/AdminPlanBanner";
+import { ViewAsBanner } from "../../components/ViewAs/ViewAs";
+import { PermissionsProvider } from "@/app/PermissionsContext";
 import DemoPlanBanner from "../../components/DemoPlanBanner/DemoPlanBanner";
 import { MobileNavProvider } from "@/app/components/MobileNav/MobileNavContext";
 import { getCurrentSession } from "@/lib/auth/session";
 import { getOrganizationMetadata } from "@/lib/helpers/organizationBranding.helpers";
+import { fetchCurrentOrganization } from "@/lib/helpers/currentOrganization";
 import { routing } from "@/i18n/routing";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -15,11 +18,11 @@ export async function generateMetadata() {
   const { supabase, user } = await getCurrentSession();
   if (!user) return {};
 
-  const { data: org, error } = await supabase
-    .from("organization")
-    .select("name, favicon_url")
-    .eq("owner_user_id", user.id)
-    .maybeSingle();
+  const { data: org, error } = await fetchCurrentOrganization(
+    supabase,
+    user.id,
+    "name, favicon_url",
+  );
 
   if (error) {
     console.error("[AppLayout] organization branding lookup failed", error);
@@ -39,19 +42,22 @@ export default async function AppLayout({ children, params }) {
 
   return (
     <MobileNavProvider>
-      <RouteLoader />
-      <TopBar />
-      <div className="app-shell">
-        <Navbar />
-        <div className="main-col">
-          <AdminPlanBanner />
-          <DemoPlanBanner />
-          <div className="page-content">
-            <GlobalLoadingOverlay />
-            <main className="app-main">{children}</main>
+      <PermissionsProvider>
+        <RouteLoader />
+        <TopBar />
+        <div className="app-shell">
+          <Navbar />
+          <div className="main-col">
+            <AdminPlanBanner />
+            <ViewAsBanner />
+            <DemoPlanBanner />
+            <div className="page-content">
+              <GlobalLoadingOverlay />
+              <main className="app-main">{children}</main>
+            </div>
           </div>
         </div>
-      </div>
+      </PermissionsProvider>
     </MobileNavProvider>
   );
 }

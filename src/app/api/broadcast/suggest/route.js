@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { handleApiError, jsonError, requireOwnedOrg } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 import {
   SUGGESTION_KINDS,
   SUGGESTION_PROMPT_MAX_LENGTH,
@@ -16,7 +17,7 @@ export async function POST(req) {
   try {
     const body = await req.json().catch(() => ({}));
 
-    const auth = await requireOwnedOrg(body?.orgId);
+    const auth = await requireOwnedOrg(body?.orgId, { permission: [PERMISSIONS.SEND_WHATSAPP, PERMISSIONS.SEND_TEAMS] });
     if (auth.error) return auth.error;
 
     const kind = SUGGESTION_KINDS.includes(body?.kind) ? body.kind : "message";

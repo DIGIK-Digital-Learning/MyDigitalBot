@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 import { listOpenChains } from "@/lib/services/broadcast/readChains/openChains";
 
 export const runtime = "nodejs";
@@ -15,7 +16,7 @@ export async function GET(req) {
       return NextResponse.json({ error: "Missing orgId" }, { status: 400 });
     }
 
-    const orgAuth = await requireOwnedOrg(rawOrgId);
+    const orgAuth = await requireOwnedOrg(rawOrgId, { permission: PERMISSIONS.SCHEDULED_VIEW });
     if (orgAuth.error) return orgAuth.error;
 
     const items = await listOpenChains(orgAuth.orgId);

@@ -1,0 +1,27 @@
+/* Aviso no lugar de uma página sem permissão de «Ver» (#247). */
+.notice {
+  max-width: 520px;
+  margin: 64px auto;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  background: #fff;
+  border: 1px solid var(--topbar-border, #e5e7eb);
+  border-radius: 16px;
+  color: #6b7280;
+}
+
+.notice h2 {
+  margin: 4px 0 0;
+  font-size: 18px;
+  color: #374151;
+}
+
+.notice p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}

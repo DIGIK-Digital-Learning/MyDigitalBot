@@ -6,6 +6,7 @@ import {
   parsePositiveInt,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 import { getTrackedLinksOverview } from "@/lib/services/broadcast/trackedLinksOverview";
 
 /*
@@ -22,7 +23,7 @@ export async function GET(req) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.LINKS_VIEW });
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {

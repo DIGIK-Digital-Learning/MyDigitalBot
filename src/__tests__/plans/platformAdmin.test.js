@@ -22,6 +22,14 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/auth/guards", () => ({
   requireUser: mocks.requireUser,
+  /* O dono da organização é Administrador dela (#247). */
+  async getCurrentMembership(auth) {
+    const { data } = await auth.admin.from().select().eq().maybeSingle();
+    return {
+      org: data,
+      access: data ? { isAdmin: mocks.memberIsAdmin ?? true } : null,
+    };
+  },
   jsonError: (message, status) => Response.json({ error: message }, { status }),
   parsePositiveInt: (value) => {
     const n = Number(value);
@@ -177,6 +185,18 @@ describe("quem é administrador", () => {
   it("a lista pode vir do ambiente (réplica local)", () => {
     process.env.PLATFORM_ADMIN_ORG_IDS = "188";
     expect(platformAdminOrgIds()).toEqual([188]);
+  });
+
+  it("um Editor ou Leitor da DIGIK não gere os planos (#247)", async () => {
+    signedInAs(1);
+    mocks.memberIsAdmin = false;
+
+    try {
+      expect((await overviewRoute()).status).toBe(403);
+      expect(await (await meRoute()).json()).toEqual({ isAdmin: false });
+    } finally {
+      mocks.memberIsAdmin = undefined;
+    }
   });
 
   it("um cliente não vê nada da administração", async () => {

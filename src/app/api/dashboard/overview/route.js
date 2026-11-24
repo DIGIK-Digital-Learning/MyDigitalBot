@@ -8,6 +8,7 @@ import {
   parsePositiveInt,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 import { getDashboardOverview } from "@/lib/services/dashboard/dashboard.service";
 
 export async function GET(request) {
@@ -25,7 +26,7 @@ export async function GET(request) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.DASHBOARD_VIEW });
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {
