@@ -62,44 +62,129 @@
   gap: 10px;
 }
 
-/* A árvore: uma caixa por área, em colunas que se ajustam à largura. */
+/*
+ * A árvore: um cartão por área, em colunas (como um mural), para os cartões
+ * pequenos não deixarem buracos ao lado dos grandes.
+ */
 .tree {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 12px;
+  columns: 2 280px;
+  column-gap: 14px;
 }
 
 .area {
-  margin: 0;
-  padding: 10px 14px 12px;
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 14px;
+  overflow: hidden;
   border: 1px solid var(--ui-border, #e5e7eb);
-  border-radius: 12px;
+  border-radius: 14px;
   background: #fff;
+  break-inside: avoid;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Uma área com alguma permissão marcada destaca-se. */
+.area[data-state="some"],
+.area[data-state="all"] {
+  border-color: rgba(var(--brand-1-rgb, 37, 99, 235), 0.35);
+  box-shadow: 0 1px 6px rgba(var(--brand-1-rgb, 37, 99, 235), 0.08);
+}
+
+.areaHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--ui-border, #e5e7eb);
+  background: #f8fafc;
+}
+
+.area[data-state="some"] .areaHeader,
+.area[data-state="all"] .areaHeader {
+  background: rgba(var(--brand-1-rgb, 37, 99, 235), 0.06);
 }
 
 .areaTitle {
-  padding: 0 4px;
-  font-weight: 700;
-}
-
-.areaTitle label,
-.permissionList label {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  font-weight: 700;
+  font-size: 0.95rem;
   cursor: pointer;
+}
+
+.areaIcon {
+  flex-shrink: 0;
+  color: var(--color-primary, #2563eb);
+}
+
+.areaCount {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--ui-border, #e5e7eb);
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.area[data-state="all"] .areaCount {
+  border-color: transparent;
+  background: var(--color-primary, #2563eb);
+  color: #fff;
 }
 
 .permissionList {
   display: grid;
-  gap: 6px;
-  margin: 6px 0 0;
-  padding: 0 0 0 22px;
+  gap: 2px;
+  margin: 0;
+  padding: 8px;
   list-style: none;
   font-size: 0.9rem;
 }
 
+/* A linha toda é clicável, com um fundo ao passar o rato. */
+.permission {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  color: #334155;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.permission:hover {
+  background: #f1f5f9;
+}
+
+.permission input {
+  margin-top: 2px;
+}
+
+.permissionOn {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.tree input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  accent-color: var(--color-primary, #2563eb);
+  cursor: inherit;
+}
+
 .permissionLocked {
   color: #94a3b8;
-  cursor: not-allowed !important;
+  cursor: not-allowed;
+}
+
+.permissionLocked:hover {
+  background: transparent;
 }
