@@ -3810,6 +3810,10 @@
       "admin": "Administrator",
       "editor": "Editor",
       "viewer": "Viewer"
+    },
+    "groups": {
+      "system": "Default",
+      "custom": "Custom"
     }
   },
   "Permissions": {

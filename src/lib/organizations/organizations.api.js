@@ -2,7 +2,8 @@
 
 /**
  * O que quem tem a sessão pode fazer (#247):
- * `{ typeKey, isAdmin, permissions, viewAs, canSwitch, viewAsTypes }`.
+ * `{ typeKey, isAdmin, permissions, viewAs, viewAsName, canSwitch,
+ *   viewAsTypes: [{ value, key, name }] }`.
  */
 export async function fetchAccess(orgId) {
   const response = await fetch(
@@ -12,7 +13,10 @@ export async function fetchAccess(orgId) {
   return response.json();
 }
 
-/** Troca o tipo com que o Administrador vê a app; null volta ao normal. */
+/**
+ * Troca o tipo com que o Administrador vê a app ("editor", "viewer" ou o id
+ * de um tipo personalizado); null volta ao normal.
+ */
 export async function changeViewAs(orgId, typeKey) {
   const response = await fetch("/api/organizations/view-as", {
     method: "POST",

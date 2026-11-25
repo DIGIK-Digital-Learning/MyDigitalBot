@@ -256,6 +256,19 @@ export const VIEW_AS_TYPES = Object.freeze([
   SYSTEM_USER_TYPES.VIEWER,
 ]);
 
+/*
+ * O valor do «Ver como»: "editor", "viewer" ou o id de um tipo
+ * personalizado da organização (#247, parte 4/4). Ver como Administrador não
+ * existe: é o normal. Qualquer outra coisa é null.
+ */
+export function parseViewAs(value) {
+  if (value == null) return null;
+  const text = String(value);
+  if (VIEW_AS_TYPES.includes(text)) return { key: text };
+  if (/^[1-9]\d{0,9}$/.test(text)) return { id: Number(text) };
+  return null;
+}
+
 /* A permissão de envio de um canal; se o canal não for válido, qualquer uma. */
 export function sendPermissionFor(channel) {
   if (channel === "whatsapp") return P.SEND_WHATSAPP;
