@@ -38,48 +38,136 @@
 
 .editor {
   display: grid;
-  gap: 16px;
-  padding: 18px;
+  gap: 18px;
+  padding: 22px 22px 0;
   border: 1px solid var(--ui-border, #e5e7eb);
-  border-radius: 14px;
+  border-top: 4px solid var(--color-primary, #2563eb);
+  border-radius: 16px;
   background: #f8fafc;
 }
 
 .editorHeader h3 {
   margin: 0 0 4px;
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
 .editorHeader p {
+  max-width: 70ch;
   margin: 0;
   color: #64748b;
   font-size: 0.875rem;
+  line-height: 1.5;
 }
 
+.editor input:not([type="checkbox"]) {
+  max-width: 420px;
+  background: #fff;
+}
+
+/* Os botões ficam sempre à vista no fundo, sem descer a árvore toda. */
 .editorActions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  margin: 0 -22px;
+  padding: 14px 22px;
+  border-top: 1px solid var(--ui-border, #e5e7eb);
+  border-radius: 0 0 16px 16px;
+  background: rgba(248, 250, 252, 0.94);
+  backdrop-filter: blur(6px);
 }
 
-/*
- * A árvore: um cartão por área, em colunas (como um mural), para os cartões
- * pequenos não deixarem buracos ao lado dos grandes.
- */
+/* A árvore: agrupada como o menu, com um cartão por área. */
+.treeWrap {
+  display: grid;
+  gap: 22px;
+}
+
+.treeToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--ui-border, #e5e7eb);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.treeSummary {
+  color: #334155;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.treeButtons {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.treeButtons button {
+  padding: 6px 12px;
+  border: 1px solid var(--ui-border, #e5e7eb);
+  border-radius: 999px;
+  background: #fff;
+  color: #334155;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.treeButtons button:hover:not(:disabled) {
+  border-color: var(--color-primary, #2563eb);
+  color: var(--color-primary, #2563eb);
+}
+
+.treeButtons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.group {
+  display: grid;
+  gap: 10px;
+}
+
+/* O nome do grupo com uma linha até ao fim, como um separador. */
+.groupTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.groupTitle::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--ui-border, #e5e7eb);
+}
+
 .tree {
-  columns: 2 280px;
-  column-gap: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  align-items: start;
+  gap: 12px;
 }
 
 .area {
-  display: inline-block;
-  width: 100%;
-  margin: 0 0 14px;
   overflow: hidden;
   border: 1px solid var(--ui-border, #e5e7eb);
   border-radius: 14px;
   background: #fff;
-  break-inside: avoid;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 

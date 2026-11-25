@@ -3926,7 +3926,10 @@
       "save": "Guardar",
       "saving": "A guardar…",
       "cancel": "Cancelar",
-      "close": "Fechar"
+      "close": "Fechar",
+      "summary": "{count} de {total} permissões marcadas",
+      "selectAll": "Marcar tudo",
+      "clear": "Limpar"
     },
     "saved": {
       "title": "Tipo guardado",
@@ -3952,16 +3955,22 @@
       "NOT_ALLOWED": "Não podes dar permissões que tu próprio não tens.",
       "NOT_FOUND": "Esse tipo já não existe."
     },
+    "groups": {
+      "general": "Geral",
+      "messages": "Mensagens",
+      "automation": "Automações e métricas",
+      "admin": "Definições e Equipa"
+    },
     "areas": {
       "dashboard": "Portal",
       "users": "Utilizadores",
       "teamsGroups": "Grupos Teams",
       "assistants": "Assistentes",
-      "send": "Mensagens: enviar",
-      "scheduled": "Mensagens: agendadas",
-      "links": "Mensagens: links rastreados",
-      "questions": "Mensagens: perguntas",
-      "media": "Mensagens: multimédia",
+      "send": "Enviar",
+      "scheduled": "Agendadas",
+      "links": "Links rastreados",
+      "questions": "Perguntas",
+      "media": "Multimédia",
       "automations": "Automações",
       "analytics": "Métricas",
       "settings": "Definições",

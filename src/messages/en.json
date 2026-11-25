@@ -3926,7 +3926,10 @@
       "save": "Save",
       "saving": "Saving…",
       "cancel": "Cancel",
-      "close": "Close"
+      "close": "Close",
+      "summary": "{count} of {total} permissions ticked",
+      "selectAll": "Tick all",
+      "clear": "Clear"
     },
     "saved": {
       "title": "Type saved",
@@ -3952,16 +3955,22 @@
       "NOT_ALLOWED": "You can't give permissions you don't have yourself.",
       "NOT_FOUND": "That type no longer exists."
     },
+    "groups": {
+      "general": "General",
+      "messages": "Messages",
+      "automation": "Automations and metrics",
+      "admin": "Settings and Team"
+    },
     "areas": {
       "dashboard": "Portal",
       "users": "Users",
       "teamsGroups": "Teams groups",
       "assistants": "Assistants",
-      "send": "Messages: send",
-      "scheduled": "Messages: scheduled",
-      "links": "Messages: tracked links",
-      "questions": "Messages: questions",
-      "media": "Messages: media",
+      "send": "Send",
+      "scheduled": "Scheduled",
+      "links": "Tracked links",
+      "questions": "Questions",
+      "media": "Media",
       "automations": "Automations",
       "analytics": "Metrics",
       "settings": "Settings",
