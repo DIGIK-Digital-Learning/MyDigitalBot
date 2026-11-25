@@ -44,6 +44,7 @@ function makeDeps(overrides = {}) {
     listUserTypes: vi.fn(async () => [...SYSTEM, CUSTOM]),
     countMembersByType: vi.fn(async () => ({ 1: 1, 7: 0 })),
     countCustomTypes: vi.fn(async () => 1),
+    getOrgLimits: vi.fn(async () => ({ limits: { customUserTypes: 10 } })),
     getUserType: vi.fn(async (_org, id) => [...SYSTEM, CUSTOM].find((t) => t.id === Number(id)) ?? null),
     createUserType: vi.fn(async (input) => ({ id: 8, key: null, isSystem: false, ...input })),
     updateUserType: vi.fn(async (_org, id, input) => ({ id, ...input })),
@@ -102,11 +103,28 @@ describe("tipos de utilizador", () => {
       .rejects.toMatchObject({ code: "NO_PERMISSIONS" });
   });
 
-  it("não passa dos 10 personalizados", async () => {
+  it("não passa do máximo do plano (10 por omissão)", async () => {
     const deps = makeDeps({ countCustomTypes: vi.fn(async () => 10) });
     await expect(createUserType(orgAuth(), { name: "Novo", permissions: ["users.view"] }, deps))
       .rejects.toMatchObject({ code: "TYPE_LIMIT_REACHED", status: 409 });
     expect(deps.createUserType).not.toHaveBeenCalled();
+  });
+
+  it("o máximo é o do plano: outro número, ou sem limite", async () => {
+    const three = makeDeps({
+      countCustomTypes: vi.fn(async () => 3),
+      getOrgLimits: vi.fn(async () => ({ limits: { customUserTypes: 3 } })),
+    });
+    await expect(createUserType(orgAuth(), { name: "Novo", permissions: ["users.view"] }, three))
+      .rejects.toMatchObject({ code: "TYPE_LIMIT_REACHED" });
+
+    const unlimited = makeDeps({
+      countCustomTypes: vi.fn(async () => 50),
+      getOrgLimits: vi.fn(async () => ({ limits: { customUserTypes: null } })),
+    });
+    await expect(
+      createUserType(orgAuth(), { name: "Novo", permissions: ["users.view"] }, unlimited),
+    ).resolves.toMatchObject({ name: "Novo" });
   });
 
   it("não cria um tipo com permissões que quem cria não tem", async () => {

@@ -64,6 +64,9 @@ vi.mock("@/lib/repos/user.repo", () => ({
 vi.mock("@/lib/repos/organizationMembers.repo", () => ({
   countMembers: vi.fn(async () => 1),
 }));
+vi.mock("@/lib/repos/userTypes.repo", () => ({
+  countCustomTypes: vi.fn(async () => 0),
+}));
 vi.mock("@/lib/repos/assistants.repo", () => ({
   countAssistantsByOrg: vi.fn(async () => 1),
 }));

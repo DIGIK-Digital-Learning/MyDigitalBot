@@ -3708,7 +3708,8 @@
     "limits": {
       "durationDays": "Duration (days)",
       "users": "Users",
-      "teamMembers": "App accounts",
+      "teamMembers": "Accounts with login",
+      "customUserTypes": "User types",
       "assistants": "Assistants",
       "assistantInstructionChars": "Instruction characters",
       "filesPerAssistant": "Files per assistant",
@@ -3897,7 +3898,7 @@
     "copyOf": "Copy of {name}",
     "usage": {
       "label": "Custom",
-      "hint": "Each organization can create up to 10 user types."
+      "hint": "How many user types your organization can create. The maximum depends on the plan."
     },
     "table": {
       "name": "Name",
@@ -3949,7 +3950,7 @@
       "INVALID_NAME": "Enter a name of up to 80 characters.",
       "NO_PERMISSIONS": "Tick at least one permission.",
       "NAME_TAKEN": "There's already a type with that name.",
-      "TYPE_LIMIT_REACHED": "You've reached 10 custom types. Delete one to create another.",
+      "TYPE_LIMIT_REACHED": "You've reached your plan's maximum number of user types. Delete one to create another.",
       "TYPE_IN_USE": "Some team members have this type. Change their type before deleting it.",
       "SYSTEM_LOCKED": "Built-in types can't be edited or deleted.",
       "NOT_ALLOWED": "You can't give permissions you don't have yourself.",

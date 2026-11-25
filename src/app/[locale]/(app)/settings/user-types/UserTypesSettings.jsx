@@ -59,7 +59,8 @@ export default function UserTypesSettings() {
   }, [load]);
 
   const allowed = useMemo(() => new Set(data?.myPermissions ?? []), [data]);
-  const limitReached = data ? data.used >= data.limit : false;
+  /* O máximo vem do plano; sem limite (null), nunca se chega a ele. */
+  const limitReached = data ? data.limit != null && data.used >= data.limit : false;
 
   const typeLabel = (type) =>
     type.isSystem && teamT.has(`types.${type.key}`) ? teamT(`types.${type.key}`) : type.name;

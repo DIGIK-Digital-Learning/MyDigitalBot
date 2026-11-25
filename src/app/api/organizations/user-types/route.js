@@ -5,11 +5,12 @@ import {
   parsePositiveInt,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
-import { CUSTOM_USER_TYPE_LIMIT, PERMISSIONS } from "@/lib/auth/permissions";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 import { TeamError } from "@/lib/services/team/team.service";
 import {
   createUserType,
   deleteUserType,
+  getCustomTypeLimit,
   listUserTypes,
   updateUserType,
 } from "@/lib/services/team/userTypes.service";
@@ -44,10 +45,14 @@ export async function GET(req) {
     const orgAuth = await authorize(new URL(req.url).searchParams.get("orgId"));
     if (orgAuth.error) return orgAuth.error;
 
-    const types = await listUserTypes(orgAuth);
+    const [types, limit] = await Promise.all([
+      listUserTypes(orgAuth),
+      getCustomTypeLimit(orgAuth.orgId),
+    ]);
     return NextResponse.json({
       types,
-      limit: CUSTOM_USER_TYPE_LIMIT,
+      /* O máximo do plano (Administração → Planos); null = sem limite. */
+      limit,
       used: types.filter((type) => !type.isSystem).length,
       /* As permissões de quem pede: as outras ficam a cinzento na árvore. */
       myPermissions: orgAuth.access.permissions,

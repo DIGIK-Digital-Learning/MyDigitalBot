@@ -1,6 +1,5 @@
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
 import {
-  CUSTOM_USER_TYPE_LIMIT,
   canGrant,
   normalizePermissions,
   permissionsWithin,
@@ -8,18 +7,26 @@ import {
 } from "@/lib/auth/permissions";
 import * as userTypesRepo from "@/lib/repos/userTypes.repo";
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
+import { getOrgLimits } from "@/lib/services/plans/planLimits";
 import { TeamError } from "@/lib/services/team/team.service";
 
 /*
  * Definições → Tipos de utilizador (#247, parte 4/4). Regras de 24/11/2026:
  *   - o Administrador não se edita nem se apaga;
  *   - o Editor e o Leitor não se editam, mas duplicam-se (no ecrã);
- *   - cada organização tem até 10 tipos personalizados;
+ *   - cada plano tem um máximo de tipos personalizados (10 por omissão,
+ *     editável na Administração → Planos);
  *   - não se apaga um tipo que alguém tem;
  *   - ninguém dá o que não tem.
  */
 
-const defaultDeps = { ...userTypesRepo, recordAuditEvent };
+const defaultDeps = { ...userTypesRepo, getOrgLimits, recordAuditEvent };
+
+/* O máximo de tipos personalizados do plano da organização; null = sem limite. */
+export async function getCustomTypeLimit(orgId, deps = defaultDeps) {
+  const { limits } = await deps.getOrgLimits(orgId);
+  return limits.customUserTypes ?? null;
+}
 
 const NAME_MAX = 80;
 
@@ -71,8 +78,11 @@ function validateInput(orgAuth, { name: rawName, permissions: rawPermissions }) 
 export async function createUserType(orgAuth, input, deps = defaultDeps) {
   const { name, permissions } = validateInput(orgAuth, input);
 
-  const count = await deps.countCustomTypes(orgAuth.orgId);
-  if (count >= CUSTOM_USER_TYPE_LIMIT) throw new TeamError("TYPE_LIMIT_REACHED", 409);
+  const [count, limit] = await Promise.all([
+    deps.countCustomTypes(orgAuth.orgId),
+    getCustomTypeLimit(orgAuth.orgId, deps),
+  ]);
+  if (limit !== null && count >= limit) throw new TeamError("TYPE_LIMIT_REACHED", 409);
 
   const type = await createOrMap(() =>
     deps.createUserType({

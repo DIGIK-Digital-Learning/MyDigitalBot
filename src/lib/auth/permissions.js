@@ -199,9 +199,6 @@ export function permissionsWithin(access, permissions = []) {
   return permissions.every((permission) => has.has(permission));
 }
 
-/* Quantos tipos personalizados cada organização pode ter (decidido a 24/11). */
-export const CUSTOM_USER_TYPE_LIMIT = 10;
-
 /*
  * O que uma rota pede. Sem `permission`, a rota fica só para Administradores:
  * uma rota esquecida fica fechada, não aberta.

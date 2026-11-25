@@ -11,6 +11,7 @@ const DEMO = {
   level: 0,
   max_users: 3,
   max_team_members: 2,
+  max_custom_user_types: 10,
   duration_days: 7,
   max_assistants: 1,
   max_assistant_instruction_chars: 5000,
@@ -48,6 +49,7 @@ describe("getOrgLimits", () => {
     expect(result.limits).toEqual({
       users: 3,
       teamMembers: 2,
+      customUserTypes: 10,
       assistants: 1,
       assistantInstructionChars: 5000,
       filesPerAssistant: 5,

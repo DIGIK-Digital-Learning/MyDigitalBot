@@ -3708,7 +3708,8 @@
     "limits": {
       "durationDays": "Duração (dias)",
       "users": "Utilizadores",
-      "teamMembers": "Contas na app",
+      "teamMembers": "Contas com login",
+      "customUserTypes": "Tipos de utilizador",
       "assistants": "Assistentes",
       "assistantInstructionChars": "Caracteres das instruções",
       "filesPerAssistant": "Ficheiros por assistente",
@@ -3897,7 +3898,7 @@
     "copyOf": "Cópia de {name}",
     "usage": {
       "label": "Personalizados",
-      "hint": "Cada organização pode criar até 10 tipos de utilizador."
+      "hint": "Quantos tipos de utilizador a tua organização pode criar. O máximo depende do plano."
     },
     "table": {
       "name": "Nome",
@@ -3949,7 +3950,7 @@
       "INVALID_NAME": "Escreve um nome com até 80 caracteres.",
       "NO_PERMISSIONS": "Marca pelo menos uma permissão.",
       "NAME_TAKEN": "Já existe um tipo com esse nome.",
-      "TYPE_LIMIT_REACHED": "Chegaste aos 10 tipos personalizados. Elimina um para criar outro.",
+      "TYPE_LIMIT_REACHED": "Chegaste ao máximo de tipos de utilizador do teu plano. Elimina um para criar outro.",
       "TYPE_IN_USE": "Há pessoas na Equipa com este tipo. Muda-lhes o tipo antes de o eliminar.",
       "SYSTEM_LOCKED": "Os tipos que vêm com a app não se editam nem se eliminam.",
       "NOT_ALLOWED": "Não podes dar permissões que tu próprio não tens.",
