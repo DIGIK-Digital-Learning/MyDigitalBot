@@ -99,6 +99,23 @@
   animation: rise 800ms var(--ease-out) both;
 }
 
+/* O título só desliza, sem fade: com opacity 0 no primeiro paint o Chrome
+   não o conta para o LCP, e o LCP da home passava para um texto pequeno do
+   ChatDemo aos ~3,4 s (PageSpeed mobile ~75 em vez de ~95). */
+.heroCopy > .heroTitleBlock {
+  animation-name: slideUp;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(22px);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
 .heroCopy > :nth-child(2) {
   animation-delay: 90ms;
 }

@@ -308,12 +308,12 @@ export default function ChatDemo({
                   </span>
                   <span className={styles.who}>
                     <strong>{chat.contact}</strong>
+                    {/* Estado fixo: trocar o texto por "a escrever…" criava
+                        uma nova pintura a cada mensagem, que o Chrome
+                        contava como LCP tardio. O "a escrever" fica só no
+                        balão de digitação, mais abaixo. */}
                     <small>
-                      {typing
-                        ? labels.typing
-                        : isTeams
-                          ? labels.teamsStatus
-                          : labels.whatsappStatus}
+                      {isTeams ? labels.teamsStatus : labels.whatsappStatus}
                     </small>
                   </span>
                   <span className={styles.barIcons}>
