@@ -169,6 +169,40 @@ export const SYSTEM_TYPE_PERMISSIONS = Object.freeze({
 });
 
 /*
+ * As permissões de um tipo de utilizador (#247, parte 4/4). O
+ * Administrador tem tudo; os outros, a lista gravada, já com o «Ver» de
+ * cada ação.
+ */
+export function typePermissions(type) {
+  if (type?.key === SYSTEM_USER_TYPES.ADMIN) return [...ALL_PERMISSIONS];
+  return normalizePermissions(type?.permissions || []);
+}
+
+/*
+ * «Ninguém dá o que não tem»: quem gere a Equipa ou os tipos só pode criar,
+ * editar ou atribuir um tipo cujas permissões ele próprio tenha. Assim
+ * ninguém sobe os seus próprios poderes. O Administrador só se dá entre
+ * Administradores.
+ */
+export function canGrant(access, type) {
+  if (!access || !type) return false;
+  if (access.isAdmin) return true;
+  if (type.key === SYSTEM_USER_TYPES.ADMIN) return false;
+  return permissionsWithin(access, typePermissions(type));
+}
+
+/* Todas as permissões da lista estão nas de `access`? */
+export function permissionsWithin(access, permissions = []) {
+  if (!access) return false;
+  if (access.isAdmin) return true;
+  const has = new Set(access.permissions || []);
+  return permissions.every((permission) => has.has(permission));
+}
+
+/* Quantos tipos personalizados cada organização pode ter (decidido a 24/11). */
+export const CUSTOM_USER_TYPE_LIMIT = 10;
+
+/*
  * O que uma rota pede. Sem `permission`, a rota fica só para Administradores:
  * uma rota esquecida fica fechada, não aberta.
  */

@@ -1,6 +1,7 @@
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
-import { SYSTEM_USER_TYPES } from "@/lib/auth/permissions";
+import { canGrant } from "@/lib/auth/permissions";
 import * as membersRepo from "@/lib/repos/organizationMembers.repo";
+import { getUserType } from "@/lib/repos/userTypes.repo";
 import { countSeatsByOrg } from "@/lib/repos/user.repo";
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { getOrgLimits, hasRoomFor } from "@/lib/services/plans/planLimits";
@@ -13,13 +14,6 @@ import { getOrgLimits, hasRoomFor } from "@/lib/services/plans/planLimits";
  *   - cada pessoa só está numa organização;
  *   - o convite é um email com link, e a pessoa escolhe a palavra-passe.
  */
-
-/* Tipos que se podem dar a alguém. Os personalizados chegam na parte 4/4. */
-export const ASSIGNABLE_TYPES = Object.freeze([
-  SYSTEM_USER_TYPES.ADMIN,
-  SYSTEM_USER_TYPES.EDITOR,
-  SYSTEM_USER_TYPES.VIEWER,
-]);
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -38,6 +32,7 @@ export function normalizeEmail(value) {
 
 const defaultDeps = {
   ...membersRepo,
+  getUserType,
   countSeatsByOrg,
   getOrgLimits,
   recordAuditEvent,
@@ -67,8 +62,11 @@ export async function listTeam(orgAuth, deps = defaultDeps) {
     return {
       id: member.id,
       email: account.email ?? null,
+      typeId: member.userTypeId,
       typeKey: member.typeKey,
       typeName: member.typeName,
+      /* Ninguém dá o que não tem (#247, 4/4): nem mexe em quem tem mais. */
+      canManage: canGrant(orgAuth.access, memberType(member)),
       isOwner: member.authUserId === ownerId,
       isYou: member.authUserId === orgAuth.user?.id,
       /* Ainda não aceitou o convite: nunca entrou. */
@@ -79,10 +77,19 @@ export async function listTeam(orgAuth, deps = defaultDeps) {
   });
 }
 
-async function systemTypeOrFail(typeKey, deps) {
-  if (!ASSIGNABLE_TYPES.includes(typeKey)) throw new TeamError("INVALID_TYPE");
-  const type = await deps.getSystemUserType(typeKey);
+/* O tipo de um membro, na forma que o canGrant lê. */
+function memberType(member) {
+  return { key: member.typeKey, permissions: member.typePermissions ?? [] };
+}
+
+/*
+ * Um tipo que se pode dar a alguém: predefinido ou desta organização, e
+ * só com permissões que quem convida também tem.
+ */
+async function assignableTypeOrFail(orgAuth, typeId, deps) {
+  const type = await deps.getUserType(orgAuth.orgId, typeId);
   if (!type) throw new TeamError("INVALID_TYPE");
+  if (!canGrant(orgAuth.access, type)) throw new TeamError("NOT_ALLOWED", 403);
   return type;
 }
 
@@ -93,12 +100,12 @@ async function systemTypeOrFail(typeKey, deps) {
  */
 export async function inviteTeamMember(
   orgAuth,
-  { email: rawEmail, typeKey, redirectTo },
+  { email: rawEmail, typeId, redirectTo },
   deps = defaultDeps,
 ) {
   const email = normalizeEmail(rawEmail);
   if (!email) throw new TeamError("INVALID_EMAIL");
-  const type = await systemTypeOrFail(typeKey, deps);
+  const type = await assignableTypeOrFail(orgAuth, typeId, deps);
 
   const existingId = await deps.findAuthUserIdByEmail(email);
   if (existingId) {
@@ -149,10 +156,10 @@ export async function inviteTeamMember(
   await deps.recordAuditEvent(orgAuth, {
     action: AUDIT_ACTIONS.TEAM_MEMBER_INVITED,
     entityLabel: email,
-    details: { typeKey, existingAccount: Boolean(existingId) },
+    details: { type: type.name, existingAccount: Boolean(existingId) },
   });
 
-  return { email, typeKey, emailSent: !existingId };
+  return { email, typeId: type.id, emailSent: !existingId };
 }
 
 /* O dono é sempre Administrador e ninguém mexe na própria conta. */
@@ -165,6 +172,9 @@ async function editableMemberOrFail(orgAuth, memberId, deps) {
   if (member.authUserId === orgAuth.user?.id) {
     throw new TeamError("CANNOT_CHANGE_SELF", 403);
   }
+  if (!canGrant(orgAuth.access, memberType(member))) {
+    throw new TeamError("NOT_ALLOWED", 403);
+  }
   return member;
 }
 
@@ -175,11 +185,11 @@ async function emailOf(authUserId, deps) {
 
 export async function changeTeamMemberType(
   orgAuth,
-  { memberId, typeKey },
+  { memberId, typeId },
   deps = defaultDeps,
 ) {
   const member = await editableMemberOrFail(orgAuth, memberId, deps);
-  const type = await systemTypeOrFail(typeKey, deps);
+  const type = await assignableTypeOrFail(orgAuth, typeId, deps);
   if (member.userTypeId === type.id) return { changed: false };
 
   await deps.updateMemberType(orgAuth.orgId, member.id, type.id);
@@ -187,7 +197,7 @@ export async function changeTeamMemberType(
     action: AUDIT_ACTIONS.TEAM_MEMBER_TYPE_CHANGED,
     entityId: member.id,
     entityLabel: await emailOf(member.authUserId, deps),
-    details: { from: member.typeKey, to: typeKey },
+    details: { from: member.typeName, to: type.name },
   });
 
   return { changed: true };
@@ -222,7 +232,7 @@ export async function resendTeamInvite(
     action: AUDIT_ACTIONS.TEAM_MEMBER_INVITE_RESENT,
     entityId: member.id,
     entityLabel: account.email,
-    details: { typeKey: member.typeKey },
+    details: { type: member.typeName },
   });
 
   return { email: account.email, emailSent: true };
@@ -237,7 +247,7 @@ export async function removeTeamMember(orgAuth, { memberId }, deps = defaultDeps
     action: AUDIT_ACTIONS.TEAM_MEMBER_REMOVED,
     entityId: member.id,
     entityLabel: email,
-    details: { typeKey: member.typeKey },
+    details: { type: member.typeName },
   });
 
   return { removed: true };

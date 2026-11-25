@@ -1,0 +1,105 @@
+/* Definições → Tipos de utilizador (#247, 4/4). O resto vem de settings.module.css. */
+.headingRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.headingActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.headingActions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.typeName {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badgeMuted {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.editor {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--ui-border, #e5e7eb);
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.editorHeader h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.editorHeader p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.editorActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* A árvore: uma caixa por área, em colunas que se ajustam à largura. */
+.tree {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.area {
+  margin: 0;
+  padding: 10px 14px 12px;
+  border: 1px solid var(--ui-border, #e5e7eb);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.areaTitle {
+  padding: 0 4px;
+  font-weight: 700;
+}
+
+.areaTitle label,
+.permissionList label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.permissionList {
+  display: grid;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 0 0 0 22px;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.permissionLocked {
+  color: #94a3b8;
+  cursor: not-allowed !important;
+}

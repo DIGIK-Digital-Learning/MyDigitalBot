@@ -20,13 +20,20 @@ import {
 const OWNER = "owner-uuid";
 const ME = "admin-uuid";
 const TYPES = {
-  admin: { id: 1, key: "admin" },
-  editor: { id: 2, key: "editor" },
-  viewer: { id: 3, key: "viewer" },
+  admin: { id: 1, key: "admin", name: "Administrador", isSystem: true, permissions: [] },
+  editor: { id: 2, key: "editor", name: "Editor", isSystem: true, permissions: ["users.view", "users.edit"] },
+  viewer: { id: 3, key: "viewer", name: "Leitor", isSystem: true, permissions: ["users.view"] },
 };
+const TYPE_BY_ID = Object.fromEntries(Object.values(TYPES).map((type) => [type.id, type]));
+const ADMIN_ACCESS = { isAdmin: true, permissions: [] };
 
-function makeOrgAuth(userId = OWNER) {
-  return { orgId: 188, org: { id: 188, owner_user_id: OWNER }, user: { id: userId, email: "x@y.pt" } };
+function makeOrgAuth(userId = OWNER, access = ADMIN_ACCESS) {
+  return {
+    orgId: 188,
+    org: { id: 188, owner_user_id: OWNER },
+    user: { id: userId, email: "x@y.pt" },
+    access,
+  };
 }
 
 function makeDeps(overrides = {}) {
@@ -34,7 +41,7 @@ function makeDeps(overrides = {}) {
     getOrgLimits: vi.fn(async () => ({ limits: { teamMembers: 3, users: 100 } })),
     countMembers: vi.fn(async () => 1),
     countSeatsByOrg: vi.fn(async () => 10),
-    getSystemUserType: vi.fn(async (key) => TYPES[key] ?? null),
+    getUserType: vi.fn(async (_orgId, id) => TYPE_BY_ID[id] ?? null),
     findAuthUserIdByEmail: vi.fn(async () => null),
     getMemberByAuthUser: vi.fn(async () => null),
     inviteAuthUser: vi.fn(async () => "new-uuid"),
@@ -53,7 +60,7 @@ function makeDeps(overrides = {}) {
 const invite = (deps, input = {}) =>
   inviteTeamMember(
     makeOrgAuth(),
-    { email: "Nova@Empresa.pt ", typeKey: "editor", redirectTo: "http://x/pt/reset/confirm", ...input },
+    { email: "Nova@Empresa.pt ", typeId: 2, redirectTo: "http://x/pt/reset/confirm", ...input },
     deps,
   );
 
@@ -67,7 +74,7 @@ describe("convidar para a Equipa", () => {
   });
 
   it("só aceita os tipos que existem", async () => {
-    await expect(invite(makeDeps(), { typeKey: "dono" })).rejects.toMatchObject({
+    await expect(invite(makeDeps(), { typeId: 99 })).rejects.toMatchObject({
       code: "INVALID_TYPE",
     });
   });
@@ -76,7 +83,7 @@ describe("convidar para a Equipa", () => {
     const deps = makeDeps();
     const result = await invite(deps);
 
-    expect(result).toEqual({ email: "nova@empresa.pt", typeKey: "editor", emailSent: true });
+    expect(result).toEqual({ email: "nova@empresa.pt", typeId: 2, emailSent: true });
     expect(deps.inviteAuthUser).toHaveBeenCalledWith(
       "nova@empresa.pt",
       expect.objectContaining({ redirectTo: "http://x/pt/reset/confirm" }),
@@ -151,18 +158,63 @@ describe("convidar para a Equipa", () => {
   });
 });
 
+describe("ninguém dá o que não tem (#247, 4/4)", () => {
+  /* Um tipo personalizado que gere a Equipa e só vê os utilizadores. */
+  const MANAGER = {
+    isAdmin: false,
+    permissions: ["team.view", "team.manage", "users.view"],
+  };
+
+  it("só convida com tipos que cabem nas suas permissões", async () => {
+    const deps = makeDeps();
+    await expect(
+      inviteTeamMember(makeOrgAuth(ME, MANAGER), { email: "a@b.pt", typeId: 2 }, deps),
+    ).rejects.toMatchObject({ code: "NOT_ALLOWED", status: 403 });
+    await expect(
+      inviteTeamMember(makeOrgAuth(ME, MANAGER), { email: "a@b.pt", typeId: 1 }, deps),
+    ).rejects.toMatchObject({ code: "NOT_ALLOWED" });
+    await expect(
+      inviteTeamMember(makeOrgAuth(ME, MANAGER), { email: "a@b.pt", typeId: 3 }, deps),
+    ).resolves.toMatchObject({ typeId: 3 });
+  });
+
+  it("não mexe em quem tem mais permissões do que ele", async () => {
+    const deps = makeDeps({
+      getMember: vi.fn(async () => ({
+        id: 5,
+        authUserId: "p-uuid",
+        userTypeId: 2,
+        typeKey: "editor",
+        typeName: "Editor",
+        typePermissions: TYPES.editor.permissions,
+      })),
+    });
+    await expect(
+      removeTeamMember(makeOrgAuth(ME, MANAGER), { memberId: 5 }, deps),
+    ).rejects.toMatchObject({ code: "NOT_ALLOWED" });
+    expect(deps.deleteMemberAccount).not.toHaveBeenCalled();
+  });
+
+  it("um tipo personalizado de outra organização não serve", async () => {
+    const deps = makeDeps({ getUserType: vi.fn(async () => null) });
+    await expect(invite(deps, { typeId: 42 })).rejects.toMatchObject({ code: "INVALID_TYPE" });
+  });
+});
+
 describe("mudar o tipo e remover", () => {
   const member = (authUserId, typeKey = "viewer") => ({
     id: 5,
     authUserId,
     userTypeId: TYPES[typeKey].id,
     typeKey,
+    typeName: TYPES[typeKey].name,
+    typePermissions: TYPES[typeKey].permissions,
   });
 
   it("o dono é sempre Administrador: não se muda nem se remove", async () => {
     const deps = makeDeps({ getMember: vi.fn(async () => member(OWNER, "admin")) });
     await expect(
-      changeTeamMemberType(makeOrgAuth(ME), { memberId: 5, typeKey: "viewer" }, deps),
+      changeTeamMemberType(makeOrgAuth(ME), { memberId: 5, typeId: 3 }, deps),
     ).rejects.toMatchObject({ code: "OWNER_LOCKED", status: 403 });
     await expect(removeTeamMember(makeOrgAuth(ME), { memberId: 5 }, deps)).rejects.toMatchObject({
       code: "OWNER_LOCKED",
@@ -188,12 +240,12 @@ describe("mudar o tipo e remover", () => {
   it("muda o tipo e regista de onde para onde", async () => {
     const deps = makeDeps({ getMember: vi.fn(async () => member("p-uuid", "viewer")) });
     await expect(
-      changeTeamMemberType(makeOrgAuth(), { memberId: 5, typeKey: "editor" }, deps),
+      changeTeamMemberType(makeOrgAuth(), { memberId: 5, typeId: 2 }, deps),
     ).resolves.toEqual({ changed: true });
     expect(deps.updateMemberType).toHaveBeenCalledWith(188, 5, 2);
     expect(deps.recordAuditEvent).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ details: { from: "viewer", to: "editor" } }),
+      expect.objectContaining({ details: { from: "Leitor", to: "Editor" } }),
     );
   });
 

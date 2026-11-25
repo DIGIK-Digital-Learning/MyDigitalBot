@@ -26,6 +26,7 @@ import {
   ShieldCheck,
   Building2,
   Contact,
+  KeyRound,
   Plug,
   History,
 } from "lucide-react";
@@ -382,6 +383,17 @@ export default function Navbar() {
                     >
                       <Contact aria-hidden className={styles.subnavIcon} />
                       <span>{translation("Settings.tabs.team")}</span>
+                    </Link>
+
+                    <Link
+                      href="/settings/user-types"
+                      onClick={onNavClick("/settings/user-types")}
+                      className={`${styles.subnavItem} ${
+                        isActive("/settings/user-types") ? styles.active : ""
+                      }`}
+                    >
+                      <KeyRound aria-hidden className={styles.subnavIcon} />
+                      <span>{translation("Settings.tabs.userTypes")}</span>
                     </Link>
 
                     <Link
