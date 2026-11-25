@@ -44,7 +44,7 @@ export default function TeamSettings() {
   const [team, setTeam] = useState(null);
   const [loadError, setLoadError] = useState(false);
   const [email, setEmail] = useState("");
-  const [typeKey, setTypeKey] = useState("editor");
+  const [typeId, setTypeId] = useState(null);
   const [inviting, setInviting] = useState(false);
   const [busyId, setBusyId] = useState(null);
 
@@ -62,6 +62,30 @@ export default function TeamSettings() {
     load();
   }, [load]);
 
+  /*
+   * Os tipos que quem está na página pode dar (#247, 4/4): os predefinidos
+   * traduzidos e os personalizados com o nome que a organização lhes deu.
+   */
+  const assignableTypes = (team?.types ?? []).filter((type) => type.canAssign);
+  const typeLabel = (type) =>
+    type?.isSystem && t.has(`types.${type.key}`) ? t(`types.${type.key}`) : type?.name ?? "—";
+  const memberTypeLabel = (member) =>
+    typeLabel(
+      (team?.types ?? []).find((type) => type.id === member.typeId) ?? {
+        isSystem: Boolean(member.typeKey),
+        key: member.typeKey,
+        name: member.typeName,
+      },
+    );
+
+  /* Por omissão, o Editor (ou o primeiro que se pode dar). */
+  useEffect(() => {
+    if (!team || assignableTypes.some((type) => type.id === typeId)) return;
+    const fallback =
+      assignableTypes.find((type) => type.key === "editor") ?? assignableTypes[0] ?? null;
+    setTypeId(fallback?.id ?? null);
+  }, [team, typeId, assignableTypes]);
+
   const errorText = (error) =>
     t.has(`errors.${error?.code}`) ? t(`errors.${error.code}`) : t("errors.generic");
 
@@ -76,10 +100,10 @@ export default function TeamSettings() {
 
   async function invite(event) {
     event.preventDefault();
-    if (!email.trim()) return;
+    if (!email.trim() || !typeId) return;
     setInviting(true);
     try {
-      const result = await inviteTeamMember(orgId, { email, typeKey, locale });
+      const result = await inviteTeamMember(orgId, { email, typeId, locale });
       setEmail("");
       void showAlert({
         title: t("invite.sentTitle"),
@@ -204,14 +228,14 @@ export default function TeamSettings() {
           <label className={settingsStyles.field}>
             <span>{t("invite.type")}</span>
             <select
-              value={typeKey}
-              onChange={(event) => setTypeKey(event.target.value)}
+              value={typeId ?? ""}
+              onChange={(event) => setTypeId(Number(event.target.value))}
               disabled={inviting || !canManage}
               {...lock(PERMISSIONS.TEAM_MANAGE)}
             >
-              {(team?.types ?? ["admin", "editor", "viewer"]).map((key) => (
-                <option key={key} value={key}>
-                  {t(`types.${key}`)}
+              {assignableTypes.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {typeLabel(type)}
                 </option>
               ))}
             </select>
@@ -253,12 +277,14 @@ export default function TeamSettings() {
                 </thead>
                 <tbody>
                   {team.members.map((member) => {
-                    const locked = member.isOwner || member.isYou;
+                    const locked = member.isOwner || member.isYou || !member.canManage;
                     const lockedReason = member.isOwner
                       ? t("ownerLocked")
                       : member.isYou
                         ? t("selfLocked")
-                        : undefined;
+                        : !member.canManage
+                          ? t("strongerLocked")
+                          : undefined;
                     const rowBusy = busyId === member.id;
 
                     return (
@@ -274,19 +300,19 @@ export default function TeamSettings() {
                         </td>
                         <td>
                           {locked ? (
-                            <span title={lockedReason}>{t(`types.${member.typeKey}`)}</span>
+                            <span title={lockedReason}>{memberTypeLabel(member)}</span>
                           ) : (
                             <select
                               className={styles.typeSelect}
                               aria-label={t("table.type")}
-                              value={member.typeKey}
-                              onChange={(event) => changeType(member, event.target.value)}
+                              value={member.typeId}
+                              onChange={(event) => changeType(member, Number(event.target.value))}
                               disabled={rowBusy || !canManage}
                               {...lock(PERMISSIONS.TEAM_MANAGE)}
                             >
-                              {team.types.map((key) => (
-                                <option key={key} value={key}>
-                                  {t(`types.${key}`)}
+                              {assignableTypes.map((type) => (
+                                <option key={type.id} value={type.id}>
+                                  {typeLabel(type)}
                                 </option>
                               ))}
                             </select>

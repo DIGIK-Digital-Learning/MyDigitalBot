@@ -7,7 +7,7 @@ import { getSupabaseAdminClient } from "@/lib/db/admin";
  */
 
 const MEMBER_COLUMNS =
-  "id, organization_id, auth_user_id, user_type_id, invited_by, created_at, user_type ( key, name, is_system )";
+  "id, organization_id, auth_user_id, user_type_id, invited_by, created_at, user_type ( key, name, is_system, permissions )";
 
 function codedError(message, code, status = 409) {
   const error = new Error(message);
@@ -25,6 +25,7 @@ function flattenType(row) {
     userTypeId: row.user_type_id,
     typeKey: type?.key ?? null,
     typeName: type?.name ?? null,
+    typePermissions: type?.permissions ?? [],
     invitedBy: row.invited_by ?? null,
     createdAt: row.created_at,
   };

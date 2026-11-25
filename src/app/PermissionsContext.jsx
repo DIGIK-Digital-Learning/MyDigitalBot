@@ -33,6 +33,7 @@ const EMPTY = {
   typeKey: null,
   permissions: [],
   viewAs: null,
+  viewAsName: null,
   canSwitch: false,
   viewAsTypes: [],
 };

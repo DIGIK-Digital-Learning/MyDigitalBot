@@ -169,6 +169,37 @@ export const SYSTEM_TYPE_PERMISSIONS = Object.freeze({
 });
 
 /*
+ * As permissões de um tipo de utilizador (#247, parte 4/4). O
+ * Administrador tem tudo; os outros, a lista gravada, já com o «Ver» de
+ * cada ação.
+ */
+export function typePermissions(type) {
+  if (type?.key === SYSTEM_USER_TYPES.ADMIN) return [...ALL_PERMISSIONS];
+  return normalizePermissions(type?.permissions || []);
+}
+
+/*
+ * «Ninguém dá o que não tem»: quem gere a Equipa ou os tipos só pode criar,
+ * editar ou atribuir um tipo cujas permissões ele próprio tenha. Assim
+ * ninguém sobe os seus próprios poderes. O Administrador só se dá entre
+ * Administradores.
+ */
+export function canGrant(access, type) {
+  if (!access || !type) return false;
+  if (access.isAdmin) return true;
+  if (type.key === SYSTEM_USER_TYPES.ADMIN) return false;
+  return permissionsWithin(access, typePermissions(type));
+}
+
+/* Todas as permissões da lista estão nas de `access`? */
+export function permissionsWithin(access, permissions = []) {
+  if (!access) return false;
+  if (access.isAdmin) return true;
+  const has = new Set(access.permissions || []);
+  return permissions.every((permission) => has.has(permission));
+}
+
+/*
  * O que uma rota pede. Sem `permission`, a rota fica só para Administradores:
  * uma rota esquecida fica fechada, não aberta.
  */
@@ -224,6 +255,19 @@ export const VIEW_AS_TYPES = Object.freeze([
   SYSTEM_USER_TYPES.EDITOR,
   SYSTEM_USER_TYPES.VIEWER,
 ]);
+
+/*
+ * O valor do «Ver como»: "editor", "viewer" ou o id de um tipo
+ * personalizado da organização (#247, parte 4/4). Ver como Administrador não
+ * existe: é o normal. Qualquer outra coisa é null.
+ */
+export function parseViewAs(value) {
+  if (value == null) return null;
+  const text = String(value);
+  if (VIEW_AS_TYPES.includes(text)) return { key: text };
+  if (/^[1-9]\d{0,9}$/.test(text)) return { id: Number(text) };
+  return null;
+}
 
 /* A permissão de envio de um canal; se o canal não for válido, qualquer uma. */
 export function sendPermissionFor(channel) {

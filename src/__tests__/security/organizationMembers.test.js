@@ -79,9 +79,19 @@ function fakeAdmin({ orgs = [], members = [], missingTable = false } = {}) {
           }
 
           if (table === "user_type") {
+            if (filters.is_system === false) {
+              const row = CUSTOM_TYPES.find(
+                (type) =>
+                  type.id === filters.id &&
+                  type.organization_id === filters.organization_id,
+              );
+              return { data: row ?? null, error: null };
+            }
             const permissions = SYSTEM_TYPE_PERMISSIONS[filters.key];
             return {
-              data: permissions ? { id: 50, key: filters.key, permissions } : null,
+              data: permissions
+                ? { id: 50, key: filters.key, name: filters.key, permissions }
+                : null,
               error: null,
             };
           }
@@ -93,6 +103,12 @@ function fakeAdmin({ orgs = [], members = [], missingTable = false } = {}) {
     },
   };
 }
+
+/* Tipos personalizados: o 70 é da organização 1, o 80 da 2. */
+const CUSTOM_TYPES = [
+  { id: 70, organization_id: 1, key: null, name: "RH", permissions: ["users.edit"] },
+  { id: 80, organization_id: 2, key: null, name: "Vendas", permissions: ["links.create"] },
+];
 
 const ORGS = [
   { id: 1, owner_user_id: "dono-1", plan_id: 7 },
@@ -293,6 +309,26 @@ describe("«Ver como» (como o «Experimentar como» dos planos)", () => {
     expect(await statusFor("editor-1", 1)).toBe(403);
 
     cookieJar.viewAs = "qualquer";
+    expect(await statusFor("dono-1", 1)).toBe(200);
+  });
+
+  it("a ver como um tipo personalizado, fica só com o que esse tipo pode", async () => {
+    cookieJar.viewAs = "70";
+
+    expect(await statusFor("dono-1", 1, PERMISSIONS.USERS_EDIT)).toBe(200);
+    expect(await statusFor("dono-1", 1, PERMISSIONS.USERS_VIEW)).toBe(200);
+    expect(await statusFor("dono-1", 1, PERMISSIONS.ANALYTICS_VIEW)).toBe(403);
+    expect(await statusFor("dono-1", 1)).toBe(403);
+
+    const { access } = await getCurrentMembership(authAs("dono-1"));
+    expect(access).toMatchObject({ viewingAs: "70", viewingAsName: "RH" });
+  });
+
+  it("um tipo de outra organização (ou apagado) não conta", async () => {
+    cookieJar.viewAs = "80";
+    expect(await statusFor("dono-1", 1)).toBe(200);
+
+    cookieJar.viewAs = "999";
     expect(await statusFor("dono-1", 1)).toBe(200);
   });
 

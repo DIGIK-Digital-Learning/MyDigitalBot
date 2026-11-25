@@ -2,12 +2,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /* «Ver como» (#247): a rota que guarda e lê o tipo escolhido. */
 
-const mocks = vi.hoisted(() => ({ requireOwnedOrg: vi.fn() }));
+const mocks = vi.hoisted(() => ({ requireOwnedOrg: vi.fn(), getUserType: vi.fn() }));
 
 vi.mock("@/lib/auth/guards", async (importOriginal) => ({
   ...(await importOriginal()),
   requireOwnedOrg: mocks.requireOwnedOrg,
 }));
+vi.mock("@/lib/repos/userTypes.repo", () => ({ getUserType: mocks.getUserType }));
 vi.mock("@/utils/supabase/server", () => ({ default: vi.fn() }));
 vi.mock("@/lib/db/admin", () => ({ getSupabaseAdminClient: vi.fn() }));
 
@@ -56,6 +57,29 @@ describe("POST /api/organizations/view-as", () => {
 
     expect((await POST(post({ orgId: 1, typeKey: "admin" }))).status).toBe(400);
     expect((await POST(post({ orgId: 1, typeKey: "dono" }))).status).toBe(400);
+  });
+
+  it("aceita um tipo personalizado da própria organização", async () => {
+    mocks.requireOwnedOrg.mockResolvedValue({ orgId: 1, realAccess: ADMIN });
+    mocks.getUserType.mockResolvedValue({ id: 7, name: "RH", isSystem: false });
+
+    const response = await POST(post({ orgId: 1, typeKey: "7" }));
+
+    expect(response.status).toBe(200);
+    expect(mocks.getUserType).toHaveBeenCalledWith(1, 7);
+    expect(response.headers.get("set-cookie")).toContain("mdb_view_as=7");
+  });
+
+  it("recusa o id de outra organização e o de um predefinido", async () => {
+    mocks.requireOwnedOrg.mockResolvedValue({ orgId: 1, realAccess: ADMIN });
+
+    mocks.getUserType.mockResolvedValue(null);
+    expect((await POST(post({ orgId: 1, typeKey: "80" }))).status).toBe(400);
+
+    mocks.getUserType.mockResolvedValue({ id: 1, key: "admin", isSystem: true });
+    expect((await POST(post({ orgId: 1, typeKey: "1" }))).status).toBe(400);
+
+    expect((await POST(post({ orgId: 1, typeKey: "-3" }))).status).toBe(400);
   });
 
   it("quem não é Administrador recebe o 403 do guard", async () => {

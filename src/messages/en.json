@@ -3238,7 +3238,8 @@
       "media": "Media",
       "tracked_link": "Tracked links",
       "organization": "Organization",
-      "team_member": "Team"
+      "team_member": "Team",
+      "user_type": "User types"
     },
     "Channels": {
       "whatsapp": "WhatsApp",
@@ -3290,7 +3291,10 @@
       "team_member_invited": "Person invited to the team",
       "team_member_type_changed": "User type changed",
       "team_member_removed": "Person removed from the team",
-      "team_member_invite_resent": "Invitation resent"
+      "team_member_invite_resent": "Invitation resent",
+      "user_type_created": "User type created",
+      "user_type_updated": "User type changed",
+      "user_type_deleted": "User type deleted"
     },
     "Table": {
       "when": "When",
@@ -3507,6 +3511,7 @@
     "tabs": {
       "organization": "Organization",
       "team": "Team",
+      "userTypes": "User types",
       "integrations": "Integrations",
       "activity": "Activity history"
     }
@@ -3703,7 +3708,8 @@
     "limits": {
       "durationDays": "Duration (days)",
       "users": "Users",
-      "teamMembers": "App accounts",
+      "teamMembers": "Accounts with login",
+      "customUserTypes": "User types",
       "assistants": "Assistants",
       "assistantInstructionChars": "Instruction characters",
       "filesPerAssistant": "Files per assistant",
@@ -3804,6 +3810,10 @@
       "admin": "Administrator",
       "editor": "Editor",
       "viewer": "Viewer"
+    },
+    "groups": {
+      "system": "Default",
+      "custom": "Custom"
     }
   },
   "Permissions": {
@@ -3880,7 +3890,133 @@
       "CANNOT_CHANGE_SELF": "You can't change or remove your own account.",
       "NOT_FOUND": "That account is no longer on the team.",
       "INVITE_FAILED": "Couldn't send the invitation. Try again.",
-      "NOT_PENDING": "That person has already signed in: no invitation needed."
+      "NOT_PENDING": "That person has already signed in: no invitation needed.",
+      "NOT_ALLOWED": "You can't give permissions you don't have yourself."
+    },
+    "strongerLocked": "This person has a type with permissions you don't have."
+  },
+  "UserTypes": {
+    "title": "User types",
+    "description": "What each team member can do in the app. The Administrator can do everything; Editor and Viewer come with the app and can be duplicated to create a similar type.",
+    "add": "Add type",
+    "copyOf": "Copy of {name}",
+    "usage": {
+      "label": "Custom",
+      "hint": "How many user types your organization can create. The maximum depends on the plan."
+    },
+    "table": {
+      "name": "Name",
+      "permissions": "Permissions",
+      "people": "People",
+      "actions": "Actions",
+      "system": "Built-in",
+      "all": "All",
+      "count": "{count} of {total}"
+    },
+    "actions": {
+      "view": "View",
+      "edit": "Edit",
+      "duplicate": "Duplicate",
+      "delete": "Delete"
+    },
+    "editor": {
+      "newTitle": "New user type",
+      "editTitle": "Edit user type",
+      "viewTitle": "{name} permissions",
+      "hint": "Tick what this type can do. Ticking an action also ticks that area's «View». Changes apply right away to everyone with this type.",
+      "systemHint": "Built-in types can't be edited. For a similar one, use «Duplicate».",
+      "name": "Name",
+      "namePlaceholder": "For example: Human Resources",
+      "notYours": "You don't have this permission, so you can't give it.",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "close": "Close",
+      "summary": "{count} of {total} permissions ticked",
+      "selectAll": "Tick all",
+      "clear": "Clear"
+    },
+    "saved": {
+      "title": "Type saved",
+      "created": "The «{name}» type was created. You can now give it to someone on the team.",
+      "updated": "The «{name}» type was changed. Everyone with it now has these permissions."
+    },
+    "remove": {
+      "title": "Delete the «{name}» type?",
+      "message": "The type will no longer exist. This can't be undone.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "errors": {
+      "title": "Couldn't save",
+      "load": "Couldn't load the user types.",
+      "generic": "Something went wrong. Try again.",
+      "INVALID_NAME": "Enter a name of up to 80 characters.",
+      "NO_PERMISSIONS": "Tick at least one permission.",
+      "NAME_TAKEN": "There's already a type with that name.",
+      "TYPE_LIMIT_REACHED": "You've reached your plan's maximum number of user types. Delete one to create another.",
+      "TYPE_IN_USE": "Some team members have this type. Change their type before deleting it.",
+      "SYSTEM_LOCKED": "Built-in types can't be edited or deleted.",
+      "NOT_ALLOWED": "You can't give permissions you don't have yourself.",
+      "NOT_FOUND": "That type no longer exists."
+    },
+    "groups": {
+      "general": "General",
+      "messages": "Messages",
+      "automation": "Automations and metrics",
+      "admin": "Settings and Team"
+    },
+    "areas": {
+      "dashboard": "Portal",
+      "users": "Users",
+      "teamsGroups": "Teams groups",
+      "assistants": "Assistants",
+      "send": "Send",
+      "scheduled": "Scheduled",
+      "links": "Tracked links",
+      "questions": "Questions",
+      "media": "Media",
+      "automations": "Automations",
+      "analytics": "Metrics",
+      "settings": "Settings",
+      "team": "Team"
+    },
+    "permissions": {
+      "dashboard_view": "View",
+      "users_view": "View",
+      "users_edit": "Create and edit",
+      "users_delete": "Delete",
+      "users_import": "Import CSV",
+      "users_groups": "Manage groups",
+      "teams_groups_view": "View",
+      "teams_groups_edit": "Create, edit and delete",
+      "assistants_view": "View",
+      "assistants_edit": "Create and edit",
+      "assistants_delete": "Delete",
+      "assistants_test": "Try out (test chat)",
+      "messages_send_whatsapp": "Send by WhatsApp",
+      "messages_send_teams": "Send through Teams",
+      "messages_image_ai": "Create AI image",
+      "messages_scheduled_view": "View",
+      "messages_scheduled_edit": "Edit and cancel (sequences too)",
+      "links_view": "View reports",
+      "links_create": "Create links",
+      "questions_view": "View",
+      "questions_review": "Review answers",
+      "questions_export": "Export",
+      "media_view": "View",
+      "media_edit": "Upload and delete",
+      "automations_view": "View",
+      "automations_edit": "Create, edit and delete",
+      "automations_run": "Run manually",
+      "analytics_view": "View",
+      "analytics_export": "Export (PDF and Excel)",
+      "settings_organization": "Organization: view and edit",
+      "settings_integrations": "Integrations (WhatsApp, Teams, opening message)",
+      "settings_audit_view": "Activity history: view",
+      "team_view": "See who has access",
+      "team_manage": "Invite, change type and remove",
+      "team_user_types": "Manage user types"
     }
   }
 }

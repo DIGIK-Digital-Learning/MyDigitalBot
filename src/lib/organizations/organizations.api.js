@@ -2,7 +2,8 @@
 
 /**
  * O que quem tem a sessão pode fazer (#247):
- * `{ typeKey, isAdmin, permissions, viewAs, canSwitch, viewAsTypes }`.
+ * `{ typeKey, isAdmin, permissions, viewAs, viewAsName, canSwitch,
+ *   viewAsTypes: [{ value, key, name }] }`.
  */
 export async function fetchAccess(orgId) {
   const response = await fetch(
@@ -12,7 +13,10 @@ export async function fetchAccess(orgId) {
   return response.json();
 }
 
-/** Troca o tipo com que o Administrador vê a app; null volta ao normal. */
+/**
+ * Troca o tipo com que o Administrador vê a app ("editor", "viewer" ou o id
+ * de um tipo personalizado); null volta ao normal.
+ */
 export async function changeViewAs(orgId, typeKey) {
   const response = await fetch("/api/organizations/view-as", {
     method: "POST",
@@ -62,11 +66,11 @@ export function fetchTeam(orgId) {
   return teamRequest(`/api/organizations/team?orgId=${encodeURIComponent(orgId)}`);
 }
 
-export function inviteTeamMember(orgId, { email, typeKey, locale }) {
+export function inviteTeamMember(orgId, { email, typeId, locale }) {
   return teamRequest("/api/organizations/team", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ orgId, email, typeKey, locale }),
+    body: JSON.stringify({ orgId, email, typeId, locale }),
   });
 }
 
@@ -78,12 +82,32 @@ export function resendTeamInvite(orgId, memberId, locale) {
   });
 }
 
-export function changeTeamMemberType(orgId, memberId, typeKey) {
+export function changeTeamMemberType(orgId, memberId, typeId) {
   return teamRequest("/api/organizations/team", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ orgId, memberId, typeKey }),
+    body: JSON.stringify({ orgId, memberId, typeId }),
   });
+}
+
+/* Definições → Tipos de utilizador (#247, parte 4/4). */
+export function fetchUserTypes(orgId) {
+  return teamRequest(`/api/organizations/user-types?orgId=${encodeURIComponent(orgId)}`);
+}
+
+export function saveUserType(orgId, { typeId = null, name, permissions }) {
+  return teamRequest("/api/organizations/user-types", {
+    method: typeId ? "PATCH" : "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orgId, typeId, name, permissions }),
+  });
+}
+
+export function deleteUserType(orgId, typeId) {
+  return teamRequest(
+    `/api/organizations/user-types?orgId=${encodeURIComponent(orgId)}&typeId=${encodeURIComponent(typeId)}`,
+    { method: "DELETE" },
+  );
 }
 
 export function removeTeamMember(orgId, memberId) {

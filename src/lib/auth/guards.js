@@ -7,17 +7,16 @@ import { getSupabaseAdminClient } from "@/lib/db/admin";
 import {
   ADMIN_ONLY,
   VIEW_AS_COOKIE,
-  VIEW_AS_TYPES,
   accessAllows,
+  parseViewAs,
   resolveAccess,
 } from "@/lib/auth/permissions";
 
-/* O tipo escolhido em «Ver como», ou null (fora de um pedido também). */
+/* O tipo escolhido em «Ver como» (`{ key }` ou `{ id }`), ou null. */
 async function readViewAsCookie() {
   try {
     const store = await cookies();
-    const value = store.get(VIEW_AS_COOKIE)?.value ?? null;
-    return VIEW_AS_TYPES.includes(value) ? value : null;
+    return parseViewAs(store.get(VIEW_AS_COOKIE)?.value ?? null);
   } catch {
     return null;
   }
@@ -26,20 +25,24 @@ async function readViewAsCookie() {
 /*
  * «Ver como» (#247): um Administrador que escolheu ver a app como outro tipo
  * passa a ter só as permissões desse tipo. Só tira: para quem não é
- * Administrador, o cookie não conta.
+ * Administrador, o cookie não conta. Um tipo personalizado só vale na
+ * organização a que pertence; se foi apagado, volta-se ao normal.
  */
-async function applyViewAs(admin, access) {
+async function applyViewAs(admin, access, orgId) {
   if (!access?.isAdmin) return access;
 
-  const typeKey = await readViewAsCookie();
-  if (!typeKey) return access;
+  const choice = await readViewAsCookie();
+  if (!choice) return access;
 
-  const { data: type, error } = await admin
-    .from("user_type")
-    .select("id, key, permissions")
-    .eq("is_system", true)
-    .eq("key", typeKey)
-    .maybeSingle();
+  let query = admin.from("user_type").select("id, key, name, permissions");
+  query = choice.key
+    ? query.eq("is_system", true).eq("key", choice.key)
+    : query
+        .eq("is_system", false)
+        .eq("id", choice.id)
+        .eq("organization_id", Number(orgId));
+
+  const { data: type, error } = await query.maybeSingle();
 
   if (error) {
     if (MISSING_TABLE_CODES.has(error.code)) return access;
@@ -57,7 +60,8 @@ async function applyViewAs(admin, access) {
       },
     }),
     isOwner: access.isOwner,
-    viewingAs: type.key,
+    viewingAs: type.key ?? String(type.id),
+    viewingAsName: type.name ?? null,
   };
 }
 
@@ -232,7 +236,7 @@ async function authorizeOrgMember(auth, orgId, options = {}) {
 
   if (realAccess && !options.realAccess) {
     try {
-      access = await applyViewAs(auth.admin, realAccess);
+      access = await applyViewAs(auth.admin, realAccess, parsedOrgId);
     } catch (error) {
       console.error("[Auth] view-as lookup failed", error);
       return { error: jsonError("Authorization check failed", 500) };
@@ -292,6 +296,7 @@ export async function getCurrentMembership(auth, columns = "id") {
     access: await applyViewAs(
       auth.admin,
       resolveAccess({ isOwner: ownerUserId === auth.user.id, member }),
+      org.id,
     ),
   };
 }

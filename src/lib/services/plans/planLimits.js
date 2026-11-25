@@ -24,6 +24,8 @@ export const LIMIT_COLUMNS = {
   users: "max_users",
   /* Contas que entram na app (Definições → Equipa, #247). */
   teamMembers: "max_team_members",
+  /* Tipos de utilizador personalizados (Definições → Tipos de utilizador, #247). */
+  customUserTypes: "max_custom_user_types",
   assistants: "max_assistants",
   assistantInstructionChars: "max_assistant_instruction_chars",
   filesPerAssistant: "max_files_per_assistant",

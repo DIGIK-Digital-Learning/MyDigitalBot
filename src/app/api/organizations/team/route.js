@@ -7,7 +7,6 @@ import {
 } from "@/lib/auth/guards";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import {
-  ASSIGNABLE_TYPES,
   TeamError,
   changeTeamMemberType,
   getTeamLimits,
@@ -16,6 +15,7 @@ import {
   removeTeamMember,
   resendTeamInvite,
 } from "@/lib/services/team/team.service";
+import { listUserTypes } from "@/lib/services/team/userTypes.service";
 
 /*
  * Definições → Equipa (#247, parte 3/4): as contas que entram na app.
@@ -57,12 +57,25 @@ export async function GET(req) {
     const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.TEAM_VIEW });
     if (orgAuth.error) return orgAuth.error;
 
-    const [members, { limits, usage }] = await Promise.all([
+    const [members, { limits, usage }, types] = await Promise.all([
       listTeam(orgAuth),
       getTeamLimits(orgAuth.orgId),
+      listUserTypes(orgAuth),
     ]);
 
-    return NextResponse.json({ members, limits, usage, types: ASSIGNABLE_TYPES });
+    /* Os predefinidos e os personalizados; canAssign: quem pede pode dá-lo (#247, 4/4). */
+    return NextResponse.json({
+      members,
+      limits,
+      usage,
+      types: types.map(({ id, key, name, isSystem, canAssign }) => ({
+        id,
+        key,
+        name,
+        isSystem,
+        canAssign,
+      })),
+    });
   } catch (error) {
     return handleApiError(error, "Failed to load team");
   }
@@ -94,7 +107,7 @@ export async function POST(req) {
 
     const result = await inviteTeamMember(orgAuth, {
       email: body?.email,
-      typeKey: body?.typeKey,
+      typeId: parsePositiveInt(body?.typeId),
       redirectTo: inviteRedirect(req, body?.locale),
     });
 
@@ -118,7 +131,7 @@ export async function PATCH(req) {
 
     const result = await changeTeamMemberType(orgAuth, {
       memberId,
-      typeKey: body?.typeKey,
+      typeId: parsePositiveInt(body?.typeId),
     });
     return NextResponse.json(result);
   } catch (error) {
