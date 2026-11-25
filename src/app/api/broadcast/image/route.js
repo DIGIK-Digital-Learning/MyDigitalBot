@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
 import { handleApiError, jsonError, requireOwnedOrg } from "@/lib/auth/guards";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 import {
   IMAGE_PROMPT_MAX_LENGTH,
   generateBroadcastImage,
@@ -18,7 +17,7 @@ export async function POST(req) {
   try {
     const body = await req.json().catch(() => ({}));
 
-    const auth = await requireOwnedOrg(body?.orgId, { permission: PERMISSIONS.IMAGE_AI });
+    const auth = await requireOwnedOrg(body?.orgId);
     if (auth.error) return auth.error;
 
     const prompt = String(body?.prompt || "").trim();

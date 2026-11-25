@@ -21,8 +21,6 @@ import EmojiButton from "./EmojiButton";
 import FormatToolbar from "./FormatToolbar";
 import { ImageSuggestBar } from "./ImageSuggestInPhone";
 import { SuggestBar } from "./SuggestInPhone";
-import usePermissions from "@/app/PermissionsContext";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 
 // O menu fica 42px acima do fundo do botão «+» (bottom: 42px no CSS).
 const MENU_OFFSET = 42;
@@ -71,7 +69,6 @@ export default function PlusMenu({
 }) {
   const [open, setOpen] = useState(false);
   const [expandedKind, setExpandedKind] = useState(null);
-  const { can, lock } = usePermissions();
   const wrapRef = useRef(null);
 
   useEffect(() => {
@@ -236,10 +233,6 @@ export default function PlusMenu({
               role="menuitem"
               className={styles.plusItem}
               onClick={() => pick(onSuggestText)}
-              disabled={
-                !can([PERMISSIONS.SEND_WHATSAPP, PERMISSIONS.SEND_TEAMS])
-              }
-              {...lock([PERMISSIONS.SEND_WHATSAPP, PERMISSIONS.SEND_TEAMS])}
             >
               <Sparkles size={16} />
               <span>{translation("Broadcast.suggest.title")}</span>
@@ -251,9 +244,8 @@ export default function PlusMenu({
               type="button"
               role="menuitem"
               className={styles.plusItem}
-              disabled={filesFull || !can(PERMISSIONS.IMAGE_AI)}
+              disabled={filesFull}
               title={filesFull ? filesFullHint : undefined}
-              {...lock(PERMISSIONS.IMAGE_AI)}
               onClick={() => pick(onCreateImage)}
             >
               <ImagePlus size={16} />

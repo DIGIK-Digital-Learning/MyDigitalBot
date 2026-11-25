@@ -26,9 +26,6 @@ vi.mock("@/lib/services/organizationSettings.service", () => ({
 }));
 
 import { PATCH } from "@/app/api/organizations/settings/route";
-import { resolveAccess } from "@/lib/auth/permissions";
-
-const ADMIN = resolveAccess({ isOwner: true });
 
 function request(body) {
   return new Request("http://localhost/api/organizations/settings", {
@@ -62,19 +59,19 @@ describe("PATCH /api/organizations/settings", () => {
   });
 
   it("uses the organization id returned by the ownership guard", async () => {
-    mocks.requireOwnedOrg.mockResolvedValue({ orgId: 7, access: ADMIN });
+    mocks.requireOwnedOrg.mockResolvedValue({ orgId: 7 });
     mocks.saveOrganizationSettings.mockResolvedValue({ id: 7, name: "Acme" });
 
     const body = { orgId: 999, id: 123, owner_user_id: "attacker", name: "Acme" };
     const response = await PATCH(request(body));
 
     expect(response.status).toBe(200);
-    expect(mocks.requireOwnedOrg).toHaveBeenCalledWith(999, { permission: "settings.organization" });
+    expect(mocks.requireOwnedOrg).toHaveBeenCalledWith(999);
     expect(mocks.saveOrganizationSettings).toHaveBeenCalledWith(7, body);
   });
 
   it("returns 409 for a duplicate Teams tenant", async () => {
-    mocks.requireOwnedOrg.mockResolvedValue({ orgId: 7, access: ADMIN });
+    mocks.requireOwnedOrg.mockResolvedValue({ orgId: 7 });
     mocks.saveOrganizationSettings.mockRejectedValue(
       Object.assign(new Error("Tenant already used"), { status: 409 }),
     );
@@ -84,22 +81,5 @@ describe("PATCH /api/organizations/settings", () => {
     );
     expect(response.status).toBe(409);
     await expect(response.json()).resolves.toEqual({ error: "Tenant already used" });
-  });
-
-  it("#247: quem só edita a organização não muda as integrações", async () => {
-    mocks.requireOwnedOrg.mockResolvedValue({
-      orgId: 7,
-      access: resolveAccess({
-        member: { typeKey: null, permissions: ["settings.organization"] },
-      }),
-    });
-
-    const blocked = await PATCH(request({ orgId: 7, waba_id: "outro" }));
-    expect(blocked.status).toBe(403);
-    expect(mocks.saveOrganizationSettings).not.toHaveBeenCalled();
-
-    mocks.saveOrganizationSettings.mockResolvedValue({ id: 7, name: "Acme" });
-    const allowed = await PATCH(request({ orgId: 7, name: "Acme" }));
-    expect(allowed.status).toBe(200);
   });
 });

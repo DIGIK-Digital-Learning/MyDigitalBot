@@ -48,7 +48,7 @@ describe("Execução manual de automações sem segredo público", () => {
     requireOwnedOrg.mockResolvedValue({ orgId: 1 });
     runInactivityScan.mockResolvedValue({ ok: true });
     const response = await POST({ json: async () => ({ organizationId: 2, limit: 50 }) });
-    expect(requireOwnedOrg).toHaveBeenCalledWith(2, expect.objectContaining({ permission: expect.anything() }));
+    expect(requireOwnedOrg).toHaveBeenCalledWith(2);
     expect(runInactivityScan).toHaveBeenCalledExactlyOnceWith({ organizationId: 1 });
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ ok: true });

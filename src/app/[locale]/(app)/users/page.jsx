@@ -34,8 +34,6 @@ import {
 import { useAlert } from "@/app/components/Alert/AlertProvider";
 import FilterMenu from "./FilterMenu";
 import QuickActionsBar from "./QuickActions/QuickActions";
-import usePermissions from "@/app/PermissionsContext";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 
 function initial(name = "") {
   return (name.trim()[0] || "?").toUpperCase();
@@ -43,7 +41,6 @@ function initial(name = "") {
 
 export default function UsersPage() {
   const translation = useTranslations();
-  const { can, lock } = usePermissions();
   const { user, loading: authLoading } = useAuth();
   const { org, loading: orgLoading } = useOrganization(user);
 
@@ -642,8 +639,6 @@ async function openCreateUserModal() {
             className={`${styles.actionBtn} ${styles.actionBtnSecondary}`}
             onClick={() => setIsTagsOpen(true)}
             title={translation("Users.manageTags")}
-            disabled={!can(PERMISSIONS.USERS_GROUPS)}
-            {...lock(PERMISSIONS.USERS_GROUPS)}
           >
             <Tag size={16} /> <span>{translation("Users.manageTags")}</span>
           </button>
@@ -653,8 +648,6 @@ async function openCreateUserModal() {
               className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}
               onClick={() => setCreateMenuOpen((v) => !v)}
               title={translation("Users.newUser")}
-              disabled={!can([PERMISSIONS.USERS_EDIT, PERMISSIONS.USERS_IMPORT])}
-              {...lock([PERMISSIONS.USERS_EDIT, PERMISSIONS.USERS_IMPORT])}
               aria-haspopup="menu"
               aria-expanded={createMenuOpen}
             >
@@ -672,7 +665,7 @@ async function openCreateUserModal() {
                   type="button"
                   className={styles.createMenuItem}
                   role="menuitem"
-                  disabled={usersFull || !can(PERMISSIONS.USERS_EDIT)}
+                  disabled={usersFull}
                   title={
                     usersFull
                       ? translation("Plans.limits.users", {
@@ -681,7 +674,6 @@ async function openCreateUserModal() {
                         })
                       : undefined
                   }
-                  {...lock(PERMISSIONS.USERS_EDIT)}
                   onClick={() => {
                     setCreateMenuOpen(false);
                     openCreateUserModal();
@@ -695,8 +687,6 @@ async function openCreateUserModal() {
                   type="button"
                   className={styles.createMenuItem}
                   role="menuitem"
-                  disabled={!can(PERMISSIONS.USERS_IMPORT)}
-                  {...lock(PERMISSIONS.USERS_IMPORT)}
                   onClick={() => {
                     setCreateMenuOpen(false);
                     setIsImportOpen(true);
@@ -931,7 +921,6 @@ async function openCreateUserModal() {
                           label: a.name,
                         }))}
                       onChange={(newAssistantId) => handleUserAssistantChange(u, newAssistantId)}
-                      disabled={!can(PERMISSIONS.USERS_EDIT)}
                     />
                     {u.assistantIds.length > 1 && (
                       <span
@@ -959,16 +948,12 @@ async function openCreateUserModal() {
                         label={translation("Users.row.edit")}
                         onClick={() => openEditFor(u)}
                         className={styles.rowAction}
-                        disabled={!can(PERMISSIONS.USERS_EDIT)}
-                        {...lock(PERMISSIONS.USERS_EDIT)}
                       />
                       <RowAction
                         kind="delete"
                         label={translation("Users.row.delete")}
                         onClick={() => deleteUserById(u)}
                         className={styles.rowAction}
-                        disabled={!can(PERMISSIONS.USERS_DELETE)}
-                        {...lock(PERMISSIONS.USERS_DELETE)}
                       />
                     </RowActions>
                   </div>

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { closeChain } from "@/lib/services/broadcast/readChains/openChains";
@@ -17,7 +16,7 @@ export async function POST(req, { params }) {
     const { id } = await params;
     const body = await req.json().catch(() => ({}));
 
-    const orgAuth = await requireOwnedOrg(body?.orgId, { permission: PERMISSIONS.SCHEDULED_EDIT });
+    const orgAuth = await requireOwnedOrg(body?.orgId);
     if (orgAuth.error) return orgAuth.error;
 
     const result = await closeChain(orgAuth.orgId, id);

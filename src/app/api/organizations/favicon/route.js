@@ -3,7 +3,6 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { handleApiError, parsePositiveInt, requireOwnedOrg } from "@/lib/auth/guards";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 import { loadOrganizationFavicon, saveOrganizationFavicon, resetOrganizationFavicon } from "@/lib/services/organizationFavicon.service";
 
 // Logo paths carry a UUID, so a rendered favicon never changes for a given path.
@@ -49,7 +48,7 @@ export async function POST(request) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.SETTINGS_ORGANIZATION });
+    const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
     const item = await saveOrganizationFavicon(orgAuth.orgId, formData.get("favicon"));
@@ -79,7 +78,7 @@ export async function DELETE(request) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.SETTINGS_ORGANIZATION });
+    const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
     const item = await resetOrganizationFavicon(orgAuth.orgId);

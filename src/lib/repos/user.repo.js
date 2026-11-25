@@ -154,21 +154,6 @@ export async function createUser({
  * create_user_with_plan_limit conta para recusar (todos os da organização).
  * Serve ao contador do limite do plano ("3 / 100").
  */
-/*
- * Lugares ocupados: colaboradores + contas da Equipa (#247). É o número que
- * create_user_with_plan_limit e add_org_member_with_limits comparam com o
- * limite de utilizadores do plano.
- */
-export async function countSeatsByOrg(organizationId) {
-  const supabase = getSupabaseAdminClient();
-  const { data, error } = await supabase.rpc("org_seat_count", {
-    p_organization_id: Number(organizationId),
-  });
-
-  if (error) throw error;
-  return Number(data ?? 0);
-}
-
 export async function countUsersByOrg(organizationId) {
   const supabase = getSupabaseAdminClient();
   const { count, error } = await supabase

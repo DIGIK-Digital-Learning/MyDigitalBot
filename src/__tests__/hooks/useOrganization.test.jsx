@@ -18,12 +18,11 @@ vi.mock("@/app/AuthContext", () => ({
 }));
 
 vi.mock("@/utils/supabase/client", () => ({
-  createClient: () => ({}),
-}));
-
-/* A organização lê-se pela linha de membro (#247): ver currentOrganization. */
-vi.mock("@/lib/helpers/currentOrganization", () => ({
-  fetchCurrentOrganization: () => mocks.single(),
+  createClient: () => ({
+    from: () => ({
+      select: () => ({ eq: () => ({ single: mocks.single }) }),
+    }),
+  }),
 }));
 
 vi.mock("@/lib/helpers/theme.helpers", () => ({

@@ -15,8 +15,6 @@ import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
 import { QUESTION_KINDS } from "@/lib/whatsapp/question";
 
 import styles from "./questions.module.css";
-import usePermissions from "@/app/PermissionsContext";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 
 const KIND_FILTER_ALL = "all";
 
@@ -76,7 +74,6 @@ export default function QuestionsPage() {
   const { org, loading: orgLoading } = useOrganization(user);
   const { stopLoading } = useGlobalLoader();
   const translation = useTranslations();
-  const { can, lock } = usePermissions();
   const showAlert = useAlert();
 
   /* Refs para o efeito de carregamento não depender destas funções. */
@@ -368,14 +365,7 @@ export default function QuestionsPage() {
           type="button"
           className={`${styles.clearButton} ${styles.exportButton}`}
           onClick={handleExport}
-          disabled={
-            loading ||
-            Boolean(error) ||
-            !filtered.length ||
-            exporting ||
-            !can(PERMISSIONS.QUESTIONS_EXPORT)
-          }
-          {...lock(PERMISSIONS.QUESTIONS_EXPORT)}
+          disabled={loading || Boolean(error) || !filtered.length || exporting}
         >
           {translation(
             exporting ? "Questions.export.exporting" : "Questions.export.button",

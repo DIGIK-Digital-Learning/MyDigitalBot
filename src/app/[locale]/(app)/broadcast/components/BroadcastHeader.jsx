@@ -1,8 +1,6 @@
 import { Loader2 } from "lucide-react";
 
 import styles from "../broadcast.module.css";
-import usePermissions from "@/app/PermissionsContext";
-import { sendPermissionFor } from "@/lib/auth/permissions";
 
 export default function BroadcastHeader({
   channel,
@@ -17,10 +15,6 @@ export default function BroadcastHeader({
   onPrimaryClick,
   translation,
 }) {
-  /* O envio pede a permissão do canal escolhido (#247). */
-  const { can, lock } = usePermissions();
-  const sendPermission = sendPermissionFor(channel);
-
   return (
     <div className={styles.headerRow}>
       <div className={styles.channelSwitch}>
@@ -60,9 +54,8 @@ export default function BroadcastHeader({
         {/* A enviar: rodinha no botão até se fechar o resultado. */}
         <button
           onClick={onPrimaryClick}
-          disabled={sending || !canSend || !can(sendPermission)}
+          disabled={sending || !canSend}
           aria-busy={sending}
-          {...lock(sendPermission)}
           className={`${styles.primaryBtn} ${styles.primaryBtnWithIcon}`}
         >
           {sending ? (

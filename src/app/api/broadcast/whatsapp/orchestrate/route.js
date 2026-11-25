@@ -12,7 +12,6 @@ import {
   requireAllRecipientsToBeKnownUsers,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 
 const supabase = getSupabaseAdminClient();
 
@@ -33,7 +32,7 @@ export async function POST(req) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.SEND_WHATSAPP });
+    const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
     const recipientUserIds = requireAllRecipientsToBeKnownUsers(recipients);

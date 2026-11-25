@@ -11,8 +11,6 @@ import {
   CircleAlert,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import usePermissions from "@/app/PermissionsContext";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 
 function initial(name = "") {
   return (name.trim()[0] || "?").toUpperCase();
@@ -34,7 +32,6 @@ export default function ViewUserModal({
   assistantsById,
 }) {
   const translation = useTranslations("ViewUserModal");
-  const { can, lock } = usePermissions();
   const [render, setRender] = useState(open);
 
   const [threads, setThreads] = useState([]);
@@ -249,8 +246,6 @@ export default function ViewUserModal({
                 className={styles.iconBtn}
                 title={translation("edit")}
                 onClick={onEdit}
-                disabled={!can(PERMISSIONS.USERS_EDIT)}
-                {...lock(PERMISSIONS.USERS_EDIT)}
               >
                 <Pencil size={18} />
               </button>

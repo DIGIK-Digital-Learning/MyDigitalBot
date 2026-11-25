@@ -17,7 +17,6 @@ import {
   handleApiError,
   requireOrgForAssistant,
 } from "@/lib/auth/guards";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 
 /*
  * O modelo, a temperature e o top_p já não se editam (#250): todos os
@@ -29,7 +28,7 @@ export async function GET(_req, { params }) {
   try {
     const { assistantId } = await params;
 
-    const orgAuth = await requireOrgForAssistant(assistantId, { permission: PERMISSIONS.ASSISTANTS_VIEW });
+    const orgAuth = await requireOrgForAssistant(assistantId);
 
     if (orgAuth.error) {
       return orgAuth.error;
@@ -57,7 +56,7 @@ export async function PATCH(req, { params }) {
 
     const updates = await req.json();
 
-    const orgAuth = await requireOrgForAssistant(assistantId, { permission: PERMISSIONS.ASSISTANTS_EDIT });
+    const orgAuth = await requireOrgForAssistant(assistantId);
 
     if (orgAuth.error) {
       return orgAuth.error;
@@ -158,7 +157,7 @@ export async function DELETE(_req, { params }) {
   try {
     const { assistantId } = await params;
 
-    const orgAuth = await requireOrgForAssistant(assistantId, { permission: PERMISSIONS.ASSISTANTS_DELETE });
+    const orgAuth = await requireOrgForAssistant(assistantId);
 
     if (orgAuth.error) {
       return orgAuth.error;

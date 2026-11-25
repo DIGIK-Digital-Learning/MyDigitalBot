@@ -8,7 +8,6 @@ import {
   requireAllRecipientsToBeKnownUsers,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 import { parseOpeningOptions } from "@/lib/services/broadcast/openingOptions";
 import { parseQuestionOptions } from "@/lib/services/broadcast/questionOptions";
 import {
@@ -23,7 +22,7 @@ export async function POST(req) {
   try {
     const body = await req.json();
 
-    const orgAuth = await requireOwnedOrg(body?.orgId, { permission: PERMISSIONS.SEND_WHATSAPP });
+    const orgAuth = await requireOwnedOrg(body?.orgId);
     if (orgAuth.error) return orgAuth.error;
 
     const recipientUserIds = requireAllRecipientsToBeKnownUsers(

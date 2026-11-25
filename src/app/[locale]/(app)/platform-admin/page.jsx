@@ -25,9 +25,6 @@ import styles from "./admin.module.css";
 /* Os limites pela ordem em que aparecem na tabela dos planos. */
 const LIMIT_ORDER = [
   "users",
-  /* Contas com login e tipos de utilizador personalizados (#247). */
-  "teamMembers",
-  "customUserTypes",
   "assistants",
   "assistantInstructionChars",
   "filesPerAssistant",
@@ -45,8 +42,6 @@ const LIMIT_ORDER = [
 /* O uso que se mostra de cada organização, com o limite correspondente. */
 const USAGE_COLUMNS = [
   ["users", "users"],
-  ["teamMembers", "teamMembers"],
-  ["customUserTypes", "customUserTypes"],
   ["assistants", "assistants"],
   ["automations", "automations"],
   ["scheduledMessages", "scheduledMessages"],

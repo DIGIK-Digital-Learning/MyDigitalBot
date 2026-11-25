@@ -7,7 +7,6 @@ import {
   parsePositiveInt,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 import {
   resetOrganizationLogo,
   saveOrganizationLogo,
@@ -33,7 +32,7 @@ export async function POST(request) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.SETTINGS_ORGANIZATION });
+    const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
     const item = await saveOrganizationLogo(orgAuth.orgId, formData.get("logo"));
@@ -63,7 +62,7 @@ export async function DELETE(request) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.SETTINGS_ORGANIZATION });
+    const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
     const item = await resetOrganizationLogo(orgAuth.orgId);

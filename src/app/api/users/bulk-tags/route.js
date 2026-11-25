@@ -7,7 +7,6 @@ import {
   handleApiError,
   requireOrgForUser,
 } from "@/lib/auth/guards";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 
 export async function POST(req) {
   try {
@@ -24,7 +23,7 @@ export async function POST(req) {
       return NextResponse.json({ error: "tagIds required" }, { status: 400 });
     }
 
-    const orgAuth = await requireOrgForUser(userIds[0], { permission: PERMISSIONS.USERS_EDIT });
+    const orgAuth = await requireOrgForUser(userIds[0]);
     if (orgAuth.error) return orgAuth.error;
 
     const safeUserIds = await assertUsersBelongToOrg(

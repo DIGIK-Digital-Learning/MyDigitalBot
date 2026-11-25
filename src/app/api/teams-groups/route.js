@@ -4,7 +4,6 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 import { listTeamsGroups } from "@/lib/services/teams/teamsGroups.service";
 
 /* Grupos do Teams onde o bot está ou esteve instalado (#165). */
@@ -12,7 +11,7 @@ export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
 
-    const orgAuth = await requireOwnedOrg(searchParams.get("orgId"), { permission: [PERMISSIONS.TEAMS_GROUPS_VIEW, PERMISSIONS.SEND_TEAMS] });
+    const orgAuth = await requireOwnedOrg(searchParams.get("orgId"));
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {

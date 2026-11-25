@@ -16,7 +16,6 @@ import {
   assertAssistantBelongsToOrg,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 import { sanitizeAutomationPayload } from "@/lib/services/automations/automationEngine";
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
@@ -35,7 +34,7 @@ export async function GET(req) {
       return NextResponse.json({ error: "Missing orgId" }, { status: 400 });
     }
 
-    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.AUTOMATIONS_VIEW });
+    const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {
@@ -71,7 +70,7 @@ export async function POST(req) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(organizationId, { permission: PERMISSIONS.AUTOMATIONS_EDIT });
+    const orgAuth = await requireOwnedOrg(organizationId);
     if (orgAuth.error) return orgAuth.error;
 
     /* Limite de automações do plano (#186): contam todas, ativas e inativas. */

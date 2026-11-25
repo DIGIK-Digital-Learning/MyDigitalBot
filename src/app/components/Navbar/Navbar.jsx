@@ -25,8 +25,6 @@ import {
   BarChart3,
   ShieldCheck,
   Building2,
-  Contact,
-  KeyRound,
   Plug,
   History,
 } from "lucide-react";
@@ -372,28 +370,6 @@ export default function Navbar() {
                     >
                       <Building2 aria-hidden className={styles.subnavIcon} />
                       <span>{translation("Settings.tabs.organization")}</span>
-                    </Link>
-
-                    <Link
-                      href="/settings/team"
-                      onClick={onNavClick("/settings/team")}
-                      className={`${styles.subnavItem} ${
-                        isActive("/settings/team") ? styles.active : ""
-                      }`}
-                    >
-                      <Contact aria-hidden className={styles.subnavIcon} />
-                      <span>{translation("Settings.tabs.team")}</span>
-                    </Link>
-
-                    <Link
-                      href="/settings/user-types"
-                      onClick={onNavClick("/settings/user-types")}
-                      className={`${styles.subnavItem} ${
-                        isActive("/settings/user-types") ? styles.active : ""
-                      }`}
-                    >
-                      <KeyRound aria-hidden className={styles.subnavIcon} />
-                      <span>{translation("Settings.tabs.userTypes")}</span>
                     </Link>
 
                     <Link

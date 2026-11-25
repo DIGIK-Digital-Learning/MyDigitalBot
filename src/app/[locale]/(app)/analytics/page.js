@@ -13,8 +13,6 @@ import styles from "./analytics.module.css";
 import { exportAnalyticsPdf } from "./lib/analytics.export";
 import { exportAnalyticsExcel } from "./lib/analytics.excel";
 import { buildExcelLabels, buildExcelFileName } from "./lib/analytics.helpers";
-import usePermissions from "@/app/PermissionsContext";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 
 /**
  * Opções disponíveis para filtrar as métricas por período.
@@ -641,7 +639,6 @@ function PageHeader({ children }) {
  */
 export default function AnalyticsPage() {
   const t = useTranslations("Analytics");
-  const { can, lock } = usePermissions();
   const locale = useLocale();
 
   const { user, loading: authLoading } = useAuth();
@@ -977,10 +974,7 @@ export default function AnalyticsPage() {
             type="button"
             className={styles.secondaryButton}
             onClick={handleExportPdf}
-            disabled={
-              !canExport || isExporting || !can(PERMISSIONS.ANALYTICS_EXPORT)
-            }
-            {...lock(PERMISSIONS.ANALYTICS_EXPORT)}
+            disabled={!canExport || isExporting}
           >
             {isExportingPdf ? t("customization.exporting") : t("customization.exportPdf")}
           </button>
@@ -988,10 +982,7 @@ export default function AnalyticsPage() {
             type="button"
             className={styles.secondaryButton}
             onClick={handleExportExcel}
-            disabled={
-              !canExport || isExporting || !can(PERMISSIONS.ANALYTICS_EXPORT)
-            }
-            {...lock(PERMISSIONS.ANALYTICS_EXPORT)}
+            disabled={!canExport || isExporting}
           >
             {isExportingExcel ? t("customization.exporting") : t("customization.exportExcel")}
           </button>

@@ -2857,8 +2857,7 @@
       "updating": "Updating…",
       "updated": "Password updated! Redirecting…",
       "passwordPolicy": "The password must be at least 8 characters long and include an uppercase letter, a lowercase letter and a special character.",
-      "genericError": "Couldn't update the password. Try again.",
-      "inviteTitle": "Welcome! Choose your password"
+      "genericError": "Couldn't update the password. Try again."
     }
   },
   "Alert": {
@@ -3237,9 +3236,7 @@
       "template": "Templates",
       "media": "Media",
       "tracked_link": "Tracked links",
-      "organization": "Organization",
-      "team_member": "Team",
-      "user_type": "User types"
+      "organization": "Organization"
     },
     "Channels": {
       "whatsapp": "WhatsApp",
@@ -3287,14 +3284,7 @@
       "teams_group_updated": "Teams group edited",
       "unknown": "Unknown action",
       "organization_plan_extended": "Plan extended",
-      "organization_plan_end_changed": "Plan end changed",
-      "team_member_invited": "Person invited to the team",
-      "team_member_type_changed": "User type changed",
-      "team_member_removed": "Person removed from the team",
-      "team_member_invite_resent": "Invitation resent",
-      "user_type_created": "User type created",
-      "user_type_updated": "User type changed",
-      "user_type_deleted": "User type deleted"
+      "organization_plan_end_changed": "Plan end changed"
     },
     "Table": {
       "when": "When",
@@ -3510,8 +3500,6 @@
     },
     "tabs": {
       "organization": "Organization",
-      "team": "Team",
-      "userTypes": "User types",
       "integrations": "Integrations",
       "activity": "Activity history"
     }
@@ -3630,7 +3618,7 @@
       "messageFilesLabel": "Message files",
       "messageFilesHint": "Each message can carry up to this many files.",
       "usersLabel": "Users",
-      "usersHint": "Counts collaborators and team accounts: they share the same plan seats.",
+      "usersHint": "Counts all users in the account.",
       "filesLabel": "Assistant files",
       "filesHint": "Each assistant can have up to this many files in its collection.",
       "assistantsLabel": "Assistants",
@@ -3708,8 +3696,6 @@
     "limits": {
       "durationDays": "Duration (days)",
       "users": "Users",
-      "teamMembers": "Accounts with login",
-      "customUserTypes": "User types",
       "assistants": "Assistants",
       "assistantInstructionChars": "Instruction characters",
       "filesPerAssistant": "Files per assistant",
@@ -3801,222 +3787,5 @@
     "continue": "Continue",
     "retry": "Try again",
     "footnote": "This page may close automatically once the redirect is done."
-  },
-  "ViewAs": {
-    "label": "View as",
-    "banner": "You are viewing the app as {type}.",
-    "back": "Back to Administrator",
-    "types": {
-      "admin": "Administrator",
-      "editor": "Editor",
-      "viewer": "Viewer"
-    },
-    "groups": {
-      "system": "Default",
-      "custom": "Custom"
-    }
-  },
-  "Permissions": {
-    "denied": "Your user type does not allow this.",
-    "noPage": {
-      "title": "No access to this page",
-      "description": "Your user type does not have access to this page. If you need it, ask an Administrator of your organization."
-    }
-  },
-  "Team": {
-    "title": "Team",
-    "description": "The people who sign in to your organization's app. Each account also takes one collaborator seat in the plan.",
-    "owner": "Owner",
-    "you": "You",
-    "ownerLocked": "The organization owner is always an Administrator.",
-    "selfLocked": "You can't change or remove your own account.",
-    "types": {
-      "admin": "Administrator",
-      "editor": "Editor",
-      "viewer": "Viewer"
-    },
-    "usage": {
-      "accounts": "Accounts",
-      "accountsHint": "Accounts that sign in to the app, including the owner. The maximum depends on the plan.",
-      "seats": "Seats",
-      "seatsHint": "Collaborators plus team accounts: they share the same plan seats."
-    },
-    "invite": {
-      "email": "Email",
-      "emailPlaceholder": "name@company.com",
-      "type": "User type",
-      "button": "Invite",
-      "sending": "Inviting…",
-      "help": "The person gets an email with a link to choose a password and sign in. Each person can only belong to one organization.",
-      "sentTitle": "Invitation sent",
-      "sent": "We sent the invitation to {email}.",
-      "added": "{email} already had an account and joined the team. They can sign in with their current password.",
-      "errorTitle": "Couldn't invite"
-    },
-    "table": {
-      "email": "Email",
-      "type": "Type",
-      "status": "Status",
-      "lastSignIn": "Last sign-in",
-      "actions": "Actions"
-    },
-    "status": {
-      "pending": "Invitation sent",
-      "active": "Active"
-    },
-    "resend": {
-      "action": "Resend invitation",
-      "sentTitle": "Invitation resent",
-      "sent": "We sent a new invitation to {email}. The previous link no longer works."
-    },
-    "remove": {
-      "action": "Remove",
-      "title": "Remove {email} from the team?",
-      "message": "The account is deleted and the person can no longer sign in. You can invite them again later.",
-      "confirm": "Remove",
-      "cancel": "Cancel"
-    },
-    "errors": {
-      "title": "Couldn't save",
-      "load": "Couldn't load the team.",
-      "generic": "Something went wrong. Try again.",
-      "INVALID_EMAIL": "Enter a valid email.",
-      "INVALID_TYPE": "Choose a user type.",
-      "ALREADY_MEMBER": "That person is already on your team.",
-      "IN_OTHER_ORGANIZATION": "That email already belongs to another organization. Each person can only belong to one.",
-      "TEAM_LIMIT_REACHED": "You've reached your plan's maximum number of accounts. Remove an account or change plan.",
-      "USER_LIMIT_REACHED": "There are no free seats in your plan: team accounts count as collaborators.",
-      "OWNER_LOCKED": "The organization owner is always an Administrator.",
-      "CANNOT_CHANGE_SELF": "You can't change or remove your own account.",
-      "NOT_FOUND": "That account is no longer on the team.",
-      "INVITE_FAILED": "Couldn't send the invitation. Try again.",
-      "NOT_PENDING": "That person has already signed in: no invitation needed.",
-      "NOT_ALLOWED": "You can't give permissions you don't have yourself."
-    },
-    "strongerLocked": "This person has a type with permissions you don't have."
-  },
-  "UserTypes": {
-    "title": "User types",
-    "description": "What each team member can do in the app. The Administrator can do everything; Editor and Viewer come with the app and can be duplicated to create a similar type.",
-    "add": "Add type",
-    "copyOf": "Copy of {name}",
-    "usage": {
-      "label": "Custom",
-      "hint": "How many user types your organization can create. The maximum depends on the plan."
-    },
-    "table": {
-      "name": "Name",
-      "permissions": "Permissions",
-      "people": "People",
-      "actions": "Actions",
-      "system": "Built-in",
-      "all": "All",
-      "count": "{count} of {total}"
-    },
-    "actions": {
-      "view": "View",
-      "edit": "Edit",
-      "duplicate": "Duplicate",
-      "delete": "Delete"
-    },
-    "editor": {
-      "newTitle": "New user type",
-      "editTitle": "Edit user type",
-      "viewTitle": "{name} permissions",
-      "hint": "Tick what this type can do. Ticking an action also ticks that area's «View». Changes apply right away to everyone with this type.",
-      "systemHint": "Built-in types can't be edited. For a similar one, use «Duplicate».",
-      "name": "Name",
-      "namePlaceholder": "For example: Human Resources",
-      "notYours": "You don't have this permission, so you can't give it.",
-      "save": "Save",
-      "saving": "Saving…",
-      "cancel": "Cancel",
-      "close": "Close",
-      "summary": "{count} of {total} permissions ticked",
-      "selectAll": "Tick all",
-      "clear": "Clear"
-    },
-    "saved": {
-      "title": "Type saved",
-      "created": "The «{name}» type was created. You can now give it to someone on the team.",
-      "updated": "The «{name}» type was changed. Everyone with it now has these permissions."
-    },
-    "remove": {
-      "title": "Delete the «{name}» type?",
-      "message": "The type will no longer exist. This can't be undone.",
-      "confirm": "Delete",
-      "cancel": "Cancel"
-    },
-    "errors": {
-      "title": "Couldn't save",
-      "load": "Couldn't load the user types.",
-      "generic": "Something went wrong. Try again.",
-      "INVALID_NAME": "Enter a name of up to 80 characters.",
-      "NO_PERMISSIONS": "Tick at least one permission.",
-      "NAME_TAKEN": "There's already a type with that name.",
-      "TYPE_LIMIT_REACHED": "You've reached your plan's maximum number of user types. Delete one to create another.",
-      "TYPE_IN_USE": "Some team members have this type. Change their type before deleting it.",
-      "SYSTEM_LOCKED": "Built-in types can't be edited or deleted.",
-      "NOT_ALLOWED": "You can't give permissions you don't have yourself.",
-      "NOT_FOUND": "That type no longer exists."
-    },
-    "groups": {
-      "general": "General",
-      "messages": "Messages",
-      "automation": "Automations and metrics",
-      "admin": "Settings and Team"
-    },
-    "areas": {
-      "dashboard": "Portal",
-      "users": "Users",
-      "teamsGroups": "Teams groups",
-      "assistants": "Assistants",
-      "send": "Send",
-      "scheduled": "Scheduled",
-      "links": "Tracked links",
-      "questions": "Questions",
-      "media": "Media",
-      "automations": "Automations",
-      "analytics": "Metrics",
-      "settings": "Settings",
-      "team": "Team"
-    },
-    "permissions": {
-      "dashboard_view": "View",
-      "users_view": "View",
-      "users_edit": "Create and edit",
-      "users_delete": "Delete",
-      "users_import": "Import CSV",
-      "users_groups": "Manage groups",
-      "teams_groups_view": "View",
-      "teams_groups_edit": "Create, edit and delete",
-      "assistants_view": "View",
-      "assistants_edit": "Create and edit",
-      "assistants_delete": "Delete",
-      "assistants_test": "Try out (test chat)",
-      "messages_send_whatsapp": "Send by WhatsApp",
-      "messages_send_teams": "Send through Teams",
-      "messages_image_ai": "Create AI image",
-      "messages_scheduled_view": "View",
-      "messages_scheduled_edit": "Edit and cancel (sequences too)",
-      "links_view": "View reports",
-      "links_create": "Create links",
-      "questions_view": "View",
-      "questions_review": "Review answers",
-      "questions_export": "Export",
-      "media_view": "View",
-      "media_edit": "Upload and delete",
-      "automations_view": "View",
-      "automations_edit": "Create, edit and delete",
-      "automations_run": "Run manually",
-      "analytics_view": "View",
-      "analytics_export": "Export (PDF and Excel)",
-      "settings_organization": "Organization: view and edit",
-      "settings_integrations": "Integrations (WhatsApp, Teams, opening message)",
-      "settings_audit_view": "Activity history: view",
-      "team_view": "See who has access",
-      "team_manage": "Invite, change type and remove",
-      "team_user_types": "Manage user types"
-    }
   }
 }
