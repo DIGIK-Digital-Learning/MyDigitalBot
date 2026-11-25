@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { UserPlus } from "lucide-react";
+import { MailPlus, UserPlus } from "lucide-react";
 
 import { useAuth } from "@/app/AuthContext";
 import { useAlert } from "@/app/components/Alert/AlertProvider";
@@ -18,6 +18,7 @@ import {
   fetchTeam,
   inviteTeamMember,
   removeTeamMember,
+  resendTeamInvite,
 } from "@/lib/organizations/organizations.api";
 
 import settingsStyles from "../settings.module.css";
@@ -99,6 +100,24 @@ export default function TeamSettings() {
     setBusyId(member.id);
     try {
       await changeTeamMemberType(orgId, member.id, nextType);
+      await load();
+    } catch (error) {
+      void showAlert({ title: t("errors.title"), message: errorText(error), tone: "danger" });
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  /* O link do convite expira; quem ainda não entrou recebe um novo. */
+  async function resend(member) {
+    setBusyId(member.id);
+    try {
+      const result = await resendTeamInvite(orgId, member.id, locale);
+      void showAlert({
+        title: t("resend.sentTitle"),
+        message: t("resend.sent", { email: result.email }),
+        tone: "success",
+      });
       await load();
     } catch (error) {
       void showAlert({ title: t("errors.title"), message: errorText(error), tone: "danger" });
@@ -282,6 +301,16 @@ export default function TeamSettings() {
                         <td>
                           {locked ? null : (
                             <RowActions label={t("table.actions")}>
+                              {member.pending ? (
+                                <RowAction
+                                  kind="resend"
+                                  icon={MailPlus}
+                                  label={t("resend.action")}
+                                  onClick={() => resend(member)}
+                                  disabled={rowBusy || !canManage}
+                                  {...lock(PERMISSIONS.TEAM_MANAGE)}
+                                />
+                              ) : null}
                               <RowAction
                                 kind="delete"
                                 label={t("remove.action")}

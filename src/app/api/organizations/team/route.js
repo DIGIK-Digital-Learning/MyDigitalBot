@@ -14,6 +14,7 @@ import {
   inviteTeamMember,
   listTeam,
   removeTeamMember,
+  resendTeamInvite,
 } from "@/lib/services/team/team.service";
 
 /*
@@ -77,6 +78,19 @@ export async function POST(req) {
 
     const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.TEAM_MANAGE });
     if (orgAuth.error) return orgAuth.error;
+
+    /* Reenviar o convite a quem ainda não entrou (o link expira). */
+    if (body?.action === "resend") {
+      const memberId = parsePositiveInt(body?.memberId);
+      if (!memberId) {
+        return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+      }
+      const resent = await resendTeamInvite(orgAuth, {
+        memberId,
+        redirectTo: inviteRedirect(req, body?.locale),
+      });
+      return NextResponse.json(resent);
+    }
 
     const result = await inviteTeamMember(orgAuth, {
       email: body?.email,

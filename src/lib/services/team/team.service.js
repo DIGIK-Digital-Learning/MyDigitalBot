@@ -193,6 +193,41 @@ export async function changeTeamMemberType(
   return { changed: true };
 }
 
+/*
+ * Volta a mandar o email do convite. Os links do Supabase expiram (1 hora
+ * por omissão), e sem isto o administrador tinha de remover a pessoa e
+ * convidá-la de novo. Só serve para quem ainda nunca entrou.
+ */
+export async function resendTeamInvite(
+  orgAuth,
+  { memberId, redirectTo },
+  deps = defaultDeps,
+) {
+  const member = await editableMemberOrFail(orgAuth, memberId, deps);
+  const info = await deps.getAuthUsersInfo([member.authUserId]);
+  const account = info[member.authUserId];
+  if (!account?.email) throw new TeamError("NOT_FOUND", 404);
+  if (account.lastSignInAt) throw new TeamError("NOT_PENDING", 409);
+
+  try {
+    await deps.inviteAuthUser(account.email, {
+      redirectTo,
+      data: { invited_to_organization: Number(orgAuth.orgId) },
+    });
+  } catch {
+    throw new TeamError("INVITE_FAILED", 502);
+  }
+
+  await deps.recordAuditEvent(orgAuth, {
+    action: AUDIT_ACTIONS.TEAM_MEMBER_INVITE_RESENT,
+    entityId: member.id,
+    entityLabel: account.email,
+    details: { typeKey: member.typeKey },
+  });
+
+  return { email: account.email, emailSent: true };
+}
+
 export async function removeTeamMember(orgAuth, { memberId }, deps = defaultDeps) {
   const member = await editableMemberOrFail(orgAuth, memberId, deps);
   const email = await emailOf(member.authUserId, deps);

@@ -70,6 +70,14 @@ export function inviteTeamMember(orgId, { email, typeKey, locale }) {
   });
 }
 
+export function resendTeamInvite(orgId, memberId, locale) {
+  return teamRequest("/api/organizations/team", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orgId, action: "resend", memberId, locale }),
+  });
+}
+
 export function changeTeamMemberType(orgId, memberId, typeKey) {
   return teamRequest("/api/organizations/team", {
     method: "PATCH",

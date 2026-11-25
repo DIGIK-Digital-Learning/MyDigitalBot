@@ -3289,7 +3289,8 @@
       "organization_plan_end_changed": "Fim do plano alterado",
       "team_member_invited": "Pessoa convidada para a Equipa",
       "team_member_type_changed": "Tipo de utilizador mudado",
-      "team_member_removed": "Pessoa removida da Equipa"
+      "team_member_removed": "Pessoa removida da Equipa",
+      "team_member_invite_resent": "Convite da Equipa reenviado"
     },
     "Table": {
       "when": "Quando",
@@ -3853,6 +3854,11 @@
       "pending": "Convite enviado",
       "active": "Ativo"
     },
+    "resend": {
+      "action": "Reenviar convite",
+      "sentTitle": "Convite reenviado",
+      "sent": "Enviámos um convite novo para {email}. O link anterior deixa de funcionar."
+    },
     "remove": {
       "action": "Remover",
       "title": "Remover {email} da Equipa?",
@@ -3873,7 +3879,8 @@
       "OWNER_LOCKED": "O dono da organização é sempre Administrador.",
       "CANNOT_CHANGE_SELF": "Não podes mudar nem remover a tua própria conta.",
       "NOT_FOUND": "Essa conta já não está na Equipa.",
-      "INVITE_FAILED": "Não foi possível enviar o convite. Tenta novamente."
+      "INVITE_FAILED": "Não foi possível enviar o convite. Tenta novamente.",
+      "NOT_PENDING": "Essa pessoa já entrou na app: não precisa de convite."
     }
   }
 }

@@ -66,6 +66,7 @@ export const AUDIT_ACTIONS = Object.freeze({
   TEAMS_GROUP_UPDATED: "teams_group.updated",
 
   TEAM_MEMBER_INVITED: "team_member.invited",
+  TEAM_MEMBER_INVITE_RESENT: "team_member.invite_resent",
   TEAM_MEMBER_TYPE_CHANGED: "team_member.type_changed",
   TEAM_MEMBER_REMOVED: "team_member.removed",
 });

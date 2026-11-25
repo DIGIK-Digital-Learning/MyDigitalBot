@@ -8,6 +8,7 @@ import {
   inviteTeamMember,
   normalizeEmail,
   removeTeamMember,
+  resendTeamInvite,
 } from "@/lib/services/team/team.service";
 
 /*
@@ -194,6 +195,52 @@ describe("mudar o tipo e remover", () => {
       expect.anything(),
       expect.objectContaining({ details: { from: "viewer", to: "editor" } }),
     );
+  });
+
+  it("reenvia o convite a quem ainda não entrou e regista no histórico", async () => {
+    const deps = makeDeps({ getMember: vi.fn(async () => member("p-uuid", "editor")) });
+    await expect(
+      resendTeamInvite(makeOrgAuth(), { memberId: 5, redirectTo: "http://x/pt/reset/confirm" }, deps),
+    ).resolves.toEqual({ email: "p-uuid@local.test", emailSent: true });
+    expect(deps.inviteAuthUser).toHaveBeenCalledWith(
+      "p-uuid@local.test",
+      expect.objectContaining({ redirectTo: "http://x/pt/reset/confirm" }),
+    );
+    expect(deps.recordAuditEvent).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: "team_member.invite_resent" }),
+    );
+  });
+
+  it("não reenvia a quem já entrou, nem ao dono", async () => {
+    const signedIn = makeDeps({
+      getMember: vi.fn(async () => member("p-uuid")),
+      getAuthUsersInfo: vi.fn(async () => ({
+        "p-uuid": { email: "p@local.test", lastSignInAt: "2026-11-25T10:00:00Z" },
+      })),
+    });
+    await expect(
+      resendTeamInvite(makeOrgAuth(), { memberId: 5 }, signedIn),
+    ).rejects.toMatchObject({ code: "NOT_PENDING", status: 409 });
+    expect(signedIn.inviteAuthUser).not.toHaveBeenCalled();
+
+    const owner = makeDeps({ getMember: vi.fn(async () => member(OWNER, "admin")) });
+    await expect(
+      resendTeamInvite(makeOrgAuth(ME), { memberId: 5 }, owner),
+    ).rejects.toMatchObject({ code: "OWNER_LOCKED" });
+  });
+
+  it("se o email falhar, avisa e não regista nada", async () => {
+    const deps = makeDeps({
+      getMember: vi.fn(async () => member("p-uuid")),
+      inviteAuthUser: vi.fn(async () => {
+        throw new Error("rate limit");
+      }),
+    });
+    await expect(resendTeamInvite(makeOrgAuth(), { memberId: 5 }, deps)).rejects.toMatchObject({
+      code: "INVITE_FAILED",
+    });
+    expect(deps.recordAuditEvent).not.toHaveBeenCalled();
   });
 
   it("remover apaga a conta (só existia para esta Equipa)", async () => {

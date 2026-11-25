@@ -3289,7 +3289,8 @@
       "organization_plan_end_changed": "Plan end changed",
       "team_member_invited": "Person invited to the team",
       "team_member_type_changed": "User type changed",
-      "team_member_removed": "Person removed from the team"
+      "team_member_removed": "Person removed from the team",
+      "team_member_invite_resent": "Invitation resent"
     },
     "Table": {
       "when": "When",
@@ -3853,6 +3854,11 @@
       "pending": "Invitation sent",
       "active": "Active"
     },
+    "resend": {
+      "action": "Resend invitation",
+      "sentTitle": "Invitation resent",
+      "sent": "We sent a new invitation to {email}. The previous link no longer works."
+    },
     "remove": {
       "action": "Remove",
       "title": "Remove {email} from the team?",
@@ -3873,7 +3879,8 @@
       "OWNER_LOCKED": "The organization owner is always an Administrator.",
       "CANNOT_CHANGE_SELF": "You can't change or remove your own account.",
       "NOT_FOUND": "That account is no longer on the team.",
-      "INVITE_FAILED": "Couldn't send the invitation. Try again."
+      "INVITE_FAILED": "Couldn't send the invitation. Try again.",
+      "NOT_PENDING": "That person has already signed in: no invitation needed."
     }
   }
 }
