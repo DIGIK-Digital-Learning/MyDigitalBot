@@ -31,7 +31,6 @@ import {
   handleApiError,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
-import { sendPermissionFor } from "@/lib/auth/permissions";
 
 function normalizeRecipient(raw) {
   if (!raw || typeof raw !== "object") return null;
@@ -109,7 +108,7 @@ export async function POST(req) {
       timezone = null,
     } = body || {};
 
-    const orgAuth = await requireOwnedOrg(orgId, { permission: sendPermissionFor(channel) });
+    const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
     if (!["whatsapp", "teams"].includes(channel)) {

@@ -24,7 +24,6 @@ import {
   requireOrgForUser,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 
 export async function GET(req) {
   try {
@@ -37,7 +36,7 @@ export async function GET(req) {
       Math.max(1, Number(searchParams.get("pageSize") || 100)),
     );
 
-    const orgAuth = await requireOwnedOrg(orgId, { permission: [PERMISSIONS.USERS_VIEW, PERMISSIONS.SEND_WHATSAPP, PERMISSIONS.SEND_TEAMS, PERMISSIONS.AUTOMATIONS_EDIT] });
+    const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {
@@ -71,7 +70,7 @@ export async function POST(req) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(organizationId, { permission: PERMISSIONS.USERS_EDIT });
+    const orgAuth = await requireOwnedOrg(organizationId);
     if (orgAuth.error) return orgAuth.error;
 
     /* A Demo terminou (#209): ver continua, criar e enviar não. */
@@ -200,7 +199,7 @@ export async function PATCH(req) {
       );
     }
 
-    const orgAuth = await requireOrgForUser(id, { permission: PERMISSIONS.USERS_EDIT });
+    const orgAuth = await requireOrgForUser(id);
     if (orgAuth.error) return orgAuth.error;
 
     const safeAssistantId =
@@ -307,7 +306,7 @@ export async function DELETE(req) {
     const { searchParams } = new URL(req.url);
     const userId = Number(searchParams.get("id"));
 
-    const orgAuth = await requireOrgForUser(userId, { permission: PERMISSIONS.USERS_DELETE });
+    const orgAuth = await requireOrgForUser(userId);
     if (orgAuth.error) return orgAuth.error;
 
     await deleteUser(orgAuth.userId);

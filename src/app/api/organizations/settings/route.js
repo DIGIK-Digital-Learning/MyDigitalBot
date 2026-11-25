@@ -8,9 +8,6 @@ import {
   parsePositiveInt,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
-import { PERMISSIONS, accessAllows } from "@/lib/auth/permissions";
-
-const INTEGRATION_FIELDS = ["teams_tenant_id", "waba_id", "waba_namespace"];
 import {
   loadOrganizationSettings,
   saveOrganizationSettings,
@@ -31,7 +28,7 @@ export async function GET(request) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.SETTINGS_ORGANIZATION });
+    const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {
@@ -68,23 +65,8 @@ export async function PATCH(request) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.SETTINGS_ORGANIZATION });
+    const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
-
-    /*
-     * Os ids do WhatsApp e do Teams são integrações (#247): mudá-los pede
-     * também essa permissão, além da de editar a organização.
-     */
-    const touchesIntegrations = INTEGRATION_FIELDS.some((field) =>
-      Object.hasOwn(body || {}, field),
-    );
-
-    if (
-      touchesIntegrations &&
-      !accessAllows(orgAuth.access, PERMISSIONS.SETTINGS_INTEGRATIONS)
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
 
     const item = await saveOrganizationSettings(orgAuth.orgId, body);
     return NextResponse.json({ ok: true, item });

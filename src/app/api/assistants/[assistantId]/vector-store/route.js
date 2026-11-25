@@ -10,7 +10,6 @@ import { associateVectorStoreToDbAssistant } from "@/lib/repos/assistants.repo";
 import { createDBStore } from "@/lib/repos/store.repo";
 
 import { requireOrgForAssistant, handleApiError } from "@/lib/auth/guards";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
@@ -34,7 +33,7 @@ export async function POST(req, ctx) {
      * - Assistant exists
      * - Logged-in user owns its organization
      */
-    const auth = await requireOrgForAssistant(assistantId, { permission: PERMISSIONS.ASSISTANTS_EDIT });
+    const auth = await requireOrgForAssistant(assistantId);
 
     if (auth.error) {
       return auth.error;

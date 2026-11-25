@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { applyThemeVariables } from "@/lib/helpers/theme.helpers";
 import { useAuth } from "@/app/AuthContext";
-import { fetchCurrentOrganization } from "@/lib/helpers/currentOrganization";
 
 export default function useOrganization(user) {
   const { loading: authLoading } = useAuth();
@@ -21,11 +20,13 @@ export default function useOrganization(user) {
     }
 
     setFetching(true);
-    const { data, error } = await fetchCurrentOrganization(
-      supabase,
-      user.id,
-      "id, name, logo_url, theme, channel_id, waba_id, waba_namespace, teams_tenant_id, default_phone_country_code",
-    );
+    const { data, error } = await supabase
+      .from("organization")
+      .select(
+        "id, name, logo_url, theme, channel_id, waba_id, waba_namespace, teams_tenant_id, default_phone_country_code",
+      )
+      .eq("owner_user_id", user.id)
+      .single();
 
     if (error) console.error("[useOrganization]", error.message);
     setOrg(data ?? null);
@@ -62,15 +63,8 @@ export default function useOrganization(user) {
    * ainda por chegar, ou acabado de chegar) com loading false e org null, e
    * as páginas avisavam "Organização em falta" sem razão.
    */
-  /*
-   * Reler a organização já lida (depois de a editar nas Definições) não
-   * volta a «a carregar»: as páginas por trás das permissões ficam onde
-   * estão, com o que a pessoa estava a escrever (#247).
-   */
   const loading =
-    authLoading ||
-    Boolean(user && loadedFor !== user.id) ||
-    (fetching && !org);
+    authLoading || fetching || Boolean(user && loadedFor !== user.id);
 
   return { org, loading, refresh: loadOrganization };
 }

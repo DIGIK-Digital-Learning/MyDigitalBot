@@ -24,14 +24,11 @@ import { Plus, Undo2 } from "lucide-react";
 import usePlanLimits from "@/app/hooks/usePlanLimits";
 import { limitKeepingCurrent } from "@/lib/plans/limitRules";
 import { DetailSkeleton, ListSkeleton } from "./AssistantsSkeleton";
-import usePermissions from "@/app/PermissionsContext";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 
 const STORAGE_BUCKET = "assistant-uploads";
 
 export default function AssistantsHub() {
   const translation = useTranslations();
-  const { can, lock } = usePermissions();
   const confirm = useConfirm();
   const { user, loading: authLoading, supabase } = useAuth();
   const { org, loading: orgLoading } = useOrganization(user);
@@ -548,7 +545,7 @@ export default function AssistantsHub() {
           <button
             className={styles.ctaPrimary}
             onClick={openCreate}
-            disabled={!orgId || assistantsFull || !can(PERMISSIONS.ASSISTANTS_EDIT)}
+            disabled={!orgId || assistantsFull}
             title={
               assistantsFull
                 ? translation("Plans.limits.assistants", {
@@ -557,7 +554,6 @@ export default function AssistantsHub() {
                   })
                 : translation("Assistants.createAssistant")
             }
-            {...lock(PERMISSIONS.ASSISTANTS_EDIT)}
           >
             <Plus size={16} aria-hidden />
             {translation("Assistants.createAssistant")}
@@ -708,15 +704,11 @@ export default function AssistantsHub() {
                           setDraft(selected ? { ...selected } : null);
                           setIsEditing(true);
                         }}
-                        disabled={!can(PERMISSIONS.ASSISTANTS_EDIT)}
-                        {...lock(PERMISSIONS.ASSISTANTS_EDIT)}
                       />
                       <RowAction
                         kind="delete"
                         label={translation("Assistants.details.delete")}
                         onClick={deleteAssistant}
-                        disabled={!can(PERMISSIONS.ASSISTANTS_DELETE)}
-                        {...lock(PERMISSIONS.ASSISTANTS_DELETE)}
                       />
                     </>
                   )}
@@ -738,7 +730,6 @@ export default function AssistantsHub() {
                     className={styles.input}
                     value={vsName}
                     onChange={(e) => setVsName(e.target.value)}
-                    disabled={!can(PERMISSIONS.ASSISTANTS_EDIT)}
                     placeholder={`${translation(
                       "Assistants.vector.collectionNamePlaceholder",
                     )} ${selected.name}`}
@@ -777,10 +768,7 @@ export default function AssistantsHub() {
                     <button
                       className={styles.ctaPrimary}
                       onClick={handleAddVectorStore}
-                      disabled={
-                        !vsName.trim() || vsFiles.length === 0 || !can(PERMISSIONS.ASSISTANTS_EDIT)
-                      }
-                      {...lock(PERMISSIONS.ASSISTANTS_EDIT)}
+                      disabled={!vsName.trim() || vsFiles.length === 0}
                     >
                       {translation("Assistants.vector.createAndAttach")}
                     </button>
@@ -797,9 +785,8 @@ export default function AssistantsHub() {
                         type="button"
                         className={styles.ghostBtn}
                         onClick={beginVectorStoreEdit}
-                        disabled={!vectorStore || !can(PERMISSIONS.ASSISTANTS_EDIT)}
+                        disabled={!vectorStore}
                         title={translation("Assistants.vector.editTitle")}
-                        {...lock(PERMISSIONS.ASSISTANTS_EDIT)}
                       >
                         {translation("Assistants.vector.edit")}
                       </button>
@@ -1016,8 +1003,6 @@ export default function AssistantsHub() {
                           kind="delete"
                           label={translation("Common.delete")}
                           onClick={deleteVectorStore}
-                          disabled={!can(PERMISSIONS.ASSISTANTS_EDIT)}
-                          {...lock(PERMISSIONS.ASSISTANTS_EDIT)}
                         />
                       </div>
                     </>

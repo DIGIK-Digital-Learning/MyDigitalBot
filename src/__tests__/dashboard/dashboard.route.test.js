@@ -45,7 +45,7 @@ describe("GET /api/dashboard/overview", () => {
 
     const response = await GET(request(99));
     expect(response.status).toBe(200);
-    expect(mocks.requireOwnedOrg).toHaveBeenCalledWith(99, { permission: "dashboard.view" });
+    expect(mocks.requireOwnedOrg).toHaveBeenCalledWith(99);
     expect(mocks.getDashboardOverview).toHaveBeenCalledWith(7);
   });
 });

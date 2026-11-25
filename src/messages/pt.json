@@ -2857,8 +2857,7 @@
       "updating": "A atualizar…",
       "updated": "Palavra-passe atualizada! A redirecionar…",
       "passwordPolicy": "A palavra-passe tem de ter pelo menos 8 caracteres e incluir uma letra maiúscula, uma letra minúscula e um caráter especial.",
-      "genericError": "Não foi possível atualizar a palavra-passe. Tenta novamente.",
-      "inviteTitle": "Bem-vindo! Escolhe a tua palavra-passe"
+      "genericError": "Não foi possível atualizar a palavra-passe. Tenta novamente."
     }
   },
   "Alert": {
@@ -3237,9 +3236,7 @@
       "template": "Templates",
       "media": "Multimédia",
       "tracked_link": "Links rastreados",
-      "organization": "Organização",
-      "team_member": "Equipa",
-      "user_type": "Tipos de utilizador"
+      "organization": "Organização"
     },
     "Channels": {
       "whatsapp": "WhatsApp",
@@ -3287,14 +3284,7 @@
       "teams_group_updated": "Grupo Teams editado",
       "unknown": "Ação desconhecida",
       "organization_plan_extended": "Plano prolongado",
-      "organization_plan_end_changed": "Fim do plano alterado",
-      "team_member_invited": "Pessoa convidada para a Equipa",
-      "team_member_type_changed": "Tipo de utilizador mudado",
-      "team_member_removed": "Pessoa removida da Equipa",
-      "team_member_invite_resent": "Convite da Equipa reenviado",
-      "user_type_created": "Tipo de utilizador criado",
-      "user_type_updated": "Tipo de utilizador alterado",
-      "user_type_deleted": "Tipo de utilizador eliminado"
+      "organization_plan_end_changed": "Fim do plano alterado"
     },
     "Table": {
       "when": "Quando",
@@ -3510,8 +3500,6 @@
     },
     "tabs": {
       "organization": "Organização",
-      "team": "Equipa",
-      "userTypes": "Tipos de utilizador",
       "integrations": "Integrações",
       "activity": "Histórico de atividade"
     }
@@ -3630,7 +3618,7 @@
       "messageFilesLabel": "Ficheiros da mensagem",
       "messageFilesHint": "Cada mensagem pode levar até este número de ficheiros.",
       "usersLabel": "Utilizadores",
-      "usersHint": "Conta os colaboradores e as contas da Equipa: partilham os mesmos lugares do plano.",
+      "usersHint": "Conta todos os utilizadores da conta.",
       "filesLabel": "Ficheiros do assistente",
       "filesHint": "Cada assistente pode ter até este número de ficheiros na coleção.",
       "assistantsLabel": "Assistentes",
@@ -3708,8 +3696,6 @@
     "limits": {
       "durationDays": "Duração (dias)",
       "users": "Utilizadores",
-      "teamMembers": "Contas com login",
-      "customUserTypes": "Tipos de utilizador",
       "assistants": "Assistentes",
       "assistantInstructionChars": "Caracteres das instruções",
       "filesPerAssistant": "Ficheiros por assistente",
@@ -3801,222 +3787,5 @@
     "continue": "Continuar",
     "retry": "Tentar novamente",
     "footnote": "Esta página pode fechar automaticamente ao concluir o redirecionamento."
-  },
-  "ViewAs": {
-    "label": "Ver como",
-    "banner": "Estás a ver a app como {type}.",
-    "back": "Voltar a Administrador",
-    "types": {
-      "admin": "Administrador",
-      "editor": "Editor",
-      "viewer": "Leitor"
-    },
-    "groups": {
-      "system": "Predefinidos",
-      "custom": "Personalizados"
-    }
-  },
-  "Permissions": {
-    "denied": "O teu tipo de utilizador não permite fazer isto.",
-    "noPage": {
-      "title": "Sem acesso a esta página",
-      "description": "O teu tipo de utilizador não tem acesso a esta página. Se precisares, pede a um Administrador da tua organização."
-    }
-  },
-  "Team": {
-    "title": "Equipa",
-    "description": "As pessoas que entram na app da tua organização. Cada conta ocupa também um lugar de colaborador do plano.",
-    "owner": "Dono",
-    "you": "Tu",
-    "ownerLocked": "O dono da organização é sempre Administrador.",
-    "selfLocked": "Não podes mudar nem remover a tua própria conta.",
-    "types": {
-      "admin": "Administrador",
-      "editor": "Editor",
-      "viewer": "Leitor"
-    },
-    "usage": {
-      "accounts": "Contas",
-      "accountsHint": "Contas que entram na app, incluindo o dono. O máximo depende do plano.",
-      "seats": "Lugares",
-      "seatsHint": "Colaboradores mais contas da Equipa: partilham os mesmos lugares do plano."
-    },
-    "invite": {
-      "email": "Email",
-      "emailPlaceholder": "nome@empresa.pt",
-      "type": "Tipo de utilizador",
-      "button": "Convidar",
-      "sending": "A convidar…",
-      "help": "A pessoa recebe um email com um link para escolher a palavra-passe e entrar. Cada pessoa só pode estar numa organização.",
-      "sentTitle": "Convite enviado",
-      "sent": "Enviámos o convite para {email}.",
-      "added": "{email} já tinha conta e entrou na Equipa. Pode entrar com a palavra-passe que já tem.",
-      "errorTitle": "Não foi possível convidar"
-    },
-    "table": {
-      "email": "Email",
-      "type": "Tipo",
-      "status": "Estado",
-      "lastSignIn": "Última entrada",
-      "actions": "Ações"
-    },
-    "status": {
-      "pending": "Convite enviado",
-      "active": "Ativo"
-    },
-    "resend": {
-      "action": "Reenviar convite",
-      "sentTitle": "Convite reenviado",
-      "sent": "Enviámos um convite novo para {email}. O link anterior deixa de funcionar."
-    },
-    "remove": {
-      "action": "Remover",
-      "title": "Remover {email} da Equipa?",
-      "message": "A conta é apagada e a pessoa deixa de entrar na app. Podes voltar a convidá-la mais tarde.",
-      "confirm": "Remover",
-      "cancel": "Cancelar"
-    },
-    "errors": {
-      "title": "Não foi possível guardar",
-      "load": "Não foi possível carregar a Equipa.",
-      "generic": "Algo correu mal. Tenta novamente.",
-      "INVALID_EMAIL": "Escreve um email válido.",
-      "INVALID_TYPE": "Escolhe um tipo de utilizador.",
-      "ALREADY_MEMBER": "Essa pessoa já está na tua Equipa.",
-      "IN_OTHER_ORGANIZATION": "Esse email já pertence a outra organização. Cada pessoa só pode estar numa.",
-      "TEAM_LIMIT_REACHED": "Chegaste ao máximo de contas do teu plano. Remove uma conta ou muda de plano.",
-      "USER_LIMIT_REACHED": "Não há lugares livres no teu plano: as contas da Equipa contam como colaboradores.",
-      "OWNER_LOCKED": "O dono da organização é sempre Administrador.",
-      "CANNOT_CHANGE_SELF": "Não podes mudar nem remover a tua própria conta.",
-      "NOT_FOUND": "Essa conta já não está na Equipa.",
-      "INVITE_FAILED": "Não foi possível enviar o convite. Tenta novamente.",
-      "NOT_PENDING": "Essa pessoa já entrou na app: não precisa de convite.",
-      "NOT_ALLOWED": "Não podes dar permissões que tu próprio não tens."
-    },
-    "strongerLocked": "Esta pessoa tem um tipo com permissões que tu não tens."
-  },
-  "UserTypes": {
-    "title": "Tipos de utilizador",
-    "description": "O que cada pessoa da Equipa pode fazer na app. O Administrador pode tudo; o Editor e o Leitor vêm com a app e podem duplicar-se para criar um tipo parecido.",
-    "add": "Adicionar tipo",
-    "copyOf": "Cópia de {name}",
-    "usage": {
-      "label": "Personalizados",
-      "hint": "Quantos tipos de utilizador a tua organização pode criar. O máximo depende do plano."
-    },
-    "table": {
-      "name": "Nome",
-      "permissions": "Permissões",
-      "people": "Pessoas",
-      "actions": "Ações",
-      "system": "Predefinido",
-      "all": "Todas",
-      "count": "{count} de {total}"
-    },
-    "actions": {
-      "view": "Ver",
-      "edit": "Editar",
-      "duplicate": "Duplicar",
-      "delete": "Eliminar"
-    },
-    "editor": {
-      "newTitle": "Novo tipo de utilizador",
-      "editTitle": "Editar tipo de utilizador",
-      "viewTitle": "Permissões do {name}",
-      "hint": "Marca o que este tipo pode fazer. Ao marcar uma ação, o «Ver» da área marca-se sozinho. As mudanças valem logo para quem tem este tipo.",
-      "systemHint": "Os tipos que vêm com a app não se editam. Para um parecido, usa «Duplicar».",
-      "name": "Nome",
-      "namePlaceholder": "Por exemplo: Recursos Humanos",
-      "notYours": "Não tens esta permissão, por isso não a podes dar.",
-      "save": "Guardar",
-      "saving": "A guardar…",
-      "cancel": "Cancelar",
-      "close": "Fechar",
-      "summary": "{count} de {total} permissões marcadas",
-      "selectAll": "Marcar tudo",
-      "clear": "Limpar"
-    },
-    "saved": {
-      "title": "Tipo guardado",
-      "created": "O tipo «{name}» foi criado. Já o podes dar a alguém na Equipa.",
-      "updated": "O tipo «{name}» foi alterado. Quem o tem passa a ter estas permissões."
-    },
-    "remove": {
-      "title": "Eliminar o tipo «{name}»?",
-      "message": "O tipo deixa de existir. Esta ação não se desfaz.",
-      "confirm": "Eliminar",
-      "cancel": "Cancelar"
-    },
-    "errors": {
-      "title": "Não foi possível guardar",
-      "load": "Não foi possível carregar os tipos de utilizador.",
-      "generic": "Algo correu mal. Tenta novamente.",
-      "INVALID_NAME": "Escreve um nome com até 80 caracteres.",
-      "NO_PERMISSIONS": "Marca pelo menos uma permissão.",
-      "NAME_TAKEN": "Já existe um tipo com esse nome.",
-      "TYPE_LIMIT_REACHED": "Chegaste ao máximo de tipos de utilizador do teu plano. Elimina um para criar outro.",
-      "TYPE_IN_USE": "Há pessoas na Equipa com este tipo. Muda-lhes o tipo antes de o eliminar.",
-      "SYSTEM_LOCKED": "Os tipos que vêm com a app não se editam nem se eliminam.",
-      "NOT_ALLOWED": "Não podes dar permissões que tu próprio não tens.",
-      "NOT_FOUND": "Esse tipo já não existe."
-    },
-    "groups": {
-      "general": "Geral",
-      "messages": "Mensagens",
-      "automation": "Automações e métricas",
-      "admin": "Definições e Equipa"
-    },
-    "areas": {
-      "dashboard": "Portal",
-      "users": "Utilizadores",
-      "teamsGroups": "Grupos Teams",
-      "assistants": "Assistentes",
-      "send": "Enviar",
-      "scheduled": "Agendadas",
-      "links": "Links rastreados",
-      "questions": "Perguntas",
-      "media": "Multimédia",
-      "automations": "Automações",
-      "analytics": "Métricas",
-      "settings": "Definições",
-      "team": "Equipa"
-    },
-    "permissions": {
-      "dashboard_view": "Ver",
-      "users_view": "Ver",
-      "users_edit": "Criar e editar",
-      "users_delete": "Eliminar",
-      "users_import": "Importar CSV",
-      "users_groups": "Gerir grupos",
-      "teams_groups_view": "Ver",
-      "teams_groups_edit": "Criar, editar e eliminar",
-      "assistants_view": "Ver",
-      "assistants_edit": "Criar e editar",
-      "assistants_delete": "Eliminar",
-      "assistants_test": "Experimentar (chat de teste)",
-      "messages_send_whatsapp": "Enviar por WhatsApp",
-      "messages_send_teams": "Enviar pelo Teams",
-      "messages_image_ai": "Criar imagem com IA",
-      "messages_scheduled_view": "Ver",
-      "messages_scheduled_edit": "Editar e cancelar (também as sequências)",
-      "links_view": "Ver relatórios",
-      "links_create": "Criar links",
-      "questions_view": "Ver",
-      "questions_review": "Avaliar respostas",
-      "questions_export": "Exportar",
-      "media_view": "Ver",
-      "media_edit": "Carregar e eliminar",
-      "automations_view": "Ver",
-      "automations_edit": "Criar, editar e eliminar",
-      "automations_run": "Correr à mão",
-      "analytics_view": "Ver",
-      "analytics_export": "Exportar (PDF e Excel)",
-      "settings_organization": "Organização: ver e editar",
-      "settings_integrations": "Integrações (WhatsApp, Teams, mensagem de abertura)",
-      "settings_audit_view": "Histórico de atividade: ver",
-      "team_view": "Ver quem tem acesso",
-      "team_manage": "Convidar, mudar o tipo e remover",
-      "team_user_types": "Gerir tipos de utilizador"
-    }
   }
 }

@@ -24,7 +24,6 @@ import {
   requireOwnedOrg,
   parsePositiveInt,
 } from "@/lib/auth/guards";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 
 export async function GET(req) {
   try {
@@ -47,7 +46,7 @@ export async function GET(req) {
      * Ensure the logged-in user owns
      * this organization.
      */
-    const orgAuth = await requireOwnedOrg(orgId, { permission: [PERMISSIONS.ASSISTANTS_VIEW, PERMISSIONS.USERS_EDIT, PERMISSIONS.SEND_WHATSAPP, PERMISSIONS.SEND_TEAMS, PERMISSIONS.AUTOMATIONS_EDIT] });
+    const orgAuth = await requireOwnedOrg(orgId);
 
     if (orgAuth.error) {
       return orgAuth.error;
@@ -82,7 +81,7 @@ export async function POST(req) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.ASSISTANTS_EDIT });
+    const orgAuth = await requireOwnedOrg(orgId);
 
     if (orgAuth.error) {
       return orgAuth.error;

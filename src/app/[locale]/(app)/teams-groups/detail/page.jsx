@@ -14,8 +14,6 @@ import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
 
 import { formatDateTime, groupTypeKey } from "../groups.helpers";
 import styles from "../teams-groups.module.css";
-import usePermissions from "@/app/PermissionsContext";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 
 /**
  * Um grupo do Teams (#165): nome e assistente que responde, membros lidos no
@@ -29,7 +27,6 @@ export default function TeamsGroupDetailPage() {
   const { org, loading: orgLoading } = useOrganization(user);
   const { stopLoading } = useGlobalLoader();
   const translation = useTranslations();
-  const { can, lock } = usePermissions();
   const showAlert = useAlert();
 
   /* Refs para os efeitos de carregamento não dependerem destas funções. */
@@ -272,8 +269,6 @@ export default function TeamsGroupDetailPage() {
                     "TeamsGroups.detail.namePlaceholder",
                   )}
                   onChange={(e) => setNameDraft(e.target.value)}
-                  disabled={!can(PERMISSIONS.TEAMS_GROUPS_EDIT)}
-                  {...lock(PERMISSIONS.TEAMS_GROUPS_EDIT)}
                 />
                 <span className={styles.fieldHint}>
                   {translation("TeamsGroups.detail.nameHint")}
@@ -288,8 +283,6 @@ export default function TeamsGroupDetailPage() {
                   className={styles.input}
                   value={assistantDraft}
                   onChange={(e) => setAssistantDraft(e.target.value)}
-                  disabled={!can(PERMISSIONS.TEAMS_GROUPS_EDIT)}
-                  {...lock(PERMISSIONS.TEAMS_GROUPS_EDIT)}
                 >
                   {assistants.map((assistant) => (
                     <option key={assistant.id} value={String(assistant.id)}>
@@ -304,12 +297,7 @@ export default function TeamsGroupDetailPage() {
               <button
                 type="submit"
                 className={styles.primaryButton}
-                disabled={
-                  saving ||
-                  (!nameChanged && !assistantChanged) ||
-                  !can(PERMISSIONS.TEAMS_GROUPS_EDIT)
-                }
-                {...lock(PERMISSIONS.TEAMS_GROUPS_EDIT)}
+                disabled={saving || (!nameChanged && !assistantChanged)}
               >
                 {translation("TeamsGroups.detail.save")}
               </button>

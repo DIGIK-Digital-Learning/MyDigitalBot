@@ -15,8 +15,6 @@ import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
 import { VERDICTS } from "@/lib/services/questions/questionReports";
 
 import styles from "../questions.module.css";
-import usePermissions from "@/app/PermissionsContext";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 
 const ANSWER_FILTER_ALL = "all";
 
@@ -73,7 +71,6 @@ export default function QuestionDetailPage() {
   const { org, loading: orgLoading } = useOrganization(user);
   const { stopLoading } = useGlobalLoader();
   const translation = useTranslations();
-  const { can, lock } = usePermissions();
   const showAlert = useAlert();
 
   /* Refs para o efeito de carregamento não depender destas funções. */
@@ -551,11 +548,7 @@ export default function QuestionDetailPage() {
                                     "Questions.detail.table.verdict",
                                   )}
                                   value={item.adminVerdict || ""}
-                                  disabled={
-                                    savingId === item.answerId ||
-                                    !can(PERMISSIONS.QUESTIONS_REVIEW)
-                                  }
-                                  {...lock(PERMISSIONS.QUESTIONS_REVIEW)}
+                                  disabled={savingId === item.answerId}
                                   onChange={(e) =>
                                     changeVerdict(item, e.target.value)
                                   }

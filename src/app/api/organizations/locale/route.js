@@ -4,7 +4,6 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 
 import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 import { updateOrganizationLocale } from "@/lib/repos/organizations.repo";
 
 const LOCALES = new Set(["pt", "en"]);
@@ -22,7 +21,7 @@ export async function PATCH(req) {
       return NextResponse.json({ error: "Invalid locale" }, { status: 400 });
     }
 
-    const orgAuth = await requireOwnedOrg(body?.orgId, { permission: PERMISSIONS.SETTINGS_ORGANIZATION });
+    const orgAuth = await requireOwnedOrg(body?.orgId);
     if (orgAuth.error) return orgAuth.error;
 
     await updateOrganizationLocale(orgAuth.orgId, body.locale);

@@ -27,8 +27,6 @@ import usePlanLimits from "@/app/hooks/usePlanLimits";
 import usePlanLimitPrompt from "@/app/hooks/usePlanLimitPrompt";
 import UsageCounter from "@/app/components/UsageCounter/UsageCounter";
 import RowAction, { RowActions } from "@/app/components/RowAction/RowAction";
-import usePermissions from "@/app/PermissionsContext";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 
 const TRIGGER_OPTIONS = [
   {
@@ -151,7 +149,6 @@ export default function AutomationsPage() {
   const { org, loading: orgLoading } = useOrganization(user);
   const confirm = useConfirm();
   const showAlert = useAlert();
-  const { can, lock } = usePermissions();
 
   const showAlertRef = useRef(showAlert);
 
@@ -686,8 +683,6 @@ export default function AutomationsPage() {
             type="button"
             className={`${styles.actionBtn} ${styles.actionBtnSecondary}`}
             onClick={() => runAutomation("/api/automations/run/inactivity")}
-            disabled={!can(PERMISSIONS.AUTOMATIONS_RUN)}
-            {...lock(PERMISSIONS.AUTOMATIONS_RUN)}
           >
             <Clock3 size={16} />
             <span>{translation("runInactivity")}</span>
@@ -697,8 +692,6 @@ export default function AutomationsPage() {
             type="button"
             className={`${styles.actionBtn} ${styles.actionBtnSecondary}`}
             onClick={() => runAutomation("/api/automations/run/materialize")}
-            disabled={!can(PERMISSIONS.AUTOMATIONS_RUN)}
-            {...lock(PERMISSIONS.AUTOMATIONS_RUN)}
           >
             <PlayCircle size={16} />
             <span>{translation("materialize")}</span>
@@ -709,7 +702,7 @@ export default function AutomationsPage() {
               type="button"
               className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}
               onClick={() => setCreateMenuOpen((v) => !v)}
-              disabled={automationsFull || !can(PERMISSIONS.AUTOMATIONS_EDIT)}
+              disabled={automationsFull}
               title={
                 automationsFull
                   ? planTranslation("automations", {
@@ -717,7 +710,6 @@ export default function AutomationsPage() {
                     })
                   : undefined
               }
-              {...lock(PERMISSIONS.AUTOMATIONS_EDIT)}
             >
               <Plus size={16} />
               <span>{translation("newAutomation")}</span>
@@ -877,8 +869,6 @@ export default function AutomationsPage() {
                             : translation("rulesTable.activate")
                         }
                         onClick={() => toggleRule(rule)}
-                        disabled={!can(PERMISSIONS.AUTOMATIONS_EDIT)}
-                        {...lock(PERMISSIONS.AUTOMATIONS_EDIT)}
                       />
                       <RowAction
                         kind="edit"
@@ -887,15 +877,11 @@ export default function AutomationsPage() {
                           setEditingRule(rule);
                           setModalOpen(true);
                         }}
-                        disabled={!can(PERMISSIONS.AUTOMATIONS_EDIT)}
-                        {...lock(PERMISSIONS.AUTOMATIONS_EDIT)}
                       />
                       <RowAction
                         kind="delete"
                         label={translation("rulesTable.delete")}
                         onClick={() => handleDeleteRule(rule)}
-                        disabled={!can(PERMISSIONS.AUTOMATIONS_EDIT)}
-                        {...lock(PERMISSIONS.AUTOMATIONS_EDIT)}
                       />
                     </RowActions>
                   </div>
@@ -1086,15 +1072,12 @@ export default function AutomationsPage() {
             readChainsEnabled ? styles.readChainFloatingToggleOn : ""
           }`}
           onClick={toggleReadChainsFeature}
-          disabled={
-            readChainsSaving || !can(PERMISSIONS.SETTINGS_INTEGRATIONS)
-          }
+          disabled={readChainsSaving}
           title={
             readChainsEnabled
               ? translation("readChains.disable")
               : translation("readChains.enable")
           }
-          {...lock(PERMISSIONS.SETTINGS_INTEGRATIONS)}
         >
           {readChainsEnabled ? (
             <ToggleRight size={20} />

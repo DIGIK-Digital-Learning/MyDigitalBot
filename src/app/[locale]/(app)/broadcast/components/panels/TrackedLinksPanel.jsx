@@ -9,8 +9,6 @@ import {
   filterTrackedLinkLibrary,
   isSameTrackedLink,
 } from "../../lib/helpers";
-import usePermissions from "@/app/PermissionsContext";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 
 /*
  * Links já usados noutros envios, para escolher em vez de escrever outra
@@ -25,7 +23,6 @@ function LinkLibrary({
   translation,
 }) {
   const [query, setQuery] = useState("");
-  const { can, lock } = usePermissions();
   const items = library?.items || [];
 
   if (!library || (!library.loading && !library.failed && !items.length)) {
@@ -124,8 +121,6 @@ function LinkLibrary({
                       title={translation("Broadcast.linkLibrary.delete", {
                         label: item.label,
                       })}
-                      disabled={!can(PERMISSIONS.LINKS_CREATE)}
-                      {...lock(PERMISSIONS.LINKS_CREATE)}
                     >
                       <X size={14} />
                     </button>

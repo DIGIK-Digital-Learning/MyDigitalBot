@@ -7,7 +7,6 @@ import {
   handleApiError,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 import { sendTeamsGroupBroadcast } from "@/lib/services/broadcast/sendTeamsGroupBroadcast";
 import {
   checkMessageContent,
@@ -27,7 +26,7 @@ export async function POST(req) {
   try {
     const body = await req.json().catch(() => ({}));
 
-    const orgAuth = await requireOwnedOrg(body?.orgId, { permission: PERMISSIONS.SEND_TEAMS });
+    const orgAuth = await requireOwnedOrg(body?.orgId);
     if (orgAuth.error) return orgAuth.error;
 
     assertGroupBroadcastContent(body);

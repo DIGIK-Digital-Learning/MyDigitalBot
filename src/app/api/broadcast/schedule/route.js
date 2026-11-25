@@ -16,7 +16,6 @@ import { setAdminDailySendSource } from "@/lib/repos/adminDailySends.repo";
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
 import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
-import { sendPermissionFor } from "@/lib/auth/permissions";
 import { buildScheduledPayload } from "@/lib/services/broadcast/scheduledPayload";
 import { messageContentProblem } from "@/lib/plans/messageLimits";
 
@@ -33,7 +32,7 @@ export async function POST(req) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId, { permission: sendPermissionFor(channel) });
+    const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
     if (!["teams", "whatsapp"].includes(channel)) {

@@ -10,7 +10,6 @@ import {
   requireOrgForUser,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
-import { PERMISSIONS } from "@/lib/auth/permissions";
 
 export async function PATCH(req) {
   try {
@@ -21,7 +20,7 @@ export async function PATCH(req) {
       return NextResponse.json({ error: "ids required" }, { status: 400 });
     }
 
-    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.USERS_EDIT });
+    const orgAuth = await requireOwnedOrg(orgId);
     if (orgAuth.error) return orgAuth.error;
 
     const safeUserIds = await assertUsersBelongToOrg(
@@ -112,7 +111,7 @@ export async function DELETE(req) {
       return NextResponse.json({ error: "ids required" }, { status: 400 });
     }
 
-    const orgAuth = await requireOrgForUser(userIds[0], { permission: PERMISSIONS.USERS_DELETE });
+    const orgAuth = await requireOrgForUser(userIds[0]);
     if (orgAuth.error) return orgAuth.error;
 
     const safeUserIds = await assertUsersBelongToOrg(
