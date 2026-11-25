@@ -2857,7 +2857,8 @@
       "updating": "Updating…",
       "updated": "Password updated! Redirecting…",
       "passwordPolicy": "The password must be at least 8 characters long and include an uppercase letter, a lowercase letter and a special character.",
-      "genericError": "Couldn't update the password. Try again."
+      "genericError": "Couldn't update the password. Try again.",
+      "inviteTitle": "Welcome! Choose your password"
     }
   },
   "Alert": {
@@ -3236,7 +3237,8 @@
       "template": "Templates",
       "media": "Media",
       "tracked_link": "Tracked links",
-      "organization": "Organization"
+      "organization": "Organization",
+      "team_member": "Team"
     },
     "Channels": {
       "whatsapp": "WhatsApp",
@@ -3284,7 +3286,11 @@
       "teams_group_updated": "Teams group edited",
       "unknown": "Unknown action",
       "organization_plan_extended": "Plan extended",
-      "organization_plan_end_changed": "Plan end changed"
+      "organization_plan_end_changed": "Plan end changed",
+      "team_member_invited": "Person invited to the team",
+      "team_member_type_changed": "User type changed",
+      "team_member_removed": "Person removed from the team",
+      "team_member_invite_resent": "Invitation resent"
     },
     "Table": {
       "when": "When",
@@ -3500,6 +3506,7 @@
     },
     "tabs": {
       "organization": "Organization",
+      "team": "Team",
       "integrations": "Integrations",
       "activity": "Activity history"
     }
@@ -3618,7 +3625,7 @@
       "messageFilesLabel": "Message files",
       "messageFilesHint": "Each message can carry up to this many files.",
       "usersLabel": "Users",
-      "usersHint": "Counts all users in the account.",
+      "usersHint": "Counts collaborators and team accounts: they share the same plan seats.",
       "filesLabel": "Assistant files",
       "filesHint": "Each assistant can have up to this many files in its collection.",
       "assistantsLabel": "Assistants",
@@ -3696,6 +3703,7 @@
     "limits": {
       "durationDays": "Duration (days)",
       "users": "Users",
+      "teamMembers": "App accounts",
       "assistants": "Assistants",
       "assistantInstructionChars": "Instruction characters",
       "filesPerAssistant": "Files per assistant",
@@ -3803,6 +3811,76 @@
     "noPage": {
       "title": "No access to this page",
       "description": "Your user type does not have access to this page. If you need it, ask an Administrator of your organization."
+    }
+  },
+  "Team": {
+    "title": "Team",
+    "description": "The people who sign in to your organization's app. Each account also takes one collaborator seat in the plan.",
+    "owner": "Owner",
+    "you": "You",
+    "ownerLocked": "The organization owner is always an Administrator.",
+    "selfLocked": "You can't change or remove your own account.",
+    "types": {
+      "admin": "Administrator",
+      "editor": "Editor",
+      "viewer": "Viewer"
+    },
+    "usage": {
+      "accounts": "Accounts",
+      "accountsHint": "Accounts that sign in to the app, including the owner. The maximum depends on the plan.",
+      "seats": "Seats",
+      "seatsHint": "Collaborators plus team accounts: they share the same plan seats."
+    },
+    "invite": {
+      "email": "Email",
+      "emailPlaceholder": "name@company.com",
+      "type": "User type",
+      "button": "Invite",
+      "sending": "Inviting…",
+      "help": "The person gets an email with a link to choose a password and sign in. Each person can only belong to one organization.",
+      "sentTitle": "Invitation sent",
+      "sent": "We sent the invitation to {email}.",
+      "added": "{email} already had an account and joined the team. They can sign in with their current password.",
+      "errorTitle": "Couldn't invite"
+    },
+    "table": {
+      "email": "Email",
+      "type": "Type",
+      "status": "Status",
+      "lastSignIn": "Last sign-in",
+      "actions": "Actions"
+    },
+    "status": {
+      "pending": "Invitation sent",
+      "active": "Active"
+    },
+    "resend": {
+      "action": "Resend invitation",
+      "sentTitle": "Invitation resent",
+      "sent": "We sent a new invitation to {email}. The previous link no longer works."
+    },
+    "remove": {
+      "action": "Remove",
+      "title": "Remove {email} from the team?",
+      "message": "The account is deleted and the person can no longer sign in. You can invite them again later.",
+      "confirm": "Remove",
+      "cancel": "Cancel"
+    },
+    "errors": {
+      "title": "Couldn't save",
+      "load": "Couldn't load the team.",
+      "generic": "Something went wrong. Try again.",
+      "INVALID_EMAIL": "Enter a valid email.",
+      "INVALID_TYPE": "Choose a user type.",
+      "ALREADY_MEMBER": "That person is already on your team.",
+      "IN_OTHER_ORGANIZATION": "That email already belongs to another organization. Each person can only belong to one.",
+      "TEAM_LIMIT_REACHED": "You've reached your plan's maximum number of accounts. Remove an account or change plan.",
+      "USER_LIMIT_REACHED": "There are no free seats in your plan: team accounts count as collaborators.",
+      "OWNER_LOCKED": "The organization owner is always an Administrator.",
+      "CANNOT_CHANGE_SELF": "You can't change or remove your own account.",
+      "NOT_FOUND": "That account is no longer on the team.",
+      "INVITE_FAILED": "Couldn't send the invitation. Try again.",
+      "NOT_PENDING": "That person has already signed in: no invitation needed."
     }
   }
 }

@@ -59,6 +59,10 @@ vi.mock("@/lib/services/audit/recordAuditEvent", () => ({
 
 vi.mock("@/lib/repos/user.repo", () => ({
   countUsersByOrg: vi.fn(async () => 5),
+  countSeatsByOrg: vi.fn(async () => 5),
+}));
+vi.mock("@/lib/repos/organizationMembers.repo", () => ({
+  countMembers: vi.fn(async () => 1),
 }));
 vi.mock("@/lib/repos/assistants.repo", () => ({
   countAssistantsByOrg: vi.fn(async () => 1),

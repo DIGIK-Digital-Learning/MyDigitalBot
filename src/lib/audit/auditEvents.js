@@ -64,6 +64,11 @@ export const AUDIT_ACTIONS = Object.freeze({
   ORGANIZATION_PLAN_END_CHANGED: "organization.plan_end_changed",
 
   TEAMS_GROUP_UPDATED: "teams_group.updated",
+
+  TEAM_MEMBER_INVITED: "team_member.invited",
+  TEAM_MEMBER_INVITE_RESENT: "team_member.invite_resent",
+  TEAM_MEMBER_TYPE_CHANGED: "team_member.type_changed",
+  TEAM_MEMBER_REMOVED: "team_member.removed",
 });
 
 export const AUDIT_ACTION_LIST = Object.freeze(Object.values(AUDIT_ACTIONS));
@@ -99,6 +104,7 @@ export const AUDIT_ENTITY_TYPES = Object.freeze({
   ORGANIZATION: "organization",
   TEAMS_GROUP: "teams_group",
   TRACKED_LINK: "tracked_link",
+  TEAM_MEMBER: "team_member",
 });
 
 const MAX_LABEL_LENGTH = 200;

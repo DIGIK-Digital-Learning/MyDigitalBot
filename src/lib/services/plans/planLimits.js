@@ -22,6 +22,8 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 /* Nome de cada limite no código e a coluna da tabela plan onde está guardado. */
 export const LIMIT_COLUMNS = {
   users: "max_users",
+  /* Contas que entram na app (Definições → Equipa, #247). */
+  teamMembers: "max_team_members",
   assistants: "max_assistants",
   assistantInstructionChars: "max_assistant_instruction_chars",
   filesPerAssistant: "max_files_per_assistant",
