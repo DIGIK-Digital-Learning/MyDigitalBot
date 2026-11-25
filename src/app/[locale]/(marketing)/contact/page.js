@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Mail } from "lucide-react";
 import SiteShell from "../components/Site/SiteShell";
 import PageHero from "../components/Site/PageHero";
@@ -17,7 +17,9 @@ export async function generateMetadata({ params }) {
 
 const STEPS = ["one", "two", "three"];
 
-export default async function ContactPage() {
+export default async function ContactPage({ params }) {
+  // Língua pelo URL: deixa a página ser gerada no build (estática).
+  setRequestLocale((await params).locale);
   const t = await getTranslations("LandingPage.Contact");
   const tp = await getTranslations("Pages.contact");
 

@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Bot, GraduationCap, Megaphone, UserPlus } from "lucide-react";
 import SiteShell from "../components/Site/SiteShell";
 import PageHero from "../components/Site/PageHero";
@@ -44,6 +44,11 @@ export async function generateMetadata({ params }) {
 // A Comunicação Interna e o Microlearning em mobile usam um Samsung seguro
 // com uma mão (gerado no GPT a 23-11-2026, ver PROMPT_4 em
 // Desktop/2026-11-16-mockups-...). O furo da câmara fica fora da máscara.
+// Teste pedido pelo Fernando a 23-11-2026: sem cenas de fundo, só o aparelho
+// com a conversa (moldura do próprio ChatDemo). false = só o aparelho;
+// true = volta às cenas (as medidas abaixo ficam guardadas para isso).
+const SHOW_SCENES = false;
+
 const SAMSUNG_HAND = {
   src: "/images/scenes/samsung-mao.webp",
   size: [1024, 1536],
@@ -67,7 +72,7 @@ const AREAS = [
       width: 0.835,
       aspect: 1.5136,
     },
-    mobile: { device: "phone", scene: SAMSUNG_HAND },
+    mobile: { device: "phone", scene: SAMSUNG_HAND, frame: "samsung" },
   },
   {
     card: "onboarding",
@@ -89,6 +94,7 @@ const AREAS = [
     chat: "comms",
     channel: "teams",
     device: "phone",
+    frame: "samsung",
     Icon: Megaphone,
     scene: SAMSUNG_HAND,
   },
@@ -152,7 +158,9 @@ function sceneStyles({
   };
 }
 
-export default async function SolutionPage() {
+export default async function SolutionPage({ params }) {
+  // Língua pelo URL: deixa a página ser gerada no build (estática).
+  setRequestLocale((await params).locale);
   const t = await getTranslations("SolutionsPage");
   const tp = await getTranslations("Pages.solution");
   const tHome = await getTranslations("HomeV2");
@@ -179,8 +187,10 @@ export default async function SolutionPage() {
           </header>
 
           <div className={styles.areas}>
-            {AREAS.map(({ card, chat, channel, device, Icon, scene, mobile }) => {
-              const views = [{ device, scene, only: mobile ? "wide" : null }];
+            {AREAS.map(({ card, chat, channel, device, frame, Icon, scene, mobile }) => {
+              const views = [
+                { device, frame, scene, only: mobile ? "wide" : null },
+              ];
               if (mobile) views.push({ ...mobile, only: "narrow" });
               return (
                 <article
@@ -209,13 +219,48 @@ export default async function SolutionPage() {
                   </div>
 
                   {views.map((view) => {
+                    const only = view.only ? styles[`only-${view.only}`] : "";
+                    if (!SHOW_SCENES) {
+                      const demo = (
+                        <ChatDemo
+                          chat={tHome.raw(`cases.items.${chat}.chat`)}
+                          labels={chatLabels}
+                          variant={view.device}
+                          initialChannel={channel}
+                          initialCount={1}
+                          bare={view.frame === "samsung"}
+                        />
+                      );
+                      return (
+                        <div
+                          key={view.only || "all"}
+                          className={`${styles.areaDevice} ${site.reveal} ${only}`}
+                        >
+                          {view.frame === "samsung" ? (
+                            // Não há moldura do Samsung sem mão: corpo em CSS
+                            // (cantos retos, bordas finas, furo da câmara) e
+                            // o ChatDemo em modo "bare" lá dentro.
+                            <div className={styles.samsung}>
+                              <div className={styles.samsungScreen}>
+                                {demo}
+                                <span
+                                  className={styles.samsungCamera}
+                                  aria-hidden="true"
+                                />
+                              </div>
+                            </div>
+                          ) : (
+                            demo
+                          )}
+                          <p className={styles.areaDeviceLabel}>{tp("example")}</p>
+                        </div>
+                      );
+                    }
                     const look = sceneStyles(view.scene);
                     return (
                       <div
                         key={view.only || "all"}
-                        className={`${styles.areaChat} ${site.reveal} ${
-                          view.only ? styles[`only-${view.only}`] : ""
-                        }`}
+                        className={`${styles.areaChat} ${site.reveal} ${only}`}
                         style={look.box}
                       >
                         <div className={styles.sceneStage} style={look.stage} />

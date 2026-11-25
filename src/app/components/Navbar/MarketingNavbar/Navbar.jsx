@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { Menu, X } from "lucide-react";
 import createClient from "@/utils/supabase/client";
 import LanguageMenu from "./LanguageMenu";
+import LanguageSwitch from "./LanguageSwitch";
 import ElasticBrandLogo from "./ElasticBrandLogo";
 import usePageDemoCtaVisibility from "./usePageDemoCtaVisibility";
 import { usePathname } from "@/i18n/navigation";
@@ -168,7 +169,9 @@ export default function MarketingNavbar({ trailing = null }) {
                 </LoaderLink>
               </>
             )}
-            <LanguageMenu />
+            {/* Desktop: dropdown. Menu do telemóvel: PT | EN à vista. */}
+            <LanguageMenu className={styles.langDropdown} />
+            <LanguageSwitch className={styles.langSwitch} onSwitch={closeMenu} />
             {trailing}
           </div>
         </div>

@@ -73,6 +73,24 @@
   transform: scale(1.03);
 }
 
+/* Mesmo degradê do cartão "Gratuito" dos preços (plans.module.css). Como a
+   secção é alta e o print tapa o canto, junta-se um degradê horizontal:
+   escuro à esquerda, azul à direita. */
+.dashboardSection {
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(var(--brand-accent-rgb), 0.28),
+      transparent 55%
+    ),
+    linear-gradient(
+      100deg,
+      transparent 35%,
+      rgba(var(--brand-accent-rgb), 0.2) 100%
+    ),
+    var(--night);
+}
+
 .dashboard {
   display: grid;
   grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
@@ -90,6 +108,7 @@
 }
 
 .dashboardShot {
+  position: relative;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 16px;
@@ -107,6 +126,18 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
+}
+
+.dashboardNoteList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Número da nota e marcador no print: só aparecem no telemóvel. */
+.dashboardNoteNum,
+.dashboardMarker {
+  display: none;
 }
 
 .dashboardNote {
@@ -217,29 +248,68 @@
     grid-template-columns: 1fr;
   }
 
-  /* No telemóvel o print é pequeno demais para notas por cima: passam para
-     baixo, como etiquetas. */
+  /* No telemóvel o print é pequeno demais para notas por cima: em cima fica
+     só um número junto a cada secção e as notas passam para uma legenda
+     numerada por baixo (texto simples, sem aspeto de botão). */
+  .dashboardMarker {
+    position: absolute;
+    top: var(--y);
+    left: var(--x);
+    display: grid;
+    width: 18px;
+    height: 18px;
+    place-items: center;
+    border-radius: 50%;
+    color: #fff;
+    background: var(--brand-accent);
+    box-shadow: 0 0 0 3px rgba(var(--brand-accent-rgb), 0.3),
+      0 4px 10px rgba(0, 0, 0, 0.25);
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
+    transform: translateY(-50%);
+  }
+
   .dashboardNotes {
     position: static;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 14px;
+    margin-top: 16px;
+  }
+
+  .dashboardNoteList {
+    display: grid;
+    gap: 10px;
   }
 
   .dashboardNote {
     position: static;
-    gap: 7px;
-    padding: 6px 11px 6px 9px;
-    font-size: 12px;
+    gap: 10px;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    color: rgba(255, 255, 255, 0.86);
+    font-size: 15px;
+    font-weight: 600;
     white-space: normal;
     transform: none;
   }
 
   .dashboardNote::before {
-    width: 6px;
-    height: 6px;
-    box-shadow: 0 0 0 3px rgba(var(--brand-accent-rgb), 0.25);
+    display: none;
+  }
+
+  .dashboardNoteNum {
+    display: grid;
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    place-items: center;
+    border-radius: 50%;
+    color: #fff;
+    background: var(--brand-accent);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
   }
 }
 

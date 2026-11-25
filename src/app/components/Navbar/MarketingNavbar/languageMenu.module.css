@@ -14,8 +14,11 @@
   height: 42px;
   padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.09);
+  /* Vidro "Refraction" (tokens --glass-* em globals.css). Borda
+     transparente só para manter o tamanho. */
+  border: 1px solid transparent;
+  background: var(--glass-fill);
+  box-shadow: var(--glass-edge);
   color: rgba(247, 251, 255, 0.82);
   cursor: pointer;
   transition:
@@ -25,9 +28,8 @@
 }
 
 .trigger:hover {
-  background: rgba(74, 176, 255, 0.16);
-  border-color: rgba(124, 194, 255, 0.45);
-  color: var(--brand-2);
+  background: var(--glass-fill-active);
+  color: #fff;
 }
 
 .trigger:focus-visible {
@@ -36,9 +38,8 @@
 }
 
 .trigger[aria-expanded="true"] {
-  background: rgba(74, 176, 255, 0.18);
-  border-color: rgba(124, 194, 255, 0.5);
-  color: var(--brand-2);
+  background: var(--glass-fill-active);
+  color: #fff;
 }
 
 /* Current-locale code shown next to the globe icon, replacing the old
@@ -161,4 +162,58 @@
     right: 0;
     min-width: 176px;
   }
+}
+
+/* LanguageSwitch: PT | EN lado a lado, no menu do telemóvel. */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: 4px;
+  padding: 4px 4px 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.switchIcon {
+  margin-right: 4px;
+  color: rgba(247, 251, 255, 0.7);
+}
+
+.switchItem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: rgba(247, 251, 255, 0.82);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.switchItem:hover {
+  color: var(--brand-2);
+}
+
+.switchItem:focus-visible {
+  outline: 2px solid var(--brand-2);
+  outline-offset: 2px;
+}
+
+.switchItemActive {
+  color: #fff;
+  background: var(--glass-fill-active);
+  box-shadow: var(--glass-edge-active);
+}
+
+.switchItemActive:hover {
+  color: #fff;
 }

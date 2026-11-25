@@ -18,12 +18,18 @@
 }
 
 /* Interruptor WhatsApp / Teams */
+/* Vidro "Refraction" (tokens --glass-* em globals.css). */
 .switch {
   display: inline-flex;
   padding: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid transparent;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-filter);
+  box-shadow:
+    var(--glass-edge),
+    var(--glass-lift);
 }
 
 .switchButton {
@@ -47,8 +53,9 @@
 }
 
 .switchButton[aria-pressed="true"] {
-  color: #081426;
-  background: #fff;
+  color: #fff;
+  background: var(--glass-fill-active);
+  box-shadow: var(--glass-edge-active);
 }
 
 .switchButton:focus-visible {
@@ -442,26 +449,6 @@
 .tablet .msg,
 .desktop .msg {
   max-width: 64%;
-}
-
-/* Teams móvel (tema claro): cabeçalho branco com seta para trás, texto
-   escuro também na barra de estado do iOS. */
-.phone.teams .statusBar {
-  color: #242424;
-}
-
-.phone.teams .bar {
-  border-bottom: 1px solid #e0e0e0;
-  color: #242424;
-  background: #fff;
-}
-
-.phone.teams .who small {
-  color: #616161;
-}
-
-.phone.teams .barIcons {
-  color: #424242;
 }
 
 /* watchOS: fundo preto, sem barra da app nem caixa de escrever, nome da

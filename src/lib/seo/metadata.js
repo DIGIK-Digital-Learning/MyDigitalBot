@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 
 // Domínio público do site de marketing. NEXT_PUBLIC_SITE_URL permite outro
@@ -145,6 +145,9 @@ export async function getPageMetadata({
   absoluteTitle = false,
 }) {
   const locale = resolveLocale((await params)?.locale);
+  // O generateMetadata pode correr antes do layout: sem isto o next-intl lê a
+  // língua dos headers e a página deixa de poder ser estática.
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace });
 
   return buildPageMetadata({

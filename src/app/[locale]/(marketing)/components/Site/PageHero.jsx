@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import LoaderLink from "../TopLoader/LoaderLink";
 import BrandSymbol from "../HomeV2/BrandSymbol";
+import HeroPattern from "./HeroPattern";
 import site from "./site.module.css";
 
 /**
@@ -21,7 +22,7 @@ export default function PageHero({
       <h1 className={site.pageHeroTitle}>{title}</h1>
       {lead ? <p className={site.pageHeroLead}>{lead}</p> : null}
       {actions.length ? (
-        <div className={site.pageHeroActions}>
+        <div className={site.pageHeroActions} data-pattern-safe="items">
           {actions.map((action, index) => (
             <LoaderLink
               key={action.href + action.label}
@@ -43,6 +44,7 @@ export default function PageHero({
 
   return (
     <section className={site.pageHero}>
+      <HeroPattern />
       <BrandSymbol className={site.pageHeroSymbol} />
       <div className={site.wrap}>
         {aside ? (

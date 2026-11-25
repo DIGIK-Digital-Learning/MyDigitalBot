@@ -42,8 +42,11 @@
   min-height: 40px;
   align-items: center;
   padding: 0 16px;
-  border: 1px solid rgba(247, 251, 255, 0.16);
+  /* Vidro "Refraction" (tokens --glass-* em globals.css). */
+  border: 1px solid transparent;
   border-radius: 999px;
+  background: var(--glass-fill);
+  box-shadow: var(--glass-edge);
   color: rgba(247, 251, 255, 0.72);
   font-size: 13.5px;
   font-weight: 650;
@@ -56,7 +59,7 @@
 }
 
 .docTab:hover {
-  border-color: rgba(74, 176, 255, 0.6);
+  background: var(--glass-fill-hover);
   color: #fff;
 }
 
@@ -66,10 +69,10 @@
   outline-offset: 3px;
 }
 
-.docTabActive {
-  border-color: #fff;
-  color: var(--legal-night);
-  background: #fff;
+.docTabActive,
+.docTabActive:hover {
+  color: #fff;
+  background: var(--glass-tint);
 }
 
 .docTabActive:hover {

@@ -6,6 +6,33 @@ import { NextResponse } from "next/server";
 
 const intl = createMiddleware(routing);
 
+// Língua de um caminho: /en/... = en, /pt/... = pt, sem prefixo = default (pt).
+function localeOfPath(pathname) {
+  const first = pathname.split("/")[1];
+  return routing.locales.includes(first) ? first : routing.defaultLocale;
+}
+
+// O next-intl redireciona sempre com 307 (temporário). Quando o redirect só
+// corrige o URL dentro da mesma língua (/how-it-works -> /como-funciona,
+// /pt/solucao -> /solucao, /en/solucao -> /en/solution), passa a 308 para o
+// Google transferir a autoridade para o URL novo. Os que mudam de língua
+// (/ -> /en pelo cookie ou Accept-Language) ficam 307: dependem do visitante.
+function makeCanonicalRedirectsPermanent(request, response) {
+  if (response.status !== 307) return response;
+  const location = response.headers.get("location");
+  if (!location) return response;
+
+  const from = new URL(request.url).pathname;
+  const to = new URL(location, request.url).pathname;
+  if (localeOfPath(from) !== localeOfPath(to)) return response;
+
+  const permanent = NextResponse.redirect(new URL(location, request.url), 308);
+  response.headers.forEach((value, key) => {
+    if (key.toLowerCase() !== "location") permanent.headers.set(key, value);
+  });
+  return permanent;
+}
+
 // Public routes that must never be redirected to /login
 const PUBLIC = [
   /^\/(pt|en)\/login$/,
@@ -29,7 +56,7 @@ export function middleware(request) {
 
   // Locale handling first (may redirect only to add the locale)
   const intlRes = intl(request);
-  if (intlRes) return intlRes;
+  if (intlRes) return makeCanonicalRedirectsPermanent(request, intlRes);
 
   // Allow public routes with NO auth guard at all
   if (PUBLIC.some((re) => re.test(p))) {

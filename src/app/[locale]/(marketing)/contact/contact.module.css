@@ -244,19 +244,21 @@
   font-weight: 800;
   font-size: 16px;
   cursor: pointer;
-  color: #081426;
-  background: var(--brand-accent);
-  box-shadow: 0 10px 32px rgba(var(--brand-accent-rgb), 0.24);
+  /* Vidro "Refraction" versão clara (o formulário é um cartão branco). */
+  color: #fff;
+  background: var(--glass-light-tint);
+  box-shadow:
+    var(--glass-light-tint-edge),
+    var(--glass-light-lift);
   transition:
     transform 120ms ease,
-    box-shadow 120ms ease,
+    background 120ms ease,
     opacity 120ms ease;
 }
 
 .submitBtn:hover {
   transform: translateY(-1px);
-  background: var(--brand-accent-hover);
-  box-shadow: 0 18px 40px rgba(var(--brand-accent-rgb), 0.28);
+  background: var(--glass-light-tint-hover);
 }
 
 .submitBtn:disabled {

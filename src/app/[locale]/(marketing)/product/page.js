@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ArrowUpRight, Check } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import SiteShell from "../components/Site/SiteShell";
@@ -42,13 +42,24 @@ const DASHBOARD_NOTES = [
   { "--x": "53%", "--y": "92%" },
 ];
 
+// No telemóvel as notas passam para uma legenda numerada por baixo do print;
+// em cima do print fica só o número, logo a seguir ao título de cada secção.
+const DASHBOARD_MARKERS = [
+  { "--x": "33%", "--y": "15.6%" },
+  { "--x": "30.5%", "--y": "41%" },
+  { "--x": "32.5%", "--y": "60%" },
+  { "--x": "35%", "--y": "83%" },
+];
+
 const TRUST_LINKS = [
   { key: "dpa", doc: "data-processing-agreement" },
   { key: "privacy", doc: "privacy-policy" },
   { key: "security", doc: "security-providers" },
 ];
 
-export default async function ProductPage() {
+export default async function ProductPage({ params }) {
+  // Língua pelo URL: deixa a página ser gerada no build (estática).
+  setRequestLocale((await params).locale);
   const t = await getTranslations("ProductPage");
   const tp = await getTranslations("Pages.product");
   const tFinal = await getTranslations("HomeV2.final");
@@ -137,7 +148,7 @@ export default async function ProductPage() {
       </section>
 
       <section
-        className={`${site.section} ${site.sectionDark}`}
+        className={`${site.section} ${site.sectionDark} ${styles.dashboardSection}`}
         aria-labelledby="product-dashboard"
       >
         <div className={`${site.wrap} ${styles.dashboard}`}>
@@ -159,19 +170,36 @@ export default async function ProductPage() {
                 quality={95}
                 sizes="(max-width: 960px) calc(100vw - 40px), 720px"
               />
-            </div>
-            {/* Notas em cima do print, cada uma junto da zona a que se refere
-                (no telemóvel passam para baixo do print). */}
-            <figcaption className={styles.dashboardNotes}>
-              {tp.raw("dashboard.notes").map((note, index) => (
+              {/* Só no telemóvel: números em cima do print que remetem para a
+                  legenda por baixo. */}
+              {DASHBOARD_MARKERS.map((position, index) => (
                 <span
-                  key={note}
-                  className={styles.dashboardNote}
-                  style={DASHBOARD_NOTES[index]}
+                  key={index}
+                  className={styles.dashboardMarker}
+                  style={position}
+                  aria-hidden="true"
                 >
-                  {note}
+                  {index + 1}
                 </span>
               ))}
+            </div>
+            {/* Notas em cima do print, cada uma junto da zona a que se refere
+                (no telemóvel passam para uma legenda numerada por baixo). */}
+            <figcaption className={styles.dashboardNotes}>
+              <ol className={styles.dashboardNoteList}>
+                {tp.raw("dashboard.notes").map((note, index) => (
+                  <li
+                    key={note}
+                    className={styles.dashboardNote}
+                    style={DASHBOARD_NOTES[index]}
+                  >
+                    <span className={styles.dashboardNoteNum} aria-hidden="true">
+                      {index + 1}
+                    </span>
+                    {note}
+                  </li>
+                ))}
+              </ol>
             </figcaption>
           </figure>
         </div>

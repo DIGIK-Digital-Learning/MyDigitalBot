@@ -5,6 +5,10 @@ import TopBar from "../../components/TopBar/TopBar";
 import { MobileNavProvider } from "@/app/components/MobileNav/MobileNavContext";
 import "react-datepicker/dist/react-datepicker.css";
 
+// App, login, legal e links rastreados continuam a ser gerados a cada pedido,
+// como antes. Só as páginas de marketing passaram a estáticas.
+export const dynamic = "force-dynamic";
+
 export default function AppLayout({ children }) {
   return (
     <MobileNavProvider>

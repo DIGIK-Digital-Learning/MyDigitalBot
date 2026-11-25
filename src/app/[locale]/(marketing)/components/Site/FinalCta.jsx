@@ -18,10 +18,12 @@ export default async function FinalCta({
     <section className={site.final} aria-labelledby="final-cta-title">
       <Image
         className={site.finalImage}
-        src="/images/hero/product-glass-symbol.jpg"
+        // Teste 24-11-2026: sorriso em vidro cristalino (azul). O anterior
+        // era /images/hero/product-glass-symbol.jpg (1672x941).
+        src="/images/hero/sorriso-vidro-cristalino.webp"
         alt=""
-        width={1672}
-        height={941}
+        width={1535}
+        height={1025}
         sizes="(max-width: 960px) 100vw, 62vw"
       />
       <div className={site.wrap}>

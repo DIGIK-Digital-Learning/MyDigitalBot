@@ -1,41 +1,36 @@
 // app/not-found.jsx
-import Link from "next/link";
-import { headers, cookies } from "next/headers";
 import styles from "./[locale]/(auth)/login/login.module.css";
+import { inter } from "./fonts/inter";
+import NotFoundAction from "./NotFoundAction";
 
-export default async function NotFound() {
-  // Get current path (works for both absolute and relative)
-  const h = await headers();
-  const raw = h.get("x-next-url") || h.get("x-request-url") || "";
-  const pathish = raw.startsWith("http") ? new URL(raw).pathname : raw || "/";
-
-  // Derive locale from first segment, default to 'pt'
-  const segs = pathish.split("/").filter(Boolean);
-  const locale = /^(pt|en)$/i.test(segs[0]) ? segs[0].toLowerCase() : "pt";
-
-  // Consider user "authed" if Supabase cookies exist
-  const c = await cookies();
-  const isAuthed = !!(c.get("sb-access-token") || c.get("sb:token"));
-
-  const targetHref = `/${locale}${isAuthed ? "/users" : "/login"}`;
-  const targetLabel = isAuthed ? "Ir para Utilizadores" : "Ir para Login";
-
+// Sem headers()/cookies() aqui: o not-found da raiz faz parte da árvore de
+// todas as páginas, e usá-los tornava o site inteiro dinâmico. A língua e a
+// sessão para o botão decidem-se no browser (NotFoundAction).
+export default function NotFound() {
+  // O layout raiz só devolve children (o <html> está em [locale]/layout.js),
+  // por isso esta página, que fica fora do [locale], traz o seu.
   return (
-    <main className={styles.page}>
-      <h1 className={styles.brand}>MyDigitalBot</h1>
-      <section className={styles.card}>
-        <h2 className={styles.title}>Página não encontrada</h2>
-        <p className={styles.message} style={{ marginBottom: "0.75rem" }}>
-          Ups! A página que procura não existe ou foi movida.
-        </p>
-        <div
-          style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}
-        >
-          <Link href={targetHref} className={styles.btnPrimary}>
-            {targetLabel}
-          </Link>
-        </div>
-      </section>
-    </main>
+    <html lang="pt" className={inter.variable}>
+      <body>
+        <main className={styles.page}>
+          <h1 className={styles.brand}>MyDigitalBot</h1>
+          <section className={styles.card}>
+            <h2 className={styles.title}>Página não encontrada</h2>
+            <p className={styles.message} style={{ marginBottom: "0.75rem" }}>
+              Ups! A página que procura não existe ou foi movida.
+            </p>
+            <div
+              style={{
+                display: "flex",
+                gap: "0.5rem",
+                justifyContent: "center",
+              }}
+            >
+              <NotFoundAction className={styles.btnPrimary} />
+            </div>
+          </section>
+        </main>
+      </body>
+    </html>
   );
 }

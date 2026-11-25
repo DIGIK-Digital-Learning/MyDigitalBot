@@ -8,6 +8,15 @@
   overflow: hidden;
   padding: clamp(120px, 14vh, 150px) 0 0;
   color: var(--cloud);
+  background: var(--night);
+}
+
+/* Os brilhos azuis ficam numa camada própria, por cima do fundo de logos
+   (HeroPattern) e por baixo do conteúdo e do símbolo. */
+.hero::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
   background:
     radial-gradient(
       60% 70% at 78% 38%,
@@ -18,8 +27,9 @@
       50% 60% at 10% 100%,
       rgba(48, 169, 224, 0.1),
       transparent 70%
-    ),
-    var(--night);
+    );
+  content: "";
+  pointer-events: none;
 }
 
 .heroGrid {
@@ -108,23 +118,42 @@
   animation: phoneIn 1000ms var(--ease-out) 150ms both;
 }
 
-/* O símbolo da marca, grande e em contorno, por trás do telemóvel */
+/* Símbolo da marca, cheio, com o gradiente do logo (gradientId em
+   BrandSymbol). Nunca fica atrás do telemóvel: no desktop fica ao lado dele;
+   no telemóvel fica atrás do título. */
 .heroSymbol {
   position: absolute;
-  top: 46%;
-  left: 50%;
   z-index: -1;
-  width: min(640px, 130%);
   height: auto;
-  color: transparent;
-  stroke: rgba(var(--brand-accent-rgb), 0.2);
-  stroke-width: 1.2;
-  transform: translate(-50%, -50%);
-  filter: drop-shadow(0 0 18px rgba(var(--brand-accent-rgb), 0.35));
+  overflow: visible;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+  filter: drop-shadow(0 0 10px rgba(var(--brand-accent-rgb), 0.45));
+  pointer-events: none;
 }
 
 .heroSymbol path {
   vector-effect: non-scaling-stroke;
+}
+
+/* Desktop: as posições partem das margens do telemóvel (330px de largura,
+   centrado na coluna), para nunca ficarem por baixo dele. */
+.heroSymbolTop {
+  top: 0;
+  right: calc(50% + 190px);
+  width: clamp(170px, 15vw, 230px);
+  transform: rotate(-10deg);
+}
+
+.heroTitleBlock,
+.heroCtaBlock {
+  position: relative;
+}
+
+.heroSymbolTitle {
+  display: none;
 }
 
 .proof {
@@ -152,9 +181,16 @@
   border-left: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.proof svg {
+/* Ícone com o próprio traço em vidro (sem caixa): gradiente de luz no
+   traço + glow leve, definidos em [locale]/layout.js (#glass-icon-stroke
+   e #glass-icon). O stroke em CSS ganha ao stroke="currentColor" do
+   lucide. */
+.proofIcon {
   flex: 0 0 auto;
   color: var(--brand-accent);
+  stroke: url(#glass-icon-stroke);
+  filter: url(#glass-icon);
+  overflow: visible;
 }
 
 /* ---------- Como funciona ---------- */
@@ -495,9 +531,16 @@
   align-items: center;
   justify-content: space-between;
   padding: clamp(28px, 4vw, 44px);
-  border: 1px solid rgba(var(--brand-accent-rgb), 0.4);
   border-radius: 20px;
-  background: #fff;
+  color: var(--cloud);
+  /* Mesmo degradê do cartão "Gratuito" dos preços (plans.module.css). */
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(var(--brand-accent-rgb), 0.28),
+      transparent 55%
+    ),
+    var(--night);
 }
 
 .priceBand > div {
@@ -506,7 +549,7 @@
 
 .priceTitle {
   margin: 0;
-  color: var(--ink);
+  color: #fff;
   font-size: clamp(1.5rem, 2.4vw, 2rem);
   font-weight: 800;
   line-height: 1.15;
@@ -515,13 +558,13 @@
 
 .priceText {
   margin: 10px 0 0;
-  color: var(--ink-soft);
+  color: rgba(247, 251, 255, 0.78);
   font-size: 16px;
   line-height: 1.55;
 }
 
 .priceText strong {
-  color: var(--ink);
+  color: #fff;
   font-variant-numeric: tabular-nums;
 }
 
@@ -585,7 +628,7 @@
     display: contents;
   }
 
-  .heroTitle {
+  .heroTitleBlock {
     order: 1;
   }
 
@@ -594,17 +637,30 @@
     margin-top: 28px;
   }
 
-  .heroLead {
+  .heroCtaBlock {
     order: 3;
+  }
+
+  .heroLead {
     margin-top: 36px;
   }
 
-  .heroActions {
-    order: 4;
+  /* Telemóvel: o telemóvel ocupa a largura toda, por isso os símbolos vão
+     para o título e para o bloco do texto, meio fora do ecrã. */
+  .heroSymbolTop {
+    display: none;
   }
 
-  .heroNote {
-    order: 5;
+  /* Ao lado das duas últimas linhas do título, que são curtas. Cheio fica
+     mais forte do que o contorno, por isso a opacidade é mais baixa para o
+     título continuar a ler-se bem. */
+  .heroSymbolTitle {
+    display: block;
+    right: 0;
+    bottom: -6px;
+    width: min(200px, 42vw);
+    opacity: 0.4;
+    transform: rotate(-10deg);
   }
 
   .casePanel,

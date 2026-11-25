@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import styles from "./topLoader.module.css";
 
@@ -15,7 +15,17 @@ export function doneTopLoader() {
   doneLoaderGlobal?.();
 }
 
+// useSearchParams precisa de um <Suspense> por cima para as páginas poderem
+// ser estáticas. A barra começa escondida, por isso o fallback é vazio.
 export default function TopLoader() {
+  return (
+    <Suspense fallback={null}>
+      <TopLoaderBar />
+    </Suspense>
+  );
+}
+
+function TopLoaderBar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 

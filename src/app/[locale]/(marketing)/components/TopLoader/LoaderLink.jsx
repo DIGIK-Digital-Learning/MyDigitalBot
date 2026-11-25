@@ -1,13 +1,12 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { startTopLoader } from "./TopLoader";
 
+// Sem useSearchParams/usePathname (não eram usados): o useSearchParams
+// obrigava a um <Suspense> à volta de cada link para a página ser estática.
+// O URL atual lê-se de window.location no clique.
 export default function LoaderLink({ onClick, href, ...props }) {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
   function isModifiedEvent(event) {
     return (
       event.button !== 0 ||

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
@@ -12,17 +12,33 @@ import styles from "./languageMenu.module.css";
 // (and their labels) come from src/i18n/localeMeta.js, which is itself
 // derived from the existing next-intl routing config (src/i18n/routing.js)
 // — adding a locale there is enough for it to show up here.
-export default function LanguageMenu() {
-  const locale = useLocale();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const t = useTranslations("Lang");
+const EMPTY_QUERY = {};
 
+// useSearchParams needs a <Suspense> above it so pages can be static. The
+// fallback (which ends up in the build-time HTML) is the same menu without
+// the URL's query params; the browser fills them in right after.
+export default function LanguageMenu(props) {
+  return (
+    <Suspense fallback={<LanguageMenuView {...props} query={EMPTY_QUERY} />}>
+      <LanguageMenuWithQuery {...props} />
+    </Suspense>
+  );
+}
+
+function LanguageMenuWithQuery(props) {
+  const searchParams = useSearchParams();
   // Preserve whatever query params are already on the URL when switching.
   const query = useMemo(
     () => Object.fromEntries(searchParams.entries()),
     [searchParams],
   );
+  return <LanguageMenuView {...props} query={query} />;
+}
+
+function LanguageMenuView({ className = "", query }) {
+  const locale = useLocale();
+  const pathname = usePathname();
+  const t = useTranslations("Lang");
 
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
@@ -112,7 +128,11 @@ export default function LanguageMenu() {
   }
 
   return (
-    <div className={styles.root} ref={rootRef} onBlur={handleBlur}>
+    <div
+      className={`${styles.root} ${className}`}
+      ref={rootRef}
+      onBlur={handleBlur}
+    >
       <button
         type="button"
         ref={triggerRef}

@@ -2,10 +2,6 @@ import { cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import ElasticBrandLogo from "./ElasticBrandLogo";
 
-vi.mock("next/image", () => ({
-  default: ({ priority, unoptimized, ...props }) => <img {...props} />,
-}));
-
 function mockMediaQueries({ reducedMotion = false, finePointer = true } = {}) {
   vi.stubGlobal(
     "matchMedia",
@@ -37,8 +33,9 @@ describe("ElasticBrandLogo", () => {
   it("keeps the logo static when reduced motion is requested", () => {
     mockMediaQueries({ reducedMotion: true });
     const { container } = render(<ElasticBrandLogo />);
-    const hitArea = container.querySelector("span[aria-hidden='true']");
-    const symbol = container.querySelectorAll("img")[1];
+    const hitArea = container.querySelector("span[aria-hidden='true']:last-child");
+    // O símbolo é o único SVG (o texto é HTML); a zona de toque é o último span.
+    const symbol = container.querySelector("svg");
 
     fireEvent.pointerMove(hitArea, {
       pointerType: "mouse",
@@ -54,7 +51,7 @@ describe("ElasticBrandLogo", () => {
   it("does not track touch movement but allows a brief press response", () => {
     mockMediaQueries();
     const { container } = render(<ElasticBrandLogo />);
-    const hitArea = container.querySelector("span[aria-hidden='true']");
+    const hitArea = container.querySelector("span[aria-hidden='true']:last-child");
 
     fireEvent.pointerMove(hitArea, {
       pointerType: "touch",

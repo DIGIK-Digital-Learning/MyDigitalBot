@@ -7,9 +7,27 @@ const SYMBOL_PATH =
 const EYE_PATH =
   "M173.49,98.62c10.39,0,19.79,4.18,26.67,10.91,7.09-6.93,11.52-16.58,11.52-27.28,0-21.09-17.1-38.19-38.19-38.19s-38.19,17.1-38.19,38.19c0,10.7,4.43,20.35,11.52,27.28,6.89-6.73,16.28-10.91,26.67-10.91Z";
 
-export default function BrandSymbol({ className, eyeClassName, title }) {
+// Cores do símbolo no logo: verde-água em baixo à esquerda, azul em cima à direita.
+const GRADIENT_FROM = "#34d7b6";
+const GRADIENT_TO = "#4ab0ff";
+
+// gradientId: pinta com o gradiente da marca. O id tem de ser único na página
+// (o componente não usa hooks para poder ser server). Com outline desenha só
+// o contorno; sem outline fica cheio.
+export default function BrandSymbol({
+  className,
+  eyeClassName,
+  title,
+  gradientId,
+  outline = false,
+  ...rest
+}) {
+  const color = gradientId ? `url(#${gradientId})` : "currentColor";
+  const paint = outline ? { fill: "none", stroke: color } : { fill: color };
+
   return (
     <svg
+      {...rest}
       className={className}
       viewBox="45 35 380 240"
       role={title ? "img" : undefined}
@@ -17,14 +35,25 @@ export default function BrandSymbol({ className, eyeClassName, title }) {
       focusable="false"
     >
       {title ? <title>{title}</title> : null}
-      <path d={SYMBOL_PATH} fill="currentColor" />
+      {gradientId ? (
+        <defs>
+          <linearGradient
+            id={gradientId}
+            gradientUnits="userSpaceOnUse"
+            x1="60"
+            y1="270"
+            x2="420"
+            y2="40"
+          >
+            <stop offset="0" stopColor={GRADIENT_FROM} />
+            <stop offset="1" stopColor={GRADIENT_TO} />
+          </linearGradient>
+        </defs>
+      ) : null}
+      <path d={SYMBOL_PATH} {...paint} />
       <g className={eyeClassName}>
-        <path d={EYE_PATH} fill="currentColor" />
-        <path
-          d={EYE_PATH}
-          fill="currentColor"
-          transform="translate(118.05 0)"
-        />
+        <path d={EYE_PATH} {...paint} />
+        <path d={EYE_PATH} {...paint} transform="translate(118.05 0)" />
       </g>
     </svg>
   );

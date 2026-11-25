@@ -213,3 +213,53 @@ option {
     transform: translateY(0) scale(1);
   }
 }
+
+/* ───────────── Vidro "Refraction" (estilo 5 do /glass-lab) ─────────────
+   Botões e pills sobre fundos escuros usam estas variáveis. O filtro SVG
+   #glass-refraction (em [locale]/layout.js) dobra o fundo atrás do vidro,
+   como uma lente. Só o Chromium aplica url() no backdrop-filter, por isso:
+   - por omissão (Safari, Firefox, telemóvel): blur normal;
+   - Chromium a partir de 768px: refração + blur leve.
+   O "-webkit-app-region" só existe no Chromium e serve para o detetar.
+   Nos componentes, declarar -webkit-backdrop-filter ANTES de
+   backdrop-filter (no Chrome o prefixado é um alias e ganharia). */
+:root {
+  --glass-fill: rgba(255, 255, 255, 0.05);
+  --glass-fill-hover: rgba(255, 255, 255, 0.1);
+  --glass-fill-active: rgba(255, 255, 255, 0.14);
+  --glass-tint: rgba(74, 176, 255, 0.45);
+  --glass-tint-hover: rgba(74, 176, 255, 0.6);
+  --glass-blur: blur(10px) saturate(170%) brightness(1.1);
+  --glass-filter: var(--glass-blur);
+  --glass-edge:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 1px 0 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.12),
+    inset -1px 0 0 rgba(255, 255, 255, 0.08);
+  --glass-edge-active: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --glass-lift: 0 10px 30px rgba(0, 0, 0, 0.22);
+
+  /* Mesmo vidro para fundos claros (cartões e secções brancas). O azul do
+     botão principal é mais profundo para o texto branco ter contraste
+     (~5:1 sobre branco); o secundário é vidro branco com texto escuro. */
+  --glass-light-tint: rgba(14, 96, 184, 0.9);
+  --glass-light-tint-hover: rgba(10, 84, 166, 0.94);
+  --glass-light-fill: rgba(255, 255, 255, 0.6);
+  --glass-light-fill-hover: rgba(255, 255, 255, 0.85);
+  --glass-light-edge:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(11, 26, 48, 0.1);
+  --glass-light-tint-edge:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+  --glass-light-lift: 0 8px 22px rgba(11, 26, 48, 0.12);
+}
+
+@supports (-webkit-app-region: drag) {
+  @media (min-width: 768px) {
+    :root {
+      --glass-filter: url(#glass-refraction) blur(3px) saturate(170%)
+        brightness(1.1);
+    }
+  }
+}

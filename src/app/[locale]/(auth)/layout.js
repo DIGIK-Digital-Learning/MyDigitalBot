@@ -6,6 +6,10 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
+// App, login, legal e links rastreados continuam a ser gerados a cada pedido,
+// como antes. Só as páginas de marketing passaram a estáticas.
+export const dynamic = "force-dynamic";
+
 export default function AuthLayout({ children }) {
   return (
     <div className={styles.frame}>

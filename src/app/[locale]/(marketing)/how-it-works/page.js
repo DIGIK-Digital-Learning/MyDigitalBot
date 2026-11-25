@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PlugZap } from "lucide-react";
 import SiteShell from "../components/Site/SiteShell";
 import PageHero from "../components/Site/PageHero";
@@ -27,7 +27,9 @@ const STEPS = [
   { key: "optimization", image: "fase-5-otimizacao" },
 ];
 
-export default async function HowItWorksPage() {
+export default async function HowItWorksPage({ params }) {
+  // Língua pelo URL: deixa a página ser gerada no build (estática).
+  setRequestLocale((await params).locale);
   const t = await getTranslations("HowItWorksPage");
   const tp = await getTranslations("Pages.how");
   const tFinal = await getTranslations("HomeV2.final");

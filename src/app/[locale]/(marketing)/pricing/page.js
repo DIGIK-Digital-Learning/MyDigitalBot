@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import SiteShell from "../components/Site/SiteShell";
 import PageHero from "../components/Site/PageHero";
 import FinalCta from "../components/Site/FinalCta";
@@ -13,7 +13,9 @@ export async function generateMetadata({ params }) {
   });
 }
 
-export default async function PricingPage() {
+export default async function PricingPage({ params }) {
+  // Língua pelo URL: deixa a página ser gerada no build (estática).
+  setRequestLocale((await params).locale);
   const t = await getTranslations("PricingPage");
 
   return (

@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { formatCount, formatPrice, getPlan } from "../pricing/plans";
@@ -18,14 +17,18 @@ export default function ContactForm() {
   const t = useTranslations("LandingPage.Contact");
   const tPlans = useTranslations("PricingPage.plans");
   const locale = useLocale();
-  const searchParams = useSearchParams();
   const [form, setForm] = useState(INITIAL_FORM);
   const [plan, setPlan] = useState(null);
 
   // Vindo da página de preços (?plano=team): mostra o plano escolhido e
   // começa a mensagem por ele. A pessoa pode editar ou tirar o plano.
+  // Lê o ?plano de window.location e não do useSearchParams: com o
+  // useSearchParams o formulário só aparecia depois de o JS carregar (a
+  // página é estática) e empurrava o hero (CLS 0,31 no /contacto).
   useEffect(() => {
-    const chosen = getPlan(searchParams.get("plano"));
+    const chosen = getPlan(
+      new URLSearchParams(window.location.search).get("plano"),
+    );
     if (!chosen) return;
 
     setPlan(chosen);
@@ -40,7 +43,7 @@ export default function ContactForm() {
             }),
           },
     );
-  }, [searchParams, t, tPlans, locale]);
+  }, [t, tPlans, locale]);
 
   function clearPlan() {
     setPlan(null);

@@ -18,17 +18,23 @@ import planStyles from "./plans.module.css";
 const INCLUDED_KEYS = ["channels", "messages", "assistants", "metrics"];
 const FAQ_KEYS = ["users", "free", "limits", "teams", "vat", "bigger"];
 
+// Escada de tom: o fundo escurece à medida que o plano cresce. Estes planos
+// usam o cartão escuro (texto claro, CTA azul da marca).
+const DARK_TIERS = ["organization", "enterprise"];
+
 function contactHref(planId) {
   return { pathname: "/contact", query: { plano: planId } };
 }
 
 function PlanCard({ plan, featured, t, locale }) {
   const name = t(`plans.${plan.id}.name`);
+  const dark = DARK_TIERS.includes(plan.id);
 
   return (
     <article
       className={`${planStyles.card} ${featured ? planStyles.cardFeatured : ""}`}
       data-tier={plan.id}
+      data-tone={dark ? "dark" : undefined}
       aria-labelledby={`plan-${plan.id}`}
     >
       <div className={planStyles.cardHead}>

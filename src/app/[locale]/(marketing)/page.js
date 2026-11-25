@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   ArrowRight,
   Check,
@@ -15,6 +15,7 @@ import BrandSymbol from "./components/HomeV2/BrandSymbol";
 import ChatDemo from "./components/HomeV2/ChatDemo";
 import UseCases from "./components/HomeV2/UseCases";
 import SiteShell from "./components/Site/SiteShell";
+import HeroPattern from "./components/Site/HeroPattern";
 import FinalCta from "./components/Site/FinalCta";
 import site from "./components/Site/site.module.css";
 import styles from "./components/HomeV2/homeV2.module.css";
@@ -54,6 +55,7 @@ const WHY = [
 
 export default async function LocaleIndex({ params }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations("HomeV2");
 
   const freePlan = getPlan("free");
@@ -74,45 +76,62 @@ export default async function LocaleIndex({ params }) {
       <HomeJsonLd locale={locale} />
 
       <section className={styles.hero}>
+        <HeroPattern />
         <div className={site.wrap}>
           <div className={styles.heroGrid}>
             <div className={styles.heroCopy}>
-              <h1 className={styles.heroTitle}>
-                {t("hero.titleA")}{" "}
-                <span className={styles.heroTitleAccent}>
-                  {t("hero.titleB")}
-                </span>
-              </h1>
-              <p className={styles.heroLead}>{t("hero.lead")}</p>
-              <div className={styles.heroActions}>
-                <LoaderLink
-                  href="/contact"
-                  className={site.primary}
-                  data-page-demo-cta
-                >
-                  {t("hero.primary")}
-                  <ArrowRight size={17} strokeWidth={2.3} aria-hidden="true" />
-                </LoaderLink>
-                <LoaderLink
-                  href={{ pathname: "/contact", query: { plano: freePlan.id } }}
-                  className={site.secondary}
-                >
-                  {t("hero.secondary")}
-                </LoaderLink>
+              {/* Só no telemóvel: o símbolo fica atrás do título (no desktop
+                  fica ao lado do telemóvel). */}
+              <div className={styles.heroTitleBlock}>
+                <BrandSymbol
+                  className={`${styles.heroSymbol} ${styles.heroSymbolTitle}`}
+                  gradientId="hero-symbol-title"
+                />
+                <h1 className={styles.heroTitle}>
+                  {t("hero.titleA")}{" "}
+                  <span className={styles.heroTitleAccent}>
+                    {t("hero.titleB")}
+                  </span>
+                </h1>
               </div>
-              <p className={styles.heroNote}>
-                <span>{t("hero.note", { users: freeUsers })}</span>
-                <span>
-                  {t("hero.maker")}{" "}
-                  <a href={digikUrl(locale)} target="_blank" rel="noopener">
-                    DIGIK
-                  </a>
-                </span>
-              </p>
+              <div className={styles.heroCtaBlock}>
+                <p className={styles.heroLead}>{t("hero.lead")}</p>
+                <div className={styles.heroActions} data-pattern-safe="items">
+                  <LoaderLink
+                    href="/contact"
+                    className={site.primary}
+                    data-page-demo-cta
+                  >
+                    {t("hero.primary")}
+                    <ArrowRight size={17} strokeWidth={2.3} aria-hidden="true" />
+                  </LoaderLink>
+                  <LoaderLink
+                    href={{ pathname: "/contact", query: { plano: freePlan.id } }}
+                    className={site.secondary}
+                  >
+                    {t("hero.secondary")}
+                  </LoaderLink>
+                </div>
+                <p className={styles.heroNote}>
+                  <span>{t("hero.note", { users: freeUsers })}</span>
+                  <span>
+                    {t("hero.maker")}{" "}
+                    <a href={digikUrl(locale)} target="_blank" rel="noopener">
+                      DIGIK
+                    </a>
+                  </span>
+                </p>
+              </div>
             </div>
 
             <div className={styles.heroVisual}>
-              <BrandSymbol className={styles.heroSymbol} />
+              {/* Desktop: um símbolo cheio ao lado do telemóvel, sem ficar
+                  tapado por ele. */}
+              <BrandSymbol
+                className={`${styles.heroSymbol} ${styles.heroSymbolTop}`}
+                data-pattern-safe
+                gradientId="hero-symbol-top"
+              />
               <ChatDemo
                 chat={t.raw("heroChat")}
                 labels={chatLabels}
@@ -123,10 +142,15 @@ export default async function LocaleIndex({ params }) {
             </div>
           </div>
 
-          <ul className={styles.proof}>
+          <ul className={styles.proof} data-pattern-safe>
             {PROOF.map(({ key, Icon }) => (
               <li key={key}>
-                <Icon size={20} strokeWidth={1.9} aria-hidden="true" />
+                <Icon
+                  className={styles.proofIcon}
+                  size={26}
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
                 {t(`proof.${key}`)}
               </li>
             ))}
@@ -275,7 +299,7 @@ export default async function LocaleIndex({ params }) {
                 })}
               </p>
             </div>
-            <LoaderLink href="/pricing" className={site.ghost}>
+            <LoaderLink href="/pricing" className={site.primary}>
               {t("pricing.cta")}
               <ArrowRight size={17} strokeWidth={2.3} aria-hidden="true" />
             </LoaderLink>

@@ -98,13 +98,20 @@
   color: var(--night);
 }
 
-.tierCta {
-  color: var(--tier-ink);
-  background: var(--tier);
+/* Vidro "Refraction" (tokens --glass-* em globals.css). Cartões claros:
+   vidro azul profundo; cartões escuros: ver .card[data-tone="dark"] abaixo.
+   ".card .tierCta" para ganhar sempre ao .primary do site.module.css,
+   independentemente da ordem em que os CSS carregam. */
+.card .tierCta {
+  color: #fff;
+  background: var(--glass-light-tint);
+  box-shadow:
+    var(--glass-light-tint-edge),
+    var(--glass-light-lift);
 }
 
-.tierCta:hover {
-  background: var(--tier-hover);
+.card .tierCta:hover {
+  background: var(--glass-light-tint-hover);
 }
 
 .cardFeatured {
@@ -344,25 +351,100 @@
     border-color 180ms ease;
 }
 
+/* Vidro "Refraction": faixa "Gratuito" é escura, "Mais de 5 000" é clara. */
 .bandButton {
-  color: var(--night);
-  background: var(--brand-accent);
+  color: #fff;
+  background: var(--glass-tint);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-filter);
+  box-shadow:
+    var(--glass-edge),
+    var(--glass-lift);
 }
 
 .bandButton:hover {
   transform: translateY(-2px);
-  background: var(--brand-accent-hover);
+  background: var(--glass-tint-hover);
 }
 
 .bandButtonGhost {
   color: var(--night);
-  border: 1px solid rgba(8, 20, 38, 0.16);
-  background: #fff;
+  border: 1px solid transparent;
+  background: var(--glass-light-fill);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-filter);
+  box-shadow:
+    var(--glass-light-edge),
+    var(--glass-light-lift);
 }
 
 .bandButtonGhost:hover {
   transform: translateY(-2px);
-  border-color: rgba(48, 169, 224, 0.4);
+  background: var(--glass-light-fill-hover);
+}
+
+/* Escada de tom (teste 24-11): o fundo escurece à medida que o plano
+   cresce. Equipa branca, Empresa azul claro, Organização e Grupo escuros. */
+.card[data-tier="business"] {
+  border-color: rgba(0, 110, 153, 0.18);
+  background: #e9f4fb;
+}
+
+.card[data-tier="organization"] {
+  background: linear-gradient(160deg, #26548a 0%, #163a63 100%);
+}
+
+.card[data-tier="enterprise"] {
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(var(--brand-accent-rgb), 0.24),
+      transparent 55%
+    ),
+    #0b1830;
+}
+
+/* Cartão escuro (Organização e Grupo, ver DARK_TIERS em PricingExplorer). */
+.card[data-tone="dark"] {
+  border-color: transparent;
+  color: var(--cloud);
+}
+
+.card[data-tone="dark"]::before {
+  background: var(--brand-accent);
+}
+
+.card[data-tone="dark"] .cardName,
+.card[data-tone="dark"] .priceValue,
+.card[data-tone="dark"] .users strong {
+  color: #fff;
+}
+
+.card[data-tone="dark"] .users,
+.card[data-tone="dark"] .priceUnit,
+.card[data-tone="dark"] .flatNote {
+  color: rgba(247, 251, 255, 0.7);
+}
+
+.card[data-tone="dark"] .price {
+  border-top-color: rgba(255, 255, 255, 0.14);
+}
+
+.card[data-tone="dark"] .perUserChip {
+  color: #b7f5cf;
+  background: rgba(110, 231, 160, 0.16);
+}
+
+.card[data-tone="dark"] .tierCta {
+  color: #fff;
+  background: var(--glass-tint);
+  box-shadow:
+    var(--glass-edge),
+    var(--glass-lift);
+}
+
+.card[data-tone="dark"] .tierCta:hover {
+  background: var(--glass-tint-hover);
 }
 
 @keyframes planEnter {

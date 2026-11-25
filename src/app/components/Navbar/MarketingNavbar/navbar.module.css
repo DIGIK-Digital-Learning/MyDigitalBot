@@ -14,13 +14,17 @@
   padding: 11px 14px;
   border-radius: 999px;
 
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  /* Slightly more opaque than a purely decorative bar: the header is now
-     persistent, so it also has to stay readable over the light sections
-     (feature grid, pricing) it scrolls across. */
-  background: rgba(8, 20, 38, 0.82);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+  /* Vidro "Refraction" (tokens --glass-* em globals.css). O fundo continua
+     com tinta escura (0.55) porque a barra é persistente e tem de se ler
+     por cima das secções claras (funcionalidades, preços). A borda é
+     transparente só para manter a altura de sempre (1px). */
+  border: 1px solid transparent;
+  background: rgba(8, 20, 38, 0.55);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-filter);
+  box-shadow:
+    var(--glass-edge),
+    0 18px 50px rgba(0, 0, 0, 0.22);
 }
 
 .topBar {
@@ -45,34 +49,37 @@
   min-width: 0;
 }
 
+/* Tudo em em a partir do font-size: a 20.5px o logo mede os mesmos 174px
+   que o PNG antigo (símbolo 23px, espaço 15px, texto 129px). */
 .logoVisual {
   position: relative;
-  display: block;
-  width: 174px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.73em;
+  font-size: 20.5px;
+  line-height: 1;
   flex: 0 0 auto;
 }
 
-.logoLayer {
-  position: absolute;
-  inset: 0;
+.logoSymbol {
   display: block;
-  width: 100%;
-  height: auto;
-  object-fit: contain;
+  flex: 0 0 auto;
+  width: 1.13em;
+  height: 0.69em;
+  overflow: visible;
   pointer-events: none;
-}
-
-/* The source artwork has a transparent gap from roughly 15% to 24% of its
-   width. Splitting inside that gap preserves the original pixels at rest. */
-.logoSymbolLayer {
-  clip-path: inset(0 80% 0 0);
-  transform-origin: 7.5% 50%;
+  /* Mesmo ponto de rotação da animação elástica de antes. */
+  transform-origin: 42% 63%;
   will-change: transform;
 }
 
-.logoWordmarkLayer {
-  position: relative;
-  clip-path: inset(0 0 0 20%);
+.logoWordmark {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: #ffffff;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .logoHitArea {
@@ -97,8 +104,9 @@
   width: 42px;
   height: 42px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.12);
+  border: 0;
+  background: var(--glass-fill-hover);
+  box-shadow: var(--glass-edge);
   color: white;
   cursor: pointer;
   flex: 0 0 auto;
@@ -121,7 +129,7 @@
 
 .navLink:hover {
   color: white;
-  background: rgba(124, 194, 255, 0.12);
+  background: var(--glass-fill-hover);
 }
 
 /* Current-page state (see aria-current="page" in Navbar.jsx). A box-shadow
@@ -132,25 +140,25 @@
    link can't visually demote it back to the default treatment. */
 .navLink.navLinkActive,
 .navLink.navLinkActive:hover {
-  color: var(--brand-accent, #4ab0ff);
-  background: rgba(var(--brand-accent-rgb, 74, 176, 255), 0.16);
-  box-shadow: inset 0 0 0 1px rgba(var(--brand-accent-rgb, 74, 176, 255), 0.4);
+  color: #fff;
+  background: var(--glass-fill-active);
+  box-shadow: var(--glass-edge-active);
 }
 
 .loginLink {
   white-space: nowrap;
   text-decoration: none;
   font-size: 14px;
-  background: rgba(255, 255, 255, 0.09);
+  background: var(--glass-fill);
+  box-shadow: var(--glass-edge);
   color: #fff;
   padding: 10px 16px;
   border-radius: 999px;
   transition: background 0.2s ease;
-  transition: color 0.2s ease;
 }
 
 .loginLink:hover {
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--glass-fill-active);
 }
 
 .signupBtn {
@@ -159,9 +167,11 @@
   font-weight: 700;
   padding: 10px 16px;
   border-radius: 999px;
-  color: #081426;
-  background: var(--brand-accent);
-  box-shadow: 0 12px 30px rgba(var(--brand-accent-rgb), 0.18);
+  color: #fff;
+  background: var(--glass-tint);
+  box-shadow:
+    var(--glass-edge),
+    0 12px 30px rgba(var(--brand-accent-rgb), 0.18);
   text-align: center;
   /* Collapsing to max-width: 0 in .signupBtnHidden must never let the label
      reflow onto multiple lines — that would grow this element's own
@@ -177,8 +187,8 @@
 }
 
 .signupBtn:hover {
-  background: var(--brand-accent-hover);
-  color: #081426;
+  background: var(--glass-tint-hover);
+  color: #fff;
 }
 
 .signupBtn:active {
@@ -298,8 +308,21 @@
   display: none;
 }
 
+/* Seletor de idioma: dropdown no desktop, PT | EN no menu do telemóvel. */
+.langSwitch {
+  display: none !important;
+}
+
 /* Mobile / tablet */
 @media (max-width: 1100px) {
+  .langDropdown {
+    display: none !important;
+  }
+
+  .langSwitch {
+    display: inline-flex !important;
+  }
+
   .mobileTrailing {
     display: inline-flex;
     margin-left: auto;
@@ -311,8 +334,9 @@
     min-height: 40px;
     padding: 0 14px;
     border-radius: 999px;
-    color: #081426;
-    background: var(--brand-accent);
+    color: #fff;
+    background: var(--glass-tint);
+    box-shadow: var(--glass-edge);
     font-size: 13px;
     font-weight: 700;
     white-space: nowrap;
@@ -320,12 +344,9 @@
     transition: background 0.2s ease;
   }
 
-  .mobileCta:hover {
-    background: var(--brand-accent-hover);
-  }
-
+  .mobileCta:hover,
   .mobileCta:active {
-    background: var(--brand-accent-active);
+    background: var(--glass-tint-hover);
   }
 
   /* O botão da barra já cobre o pedido de demonstração no telemóvel. */
@@ -412,8 +433,9 @@
   }
 
   @media (max-width: 640px) {
+    /* 150px de largura total, como antes. */
     .logoVisual {
-      width: 150px;
+      font-size: 17.7px;
     }
   }
 

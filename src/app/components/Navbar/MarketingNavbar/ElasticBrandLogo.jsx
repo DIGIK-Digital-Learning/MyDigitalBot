@@ -1,12 +1,28 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
 import styles from "./navbar.module.css";
+import { LOGO_SYMBOL } from "./brandLogoPaths";
 
-const LOGO_SRC = "/images/Logos/Logo cor e branco.png";
-const LOGO_WIDTH = 2047;
-const LOGO_HEIGHT = 276;
+// Logo = símbolo em SVG inline (path em brandLogoPaths.js) + "MyDigitalBot"
+// em texto com a Inter do site. Antes era o mesmo PNG carregado duas vezes e
+// cortado com clip-path, e era o elemento LCP. Agora não há imagem nem fonte
+// extra para descarregar. (O original usa Segoe UI Bold, que não se pode
+// servir como webfont; a Inter 700 ocupa a mesma largura.)
+function LogoSymbol({ symbolRef }) {
+  const { box } = LOGO_SYMBOL;
+  return (
+    <svg
+      ref={symbolRef}
+      className={styles.logoSymbol}
+      viewBox={`${box.x} ${box.y} ${box.w} ${box.h}`}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d={LOGO_SYMBOL.d} fill={LOGO_SYMBOL.color} fillRule="evenodd" />
+    </svg>
+  );
+}
 
 const MAX_TRANSLATE_X = 2.4;
 const MAX_TRANSLATE_Y = 1.8;
@@ -219,27 +235,10 @@ export default function ElasticBrandLogo() {
       role="img"
       aria-label="MyDigitalBot logo"
     >
-      <Image
-        src={LOGO_SRC}
-        alt=""
-        width={LOGO_WIDTH}
-        height={LOGO_HEIGHT}
-        className={`${styles.logoLayer} ${styles.logoWordmarkLayer}`}
-        priority
-        unoptimized
-        aria-hidden="true"
-      />
-      <Image
-        ref={symbolRef}
-        src={LOGO_SRC}
-        alt=""
-        width={LOGO_WIDTH}
-        height={LOGO_HEIGHT}
-        className={`${styles.logoLayer} ${styles.logoSymbolLayer}`}
-        priority
-        unoptimized
-        aria-hidden="true"
-      />
+      <LogoSymbol symbolRef={symbolRef} />
+      <span className={styles.logoWordmark} aria-hidden="true">
+        MyDigitalBot
+      </span>
       <span
         ref={hitAreaRef}
         className={styles.logoHitArea}

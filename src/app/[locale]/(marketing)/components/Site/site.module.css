@@ -61,14 +61,26 @@
     border-color 200ms ease;
 }
 
+/* Vidro "Refraction" (tokens --glass-* em globals.css). Os .primary e
+   .secondary estão todos sobre fundos escuros (heroes, faixa de preços da
+   home, CTA final); os cartões de preços trocam o fundo no .tierCta. */
+.primary,
+.secondary {
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-filter);
+  box-shadow:
+    var(--glass-edge),
+    var(--glass-lift);
+}
+
 .primary {
-  color: var(--night);
-  background: var(--brand-accent);
+  color: #fff;
+  background: var(--glass-tint);
 }
 
 .primary:hover {
   transform: translateY(-2px);
-  background: var(--brand-accent-hover);
+  background: var(--glass-tint-hover);
 }
 
 .primary svg,
@@ -83,13 +95,13 @@
 
 .secondary {
   color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid transparent;
+  background: var(--glass-fill);
 }
 
 .secondary:hover {
   transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: var(--glass-fill-hover);
 }
 
 .ghost {
@@ -207,6 +219,16 @@
     var(--night);
 }
 
+/* Fundo de logos em contorno (HeroPattern), em todos os heroes: por cima
+   da cor e dos brilhos da secção, por baixo do símbolo grande e do texto. */
+.heroPattern {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
 .pageHeroSymbol {
   position: absolute;
   top: 50%;
@@ -214,6 +236,8 @@
   z-index: -1;
   width: min(620px, 70vw);
   height: auto;
+  /* Proporção do viewBox (380x240): a altura fica certa antes de o SVG pintar. */
+  aspect-ratio: 380 / 240;
   color: transparent;
   stroke: rgba(var(--brand-accent-rgb), 0.16);
   stroke-width: 1.2;

@@ -118,6 +118,77 @@
   font-weight: 700;
 }
 
+/* Sem cena (page.js, SHOW_SCENES = false): só o aparelho do ChatDemo,
+   centrado, com a etiqueta por baixo. */
+.areaDevice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* Samsung (Galaxy S Ultra) desenhado em CSS: cantos quase retos, bordas
+   finas e furo da câmara ao centro. Proporção do ecrã tirada da foto
+   samsung-mao.webp (432 x 886). */
+.samsung {
+  position: relative;
+  width: min(320px, 100%);
+  padding: 7px;
+  border: 2px solid #55565c;
+  border-radius: 18px;
+  background: #0b0b0d;
+  filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.45));
+}
+
+/* botões laterais, à direita */
+.samsung::before,
+.samsung::after {
+  position: absolute;
+  right: -5px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: #55565c;
+  content: "";
+}
+
+.samsung::before {
+  top: 18%;
+  height: 11%;
+}
+
+.samsung::after {
+  top: 32%;
+  height: 6%;
+}
+
+.samsungScreen {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 432 / 886;
+  border-radius: 10px;
+}
+
+.samsungCamera {
+  position: absolute;
+  top: 2.2%;
+  left: 50%;
+  z-index: 4;
+  width: 3.4%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #050507;
+  box-shadow: 0 0 0 1.5px #1c1c22;
+  transform: translateX(-50%);
+}
+
+.areaDeviceLabel {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 @media (max-width: 960px) {
   .area {
     grid-template-columns: 1fr;
@@ -141,5 +212,9 @@
 
   .only-narrow {
     display: block;
+  }
+
+  .only-narrow.areaDevice {
+    display: flex;
   }
 }
