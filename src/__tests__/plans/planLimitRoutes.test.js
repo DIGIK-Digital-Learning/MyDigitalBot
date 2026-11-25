@@ -61,8 +61,13 @@ vi.mock("@/lib/repos/assistants.repo", () => ({
   getAssistantsInOrg: vi.fn(),
 }));
 
+vi.mock("@/lib/repos/organizationMembers.repo", () => ({
+  countMembers: vi.fn(async () => 1),
+}));
+
 vi.mock("@/lib/repos/user.repo", () => ({
   countUsersByOrg: vi.fn(async () => 3),
+  countSeatsByOrg: vi.fn(async () => 3),
   createUser: vi.fn(),
   getUsersInOrg: vi.fn(),
   updateUser: vi.fn(),
@@ -215,6 +220,7 @@ describe("GET /api/plans/limits", () => {
       limits: { assistantInstructionChars: 5000 },
       usage: {
         users: 3,
+        teamMembers: 1,
         assistants: 1,
         automations: 6,
         scheduledMessages: 2,

@@ -23,6 +23,8 @@ import {
   looksLikeWhatsappBsuid,
   phonesMatch,
 } from "../helpers/recipient.helpers";
+import usePermissions from "@/app/PermissionsContext";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 function safeTranslate(translation, key, fallback) {
   try {
@@ -372,6 +374,7 @@ export default function ScheduledViewModal({
   canDeleteItem,
   handleDelete,
 }) {
+  const { can, lock } = usePermissions();
   const payload = getItemPayload(selectedItem);
   const result = getItemResult(selectedItem);
 
@@ -811,6 +814,8 @@ export default function ScheduledViewModal({
             <button
               type="button"
               className={styles.secondaryButton}
+              disabled={!can(PERMISSIONS.SCHEDULED_EDIT)}
+              {...lock(PERMISSIONS.SCHEDULED_EDIT)}
               onClick={() => {
                 const item = selectedItem;
                 closeViewModal();
@@ -830,6 +835,8 @@ export default function ScheduledViewModal({
               type="button"
               className={styles.deleteButton}
               onClick={() => handleDelete(selectedItem)}
+              disabled={!can(PERMISSIONS.SCHEDULED_EDIT)}
+              {...lock(PERMISSIONS.SCHEDULED_EDIT)}
             >
               <Trash2 aria-hidden className={styles.buttonIcon} />
               <span>{translation("Actions.delete")}</span>

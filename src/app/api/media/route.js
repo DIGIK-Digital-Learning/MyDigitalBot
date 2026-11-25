@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 import {
   deleteBroadcastMedia,
   listBroadcastMedia,
@@ -16,7 +17,7 @@ export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
 
-    const orgAuth = await requireOwnedOrg(searchParams.get("orgId"));
+    const orgAuth = await requireOwnedOrg(searchParams.get("orgId"), { permission: [PERMISSIONS.MEDIA_VIEW, PERMISSIONS.SEND_WHATSAPP, PERMISSIONS.SEND_TEAMS] });
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {
@@ -35,7 +36,7 @@ export async function DELETE(req) {
   try {
     const body = await req.json().catch(() => ({}));
 
-    const orgAuth = await requireOwnedOrg(body?.orgId);
+    const orgAuth = await requireOwnedOrg(body?.orgId, { permission: PERMISSIONS.MEDIA_EDIT });
     if (orgAuth.error) return orgAuth.error;
 
     const { name } = await deleteBroadcastMedia(orgAuth.admin, orgAuth.orgId, {

@@ -17,13 +17,17 @@ const exists = (path) => existsSync(new URL(path, import.meta.url));
 const SETTINGS = "../../app/[locale]/(app)/settings";
 
 describe("páginas das Definições", () => {
-  it("são três, cada uma com o seu endereço", () => {
+  it("são cinco, cada uma com o seu endereço", () => {
     expect(SETTINGS_SECTIONS.map((section) => section.href)).toEqual([
       "/settings",
+      "/settings/team",
+      "/settings/user-types",
       "/settings/integrations",
       "/settings/activity",
     ]);
     expect(exists(`${SETTINGS}/page.jsx`)).toBe(true);
+    expect(exists(`${SETTINGS}/team/page.jsx`)).toBe(true);
+    expect(exists(`${SETTINGS}/user-types/page.jsx`)).toBe(true);
     expect(exists(`${SETTINGS}/integrations/page.jsx`)).toBe(true);
     expect(exists(`${SETTINGS}/activity/page.jsx`)).toBe(true);
   });
@@ -72,10 +76,12 @@ describe("páginas das Definições", () => {
 describe("submenu das Definições na barra lateral", () => {
   const navbar = read("../../app/components/Navbar/Navbar.jsx");
 
-  it("tem as três páginas, como o submenu das Mensagens", () => {
+  it("tem as quatro páginas, como o submenu das Mensagens", () => {
     expect(navbar).toContain('aria-controls="settings-subnav"');
     for (const href of [
       "/settings",
+      "/settings/team",
+      "/settings/user-types",
       "/settings/integrations",
       "/settings/activity",
     ]) {
@@ -108,11 +114,15 @@ describe("submenu das Definições na barra lateral", () => {
     const en = JSON.parse(read("../../messages/en.json"));
     expect(pt.Settings.tabs).toEqual({
       organization: "Organização",
+      team: "Equipa",
+      userTypes: "Tipos de utilizador",
       integrations: "Integrações",
       activity: "Histórico de atividade",
     });
     expect(en.Settings.tabs).toEqual({
       organization: "Organization",
+      team: "Team",
+      userTypes: "User types",
       integrations: "Integrations",
       activity: "Activity history",
     });

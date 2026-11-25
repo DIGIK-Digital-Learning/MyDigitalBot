@@ -12,6 +12,8 @@ import NewBadge from "@/app/components/NewBadge/NewBadge";
 import RowAction, { RowActions } from "@/app/components/RowAction/RowAction";
 import { rowClickHandler } from "@/app/components/RowAction/rowClick";
 import { SkeletonTable } from "@/app/components/Skeleton/Skeleton";
+import usePermissions from "@/app/PermissionsContext";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 export default function ScheduledTable({
   loading,
@@ -33,6 +35,11 @@ export default function ScheduledTable({
   removingStepKey = null,
   onEditStep = () => {},
 }) {
+  /* Mexer nas agendadas pede scheduled.edit (#247); ver não. */
+  const { can, lock } = usePermissions();
+  const canManage = can(PERMISSIONS.SCHEDULED_EDIT);
+  const manageLock = lock(PERMISSIONS.SCHEDULED_EDIT);
+
   /* Porque é que o texto de uma mensagem da corrente não se edita (ou null). */
   function stepEditBlockedReason(item, step) {
     if (item.status === "sending" || step.locked) {
@@ -212,9 +219,11 @@ export default function ScheduledTable({
                               )}
                               onClick={() => onCloseChain(item)}
                               disabled={
+                                !canManage ||
                                 !canCloseChain(item) ||
                                 closingChainId === item.id
                               }
+                              {...manageLock}
                             />
                           </RowActions>
                         ) : (
@@ -231,15 +240,19 @@ export default function ScheduledTable({
                               kind="edit"
                               label={translation("Actions.edit")}
                               onClick={() => openEditModal(item)}
-                              disabled={!canEditItem(item)}
+                              disabled={!canManage || !canEditItem(item)}
+                              {...manageLock}
                             />
                             <RowAction
                               kind="delete"
                               label={translation("Actions.delete")}
                               onClick={() => handleDelete(item)}
                               disabled={
-                                !canDeleteItem(item) || deletingId === item.id
+                                !canManage ||
+                                !canDeleteItem(item) ||
+                                deletingId === item.id
                               }
+                              {...manageLock}
                             />
                           </RowActions>
                         )}
@@ -295,14 +308,16 @@ export default function ScheduledTable({
                                     kind="edit"
                                     label={translation("Actions.edit")}
                                     onClick={() => onEditStep(item, step)}
-                                    disabled={Boolean(
-                                      stepEditBlockedReason(item, step),
-                                    )}
+                                    disabled={
+                                      !canManage ||
+                                      Boolean(stepEditBlockedReason(item, step))
+                                    }
                                     title={
                                       stepEditBlockedReason(item, step) ||
                                       translation("Chain.editStep")
                                     }
                                     aria-label={translation("Chain.editStep")}
+                                    {...manageLock}
                                   />
                                   {/* Tirar só esta mensagem da sequência. */}
                                   <RowAction
@@ -311,6 +326,7 @@ export default function ScheduledTable({
                                     label={translation("Actions.remove")}
                                     onClick={() => onRemoveStep(item, step)}
                                     disabled={
+                                      !canManage ||
                                       Boolean(stepBlockedReason(item, step)) ||
                                       removingStepKey ===
                                         `${item.id}:${step.index}`
@@ -320,6 +336,7 @@ export default function ScheduledTable({
                                       translation("Chain.removeStep")
                                     }
                                     aria-label={translation("Chain.removeStep")}
+                                    {...manageLock}
                                   />
                                 </RowActions>
                               </div>

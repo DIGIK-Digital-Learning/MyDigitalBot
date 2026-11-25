@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { getMessagesInThread } from "@/lib/repos/messages.repo";
 
 import { handleApiError, requireOrgForThread } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 export async function GET(_req, { params }) {
   try {
@@ -18,10 +19,10 @@ export async function GET(_req, { params }) {
      * Authorization happens before reading
      * any messages.
      *
-     * requireOrgForThread() also validates
+     * requireOrgForThread(, { permission: PERMISSIONS.USERS_VIEW }) also validates
      * and parses the DB thread ID.
      */
-    const orgAuth = await requireOrgForThread(threadId);
+    const orgAuth = await requireOrgForThread(threadId, { permission: PERMISSIONS.USERS_VIEW });
 
     if (orgAuth.error) {
       return orgAuth.error;

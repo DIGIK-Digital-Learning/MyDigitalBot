@@ -5,6 +5,7 @@ import {
   assertUsersBelongToOrg,
   jsonError,
 } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 import { sendTeamsBroadcast } from "@/lib/services/broadcast/sendTeamsBroadcast";
 import {
@@ -43,7 +44,7 @@ export async function POST(req) {
      * AUTHORIZE ORGANIZATION
      * =========================================================
      */
-    const orgAuth = await requireOwnedOrg(body?.orgId);
+    const orgAuth = await requireOwnedOrg(body?.orgId, { permission: PERMISSIONS.SEND_TEAMS });
 
     if (orgAuth.error) {
       return orgAuth.error;

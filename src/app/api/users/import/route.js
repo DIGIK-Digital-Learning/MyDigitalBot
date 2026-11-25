@@ -16,6 +16,7 @@ import {
   handleApiError,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 function cleanText(value) {
   if (value == null) return "";
@@ -211,7 +212,7 @@ export async function POST(req) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.USERS_IMPORT });
     if (orgAuth.error) return orgAuth.error;
 
     /* A Demo terminou (#209): ver continua, criar e enviar não. */

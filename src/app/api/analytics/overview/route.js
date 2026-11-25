@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { getAnalyticsOverview } from "@/lib/services/analytics/analytics.service";
 import { handleApiError, requireOwnedOrg } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 export async function GET(req) {
   try {
@@ -13,7 +14,7 @@ export async function GET(req) {
     const orgId = Number(searchParams.get("orgId"));
     const period = searchParams.get("period") || "all";
 
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.ANALYTICS_VIEW });
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {

@@ -27,6 +27,7 @@ import {
 } from "@/lib/services/openaiFiles.service";
 
 import { requireOrgForAssistant, handleApiError } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 import { recordAuditEvent } from "@/lib/services/audit/recordAuditEvent";
 import { AUDIT_ACTIONS } from "@/lib/audit/auditEvents";
@@ -79,7 +80,7 @@ export async function GET(_req, { params }) {
   try {
     const { assistantId, storeId } = await params;
 
-    const auth = await requireOrgForAssistant(assistantId);
+    const auth = await requireOrgForAssistant(assistantId, { permission: PERMISSIONS.ASSISTANTS_VIEW });
 
     if (auth.error) {
       return auth.error;
@@ -148,7 +149,7 @@ export async function PATCH(req, { params }) {
   try {
     const { assistantId, storeId } = await params;
 
-    const auth = await requireOrgForAssistant(assistantId);
+    const auth = await requireOrgForAssistant(assistantId, { permission: PERMISSIONS.ASSISTANTS_EDIT });
 
     if (auth.error) {
       return auth.error;
@@ -350,7 +351,7 @@ export async function DELETE(_req, { params }) {
   try {
     const { assistantId, storeId } = await params;
 
-    const auth = await requireOrgForAssistant(assistantId);
+    const auth = await requireOrgForAssistant(assistantId, { permission: PERMISSIONS.ASSISTANTS_EDIT });
 
     if (auth.error) {
       return auth.error;

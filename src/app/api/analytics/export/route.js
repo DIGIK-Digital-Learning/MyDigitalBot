@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { requireOwnedOrg, handleApiError } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 import { getAnalyticsExportDataset } from "@/lib/services/analytics/analyticsExport.service";
 
 /**
@@ -16,7 +17,7 @@ export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
 
-    const auth = await requireOwnedOrg(searchParams.get("orgId"));
+    const auth = await requireOwnedOrg(searchParams.get("orgId"), { permission: PERMISSIONS.ANALYTICS_EXPORT });
     if (auth.error) return auth.error;
 
     return await withSessionReadAccess(auth, async () => {

@@ -13,6 +13,8 @@ import {
 } from "@/app/components/Skeleton/Skeleton";
 
 import styles from "../tracked-links.module.css";
+import usePermissions from "@/app/PermissionsContext";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 /**
  * Links criados (#189): os que contam para os 100 do plano, com o 🗑 para
@@ -32,6 +34,7 @@ export default function SavedLinksSection({
   limit = null,
 }) {
   const translation = useTranslations();
+  const { can, lock } = usePermissions();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
 
@@ -63,7 +66,8 @@ export default function SavedLinksSection({
             type="button"
             className={styles.createButton}
             onClick={onCreate}
-            disabled={full}
+            disabled={full || !can(PERMISSIONS.LINKS_CREATE)}
+            {...lock(PERMISSIONS.LINKS_CREATE)}
           >
             <Plus size={16} aria-hidden />
             {translation("TrackedLinks.create.button")}
@@ -116,6 +120,8 @@ export default function SavedLinksSection({
                   label: link.label,
                 })}
                 onClick={() => onDelete(link)}
+                disabled={!can(PERMISSIONS.LINKS_CREATE)}
+                {...lock(PERMISSIONS.LINKS_CREATE)}
               />
             </li>
           ))}

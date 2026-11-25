@@ -8,6 +8,7 @@ import {
   jsonError,
   requireOrgForTeamsGroup,
 } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 import { getTeamsGroupMembers } from "@/lib/services/teams/teamsGroups.service";
 
 /*
@@ -18,7 +19,7 @@ export async function GET(_req, { params }) {
   try {
     const { groupId } = await params;
 
-    const orgAuth = await requireOrgForTeamsGroup(groupId);
+    const orgAuth = await requireOrgForTeamsGroup(groupId, { permission: PERMISSIONS.TEAMS_GROUPS_VIEW });
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {

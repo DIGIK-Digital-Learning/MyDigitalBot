@@ -1,0 +1,87 @@
+/* Definições → Equipa (#247). O resto vem de settings.module.css. */
+.headingRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.counters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.inviteRow {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) minmax(160px, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.inviteRow button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+}
+
+@media (max-width: 720px) {
+  .inviteRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.email {
+  font-weight: 600;
+  /* O email inteiro numa linha; numa janela estreita a tabela desliza. */
+  white-space: nowrap;
+}
+
+.badge,
+.badgeMuted {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge {
+  background: var(--brand-soft, #e0ecff);
+  color: var(--brand, #1d4ed8);
+}
+
+.badgeMuted {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.typeSelect {
+  padding: 6px 10px;
+  border: 1px solid var(--ui-border, #e5e7eb);
+  border-radius: 10px;
+  background: #fff;
+  font: inherit;
+}
+
+.pending,
+.active {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.active {
+  background: #dcfce7;
+  color: #166534;
+}

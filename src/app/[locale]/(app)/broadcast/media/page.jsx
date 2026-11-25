@@ -14,6 +14,8 @@ import { useGlobalLoader } from "@/app/LoadingScreen/GlobalLoaderContext";
 import styles from "./media.module.css";
 import RowAction from "@/app/components/RowAction/RowAction";
 import { SkeletonTable } from "@/app/components/Skeleton/Skeleton";
+import usePermissions from "@/app/PermissionsContext";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 function formatDate(value) {
   if (!value) return "-";
@@ -94,6 +96,7 @@ export default function MediaPage() {
   const { org, loading: orgLoading } = useOrganization(user);
   const { stopLoading } = useGlobalLoader();
   const translation = useTranslations();
+  const { can, lock } = usePermissions();
   const showAlert = useAlert();
   const confirm = useConfirm();
 
@@ -394,12 +397,17 @@ export default function MediaPage() {
                           kind="delete"
                           label={translation("Common.delete")}
                           onClick={() => handleDelete(item)}
-                          disabled={item.inUse || deletingPath === item.path}
+                          disabled={
+                            item.inUse ||
+                            deletingPath === item.path ||
+                            !can(PERMISSIONS.MEDIA_EDIT)
+                          }
                           title={
                             item.inUse
                               ? translation("Media.inUseHint")
                               : undefined
                           }
+                          {...lock(PERMISSIONS.MEDIA_EDIT)}
                         />
                       </td>
                     </tr>

@@ -6,6 +6,8 @@ import bar from "./quickActions.module.css";
 import u from "../users.module.css"; // reuse your filter popover styles
 import { useConfirm } from "@/app/components/Confirm/ConfirmProvider";
 import { useTranslations } from "next-intl";
+import usePermissions from "@/app/PermissionsContext";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 function usePopover(anchorRef, minWidth = 280) {
   const [open, setOpen] = useState(false);
@@ -59,6 +61,7 @@ export default function QuickActionsBar({
   clearSelection,
 }) {
   const t = useTranslations();
+  const { can, lock } = usePermissions();
   const confirm = useConfirm();
   const canAct = selectedIds?.length > 0;
 
@@ -193,6 +196,8 @@ export default function QuickActionsBar({
             className={bar.bulkBtn}
             onClick={() => aPop.setOpen((v) => !v)}
             type="button"
+            disabled={!can(PERMISSIONS.USERS_EDIT)}
+            {...lock(PERMISSIONS.USERS_EDIT)}
           >
             {t("QuickActions.bulkLabel")} {assistantId ? "•" : ""}
           </button>
@@ -282,8 +287,9 @@ export default function QuickActionsBar({
             className={bar.bulkBtn}
             onClick={() => tagPop.setOpen((v) => !v)}
             type="button"
-            disabled={!tags?.length}
+            disabled={!tags?.length || !can(PERMISSIONS.USERS_EDIT)}
             title={!tags?.length ? t("QuickActions.noTags") : undefined}
+            {...lock(PERMISSIONS.USERS_EDIT)}
           >
             {t("QuickActions.tag")} {tagIds.length ? `(${tagIds.length})` : ""}
           </button>
@@ -373,7 +379,8 @@ export default function QuickActionsBar({
             type="button"
             className={bar.bulkBtnDanger}
             onClick={bulkDelete}
-            disabled={!canAct}
+            disabled={!canAct || !can(PERMISSIONS.USERS_DELETE)}
+            {...lock(PERMISSIONS.USERS_DELETE)}
           >
             {t("QuickActions.delete")}
           </button>

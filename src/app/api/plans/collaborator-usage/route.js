@@ -5,6 +5,7 @@ import {
   parsePositiveInt,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 import { getOrgLimits } from "@/lib/services/plans/planLimits";
 import { getCollaboratorWeeklyUsage } from "@/lib/repos/collaboratorWeeklyMessages.repo";
 import {
@@ -28,7 +29,7 @@ export async function GET(req) {
       );
     }
 
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.USERS_VIEW });
     if (orgAuth.error) return orgAuth.error;
 
     const now = new Date();

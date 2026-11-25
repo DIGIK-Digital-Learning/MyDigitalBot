@@ -5,6 +5,7 @@ import {
   handleApiError,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 
 
@@ -22,7 +23,7 @@ export async function GET(req) {
       return NextResponse.json({ error: "Missing orgId" }, { status: 400 });
     }
 
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: PERMISSIONS.AUTOMATIONS_VIEW });
     if (orgAuth.error) return orgAuth.error;
 
     return await withSessionReadAccess(orgAuth, async () => {

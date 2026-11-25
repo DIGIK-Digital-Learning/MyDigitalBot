@@ -1,4 +1,8 @@
-import { jsonError, requireUser } from "@/lib/auth/guards";
+import {
+  getCurrentMembership,
+  jsonError,
+  requireUser,
+} from "@/lib/auth/guards";
 
 /*
  * Administradores da plataforma (#208): a equipa DIGIK, que gere os planos de
@@ -24,21 +28,19 @@ export function platformAdminOrgIds() {
 }
 
 /*
- * A organização de que o utilizador é dono e se é administrador. Cada
- * organização tem um só utilizador (o dono).
+ * A organização do utilizador e se é administrador da plataforma: tem de ser
+ * Administrador (o tipo de utilizador, #247) de uma das organizações DIGIK.
+ * Um Editor ou Leitor da DIGIK não gere os planos dos clientes.
  */
 export async function getPlatformAdminStatus(auth) {
-  const { data: org, error } = await auth.admin
-    .from("organization")
-    .select("id, plan_id")
-    .eq("owner_user_id", auth.user.id)
-    .maybeSingle();
-
-  if (error) throw error;
+  const { org, access } = await getCurrentMembership(auth, "id, plan_id");
 
   return {
     org: org ?? null,
-    isAdmin: Boolean(org) && platformAdminOrgIds().includes(Number(org.id)),
+    isAdmin:
+      Boolean(org) &&
+      Boolean(access?.isAdmin) &&
+      platformAdminOrgIds().includes(Number(org.id)),
   };
 }
 

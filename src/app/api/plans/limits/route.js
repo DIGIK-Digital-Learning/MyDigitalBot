@@ -5,9 +5,12 @@ import {
   parsePositiveInt,
   requireOwnedOrg,
 } from "@/lib/auth/guards";
+import { ANY_MEMBER } from "@/lib/auth/permissions";
 import { getOrgLimits } from "@/lib/services/plans/planLimits";
 import { countAssistantsByOrg } from "@/lib/repos/assistants.repo";
-import { countUsersByOrg } from "@/lib/repos/user.repo";
+/* Colaboradores + contas da Equipa: partilham os lugares do plano (#247). */
+import { countSeatsByOrg } from "@/lib/repos/user.repo";
+import { countMembers } from "@/lib/repos/organizationMembers.repo";
 import { countAutomationRulesByOrg } from "@/lib/repos/automationRules.repo";
 import { countManualQueuedBroadcasts } from "@/lib/repos/scheduledBroadcasts.repo";
 import { countAdminDailySends } from "@/lib/repos/adminDailySends.repo";
@@ -31,7 +34,7 @@ export async function GET(req) {
       return NextResponse.json({ error: "Invalid organization id" }, { status: 400 });
     }
 
-    const orgAuth = await requireOwnedOrg(orgId);
+    const orgAuth = await requireOwnedOrg(orgId, { permission: ANY_MEMBER });
     if (orgAuth.error) return orgAuth.error;
 
     /*
@@ -42,6 +45,7 @@ export async function GET(req) {
     const [
       { plan, limits, expiresAt, expired },
       users,
+      teamMembers,
       assistants,
       automations,
       scheduledMessages,
@@ -49,7 +53,8 @@ export async function GET(req) {
       trackedLinks,
     ] = await Promise.all([
       getOrgLimits(orgAuth.orgId),
-      countUsersByOrg(orgAuth.orgId),
+      countSeatsByOrg(orgAuth.orgId),
+      countMembers(orgAuth.orgId),
       countAssistantsByOrg(orgAuth.orgId),
       countAutomationRulesByOrg(orgAuth.orgId),
       countManualQueuedBroadcasts(orgAuth.orgId),
@@ -62,6 +67,7 @@ export async function GET(req) {
       limits,
       usage: {
         users,
+        teamMembers,
         assistants,
         automations,
         scheduledMessages,
